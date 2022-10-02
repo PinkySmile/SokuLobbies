@@ -27,16 +27,41 @@ void Connection::_netLoop()
 			std::this_thread::sleep_for(std::chrono::milliseconds(5));
 			continue;
 		}
-		if (!this->_connected)
+		if (!this->_connected) {
+		#ifndef _LOBBYNOLOG
+			logMutex.lock();
+			std::cout << this->_socket->getRemoteAddress().toString() << ":" << this->_socket->getRemotePort();
+			if (this->_id)
+				std::cout << " player id " << this->_id;
+			std::cout << " disconnected" << std::endl;
+			logMutex.unlock();
+		#endif
 			return;
+		}
 		if (status == sf::Socket::Disconnected) {
 			this->_init = false;
 			this->_connected = false;
 			this->onDisconnect(" has disconnected");
+		#ifndef _LOBBYNOLOG
+			logMutex.lock();
+			std::cout << this->_socket->getRemoteAddress().toString() << ":" << this->_socket->getRemotePort();
+			if (this->_id)
+				std::cout << " player id " << this->_id;
+			std::cout << " disconnected" << std::endl;
+			logMutex.unlock();
+		#endif
 			return;
 		}
 		if (status == sf::Socket::Error) {
 			this->kick("Socket error");
+		#ifndef _LOBBYNOLOG
+			logMutex.lock();
+			std::cout << this->_socket->getRemoteAddress().toString() << ":" << this->_socket->getRemotePort();
+			if (this->_id)
+				std::cout << " player id " << this->_id;
+			std::cout << " disconnected" << std::endl;
+			logMutex.unlock();
+		#endif
 			return;
 		}
 		this->_handlePacket(packet, recvSize);
@@ -45,6 +70,10 @@ void Connection::_netLoop()
 
 Connection::Connection(std::unique_ptr<sf::TcpSocket> &socket) :
 	_socket(std::move(socket))
+{
+}
+
+Connection::~Connection()
 {
 	if (this->_netThread.joinable())
 		this->_netThread.join();
@@ -73,6 +102,8 @@ void Connection::setId(uint32_t id)
 
 void Connection::send(const void *packet, size_t size)
 {
+	size_t sent;
+
 #ifndef _LOBBYNOLOG
 	logMutex.lock();
 	std::cout << "[>" << this->_socket->getRemoteAddress().toString() << ":" << this->_socket->getRemotePort();
@@ -81,7 +112,7 @@ void Connection::send(const void *packet, size_t size)
 	std::cout << "] " << reinterpret_cast<const Lobbies::Packet *>(packet)->toString() << std::endl;
 	logMutex.unlock();
 #endif
-	this->_socket->send(packet, size);
+	this->_socket->send(packet, size, sent);
 }
 
 uint32_t Connection::getId() const
@@ -227,6 +258,7 @@ void Connection::_handlePacket(const Lobbies::PacketHello &packet, size_t size)
 	this->_settings = packet.settings;
 	this->_player = packet.custom;
 	this->_realName = std::string(packet.name, strnlen(packet.name, sizeof(packet.name)));
+	this->_timeoutClock.restart();
 }
 
 void Connection::_handlePacket(const Lobbies::PacketOlleh &, size_t)
@@ -239,9 +271,14 @@ void Connection::_handlePacket(const Lobbies::PacketPlayerJoin &, size_t)
 	this->kick("Protocol error: OPCODE_PLAYER_JOIN unexpected");
 }
 
-void Connection::_handlePacket(const Lobbies::PacketPlayerLeave &, size_t)
+void Connection::_handlePacket(const Lobbies::PacketPlayerLeave &packet, size_t size)
 {
-	this->kick("Protocol error: OPCODE_PLAYER_LEAVE unexpected");
+	if (!this->_init)
+		return;
+	if (size != sizeof(packet))
+		return this->kick("Protocol error: Invalid packet size for opcode OPCODE_HELLO expected " + std::to_string(sizeof(packet)) + " but got " + std::to_string(size));
+	this->onDisconnect(" has disconnected");
+	this->_init = false;
 }
 
 void Connection::_handlePacket(const Lobbies::PacketKicked &, size_t)
@@ -301,6 +338,7 @@ void Connection::_handlePacket(const Lobbies::PacketPing &packet, size_t size)
 	Lobbies::PacketPong pong{lobby.name, lobby.maxPlayers, lobby.currentPlayers};
 
 	this->send(&pong, sizeof(pong));
+	this->_timeoutClock.restart();
 }
 
 void Connection::_handlePacket(const Lobbies::PacketPong &, size_t)

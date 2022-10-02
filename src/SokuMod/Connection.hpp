@@ -6,10 +6,16 @@
 #define SOKULOBBIES_CONNECTION_HPP
 
 
-#include <Packet.hpp>
-#include <SFML/Network.hpp>
 #include <thread>
+#include <mutex>
 #include <functional>
+#include <Packet.hpp>
+#include <Vector2.hpp> //From SokuLib
+#include "Player.hpp"
+#include "Socket.hpp"
+
+#define PLAYER_H_SPEED 2
+#define PLAYER_V_SPEED 2
 
 class Connection {
 public:
@@ -18,30 +24,26 @@ public:
 		uint8_t maxPlayers;
 		uint8_t currentPlayers;
 	};
-	struct Room {
-		std::string ip;
-		unsigned short port;
-	};
 
 private:
+	mutable std::mutex _messagesMutex;
+	mutable std::mutex _playerMutex;
+	std::thread _netThread;
+	std::thread _posThread;
 	bool _connected = true;
 	bool _init = false;
-	uint32_t _id = 0;
 	char _uniqueId[16];
 	std::string _name;
-	std::string _realName;
-	std::unique_ptr<sf::TcpSocket> _socket;
-	Lobbies::LobbySettings _settings;
-	Lobbies::PlayerCustomization _player;
-	std::thread _netThread;
-	uint8_t _dir = 0;
-	sf::Vector2<uint32_t> _pos = {0, 0};
-	uint8_t _battleStatus = 0;
-	uint8_t _machineId = 0;
-	sf::Clock _timeoutClock;
-	Room _room;
+	Socket _socket;
+	LobbyInfo _info;
+	const Player &_initParams;
+	Player *_me = nullptr;
+	std::map<uint32_t, uint32_t> _machines;
+	std::map<uint32_t, Player> _players;
+	std::vector<std::string> _messages; //TODO: properly handle channels
 
 	void _netLoop();
+	void _posLoop();
 	void _handlePacket(const Lobbies::Packet &packet, size_t size);
 	void _handlePacket(const Lobbies::PacketHello &packet, size_t size);
 	void _handlePacket(const Lobbies::PacketOlleh &packet, size_t size);
@@ -61,38 +63,28 @@ private:
 	void _handlePacket(const Lobbies::PacketImportantMessage &packet, size_t size);
 
 public:
-	std::function<LobbyInfo ()> onPing;
-	std::function<void (uint8_t dir)> onMove;
-	std::function<void (uint32_t x, uint32_t y)> onPosition;
-	std::function<void (const std::string &reason)> onDisconnect;
-	std::function<bool (const Lobbies::PacketHello &hello, std::string ip, std::string &name)> onJoin;
-	std::function<void (uint8_t channel, const std::string &msg)> onMessage;
-	std::function<void (const Lobbies::PacketSettingsUpdate &settings)> onSettingsUpdate;
-	std::function<void (const Room &port)> onGameStart;
-	std::function<void ()> onGameRequest;
-	std::function<void ()> onArcadeLeave;
+	std::function<void (const std::string &ip, unsigned short port, bool spectate)> onConnectRequest;
+	std::function<void (const std::string &msg)> onError;
+	std::function<void (const std::string &msg)> onImpMsg;
+	std::function<void (int32_t channel, const std::string &msg)> onMsg;
+	std::function<unsigned short ()> onHostRequest;
+	std::mutex meMutex;
 
-	Connection(std::unique_ptr<sf::TcpSocket> &socket);
+	Connection(const std::string &host, unsigned short port, const Player &initParams);
 	~Connection();
-	void kick(const std::string &msg);
 	void startThread();
-	void setId(uint32_t id);
+	void error(const std::string &msg);
+	void connect();
+	void disconnect();
 	void send(const void *packet, size_t size);
-	uint32_t getId() const;
 	bool isInit() const;
-	const char *getUniqueId() const;
-	std::string getName() const;
-	std::string getRealName() const;
-	sf::Vector2<uint32_t> getPos() const;
-	uint8_t getDir() const;
-	uint8_t getBattleStatus() const;
-	void setPlaying();
-	void setNotPlaying();
-	uint8_t getActiveMachine() const;
-	const Room &getRoomInfo() const;
-	Lobbies::LobbySettings getSettings() const;
-	Lobbies::PlayerCustomization getPlayer() const;
 	bool isConnected() const;
+	const LobbyInfo &getLobbyInfo() const;
+	Player *getMe();
+	const Player *getMe() const;
+	std::vector<Player> getPlayers() const;
+	std::vector<std::string> getMessages() const;
+	void updatePlayers();
 };
 
 

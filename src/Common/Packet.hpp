@@ -63,7 +63,7 @@ namespace Lobbies
 		PlayerCustomization custom;
 		LobbySettings settings;
 
-		PacketHello(char uniqueId[16], const std::string &name, const PlayerCustomization &custom);
+		PacketHello(char uniqueId[16], const std::string &name, const PlayerCustomization &custom, const LobbySettings &settings);
 		std::string toString() const;
 	};
 
@@ -156,10 +156,11 @@ namespace Lobbies
 		Opcode opcode;
 
 	public:
+		bool spectator;
 		char ip[16];
 		uint16_t port;
 
-		PacketGameStart(const std::string &ip, uint16_t port);
+		PacketGameStart(const std::string &ip, uint16_t port, bool spectator);
 		std::string toString() const;
 	};
 
@@ -203,11 +204,11 @@ namespace Lobbies
 		Opcode opcode;
 
 	public:
-		uint8_t channelId;
+		int32_t channelId;
 		uint32_t playerId;
 		char message[2040];
 
-		PacketMessage(uint8_t channelId, uint32_t playerId, const std::string &message);
+		PacketMessage(int32_t channelId, uint32_t playerId, const std::string &message);
 		std::string toString() const;
 	};
 

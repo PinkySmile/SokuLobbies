@@ -7,9 +7,10 @@
 
 namespace Lobbies
 {
-	PacketHello::PacketHello(char uniqueId[16], const std::string &name, const PlayerCustomization &custom) :
+	PacketHello::PacketHello(char uniqueId[16], const std::string &name, const PlayerCustomization &custom, const LobbySettings &settings) :
 		opcode(OPCODE_HELLO),
-		custom(custom)
+		custom(custom),
+		settings(settings)
 	{
 		memcpy(this->uniqueId, uniqueId, sizeof(this->uniqueId));
 		strncpy(this->name, name.c_str(), sizeof(this->name));
@@ -50,7 +51,6 @@ namespace Lobbies
 
 	std::string PacketPlayerJoin::toString() const
 	{
-
 		return "Packet PLAYER_JOINED: Player '" + std::string(this->name, strnlen(this->name, sizeof(this->name))) + "' (id " + std::to_string(this->id) + ")"
 		       "title: " + std::to_string(this->custom.title) + " "
 		       "avatar: " + std::to_string(this->custom.avatar) + " "
@@ -119,8 +119,9 @@ namespace Lobbies
 		return "Packet GAME_REQUEST: Console id " + std::to_string(this->consoleId);
 	}
 
-	PacketGameStart::PacketGameStart(const std::string &ip, uint16_t port) :
+	PacketGameStart::PacketGameStart(const std::string &ip, uint16_t port, bool spectator) :
 		opcode(OPCODE_GAME_START),
+		spectator(spectator),
 		port(port)
 	{
 		strncpy(this->ip, ip.c_str(), sizeof(this->ip));
@@ -128,7 +129,8 @@ namespace Lobbies
 
 	std::string PacketGameStart::toString() const
 	{
-		return "Packet GAME_START: Connect address " + std::string(this->ip, strnlen(this->ip, sizeof(this->ip))) + ":" + std::to_string(this->port);
+		return "Packet GAME_START: Connect address " + std::string(this->ip, strnlen(this->ip, sizeof(this->ip))) + ":" + std::to_string(this->port) +
+		       (this->spectator ? " as spectator" : " as player");
 	}
 
 	PacketPing::PacketPing() :
@@ -146,6 +148,7 @@ namespace Lobbies
 		maxPlayers(maxPlayers),
 		currentPlayers(currentPlayers)
 	{
+		strncpy(this->name, roomName.c_str(), sizeof(this->name));
 	}
 
 	std::string PacketPong::toString() const
@@ -174,7 +177,7 @@ namespace Lobbies
 		       "hostPref: " + std::to_string(this->settings.hostPref);
 	}
 
-	PacketMessage::PacketMessage(uint8_t channelId, uint32_t playerId, const std::string &message) :
+	PacketMessage::PacketMessage(int32_t channelId, uint32_t playerId, const std::string &message) :
 		opcode(OPCODE_MESSAGE),
 		channelId(channelId),
 		playerId(playerId)
