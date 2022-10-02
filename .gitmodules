@@ -1,0 +1,3 @@
+[submodule "src/SokuMod/SokuLib"]
+	path = src/SokuMod/SokuLib
+	url = https://github.com/SokuDev/SokuLib
