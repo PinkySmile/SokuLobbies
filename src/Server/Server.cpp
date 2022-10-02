@@ -21,13 +21,14 @@ void Server::run(unsigned short port, unsigned maxPlayers, const std::string &na
 		this->_infos.maxPlayers = maxPlayers;
 		this->_infos.currentPlayers = 0;
 		this->_infos.name = name;
-		this->_listener.listen(port);
-		this->_listener.setBlocking(false);
-#ifndef _LOBBYNOLOG
+	#ifndef _LOBBYNOLOG
 		logMutex.lock();
 		std::cout << "Listening on port " << port << std::endl;
 		logMutex.unlock();
-#endif
+	#endif
+		if (this->_listener.listen(port) != sf::Socket::Done)
+			return;
+		this->_listener.setBlocking(false);
 		this->_registerToMainServer();
 		while (this->_opened) {
 			if (sf::Socket::Done == this->_listener.accept(*socket)) {
@@ -52,11 +53,11 @@ void Server::run(unsigned short port, unsigned maxPlayers, const std::string &na
 		for (auto &c : this->_connections)
 			c.kick("Internal server error: " + std::string(e.what()));
 		this->_connectionsMutex.unlock();
-#ifndef _LOBBYNOLOG
+	#ifndef _LOBBYNOLOG
 		logMutex.lock();
 		std::cerr << "Fatal error " << e.what() << std::endl;
 		logMutex.unlock();
-#endif
+	#endif
 		throw;
 	}
 #endif
@@ -299,7 +300,11 @@ bool Server::_processCommands(Connection &author, const std::string &msg)
 
 void Server::_registerToMainServer()
 {
-
+#ifndef _LOBBYNOLOG
+	logMutex.lock();
+	std::cout << "Registering lobby '" << this->_infos.name << "' to the server: " << static_cast<int>(this->_infos.maxPlayers) << " max slots" << std::endl;
+	logMutex.unlock();
+#endif
 }
 
 void Server::close()
