@@ -73,16 +73,16 @@ int InLobbyMenu::onProcess()
 	(this->parent->*SokuLib::VTable_ConnectMenu.onProcess)();
 	SokuLib::inputMgrs.input = inputs;
 	if (this->parent->choice > 0) {
-		if (this->parent->subchoice == 5) {
-			//Already Playing
+		if (
+			this->parent->subchoice == 5 || //Already Playing
+			this->parent->subchoice == 10   //Connect Failed
+		) {
 			Lobbies::PacketArcadeLeave leave{0};
 
 			this->connection.send(&leave, sizeof(leave));
-		} else if (this->parent->subchoice == 10) {
-			//Connect Failed
-			Lobbies::PacketArcadeLeave leave{0};
-
-			this->connection.send(&leave, sizeof(leave));
+			*(*(char **)0x89a390 + 20) = false;
+			this->parent->choice = 0;
+			this->parent->subchoice = 0;
 		}
 	}
 	if (SokuLib::inputMgrs.input.b == 1 || SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {

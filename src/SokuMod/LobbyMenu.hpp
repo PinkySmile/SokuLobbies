@@ -13,6 +13,7 @@
 
 class LobbyMenu : public SokuLib::IMenu {
 private:
+	SokuLib::DrawUtils::Sprite title;
 	std::thread _netThread;
 	Player _loadedSettings;
 	std::mutex _connectionsMutex;
@@ -24,6 +25,30 @@ private:
 	void _netLoop();
 
 public:
+	struct Avatar {
+		SokuLib::DrawUtils::Sprite sprite;
+		unsigned accessoriesPlacement;
+		unsigned nbAnimations;
+
+		Avatar() = default;
+		Avatar(const Avatar &) { assert(false); }
+	};
+	struct Background {
+		SokuLib::DrawUtils::Sprite bg;
+		SokuLib::DrawUtils::Sprite fg;
+		unsigned groundPos;
+		float parallaxFactor;
+		unsigned platformInterval;
+		unsigned platformWidth;
+		unsigned platformCount;
+
+		Background() = default;
+		Background(const Background &) { assert(false); }
+	};
+
+	std::vector<Avatar> avatars;
+	std::vector<Background> backgrounds;
+
 	LobbyMenu(SokuLib::MenuConnect *parent);
 	~LobbyMenu();
 	void _() override;

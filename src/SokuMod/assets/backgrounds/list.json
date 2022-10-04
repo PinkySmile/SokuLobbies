@@ -1,0 +1,11 @@
+[
+    {
+        "bg": "assets/backgrounds/14670.png",
+        "fg": "assets/backgrounds/Sans titre 1.png",
+        "ground": 2276,
+        "parallax_factor": 2,
+        "platform_interval": 300,
+        "platform_width": 2500,
+        "platform_count": 4
+    }
+]

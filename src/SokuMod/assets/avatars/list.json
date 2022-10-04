@@ -1,0 +1,44 @@
+[
+    {
+        "spritesheet": "assets/avatars/220906 Reimu2-Sheet.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2
+    },
+    {
+        "spritesheet": "assets/avatars/220827 Remilia-Sheet Indexed.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2
+    },
+    {
+        "spritesheet": "assets/avatars/220829 Cirno-Sheet Indexed.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2
+    },
+    {
+        "spritesheet": "assets/avatars/220905 Okuu-Sheet Indexed.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2
+    },
+    {
+        "spritesheet": "assets/avatars/220906 Reimu-Sheet Indexed.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2
+    },
+    {
+        "spritesheet": "assets/avatars/220909 Reisen-Sheet Indexed.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2
+    },
+    {
+        "spritesheet": "assets/avatars/220909 Youmu-Sheet Indexed.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2
+    }
+]

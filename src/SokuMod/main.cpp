@@ -8,13 +8,21 @@
 
 static int (SokuLib::MenuConnect::*og_ConnectOnProcess)();
 
+wchar_t profilePath[MAX_PATH];
+wchar_t profileFolderPath[MAX_PATH];
+
 int __fastcall ConnectOnProcess(SokuLib::MenuConnect *This)
 {
 	auto res = (This->*og_ConnectOnProcess)();
 
 	if (SokuLib::inputMgrs.input.changeCard == 1) {
-		SokuLib::activateMenu(new LobbyMenu(This));
-		SokuLib::playSEWaveBuffer(0x28);
+		try {
+			SokuLib::activateMenu(new LobbyMenu(This));
+			SokuLib::playSEWaveBuffer(0x28);
+		} catch (std::exception &e) {
+			MessageBox(SokuLib::window, e.what(), "Loading error", MB_ICONERROR);
+			SokuLib::playSEWaveBuffer(0x29);
+		}
 	}
 	return res;
 }
@@ -33,6 +41,11 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	freopen_s(&_, "CONOUT$", "w", stdout);
 	freopen_s(&_, "CONOUT$", "w", stderr);
 #endif
+
+	GetModuleFileNameW(hMyModule, profilePath, 1024);
+	PathRemoveFileSpecW(profilePath);
+	wcscpy(profileFolderPath, profilePath);
+	PathAppendW(profilePath, L"SokuLobbies.ini");
 
 	// DWORD old;
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);

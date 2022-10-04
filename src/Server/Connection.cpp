@@ -244,6 +244,10 @@ void Connection::_handlePacket(const Lobbies::PacketHello &packet, size_t size)
 		return;
 	if (size != sizeof(packet))
 		return this->kick("Protocol error: Invalid packet size for opcode OPCODE_HELLO expected " + std::to_string(sizeof(packet)) + " but got " + std::to_string(size));
+	if (packet.modVersion > MOD_VERSION)
+		return this->kick("Outdated server!");
+	if (packet.modVersion < MOD_VERSION)
+		return this->kick("You are running an old version of SokuLobbies! Please update your mod and try again.");
 	memcpy(this->_uniqueId, packet.uniqueId, sizeof(packet.uniqueId));
 	if (!this->onJoin(
 		packet,

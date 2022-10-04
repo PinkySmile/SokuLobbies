@@ -9,6 +9,8 @@
 #include <cstdint>
 #include <string>
 
+#define MOD_VERSION 1
+
 namespace Lobbies
 {
 	enum Opcode : uint8_t {
@@ -58,6 +60,7 @@ namespace Lobbies
 		Opcode opcode;
 
 	public:
+		uint32_t modVersion = MOD_VERSION;
 		char uniqueId[16];
 		char name[32];
 		PlayerCustomization custom;
@@ -74,6 +77,7 @@ namespace Lobbies
 	public:
 		uint32_t id;
 		char realName[64];
+		uint32_t bg;
 		char data[2048]; // This is the lobby customization
 
 		PacketOlleh(const std::string &realName, uint32_t id);
