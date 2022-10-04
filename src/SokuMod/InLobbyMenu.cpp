@@ -3,11 +3,12 @@
 //
 
 #include "InLobbyMenu.hpp"
-#include "dinput.h"
+#include <dinput.h>
 
-InLobbyMenu::InLobbyMenu(SokuLib::MenuConnect *parent, Connection &connection) :
+InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connection &connection) :
 	connection(connection),
-	parent(parent)
+	parent(parent),
+	_menu(menu)
 {
 	this->onConnectRequest = connection.onConnectRequest;
 	this->onError = connection.onError;
@@ -16,6 +17,7 @@ InLobbyMenu::InLobbyMenu(SokuLib::MenuConnect *parent, Connection &connection) :
 	this->onHostRequest = connection.onHostRequest;
 	connection.onConnectRequest = [this](const std::string &ip, unsigned short port, bool spectate){
 		SokuLib::playSEWaveBuffer(57);
+		this->connection.getMe()->battleStatus = 2;
 		this->parent->joinHost(ip.c_str(), port, spectate);
 	};
 	connection.onError = [this](const std::string &msg){
@@ -34,6 +36,7 @@ InLobbyMenu::InLobbyMenu(SokuLib::MenuConnect *parent, Connection &connection) :
 	connection.onHostRequest = [this]{
 		SokuLib::playSEWaveBuffer(57);
 		//TODO: Allow to change port
+		this->connection.getMe()->battleStatus = 2;
 		this->parent->setupHost(10800, true);
 		return 10800;
 	};
@@ -48,22 +51,46 @@ InLobbyMenu::~InLobbyMenu()
 	this->connection.onImpMsg = this->onImpMsg;
 	this->connection.onMsg = this->onMsg;
 	this->connection.onHostRequest = this->onHostRequest;
+	this->_menu->setActive();
 }
 
 void InLobbyMenu::_()
 {
-	puts("_ !");
+	Lobbies::PacketArcadeLeave leave{0};
+
+	this->connection.send(&leave, sizeof(leave));
+	*(*(char **)0x89a390 + 20) = false;
+	this->parent->choice = 0;
+	this->parent->subchoice = 0;
 	*(int *)0x882a94 = 0x16;
 }
 
 int InLobbyMenu::onProcess()
 {
+	auto inputs = SokuLib::inputMgrs.input;
+
+	memset(&SokuLib::inputMgrs.input, 0, sizeof(SokuLib::inputMgrs.input));
+	(this->parent->*SokuLib::VTable_ConnectMenu.onProcess)();
+	SokuLib::inputMgrs.input = inputs;
+	if (this->parent->choice > 0) {
+		if (this->parent->subchoice == 5) {
+			//Already Playing
+			Lobbies::PacketArcadeLeave leave{0};
+
+			this->connection.send(&leave, sizeof(leave));
+		} else if (this->parent->subchoice == 10) {
+			//Connect Failed
+			Lobbies::PacketArcadeLeave leave{0};
+
+			this->connection.send(&leave, sizeof(leave));
+		}
+	}
 	if (SokuLib::inputMgrs.input.b == 1 || SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
 		SokuLib::playSEWaveBuffer(0x29);
 		this->connection.disconnect();
 		return false;
 	}
-	if (SokuLib::inputMgrs.input.a == 1 && this->connection.getMe()->battleStatus == 0) {
+	if (this->connection.isInit() && SokuLib::inputMgrs.input.a == 1 && this->connection.getMe()->battleStatus == 0) {
 		Lobbies::PacketGameRequest packet{0};
 
 		this->connection.getMe()->battleStatus = 1;

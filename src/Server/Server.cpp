@@ -86,7 +86,7 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 	while (!ok) {
 		ok = true;
 		for (auto &c : this->_connections)
-			if (c->getId() == id && c->isInit()) {
+			if (c->getId() == id) {
 				ok = false;
 				id++;
 			}
@@ -227,6 +227,9 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 		this->_machinesMutex.unlock();
 	};
 	connection.onGameRequest = [&connection, this, id](){
+		if (connection.getBattleStatus())
+			return;
+
 		Lobbies::PacketArcadeEngage engage{id};
 
 		this->_machinesMutex.lock();

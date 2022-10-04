@@ -109,7 +109,7 @@ void Connection::send(const void *packet, size_t size)
 	std::cout << "[>" << this->_socket->getRemoteAddress().toString() << ":" << this->_socket->getRemotePort();
 	if (this->_id)
 		std::cout << " player id " << this->_id;
-	std::cout << "] " << reinterpret_cast<const Lobbies::Packet *>(packet)->toString() << std::endl;
+	std::cout << "] " << size << " bytes: " << reinterpret_cast<const Lobbies::Packet *>(packet)->toString() << std::endl;
 	logMutex.unlock();
 #endif
 	this->_socket->send(packet, size, sent);
@@ -197,7 +197,7 @@ void Connection::_handlePacket(const Lobbies::Packet &packet, size_t size)
 	std::cout << "[<" << this->_socket->getRemoteAddress().toString() << ":" << this->_socket->getRemotePort();
 	if (this->_id)
 		std::cout << " player id " << this->_id;
-	std::cout << "] " << packet.toString() << std::endl;
+	std::cout << "] " << size << " bytes: " << packet.toString() << std::endl;
 	logMutex.unlock();
 #endif
 	switch (packet.opcode) {
@@ -313,9 +313,9 @@ void Connection::_handlePacket(const Lobbies::PacketGameRequest &packet, size_t 
 		return this->kick("Protocol error: Invalid handshake");
 	if (size != sizeof(packet))
 		return this->kick("Protocol error: Invalid packet size for opcode OPCODE_GAME_REQUEST expected " + std::to_string(sizeof(packet)) + " but got " + std::to_string(size));
-	this->_battleStatus = 1;
 	this->_machineId = packet.consoleId;
 	this->onGameRequest();
+	this->_battleStatus = 1;
 }
 
 void Connection::_handlePacket(const Lobbies::PacketGameStart &packet, size_t size)

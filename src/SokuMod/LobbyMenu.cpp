@@ -44,6 +44,8 @@ void LobbyMenu::_netLoop()
 			if (!this->_open)
 				return;
 		}
+		if (!this->_active)
+			continue;
 		this->_connectionsMutex.lock();
 		for (auto &c : this->_connections)
 			c->send(&ping, sizeof(ping));
@@ -66,7 +68,8 @@ int LobbyMenu::onProcess()
 	}
 	if (SokuLib::inputMgrs.input.a == 1) {
 		this->_connectionsMutex.lock();
-		SokuLib::activateMenu(new InLobbyMenu(this->_parent, *this->_connections[0]));
+		SokuLib::activateMenu(new InLobbyMenu(this, this->_parent, *this->_connections[0]));
+		this->_active = false;
 		this->_connectionsMutex.unlock();
 		SokuLib::playSEWaveBuffer(0x28);
 	}
@@ -76,4 +79,9 @@ int LobbyMenu::onProcess()
 int LobbyMenu::onRender()
 {
 	return 0;
+}
+
+void LobbyMenu::setActive()
+{
+	this->_active = true;
 }

@@ -10,6 +10,7 @@
 #include <Socket.hpp>
 #include <SokuLib.hpp>
 #include "Connection.hpp"
+#include "LobbyMenu.hpp"
 
 class InLobbyMenu : public SokuLib::IMenu {
 private:
@@ -20,10 +21,11 @@ private:
 	std::function<unsigned short ()> onHostRequest;
 	Connection &connection;
 	SokuLib::MenuConnect *parent;
+	LobbyMenu *_menu;
 	bool _wasConnected = false;
 
 public:
-	InLobbyMenu(SokuLib::MenuConnect *parent, Connection &connection);
+	InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connection &connection);
 	~InLobbyMenu();
 	void _() override;
 	int onProcess() override;

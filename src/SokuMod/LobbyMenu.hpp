@@ -19,6 +19,7 @@ private:
 	SokuLib::MenuConnect *_parent;
 	std::vector<std::shared_ptr<Connection>> _connections;
 	volatile bool _open = true;
+	bool _active = true;
 
 	void _netLoop();
 
@@ -28,6 +29,7 @@ public:
 	void _() override;
 	int onProcess() override;
 	int onRender() override;
+	void setActive();
 };
 
 

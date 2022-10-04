@@ -15,12 +15,12 @@ std::mutex logMutex;
 
 void Connection::_netLoop()
 {
-	Lobbies::Packet packet;
+	char buffer[sizeof(Lobbies::Packet)];
 	size_t recvSize;
 
-	do {
+	while (true) {
 		try {
-			recvSize = this->_socket.read(&packet, sizeof(packet));
+			recvSize = this->_socket.read(buffer, sizeof(buffer));
 		} catch (std::exception &e) {
 			if (!this->_socket.isOpen())
 				return;
@@ -49,8 +49,13 @@ void Connection::_netLoop()
 			this->onError("Connection closed");
 			return;
 		}
-		this->_handlePacket(packet, recvSize);
-	} while (true);
+
+		size_t total = recvSize;
+
+		do
+			this->_handlePacket(*reinterpret_cast<Lobbies::Packet *>(&buffer[total - recvSize]), recvSize);
+		while (recvSize != 0 && this->_connected);
+	}
 }
 
 Connection::Connection(const std::string &host, unsigned short port, const Player &initParams) :
@@ -86,7 +91,7 @@ void Connection::send(const void *packet, size_t size)
 #ifndef _LOBBYNOLOG
 	logMutex.lock();
 	std::cout << "[>" << inet_ntoa(this->_socket.getRemote().sin_addr) << ":" << this->_socket.getRemote().sin_port;
-	std::cout << "] " << reinterpret_cast<const Lobbies::Packet *>(packet)->toString() << std::endl;
+	std::cout << "] " << size << " bytes: " << reinterpret_cast<const Lobbies::Packet *>(packet)->toString() << std::endl;
 	logMutex.unlock();
 #endif
 	try {
@@ -110,12 +115,12 @@ bool Connection::isConnected() const
 	return this->_connected;
 }
 
-void Connection::_handlePacket(const Lobbies::Packet &packet, size_t size)
+void Connection::_handlePacket(const Lobbies::Packet &packet, size_t &size)
 {
 #ifndef _LOBBYNOLOG
 	logMutex.lock();
 	std::cout << "[<" << inet_ntoa(this->_socket.getRemote().sin_addr) << ":" << this->_socket.getRemote().sin_port;
-	std::cout << "] " << packet.toString() << std::endl;
+	std::cout << "] " << size << " bytes: " << packet.toString() << std::endl;
 	logMutex.unlock();
 #endif
 	switch (packet.opcode) {
@@ -156,15 +161,16 @@ void Connection::_handlePacket(const Lobbies::Packet &packet, size_t size)
 	}
 }
 
-void Connection::_handlePacket(const Lobbies::PacketHello &, size_t)
+void Connection::_handlePacket(const Lobbies::PacketHello &, size_t &)
 {
 	this->error("Protocol error: OPCODE_HELLO unexpected");
 }
 
-void Connection::_handlePacket(const Lobbies::PacketOlleh &packet, size_t size)
+void Connection::_handlePacket(const Lobbies::PacketOlleh &packet, size_t &size)
 {
-	if (size != sizeof(packet))
+	if (size < sizeof(packet))
 		return this->error("Protocol error: Invalid packet size for opcode OPCODE_OLLEH expected " + std::to_string(sizeof(packet)) + " but got " + std::to_string(size));
+	size -= sizeof(packet);
 
 	Player player = this->_initParams;
 
@@ -180,12 +186,13 @@ void Connection::_handlePacket(const Lobbies::PacketOlleh &packet, size_t size)
 	this->_posThread = std::thread(&Connection::_posLoop, this);
 }
 
-void Connection::_handlePacket(const Lobbies::PacketPlayerJoin &packet, size_t size)
+void Connection::_handlePacket(const Lobbies::PacketPlayerJoin &packet, size_t &size)
 {
 	if (!this->_init)
 		return this->error("Protocol error: Invalid handshake");
-	if (size != sizeof(packet))
+	if (size < sizeof(packet))
 		return this->error("Protocol error: Invalid packet size for opcode OPCODE_PLAYER_JOIN expected " + std::to_string(sizeof(packet)) + " but got " + std::to_string(size));
+	size -= sizeof(packet);
 
 	Player player;
 
@@ -197,12 +204,13 @@ void Connection::_handlePacket(const Lobbies::PacketPlayerJoin &packet, size_t s
 	this->_playerMutex.unlock();
 }
 
-void Connection::_handlePacket(const Lobbies::PacketPlayerLeave &packet, size_t size)
+void Connection::_handlePacket(const Lobbies::PacketPlayerLeave &packet, size_t &size)
 {
 	if (!this->_init)
 		return this->error("Protocol error: Invalid handshake");
-	if (size != sizeof(packet))
+	if (size < sizeof(packet))
 		return this->error("Protocol error: Invalid packet size for opcode OPCODE_PLAYER_LEAVE expected " + std::to_string(sizeof(packet)) + " but got " + std::to_string(size));
+	size -= sizeof(packet);
 	if (packet.id == this->_me->id)
 		return this->error("Protocol error: Server sent OPCODE_PLAYER_LEAVE with self id");
 	this->_playerMutex.lock();
@@ -210,46 +218,50 @@ void Connection::_handlePacket(const Lobbies::PacketPlayerLeave &packet, size_t 
 	this->_playerMutex.unlock();
 }
 
-void Connection::_handlePacket(const Lobbies::PacketKicked &packet, size_t size)
+void Connection::_handlePacket(const Lobbies::PacketKicked &packet, size_t &size)
 {
 	if (!this->_init)
 		return this->error("Protocol error: Invalid handshake");
-	if (size != sizeof(packet))
+	if (size < sizeof(packet))
 		return this->error("Protocol error: Invalid packet size for opcode OPCODE_KICKED expected " + std::to_string(sizeof(packet)) + " but got " + std::to_string(size));
+	size -= sizeof(packet);
 	this->onImpMsg("Kicked: " + std::string(packet.message, strnlen(packet.message, sizeof(packet.message))));
 	this->_init = false;
 	this->_connected = false;
 	this->_socket.disconnect();
 }
 
-void Connection::_handlePacket(const Lobbies::PacketMove &packet, size_t size)
+void Connection::_handlePacket(const Lobbies::PacketMove &packet, size_t &size)
 {
 	if (!this->_init)
 		return this->error("Protocol error: Invalid handshake");
-	if (size != sizeof(packet))
+	if (size < sizeof(packet))
 		return this->error("Protocol error: Invalid packet size for opcode OPCODE_MOVE expected " + std::to_string(sizeof(packet)) + " but got " + std::to_string(size));
+	size -= sizeof(packet);
 	this->_playerMutex.lock();
 	this->_players[packet.id].dir = packet.dir;
 	this->_playerMutex.unlock();
 }
 
-void Connection::_handlePacket(const Lobbies::PacketPosition &packet, size_t size)
+void Connection::_handlePacket(const Lobbies::PacketPosition &packet, size_t &size)
 {
 	if (!this->_init)
 		return this->error("Protocol error: Invalid handshake");
-	if (size != sizeof(packet))
+	if (size < sizeof(packet))
 		return this->error("Protocol error: Invalid packet size for opcode OPCODE_POSITION expected " + std::to_string(sizeof(packet)) + " but got " + std::to_string(size));
+	size -= sizeof(packet);
 	this->_playerMutex.lock();
 	this->_players[packet.id].pos = {packet.x, packet.y};
 	this->_playerMutex.unlock();
 }
 
-void Connection::_handlePacket(const Lobbies::PacketGameRequest &packet, size_t size)
+void Connection::_handlePacket(const Lobbies::PacketGameRequest &packet, size_t &size)
 {
 	if (!this->_init)
 		return this->error("Protocol error: Invalid handshake");
-	if (size != sizeof(packet))
+	if (size < sizeof(packet))
 		return this->error("Protocol error: Invalid packet size for opcode OPCODE_GAME_REQUEST expected " + std::to_string(sizeof(packet)) + " but got " + std::to_string(size));
+	size -= sizeof(packet);
 
 	Lobbies::PacketGameStart game{getMyIp(), this->onHostRequest(), false};
 
@@ -257,77 +269,84 @@ void Connection::_handlePacket(const Lobbies::PacketGameRequest &packet, size_t 
 	this->_me->battleStatus = 2;
 }
 
-void Connection::_handlePacket(const Lobbies::PacketGameStart &packet, size_t size)
+void Connection::_handlePacket(const Lobbies::PacketGameStart &packet, size_t &size)
 {
 	if (!this->_init)
 		return this->error("Protocol error: Invalid handshake");
-	if (size != sizeof(packet))
+	if (size < sizeof(packet))
 		return this->error("Protocol error: Invalid packet size for opcode OPCODE_GAME_START expected " + std::to_string(sizeof(packet)) + " but got " + std::to_string(size));
+	size -= sizeof(packet);
 	this->onConnectRequest(packet.ip, packet.port, packet.spectator);
 	this->_me->battleStatus = 2;
 }
 
-void Connection::_handlePacket(const Lobbies::PacketPing &, size_t)
+void Connection::_handlePacket(const Lobbies::PacketPing &, size_t &)
 {
 	this->error("Protocol error: OPCODE_PING unexpected");
 }
 
-void Connection::_handlePacket(const Lobbies::PacketPong &packet, size_t size)
+void Connection::_handlePacket(const Lobbies::PacketPong &packet, size_t &size)
 {
-	if (size != sizeof(packet))
+	if (size < sizeof(packet))
 		return this->error("Protocol error: Invalid packet size for opcode OPCODE_PONG expected " + std::to_string(sizeof(packet)) + " but got " + std::to_string(size));
+	size -= sizeof(packet);
 
 	this->_info.name = std::string(packet.name, strnlen(packet.name, sizeof(packet.name)));
 	this->_info.maxPlayers = packet.maxPlayers;
 	this->_info.currentPlayers = packet.currentPlayers;
 }
 
-void Connection::_handlePacket(const Lobbies::PacketSettingsUpdate &packet, size_t size)
+void Connection::_handlePacket(const Lobbies::PacketSettingsUpdate &packet, size_t &size)
 {
 	if (!this->_init)
 		return this->error("Protocol error: Invalid handshake");
-	if (size != sizeof(packet))
+	if (size < sizeof(packet))
 		return this->error("Protocol error: Invalid packet size for opcode OPCODE_SETTINGS_UPDATE expected " + std::to_string(sizeof(packet)) + " but got " + std::to_string(size));
+	size -= sizeof(packet);
 	this->_playerMutex.lock();
 	this->_players[packet.id].player = packet.custom;
 	this->_playerMutex.unlock();
 }
 
-void Connection::_handlePacket(const Lobbies::PacketArcadeEngage &packet, size_t size)
+void Connection::_handlePacket(const Lobbies::PacketArcadeEngage &packet, size_t &size)
 {
 	if (!this->_init)
 		return this->error("Protocol error: Invalid handshake");
-	if (size != sizeof(packet))
+	if (size < sizeof(packet))
 		return this->error("Protocol error: Invalid packet size for opcode OPCODE_ARCADE_ENGAGE expected " + std::to_string(sizeof(packet)) + " but got " + std::to_string(size));
+	size -= sizeof(packet);
 	this->_playerMutex.lock();
 	this->_players[packet.id].battleStatus = 1;
 	this->_playerMutex.unlock();
 }
 
-void Connection::_handlePacket(const Lobbies::PacketArcadeLeave &packet, size_t size)
+void Connection::_handlePacket(const Lobbies::PacketArcadeLeave &packet, size_t &size)
 {
 	if (!this->_init)
 		return this->error("Protocol error: Invalid handshake");
-	if (size != sizeof(packet))
+	if (size < sizeof(packet))
 		return this->error("Protocol error: Invalid packet size for opcode OPCODE_ARCADE_LEAVE expected " + std::to_string(sizeof(packet)) + " but got " + std::to_string(size));
+	size -= sizeof(packet);
 	this->_playerMutex.lock();
 	this->_players[packet.id].battleStatus = 0;
 	this->_playerMutex.unlock();
 }
 
-void Connection::_handlePacket(const Lobbies::PacketMessage &packet, size_t size)
+void Connection::_handlePacket(const Lobbies::PacketMessage &packet, size_t &size)
 {
-	if (size != sizeof(packet))
+	if (size < sizeof(packet))
 		return this->error("Protocol error: Invalid packet size for opcode OPCODE_MESSAGE expected " + std::to_string(sizeof(packet)) + " but got " + std::to_string(size));
+	size -= sizeof(packet);
 	this->onMsg(packet.channelId, std::string(packet.message, strnlen(packet.message, sizeof(packet.message))));
 }
 
-void Connection::_handlePacket(const Lobbies::PacketImportantMessage &packet, size_t size)
+void Connection::_handlePacket(const Lobbies::PacketImportantMessage &packet, size_t &size)
 {
 	if (!this->_init)
 		return this->error("Protocol error: Invalid handshake");
-	if (size != sizeof(packet))
+	if (size < sizeof(packet))
 		return this->error("Protocol error: Invalid packet size for opcode OPCODE_IMPORTANT_MESSAGE expected " + std::to_string(sizeof(packet)) + " but got " + std::to_string(size));
+	size -= sizeof(packet);
 	this->onImpMsg(std::string(packet.message, strnlen(packet.message, sizeof(packet.message))));
 }
 
