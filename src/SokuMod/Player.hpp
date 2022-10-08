@@ -23,6 +23,8 @@ struct Player {
 	SokuLib::Vector2<uint32_t> pos = {0, 0};
 	uint8_t battleStatus = 0;
 	uint8_t machineId = 0;
+	uint8_t currentAnimation = 0;
+	uint8_t animationCtr = 0;
 	Room room;
 };
 

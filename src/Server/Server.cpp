@@ -118,11 +118,15 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 			return;
 
 		Lobbies::PacketMessage msg{0, 0, connection.getName() + reason};
+		Lobbies::PacketPlayerLeave leave{connection.getId()};
 
 		this->_connectionsMutex.lock();
 		for (auto &c : this->_connections)
-			if (c->isInit())
+			if (c->isInit()) {
 				c->send(&msg, sizeof(msg));
+				if (&*c != &connection)
+					c->send(&leave, sizeof(leave));
+			}
 		this->_infos.currentPlayers--;
 		this->_connectionsMutex.unlock();
 		if (connection.getBattleStatus()) {
@@ -236,11 +240,11 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 		auto &machine = this->_machines[connection.getActiveMachine()];
 
 		if (!machine.empty() && machine[0]->getBattleStatus() == 2) {
-			Lobbies::PacketGameStart packet{machine[0]->getRoomInfo().ip, machine[0]->getRoomInfo().port, false};
+			Lobbies::PacketGameStart packet{machine[0]->getRoomInfo().ip, machine[0]->getRoomInfo().port, true};
 
 			connection.send(&packet, sizeof(packet));
 		} else if (machine.size() >= 2 && machine[1]->getBattleStatus() == 2) {
-			Lobbies::PacketGameStart packet{machine[1]->getRoomInfo().ip, machine[1]->getRoomInfo().port, false};
+			Lobbies::PacketGameStart packet{machine[1]->getRoomInfo().ip, machine[1]->getRoomInfo().port, true};
 
 			connection.send(&packet, sizeof(packet));
 		}

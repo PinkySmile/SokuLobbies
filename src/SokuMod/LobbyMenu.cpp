@@ -15,6 +15,14 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 	_parent(parent),
 	avatars()
 {
+	std::ifstream ips{std::filesystem::path(profileFolderPath) / "ip.txt"};
+	std::string ip;
+
+	std::getline(ips, ip);
+	if (ip.empty())
+		ip = "localhost";
+	ips.close();
+
 	auto path = std::filesystem::path(profileFolderPath) / "assets/avatars/list.json";
 	std::ifstream stream{path};
 	nlohmann::json j;
@@ -31,6 +39,7 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 
 		avatar.accessoriesPlacement = val["accessories"];
 		avatar.nbAnimations = val["animations"];
+		avatar.animationsStep = val["anim_step"];
 		avatar.sprite.texture.loadFromFile((std::filesystem::path(profileFolderPath) / val["spritesheet"].get<std::string>()).string().c_str());
 		avatar.sprite.rect.width = avatar.sprite.texture.getSize().x / avatar.nbAnimations;
 		avatar.sprite.rect.height = avatar.sprite.texture.getSize().y / 2;
@@ -76,19 +85,24 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 	//TODO: Save and load this in a file
 	this->_loadedSettings.settings.hostPref = Lobbies::HOSTPREF_NO_PREF;
 	this->_loadedSettings.player.title = 0;
-	this->_loadedSettings.player.avatar = 0;
+	this->_loadedSettings.player.avatar = time(nullptr) % this->avatars.size();//0;
 	this->_loadedSettings.player.head = 0;
 	this->_loadedSettings.player.body = 0;
 	this->_loadedSettings.player.back = 0;
 	this->_loadedSettings.player.env = 0;
 	this->_loadedSettings.player.feet = 0;
 	this->_loadedSettings.name = SokuLib::profile1.name.operator std::string();
+	this->_loadedSettings.pos.x = 20;
 
 	//TODO: Actually have a list
-	this->_connections.emplace_back(new Connection("localhost", 10900, this->_loadedSettings));
+	this->_connections.emplace_back(new Connection(ip, 10800, this->_loadedSettings));
 	this->_connections.back()->onError = [this](const std::string &msg){
 		SokuLib::playSEWaveBuffer(38);
 		MessageBox(SokuLib::window, msg.c_str(), "Internal Error", MB_ICONERROR);
+	};
+	this->_connections.back()->onImpMsg = [this](const std::string &msg){
+		SokuLib::playSEWaveBuffer(23);
+		MessageBox(SokuLib::window, msg.c_str(), "Notification from server", MB_ICONINFORMATION);
 	};
 	this->_connections.back()->startThread();
 	this->_netThread = std::thread(&LobbyMenu::_netLoop, this);

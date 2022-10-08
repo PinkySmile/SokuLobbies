@@ -13,9 +13,10 @@
 #include <Vector2.hpp> //From SokuLib
 #include "Player.hpp"
 #include "Socket.hpp"
+#include "LobbyMenu.hpp"
 
-#define PLAYER_H_SPEED 2
-#define PLAYER_V_SPEED 2
+#define PLAYER_H_SPEED 4
+#define PLAYER_V_SPEED 4
 
 class Connection {
 public:
@@ -67,6 +68,8 @@ public:
 	std::function<void (const std::string &msg)> onError;
 	std::function<void (const std::string &msg)> onImpMsg;
 	std::function<void (int32_t channel, const std::string &msg)> onMsg;
+	std::function<void (const Lobbies::PacketOlleh &)> onConnect;
+	std::function<void (const Player &)> onPlayerJoin;
 	std::function<unsigned short ()> onHostRequest;
 	std::mutex meMutex;
 
@@ -84,7 +87,7 @@ public:
 	const Player *getMe() const;
 	std::vector<Player> getPlayers() const;
 	std::vector<std::string> getMessages() const;
-	void updatePlayers();
+	void updatePlayers(const std::vector<LobbyMenu::Avatar> &avatars);
 };
 
 

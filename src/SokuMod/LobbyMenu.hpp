@@ -9,8 +9,9 @@
 #include <mutex>
 #include <thread>
 #include <SokuLib.hpp>
-#include "Connection.hpp"
+#include "Player.hpp"
 
+class Connection;
 class LobbyMenu : public SokuLib::IMenu {
 private:
 	SokuLib::DrawUtils::Sprite title;
@@ -28,6 +29,7 @@ public:
 	struct Avatar {
 		SokuLib::DrawUtils::Sprite sprite;
 		unsigned accessoriesPlacement;
+		unsigned animationsStep;
 		unsigned nbAnimations;
 
 		Avatar() = default;

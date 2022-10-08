@@ -184,6 +184,7 @@ void Connection::_handlePacket(const Lobbies::PacketOlleh &packet, size_t &size)
 	this->meMutex.unlock();
 	this->_init = true;
 	this->_posThread = std::thread(&Connection::_posLoop, this);
+	this->onConnect(packet);
 }
 
 void Connection::_handlePacket(const Lobbies::PacketPlayerJoin &packet, size_t &size)
@@ -202,6 +203,7 @@ void Connection::_handlePacket(const Lobbies::PacketPlayerJoin &packet, size_t &
 	this->_playerMutex.lock();
 	this->_players[packet.id] = player;
 	this->_playerMutex.unlock();
+	this->onPlayerJoin(player);
 }
 
 void Connection::_handlePacket(const Lobbies::PacketPlayerLeave &packet, size_t &size)
@@ -220,8 +222,6 @@ void Connection::_handlePacket(const Lobbies::PacketPlayerLeave &packet, size_t 
 
 void Connection::_handlePacket(const Lobbies::PacketKicked &packet, size_t &size)
 {
-	if (!this->_init)
-		return this->error("Protocol error: Invalid handshake");
 	if (size < sizeof(packet))
 		return this->error("Protocol error: Invalid packet size for opcode OPCODE_KICKED expected " + std::to_string(sizeof(packet)) + " but got " + std::to_string(size));
 	size -= sizeof(packet);
@@ -414,7 +414,7 @@ std::vector<std::string> Connection::getMessages() const
 	return result;
 }
 
-void Connection::updatePlayers()
+void Connection::updatePlayers(const std::vector<LobbyMenu::Avatar> &avatars)
 {
 	this->_playerMutex.lock();
 	for (auto &p : this->_players) {
@@ -426,6 +426,12 @@ void Connection::updatePlayers()
 			p.second.pos.y += PLAYER_V_SPEED;
 		if (p.second.dir & 8)
 			p.second.pos.y -= PLAYER_V_SPEED;
+		p.second.animationCtr++;
+		if (p.second.animationCtr > avatars[p.second.player.avatar].animationsStep) {
+			p.second.currentAnimation++;
+			p.second.currentAnimation %= avatars[p.second.player.avatar].nbAnimations;
+			p.second.animationCtr = 0;
+		}
 	}
 	this->_playerMutex.unlock();
 }
