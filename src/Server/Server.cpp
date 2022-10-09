@@ -9,7 +9,15 @@ extern std::mutex logMutex;
 #endif
 #include <memory>
 #include <cstring>
+#include <shlwapi.h>
 #include "Server.hpp"
+
+Server::~Server()
+{
+	this->_opened = false;
+	if (this->_mainServerThread.joinable())
+		this->_mainServerThread.join();
+}
 
 void Server::run(unsigned short port, unsigned maxPlayers, const std::string &name)
 {
@@ -18,6 +26,7 @@ void Server::run(unsigned short port, unsigned maxPlayers, const std::string &na
 #endif
 		auto socket = std::make_unique<sf::TcpSocket>();
 
+		this->_port = port;
 		this->_infos.maxPlayers = maxPlayers;
 		this->_infos.currentPlayers = 0;
 		this->_infos.name = name;
@@ -378,6 +387,26 @@ void Server::_registerToMainServer()
 	std::cout << "Registering lobby '" << this->_infos.name << "' to the server: " << static_cast<int>(this->_infos.maxPlayers) << " max slots" << std::endl;
 	logMutex.unlock();
 #endif
+	this->_mainServerThread = std::thread([this]{
+		sf::TcpSocket socket;
+		unsigned short servPort;
+		char packet[3];
+		char buffer[64];
+
+		packet[0] = 0;
+		packet[1] = this->_port & 0xFF;
+		packet[2] = this->_port >> 8;
+		GetPrivateProfileString("Lobby", "Host", "pinkysmile.fr", buffer, sizeof(buffer), "./SokuLobbies.ini");
+		servPort = GetPrivateProfileInt("Lobby", "Port", 5254, "./SokuLobbies.ini");
+		std::cout << "Main server is " << buffer << ":" << servPort << std::endl;
+		socket.connect(buffer, servPort);
+		while (this->_opened) {
+			if (socket.send(&packet, sizeof(packet)) == sf::Socket::Disconnected)
+				socket.connect(buffer, servPort);
+			for (int i = 0; i < 100 && this->_opened; i++)
+				std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		}
+	});
 }
 
 void Server::close()

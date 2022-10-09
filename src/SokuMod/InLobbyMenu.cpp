@@ -13,7 +13,6 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 	parent(parent),
 	_menu(menu)
 {
-
 	SokuLib::FontDescription desc;
 	bool hasEnglishPatch = (*(int *)0x411c64 == 1);
 

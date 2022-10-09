@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <string>
 
-#define MOD_VERSION 2
+#define MOD_VERSION 3
 
 namespace Lobbies
 {
@@ -63,6 +63,7 @@ namespace Lobbies
 		uint32_t modVersion = MOD_VERSION;
 		char uniqueId[16];
 		char name[32];
+		char password[32] = {0};
 		PlayerCustomization custom;
 		LobbySettings settings;
 
@@ -186,6 +187,7 @@ namespace Lobbies
 		char name[32];
 		uint8_t maxPlayers;
 		uint8_t currentPlayers;
+		bool requiresPwd = false;
 
 		PacketPong(const std::string &roomName, uint8_t maxPlayers, uint8_t currentPlayers);
 		std::string toString() const;

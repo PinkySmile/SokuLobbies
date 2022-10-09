@@ -10,12 +10,14 @@ static int (SokuLib::MenuConnect::*og_ConnectOnProcess)();
 
 wchar_t profilePath[MAX_PATH];
 wchar_t profileFolderPath[MAX_PATH];
+char servHost[64];
+unsigned short servPort;
 
 int __fastcall ConnectOnProcess(SokuLib::MenuConnect *This)
 {
 	auto res = (This->*og_ConnectOnProcess)();
 
-	if (SokuLib::inputMgrs.input.changeCard == 1) {
+	if (*(byte*)0x0448e4a != 0x30 && SokuLib::inputMgrs.input.changeCard == 1) {
 		try {
 			SokuLib::activateMenu(new LobbyMenu(This));
 			SokuLib::playSEWaveBuffer(0x28);
@@ -41,11 +43,15 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	freopen_s(&_, "CONOUT$", "w", stdout);
 	freopen_s(&_, "CONOUT$", "w", stderr);
 #endif
+	wchar_t servHostW[sizeof(servHost)];
 
 	GetModuleFileNameW(hMyModule, profilePath, 1024);
 	PathRemoveFileSpecW(profilePath);
 	wcscpy(profileFolderPath, profilePath);
 	PathAppendW(profilePath, L"SokuLobbies.ini");
+	GetPrivateProfileStringW(L"Lobby", L"Host", L"pinkysmile.fr", servHostW, sizeof(servHost), profilePath);
+	servPort = GetPrivateProfileIntW(L"Lobby", L"Port", 5254, profilePath);
+	wcstombs(servHost, servHostW, sizeof(servHost));
 
 	// DWORD old;
 	::VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);

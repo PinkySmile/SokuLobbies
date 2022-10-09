@@ -22,8 +22,8 @@ class Connection {
 public:
 	struct LobbyInfo {
 		std::string name;
-		uint8_t maxPlayers;
-		uint8_t currentPlayers;
+		uint8_t maxPlayers = 0;
+		uint8_t currentPlayers = 0;
 	};
 
 private:

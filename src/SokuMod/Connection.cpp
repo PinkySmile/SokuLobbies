@@ -438,13 +438,18 @@ void Connection::updatePlayers(const std::vector<LobbyMenu::Avatar> &avatars)
 
 void Connection::_posLoop()
 {
+	puts("IN!");
 	while (this->_init) {
+		puts("Lock!");
 		this->meMutex.lock();
+		puts("Locked");
 
 		Lobbies::PacketPosition position{0, this->_me->pos.x, this->_me->pos.y};
 
 		this->send(&position, sizeof(position));
 		this->meMutex.unlock();
-		std::this_thread::sleep_for(std::chrono::seconds(1));
+		for (int i = 0; i < 10 && this->_init; i++)
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
+	puts("Out!");
 }

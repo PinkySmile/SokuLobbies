@@ -20,12 +20,14 @@ struct BanEntry {
 class Server {
 private:
 	bool _opened = true;
+	unsigned short _port;
 	Connection::LobbyInfo _infos;
 	sf::TcpListener _listener;
 	std::vector<std::shared_ptr<Connection>> _connections;
 	std::mutex _connectionsMutex;
 	std::mutex _machinesMutex;
 	std::vector<BanEntry> _banList;
+	std::thread _mainServerThread;
 	std::map<uint8_t, std::vector<Connection *>> _machines;
 
 	bool _processCommands(Connection &author, const std::string &msg);
@@ -35,6 +37,7 @@ private:
 	void _registerToMainServer();
 
 public:
+	~Server();
 	void run(unsigned short port, unsigned maxPlayers, const std::string &name);
 	void close();
 };

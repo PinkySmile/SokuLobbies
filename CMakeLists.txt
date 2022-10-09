@@ -19,25 +19,37 @@ endif ()
 
 add_subdirectory(src/SokuMod/SokuLib)
 include_directories(src/Common)
-find_package(SFML REQUIRED)
+find_package(SFML)
 
 add_executable(
-	SokuLobbiesServer
-	src/Server/main.cpp
-	src/Common/Packet.hpp
-	src/Common/Packet.cpp
+	SokuLobbiesMainServer
 	src/Common/Socket.hpp
 	src/Common/Socket.cpp
-	src/Server/Connection.cpp
-	src/Server/Connection.hpp
-	src/Server/Server.cpp
-	src/Server/Server.hpp
+	src/MainServer/main.cpp
 )
-target_include_directories(SokuLobbiesServer PRIVATE ${SFML_INCLUDE_DIRS})
 if (WIN32)
-	target_link_libraries(SokuLobbiesServer ${SFML_NETWORK_LIBRARY} ${SFML_SYSTEM_LIBRARY} ws2_32)
-else()
-	target_link_libraries(SokuLobbiesServer ${SFML_NETWORK_LIBRARY} ${SFML_SYSTEM_LIBRARY})
+	target_link_libraries(SokuLobbiesMainServer ws2_32)
+endif()
+
+if (SFML_FOUND)
+	add_executable(
+		SokuLobbiesServer
+		src/Server/main.cpp
+		src/Common/Packet.hpp
+		src/Common/Packet.cpp
+		src/Common/Socket.hpp
+		src/Common/Socket.cpp
+		src/Server/Connection.cpp
+		src/Server/Connection.hpp
+		src/Server/Server.cpp
+		src/Server/Server.hpp
+	)
+	target_include_directories(SokuLobbiesServer PRIVATE ${SFML_INCLUDE_DIRS})
+	if (WIN32)
+		target_link_libraries(SokuLobbiesServer ${SFML_NETWORK_LIBRARY} ${SFML_SYSTEM_LIBRARY} ws2_32)
+	else()
+		target_link_libraries(SokuLobbiesServer ${SFML_NETWORK_LIBRARY} ${SFML_SYSTEM_LIBRARY})
+	endif()
 endif()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
