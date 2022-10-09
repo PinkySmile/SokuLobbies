@@ -276,7 +276,8 @@ void Connection::_handlePacket(const Lobbies::PacketGameStart &packet, size_t &s
 	if (size < sizeof(packet))
 		return this->error("Protocol error: Invalid packet size for opcode OPCODE_GAME_START expected " + std::to_string(sizeof(packet)) + " but got " + std::to_string(size));
 	size -= sizeof(packet);
-	this->onConnectRequest(packet.ip, packet.port, packet.spectator);
+	if (this->onConnectRequest)
+		this->onConnectRequest(packet.ip, packet.port, packet.spectator);
 	this->_me->battleStatus = 2;
 }
 
@@ -337,7 +338,8 @@ void Connection::_handlePacket(const Lobbies::PacketMessage &packet, size_t &siz
 	if (size < sizeof(packet))
 		return this->error("Protocol error: Invalid packet size for opcode OPCODE_MESSAGE expected " + std::to_string(sizeof(packet)) + " but got " + std::to_string(size));
 	size -= sizeof(packet);
-	this->onMsg(packet.channelId, std::string(packet.message, strnlen(packet.message, sizeof(packet.message))));
+	if (this->onMsg)
+		this->onMsg(packet.channelId, std::string(packet.message, strnlen(packet.message, sizeof(packet.message))));
 }
 
 void Connection::_handlePacket(const Lobbies::PacketImportantMessage &packet, size_t &size)
@@ -438,11 +440,8 @@ void Connection::updatePlayers(const std::vector<LobbyMenu::Avatar> &avatars)
 
 void Connection::_posLoop()
 {
-	puts("IN!");
 	while (this->_init) {
-		puts("Lock!");
 		this->meMutex.lock();
-		puts("Locked");
 
 		Lobbies::PacketPosition position{0, this->_me->pos.x, this->_me->pos.y};
 
@@ -451,5 +450,4 @@ void Connection::_posLoop()
 		for (int i = 0; i < 10 && this->_init; i++)
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
-	puts("Out!");
 }

@@ -10,15 +10,13 @@
 
 #ifndef _WIN32
 #include <unistd.h>
-#else
-#define close(fd) closesocket(fd)
-#endif
-
-#ifndef _WIN32
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <sys/select.h>
 typedef fd_set FD_SET;
+#else
+#define socklen_t int
+#define close(fd) closesocket(fd)
 #endif
 
 #ifdef _WIN32

@@ -336,6 +336,7 @@ void LobbyMenu::_masterServerLoop()
 				this->_loadingText.texture.createFromText("Connecting to server...", this->_defaultFont16, {600, 74});
 				this->_lastError.clear();
 				this->_mainServer.connect(servHost, servPort);
+				puts("Connected!");
 			} catch (std::exception &e) {
 				this->_loadingText.texture.createFromText(("Connection failed:<br><color FF0000>" + std::string(e.what()) + "</color>").c_str(), this->_defaultFont16, {600, 74});
 				this->_lastError = e.what();
