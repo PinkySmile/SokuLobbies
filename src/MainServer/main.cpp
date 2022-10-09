@@ -13,6 +13,7 @@
 
 std::mutex mutex;
 std::list<struct Entry> entries;
+in_addr myIp;
 
 struct Entry {
 	Socket s;
@@ -42,6 +43,8 @@ struct Entry {
 						auto remote = entry.s.getRemote();
                                                 auto ip = reinterpret_cast<char *>(&remote.sin_addr);
 
+						if (ip[0] == 127 && ip[1] == 0 && ip[2] == 0 && ip[3] == 1)
+							ip = reinterpret_cast<char *>(&myIp);
 						packet[0] = entry.port & 0xFF;
 						packet[1] = entry.port >> 8;
 						packet[2] = ip[0];
@@ -80,8 +83,31 @@ struct Entry {
 	}
 };
 
+void getIp()
+{
+	puts("Fetching public IP");
+
+	Socket sock;
+	Socket::HttpRequest request{
+		/*.httpVer*/ "HTTP/1.1",
+		/*.body   */ "",
+		/*.method */ "GET",
+		/*.host   */ "www.sfml-dev.org",
+		/*.portno */ 80,
+		/*.header */ {},
+		/*.path   */ "/ip-provider.php",
+	};
+	auto response = sock.makeHttpRequest(request);
+
+	if (inet_aton(response.body.c_str(), &myIp) == -1)
+		throw std::runtime_error(response.body);
+	printf("My ip is %s\n", inet_ntoa(myIp));
+}
+
 int main(int argc, char **argv)
 {
+	getIp();
+
 	unsigned short port = 5254;
 	Socket sock;
 	std::thread thread{[]{
