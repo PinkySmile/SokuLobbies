@@ -9,6 +9,7 @@
 #include <winsock.h>
 #else
 #include <sys/socket.h>
+#include <netinet/in.h>
 #define INVALID_SOCKET -1
 typedef int SOCKET;
 #endif

@@ -7,6 +7,8 @@
 #include <list>
 #include <iostream>
 #include <algorithm>
+#include <cstring>
+#include <arpa/inet.h>
 #include "Socket.hpp"
 
 std::mutex mutex;
@@ -38,13 +40,14 @@ struct Entry {
 				for (auto &entry : entries) {
 					if (entry.port) {
 						auto remote = entry.s.getRemote();
+                                                auto ip = reinterpret_cast<char *>(&remote.sin_addr);
 
 						packet[0] = entry.port & 0xFF;
 						packet[1] = entry.port >> 8;
-						packet[2] = remote.sin_addr.S_un.S_un_b.s_b1;
-						packet[3] = remote.sin_addr.S_un.S_un_b.s_b2;
-						packet[4] = remote.sin_addr.S_un.S_un_b.s_b3;
-						packet[5] = remote.sin_addr.S_un.S_un_b.s_b4;
+						packet[2] = ip[0];
+						packet[3] = ip[1];
+						packet[4] = ip[2];
+						packet[5] = ip[3];
 						this->s.send(&packet, sizeof(packet));
 					}
 				}

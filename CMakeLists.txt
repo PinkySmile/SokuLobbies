@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 3.22)
 project(SokuLobbies)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -17,7 +17,6 @@ else ()
 	add_compile_definitions(NDEBUG=1)
 endif ()
 
-add_subdirectory(src/SokuMod/SokuLib)
 include_directories(src/Common)
 find_package(SFML)
 
@@ -53,6 +52,7 @@ if (SFML_FOUND)
 endif()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+	add_subdirectory(src/SokuMod/SokuLib)
 	add_definitions(-DWINVER=0x0501 -D_WIN32_WINNT=0x0501)
 
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /Brepro")

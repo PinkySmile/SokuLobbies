@@ -168,7 +168,11 @@ public:
 class CryptFailedException: public NetworkException {
 public:
 	//! @param msg The error message.
+#ifdef _WIN32
 	explicit CryptFailedException(const std::string &&msg): NetworkException(msg + ": " + std::to_string(GetLastError())){};
+#else
+	explicit CryptFailedException(const std::string &&msg): NetworkException(static_cast<const std::string &&>(msg)){};
+#endif
 };
 
 class ConnectionTerminatedException: public NetworkException {

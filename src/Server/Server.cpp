@@ -9,7 +9,9 @@ extern std::mutex logMutex;
 #endif
 #include <memory>
 #include <cstring>
+#ifdef _WIN32
 #include <shlwapi.h>
+#endif
 #include "Server.hpp"
 
 Server::~Server()
@@ -65,7 +67,7 @@ void Server::run(unsigned short port, unsigned maxPlayers, const std::string &na
 		this->_listener.close();
 		this->_connectionsMutex.lock();
 		for (auto &c : this->_connections)
-			c.kick("Internal server error: " + std::string(e.what()));
+			c->kick("Internal server error: " + std::string(e.what()));
 		this->_connectionsMutex.unlock();
 	#ifndef _LOBBYNOLOG
 		logMutex.lock();
@@ -396,8 +398,16 @@ void Server::_registerToMainServer()
 		packet[0] = 0;
 		packet[1] = this->_port & 0xFF;
 		packet[2] = this->_port >> 8;
+#ifdef _WIN32
 		GetPrivateProfileString("Lobby", "Host", "pinkysmile.fr", buffer, sizeof(buffer), "./SokuLobbies.ini");
 		servPort = GetPrivateProfileInt("Lobby", "Port", 5254, "./SokuLobbies.ini");
+#else
+		// This is a dirty hack for the main server since it's running on linux
+		// and only need to talk to the main server on the loopback
+		// but it would be better to use real config files instead
+		strcpy(buffer, "localhost");
+		servPort = 5254;
+#endif
 		std::cout << "Main server is " << buffer << ":" << servPort << std::endl;
 		socket.connect(buffer, servPort);
 		while (this->_opened) {

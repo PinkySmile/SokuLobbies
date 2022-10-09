@@ -21,8 +21,8 @@
 typedef fd_set FD_SET;
 #endif
 
-std::string getLastSocketError(int err = WSAGetLastError()) {
 #ifdef _WIN32
+std::string getLastSocketError(int err = WSAGetLastError()) {
 	wchar_t *s = nullptr;
 
 	FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, err,
@@ -36,7 +36,8 @@ std::string getLastSocketError(int err = WSAGetLastError()) {
 	LocalFree(s);
 	return stream.str();
 #else
-	return strerror(errno);
+std::string getLastSocketError(int err = errno) {
+	return strerror(err);
 #endif
 }
 
@@ -201,8 +202,10 @@ std::string Socket::readUntilEOF() {
 		int bytes = recv(this->_sockfd, buffer, sizeof(buffer), 0);
 
 		if (bytes < 0) {
+#ifdef _WIN32
 			if (WSAGetLastError() == 10035)
 				return result;
+#endif
 			throw EOFException(getLastSocketError());
 		}
 		result.reserve(result.size() + bytes + 1);
@@ -254,7 +257,7 @@ const sockaddr_in &Socket::getRemote() const {
 
 Socket Socket::accept() {
 	struct sockaddr_in serv_addr = {};
-	int size = sizeof(serv_addr);
+	socklen_t size = sizeof(serv_addr);
 	SOCKET fd = ::accept(this->_sockfd, reinterpret_cast<sockaddr *>(&serv_addr), &size);
 
 	if (fd == INVALID_SOCKET)

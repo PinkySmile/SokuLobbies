@@ -1,5 +1,6 @@
 #include <iostream>
 #include <mutex>
+#include <csignal>
 #include "Server.hpp"
 
 std::mutex logMutex;
