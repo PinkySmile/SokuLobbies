@@ -128,7 +128,7 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 		if (!connection.isInit())
 			return;
 
-		Lobbies::PacketMessage msg{0, 0, connection.getName() + reason};
+		Lobbies::PacketMessage msg{0xFF00FF, 0, connection.getName() + reason};
 		Lobbies::PacketPlayerLeave leave{connection.getId()};
 
 		this->_connectionsMutex.lock();
@@ -183,8 +183,10 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 
 		Lobbies::PacketOlleh res{name, id};
 		Lobbies::PacketPlayerJoin join{id, name, packet.custom};
+		Lobbies::PacketMessage msgPacket{0xFF00FF, 0, connection.getName() + " has joined the lobby."};
 
 		connection.send(&res, sizeof(res));
+		connection.send(&msgPacket, sizeof(msgPacket));
 		this->_connectionsMutex.lock();
 		for (auto &c : this->_connections)
 			if (c->isInit()) {
@@ -193,6 +195,7 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 				Lobbies::PacketMove move{c->getId(), c->getDir()};
 
 				c->send(&join, sizeof(join));
+				c->send(&msgPacket, sizeof(msgPacket));
 				connection.send(&join2, sizeof(join2));
 				connection.send(&pos, sizeof(pos));
 				connection.send(&move, sizeof(move));
@@ -210,7 +213,16 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 		if (this->_processCommands(connection, msg))
 			return;
 
-		Lobbies::PacketMessage msgPacket{channel, id, connection.getName() + ": " + msg};
+		auto realMessage = msg;
+
+		for (size_t i = 0; i < realMessage.size(); i++) {
+			if (realMessage[i] == '<')
+				realMessage[i] = '{';
+			if (realMessage[i] == '>')
+				realMessage[i] = '}';
+		}
+
+		Lobbies::PacketMessage msgPacket{channel, id, "[" + connection.getName() + "]: " + realMessage};
 
 		this->_connectionsMutex.lock();
 		for (auto &c : this->_connections)
@@ -241,44 +253,18 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 			}
 		this->_machinesMutex.unlock();
 	};
-	connection.onGameRequest = [&connection, this, id](){
-		if (connection.getBattleStatus())
-			return;
-
-		Lobbies::PacketArcadeEngage engage{id};
-
-		this->_machinesMutex.lock();
-		auto &machine = this->_machines[connection.getActiveMachine()];
-
-		if (!machine.empty() && machine[0]->getBattleStatus() == 2) {
-			Lobbies::PacketGameStart packet{machine[0]->getRoomInfo().ip, machine[0]->getRoomInfo().port, true};
-
-			connection.send(&packet, sizeof(packet));
-		} else if (machine.size() >= 2 && machine[1]->getBattleStatus() == 2) {
-			Lobbies::PacketGameStart packet{machine[1]->getRoomInfo().ip, machine[1]->getRoomInfo().port, true};
-
-			connection.send(&packet, sizeof(packet));
-		}
-		machine.push_back(&connection);
-		if (machine.size() == 2 && !this->_startRoom(machine)) {
-			this->_machinesMutex.unlock();
-			return;
-		}
-		this->_machinesMutex.unlock();
-
-		this->_connectionsMutex.lock();
-		for (auto &c : this->_connections)
-			if (c->getId() != id && c->isInit())
-				c->send(&engage, sizeof(engage));
-		this->_connectionsMutex.unlock();
+	connection.onGameRequest = [&connection, this](){
+		this->_onPlayerJoinArcade(connection, connection.getActiveMachine());
 	};
 	connection.onArcadeLeave = [&connection, this](){
 		if (!connection.getBattleStatus())
 			return;
 		this->_machinesMutex.lock();
 
+		Lobbies::PacketMessage msgPacket{0x00FFFF, 0, "You left arcade " + std::to_string(connection.getActiveMachine()) + "."};
 		auto &machine = this->_machines[connection.getActiveMachine()];
 
+		connection.send(&msgPacket, sizeof(msgPacket));
 		// There is no need to check if the vector is of size >= 2
 		// because there is no way that the connection is not in the list if the battle status is not 0
 		if (machine[0] == &connection || machine[1] == &connection) {
@@ -376,9 +362,17 @@ bool Server::_processCommands(Connection &author, const std::string &msg)
 	if (msg.empty() || msg.front() != '/')
 		return false;
 
-	Lobbies::PacketMessage m{0, 0, "Commands are not yet implemented"};
+	auto parsed = this->_parseCommand(msg.substr(1));
+	auto it = Server::_commands.find(parsed[0]);
 
-	author.send(&m, sizeof(m));
+	if (it == Server::_commands.end()) {
+		Lobbies::PacketMessage m{0xFF0000, 0, "Unknown command \"" + parsed[0]+ "\"<br>Use /help for a list of command"};
+
+		author.send(&m, sizeof(m));
+		return true;
+	}
+	parsed.erase(parsed.begin());
+	(this->*it->second.callback)(author, parsed);
 	return true;
 }
 
@@ -422,4 +416,279 @@ void Server::_registerToMainServer()
 void Server::close()
 {
 	this->_opened = false;
+}
+
+void Server::_onPlayerJoinArcade(Connection &connection, unsigned int aid)
+{
+	if (connection.getBattleStatus())
+		return;
+
+	Lobbies::PacketMessage msgPacket{0x00FFFF, 0, "You joined arcade " + std::to_string(aid) + "."};
+	Lobbies::PacketArcadeEngage engage{connection.getId()};
+
+	connection.setActiveMachine(aid);
+	this->_machinesMutex.lock();
+	auto &machine = this->_machines[aid];
+
+	connection.send(&msgPacket, sizeof(msgPacket));
+	if (machine.size() >= 2) {
+		if (machine[0]->getBattleStatus() == 2) {
+			Lobbies::PacketGameStart packet{machine[0]->getRoomInfo().ip, machine[0]->getRoomInfo().port, true};
+
+			connection.send(&packet, sizeof(packet));
+		} else if (machine[1]->getBattleStatus() == 2) {
+			Lobbies::PacketGameStart packet{machine[1]->getRoomInfo().ip, machine[1]->getRoomInfo().port, true};
+
+			connection.send(&packet, sizeof(packet));
+		}
+	}
+	machine.push_back(&connection);
+	if (machine.size() == 2 && !this->_startRoom(machine)) {
+		this->_machinesMutex.unlock();
+		return;
+	}
+	this->_machinesMutex.unlock();
+
+	this->_connectionsMutex.lock();
+	for (auto &c : this->_connections)
+		if (c->getId() != connection.getId() && c->isInit())
+			c->send(&engage, sizeof(engage));
+	this->_connectionsMutex.unlock();
+}
+
+std::vector<std::string> Server::_parseCommand(const std::string &msg)
+{
+	std::string token;
+	std::vector<std::string> result;
+	bool q = false;
+	bool sq = false;
+	bool esc = false;
+
+	for (auto c : msg) {
+		if (esc) {
+			token += c;
+			esc = false;
+		} else if (c == '\\')
+			esc = true;
+		else if (c == '"' && !sq)
+			q = !q;
+		else if (c == '\'' && !q)
+			sq = !sq;
+		else if (!isspace(c) || q || sq)
+			token += c;
+		else {
+			result.push_back(token);
+			token.clear();
+		}
+	}
+	result.push_back(token);
+	return result;
+}
+
+Connection *Server::_findPlayer(uint32_t id)
+{
+	this->_connectionsMutex.lock();
+	for (auto &c : this->_connections)
+		if (c->getId() == id) {
+			this->_connectionsMutex.unlock();
+			if (c->isInit())
+				return &*c;
+			return nullptr;
+		}
+	this->_connectionsMutex.unlock();
+	return nullptr;
+}
+
+Connection *Server::_findPlayer(const std::string &name)
+{
+	this->_connectionsMutex.lock();
+	for (auto &c : this->_connections)
+		if (c->getName() == name) {
+			this->_connectionsMutex.unlock();
+			if (c->isInit())
+				return &*c;
+			return nullptr;
+		}
+	this->_connectionsMutex.unlock();
+	return nullptr;
+}
+
+const std::map<std::string, Server::Cmd> Server::_commands{
+	{"help",    {"[command]", "Displays list of commands.<br>Example:<br>/help<br>/help help", &Server::_helpCmd}},
+	{"join",    {"(player_id)|@(player_name)", "Join an arcade machine. The id must be in the range 0 to 4294967295<br>Example:<br>/join 1<br>/join @PinkySmile", &Server::_joinCmd}},
+	{"list",    {"", "Displays the list of connected players.", &Server::_listCmd}},
+	{"locate",  {"(player_id)|@(player_name)", "Locate a player in the field.<br>Example:<br>/locate 1<br>/locate @PinkySmile", &Server::_locateCmd}},
+	{"teleport",{"(player_id)|@(player_name)", "Teleports to a player or a location<br>Example:<br>/teleport 10<br>/teleport @PinkySmile", &Server::_teleportCmd}},
+};
+
+void Server::_helpCmd(Connection &author, const std::vector<std::string> &args)
+{
+	std::string msg;
+
+	if (args.empty()) {
+		msg = "Available commands:";
+		for (auto &cmd : Server::_commands)
+			msg += "<br>/" + cmd.first;
+	} else {
+		auto it = Server::_commands.find(args[0]);
+
+		if (it == Server::_commands.end()) {
+			Lobbies::PacketMessage m{0xFF0000, 0, "Unknown command \"" + args[0] + "\""};
+
+			author.send(&m, sizeof(m));
+			return;
+		}
+		msg = "/" + it->first + " " + it->second.usage + ": " + it->second.description;
+	}
+
+	Lobbies::PacketMessage m{0xFFFF00, 0, msg};
+
+	author.send(&m, sizeof(m));
+}
+
+void Server::_joinCmd(Connection &author, const std::vector<std::string> &args)
+{
+	if (args.empty()) {
+		Lobbies::PacketMessage m{0xFF0000, 0, "Missing argument #1 for command /join. Use /help join for more information"};
+
+		author.send(&m, sizeof(m));
+		return;
+	}
+
+	if (args[0].front() == '@') {
+		auto name = args[0].substr(1);
+		auto player = this->_findPlayer(name);
+
+		if (!player) {
+			Lobbies::PacketMessage m{0xFF0000, 0, "Cannot find " + name + "."};
+
+			author.send(&m, sizeof(m));
+		} else if (!player->getBattleStatus()) {
+			Lobbies::PacketMessage m{0xFF0000, 0, name + " is not at an arcade machine."};
+
+			author.send(&m, sizeof(m));
+		} else
+			this->_onPlayerJoinArcade(author, player->getActiveMachine());
+		return;
+	}
+
+	uint64_t id;
+	try {
+		id = std::stoul(args[0]);
+		if (id > UINT32_MAX)
+			throw std::exception();
+	} catch (...) {
+		Lobbies::PacketMessage m{0xFF0000, 0, args[0] + " is not a valid number"};
+
+		author.send(&m, sizeof(m));
+		return;
+	}
+	this->_onPlayerJoinArcade(author, id);
+
+	Lobbies::PacketArcadeEngage engage{author.getId()};
+
+	author.send(&engage, sizeof(engage));
+}
+
+void Server::_listCmd(Connection &author, const std::vector<std::string> &)
+{
+	this->_connectionsMutex.lock();
+
+	std::string msg = "There are " + std::to_string(this->_connections.size()) + " players connected.";
+
+	for (auto &c : this->_connections)
+		if (c->isInit())
+			msg += "<br>" + std::to_string(c->getId()) + ": " + c->getName();
+	this->_connectionsMutex.unlock();
+
+	Lobbies::PacketMessage m{0xFFFF00, 0, msg};
+
+	author.send(&m, sizeof(m));
+}
+
+void Server::_locateCmd(Connection &author, const std::vector<std::string> &args)
+{
+	Connection *player;
+
+	if (args[0].front() == '@') {
+		auto name = args[0].substr(1);
+
+		player = this->_findPlayer(name);
+		if (!player) {
+			Lobbies::PacketMessage m{0xFF0000, 0, "Cannot find " + name + "."};
+
+			author.send(&m, sizeof(m));
+			return;
+		}
+	} else {
+		uint64_t id;
+
+		try {
+			id = std::stoul(args[0]);
+			if (id > UINT32_MAX)
+				throw std::exception();
+		} catch (...) {
+			Lobbies::PacketMessage m{0xFF0000, 0, args[0] + " is not a valid number"};
+
+			author.send(&m, sizeof(m));
+			return;
+		}
+		player = this->_findPlayer(id);
+		if (!player) {
+			Lobbies::PacketMessage m{0xFF0000, 0, "Cannot find player #" + std::to_string(id) + "."};
+
+			author.send(&m, sizeof(m));
+			return;
+		}
+	}
+
+	Lobbies::PacketMessage m{0xFFFF00, 0, player->getName() + " is at x:" + std::to_string(player->getPos().x) + " y:" + std::to_string(player->getPos().y) + "."};
+
+	author.send(&m, sizeof(m));
+}
+
+void Server::_teleportCmd(Connection &author, const std::vector<std::string> &args)
+{
+	Connection *player;
+
+	if (args[0].front() == '@') {
+		auto name = args[0].substr(1);
+
+		player = this->_findPlayer(name);
+		if (!player) {
+			Lobbies::PacketMessage m{0xFF0000, 0, "Cannot find " + name + "."};
+
+			author.send(&m, sizeof(m));
+			return;
+		}
+	} else {
+		uint64_t id;
+
+		try {
+			id = std::stoul(args[0]);
+			if (id > UINT32_MAX)
+				throw std::exception();
+		} catch (...) {
+			Lobbies::PacketMessage m{0xFF0000, 0, args[0] + " is not a valid number"};
+
+			author.send(&m, sizeof(m));
+			return;
+		}
+		player = this->_findPlayer(id);
+		if (!player) {
+			Lobbies::PacketMessage m{0xFF0000, 0, "Cannot find player #" + std::to_string(id) + "."};
+
+			author.send(&m, sizeof(m));
+			return;
+		}
+	}
+
+	Lobbies::PacketPosition pos{author.getId(), player->getPos().x, player->getPos().y};
+	Lobbies::PacketMessage m{0xFFFF00, 0, "Teleporting to " + player->getName() + " at x:" + std::to_string(player->getPos().x) + " y:" + std::to_string(player->getPos().y) + "."};
+
+	author.send(&m, sizeof(m));
+	author.send(&pos, sizeof(pos));
+	author.send(&pos, sizeof(pos));
+	author.send(&pos, sizeof(pos));
+	author.send(&pos, sizeof(pos));
 }

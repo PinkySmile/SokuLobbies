@@ -15,7 +15,7 @@ std::mutex logMutex;
 
 void Connection::_netLoop()
 {
-	char buffer[sizeof(Lobbies::Packet)];
+	char buffer[65536];
 	size_t recvSize;
 
 	while (true) {
@@ -184,7 +184,8 @@ void Connection::_handlePacket(const Lobbies::PacketOlleh &packet, size_t &size)
 	this->meMutex.unlock();
 	this->_init = true;
 	this->_posThread = std::thread(&Connection::_posLoop, this);
-	this->onConnect(packet);
+	if (this->onConnect)
+		this->onConnect(packet);
 }
 
 void Connection::_handlePacket(const Lobbies::PacketPlayerJoin &packet, size_t &size)
@@ -203,7 +204,8 @@ void Connection::_handlePacket(const Lobbies::PacketPlayerJoin &packet, size_t &
 	this->_playerMutex.lock();
 	this->_players[packet.id] = player;
 	this->_playerMutex.unlock();
-	this->onPlayerJoin(player);
+	if (this->onPlayerJoin)
+		this->onPlayerJoin(player);
 }
 
 void Connection::_handlePacket(const Lobbies::PacketPlayerLeave &packet, size_t &size)
@@ -225,7 +227,8 @@ void Connection::_handlePacket(const Lobbies::PacketKicked &packet, size_t &size
 	if (size < sizeof(packet))
 		return this->error("Protocol error: Invalid packet size for opcode OPCODE_KICKED expected " + std::to_string(sizeof(packet)) + " but got " + std::to_string(size));
 	size -= sizeof(packet);
-	this->onImpMsg("Kicked: " + std::string(packet.message, strnlen(packet.message, sizeof(packet.message))));
+	if (this->onImpMsg)
+		this->onImpMsg("Kicked: " + std::string(packet.message, strnlen(packet.message, sizeof(packet.message))));
 	this->_init = false;
 	this->_connected = false;
 	this->_socket.disconnect();
@@ -339,7 +342,7 @@ void Connection::_handlePacket(const Lobbies::PacketMessage &packet, size_t &siz
 		return this->error("Protocol error: Invalid packet size for opcode OPCODE_MESSAGE expected " + std::to_string(sizeof(packet)) + " but got " + std::to_string(size));
 	size -= sizeof(packet);
 	if (this->onMsg)
-		this->onMsg(packet.channelId, std::string(packet.message, strnlen(packet.message, sizeof(packet.message))));
+		this->onMsg(packet.channelId, packet.playerId, std::string(packet.message, strnlen(packet.message, sizeof(packet.message))));
 }
 
 void Connection::_handlePacket(const Lobbies::PacketImportantMessage &packet, size_t &size)
@@ -349,7 +352,8 @@ void Connection::_handlePacket(const Lobbies::PacketImportantMessage &packet, si
 	if (size < sizeof(packet))
 		return this->error("Protocol error: Invalid packet size for opcode OPCODE_IMPORTANT_MESSAGE expected " + std::to_string(sizeof(packet)) + " but got " + std::to_string(size));
 	size -= sizeof(packet);
-	this->onImpMsg(std::string(packet.message, strnlen(packet.message, sizeof(packet.message))));
+	if (this->onImpMsg)
+		this->onImpMsg(std::string(packet.message, strnlen(packet.message, sizeof(packet.message))));
 }
 
 void Connection::connect()

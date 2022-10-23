@@ -51,7 +51,9 @@ struct Entry {
 						packet[3] = ip[1];
 						packet[4] = ip[2];
 						packet[5] = ip[3];
-						this->s.send(&packet, sizeof(packet));
+						try {
+							this->s.send(&packet, sizeof(packet));
+						} catch (...) {}
 					}
 				}
 				mutex.unlock();

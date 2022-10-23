@@ -47,5 +47,19 @@
         "animations": 4,
         "scale": 2,
         "anim_step": 8
+    },
+    {
+        "spritesheet": "assets/avatars/221011 Sanae-Sheet Indexed.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8
+    },
+    {
+        "spritesheet": "assets/avatars/221011 Marisa-Sheet Indexed.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8
     }
 ]

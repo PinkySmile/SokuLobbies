@@ -13,15 +13,16 @@ extern std::mutex logMutex;
 
 void Connection::_netLoop()
 {
-	char buffer[sizeof(Lobbies::Packet)];
-	size_t recvSize;
+	char buffer[sizeof(Lobbies::Packet) * 6];
+	size_t recvSize = 0;
+	size_t recvSize2;
 
 	this->_timeoutClock.restart();
 	this->_socket->setBlocking(false);
 	do {
-		auto status = this->_socket->receive(buffer, sizeof(buffer), recvSize);
+		auto status = this->_socket->receive(buffer + recvSize, sizeof(buffer) - recvSize, recvSize);
 
-		if (status == sf::Socket::NotReady) {
+		if (status == sf::Socket::NotReady && !recvSize) {
 			if (this->_timeoutClock.getElapsedTime().asSeconds() >= 5)
 				return this->kick("Timed out");
 			std::this_thread::sleep_for(std::chrono::milliseconds(5));
@@ -168,6 +169,12 @@ void Connection::setPlaying()
 uint8_t Connection::getActiveMachine() const
 {
 	return this->_machineId;
+}
+
+void Connection::setActiveMachine(uint8_t id)
+{
+	this->_machineId = id;
+	this->_battleStatus = 1;
 }
 
 const Connection::Room &Connection::getRoomInfo() const

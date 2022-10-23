@@ -67,7 +67,7 @@ public:
 	std::function<void (const std::string &ip, unsigned short port, bool spectate)> onConnectRequest;
 	std::function<void (const std::string &msg)> onError;
 	std::function<void (const std::string &msg)> onImpMsg;
-	std::function<void (int32_t channel, const std::string &msg)> onMsg;
+	std::function<void (int32_t channel, int32_t player, const std::string &msg)> onMsg;
 	std::function<void (const Lobbies::PacketOlleh &)> onConnect;
 	std::function<void (const Player &)> onPlayerJoin;
 	std::function<unsigned short ()> onHostRequest;

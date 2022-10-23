@@ -88,6 +88,7 @@ public:
 	uint8_t getBattleStatus() const;
 	void setPlaying();
 	void setNotPlaying();
+	void setActiveMachine(uint8_t id);
 	uint8_t getActiveMachine() const;
 	const Room &getRoomInfo() const;
 	Lobbies::LobbySettings getSettings() const;

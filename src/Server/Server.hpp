@@ -35,6 +35,24 @@ private:
 	void _prepareConnectionHandlers(Connection &connection);
 	bool _startRoom(const std::vector<Connection *> &machine);
 	void _registerToMainServer();
+	std::vector<std::string> _parseCommand(const std::string &msg);
+	void _onPlayerJoinArcade(Connection &connection, unsigned id);
+
+	struct Cmd {
+		std::string usage;
+		std::string description;
+		void (Server::*callback)(Connection &author, const std::vector<std::string> &args);
+	};
+
+	static const std::map<std::string, Cmd> _commands;
+
+	Connection *_findPlayer(uint32_t id);
+	Connection *_findPlayer(const std::string &name);
+	void _helpCmd(Connection &author, const std::vector<std::string> &args);
+	void _joinCmd(Connection &author, const std::vector<std::string> &args);
+	void _listCmd(Connection &author, const std::vector<std::string> &args);
+	void _locateCmd(Connection &author, const std::vector<std::string> &args);
+	void _teleportCmd(Connection &author, const std::vector<std::string> &args);
 
 public:
 	~Server();
