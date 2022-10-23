@@ -213,7 +213,7 @@ namespace Lobbies
 	public:
 		int32_t channelId;
 		uint32_t playerId;
-		char message[2040];
+		char message[1240];
 
 		PacketMessage(int32_t channelId, uint32_t playerId, const std::string &message);
 		std::string toString() const;
