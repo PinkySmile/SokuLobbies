@@ -78,7 +78,13 @@ public:
 
 	void onKeyPressed(int chr);
 	void onKeyReleased();
+
+	void updateChat();
+	void renderChat();
+	bool isInputing();
 };
+
+extern InLobbyMenu *activeMenu;
 
 
 #endif //SOKULOBBIES_INLOBBYMENU_HPP

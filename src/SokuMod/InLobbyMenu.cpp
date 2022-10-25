@@ -14,8 +14,8 @@
 
 extern wchar_t profileFolderPath[MAX_PATH];
 
+InLobbyMenu *activeMenu = nullptr;
 static WNDPROC Original_WndProc = nullptr;
-static InLobbyMenu *activeMenu = nullptr;
 static std::mutex ptrMutex;
 
 LRESULT __stdcall Hooked_WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -219,47 +219,7 @@ int InLobbyMenu::onProcess()
 	auto inputs = SokuLib::inputMgrs.input;
 	auto me = this->connection.getMe();
 
-	this->_inputBoxUpdate();
-	if (this->_editingText)
-		this->_chatTimer = 300;
-	if (this->_chatTimer) {
-		this->_chatTimer--;
-
-		unsigned char alpha = this->_chatTimer > 120 ? 255 : (this->_chatTimer * 255 / 120);
-
-		this->_chatSeat.tint.a = alpha;
-
-		auto remaining = this->_chatOffset;
-		SokuLib::Vector2i pos{292, 180};
-
-		for (auto &msg : this->_chatMessages) {
-			if (remaining > msg.realSize.y) {
-				msg.sprite.rect.height = 0;
-				remaining -= msg.realSize.y;
-				continue;
-			}
-			if (pos.y <= 3) {
-				msg.sprite.rect.width = 0;
-				break;
-			}
-			msg.sprite.tint.a = alpha;
-			msg.sprite.rect.top = 0;
-			msg.sprite.rect.width = msg.realSize.x;
-			msg.sprite.rect.height = msg.realSize.y - remaining;
-			remaining = 0;
-			pos.y -= msg.sprite.rect.height;
-			if (pos.y < 3) {
-				msg.sprite.rect.height -= 3 - pos.y;
-				msg.sprite.rect.top = 3 - pos.y;
-				pos.y = 3;
-			}
-			msg.sprite.setSize({
-				static_cast<unsigned int>(msg.sprite.rect.width),
-				static_cast<unsigned int>(msg.sprite.rect.height)
-			});
-			msg.sprite.setPosition(pos);
-		}
-	}
+	this->updateChat();
 	memset(&SokuLib::inputMgrs.input, 0, sizeof(SokuLib::inputMgrs.input));
 	(this->parent->*SokuLib::VTable_ConnectMenu.onProcess)();
 	SokuLib::inputMgrs.input = inputs;
@@ -436,20 +396,7 @@ int InLobbyMenu::onRender()
 			this->_inBattle.draw();
 		}
 	}
-	if (this->_chatSeat.tint.a) {
-		this->_chatSeat.draw();
-		for (auto &msg: this->_chatMessages) {
-			if (!msg.sprite.rect.height)
-				continue;
-			if (!msg.sprite.rect.width)
-				break;
-			msg.sprite.draw();
-		}
-	}
-	if (this->_editingText) {
-		this->_textSprite.draw();
-		this->_textCursor.draw();
-	}
+	this->renderChat();
 	return 0;
 }
 
@@ -656,4 +603,72 @@ void InLobbyMenu::_sendMessage(const std::string &msg)
 		SokuLib::playSEWaveBuffer(0x28);
 	} else
 		SokuLib::playSEWaveBuffer(0x29);
+}
+
+void InLobbyMenu::updateChat()
+{
+	this->_inputBoxUpdate();
+	if (this->_editingText)
+		this->_chatTimer = 300;
+	if (this->_chatTimer) {
+		this->_chatTimer--;
+
+		unsigned char alpha = this->_chatTimer > 120 ? 255 : (this->_chatTimer * 255 / 120);
+
+		this->_chatSeat.tint.a = alpha;
+
+		auto remaining = this->_chatOffset;
+		SokuLib::Vector2i pos{292, 180};
+
+		for (auto &msg : this->_chatMessages) {
+			if (remaining > msg.realSize.y) {
+				msg.sprite.rect.height = 0;
+				remaining -= msg.realSize.y;
+				continue;
+			}
+			if (pos.y <= 3) {
+				msg.sprite.rect.width = 0;
+				break;
+			}
+			msg.sprite.tint.a = alpha;
+			msg.sprite.rect.top = 0;
+			msg.sprite.rect.width = msg.realSize.x;
+			msg.sprite.rect.height = msg.realSize.y - remaining;
+			remaining = 0;
+			pos.y -= msg.sprite.rect.height;
+			if (pos.y < 3) {
+				msg.sprite.rect.height -= 3 - pos.y;
+				msg.sprite.rect.top = 3 - pos.y;
+				pos.y = 3;
+			}
+			msg.sprite.setSize({
+				static_cast<unsigned int>(msg.sprite.rect.width),
+				static_cast<unsigned int>(msg.sprite.rect.height)
+			});
+			msg.sprite.setPosition(pos);
+		}
+	}
+}
+
+void InLobbyMenu::renderChat()
+{
+	if (this->_chatSeat.tint.a) {
+		this->_chatSeat.draw();
+		for (auto &msg: this->_chatMessages) {
+			if (!msg.sprite.rect.height)
+				continue;
+			if (!msg.sprite.rect.width)
+				break;
+			msg.sprite.draw();
+		}
+	}
+	if (this->_editingText) {
+		this->_textSprite.draw();
+		this->_textCursor.draw();
+	}
+}
+
+bool InLobbyMenu::isInputing()
+{
+	return this->_editingText;
 }
