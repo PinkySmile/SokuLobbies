@@ -129,12 +129,11 @@ int main(int argc, char **argv)
 	Socket sock;
 	std::thread thread{[]{
 		while (true) {
-			time_t current = time(nullptr);
 			GuardedMutex m{mutex};
 
 			m.lock();
 			for (auto &entry : entries) {
-				if (current - entry.last > 30) {
+				if (time(nullptr) - entry.last > 30) {
 					entry.connected = false;
 					entry.s.disconnect();
 				}
