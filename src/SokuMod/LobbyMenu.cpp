@@ -10,6 +10,8 @@
 #include "LobbyMenu.hpp"
 #include "InLobbyMenu.hpp"
 #include "Exceptions.hpp"
+#include "InputBox.hpp"
+#include "GuardedMutex.hpp"
 
 #define CRenderer_Unknown1 ((void (__thiscall *)(int, int))0x404AF0)
 
@@ -41,6 +43,7 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 	std::ifstream ips{std::filesystem::path(profileFolderPath) / "ip.txt"};
 	std::string ip;
 
+	inputBoxLoadAssets();
 	std::getline(ips, ip);
 	if (ip.empty())
 		ip = "localhost";
@@ -182,6 +185,7 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 
 LobbyMenu::~LobbyMenu()
 {
+	inputBoxUnloadAssets();
 	this->_open = false;
 	if (this->_netThread.joinable())
 		this->_netThread.join();
@@ -215,6 +219,9 @@ void LobbyMenu::_()
 
 int LobbyMenu::onProcess()
 {
+	inputBoxUpdate();
+	if (inputBoxShown)
+		return true;
 	if (SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
 		SokuLib::playSEWaveBuffer(0x29);
 		this->_open = false;
@@ -238,6 +245,25 @@ int LobbyMenu::onProcess()
 				this->_menuCursor++;
 			this->_menuCursor %= 8;
 			SokuLib::playSEWaveBuffer(0x27);
+		}
+		if (SokuLib::inputMgrs.input.changeCard == 1) {
+			setInputBoxCallbacks([this](const std::string &value){
+				GuardedMutex m{this->_connectionsMutex};
+
+				try {
+					auto colon = value.find_last_of(':');
+					auto ip = value.substr(0, colon);
+					unsigned short port = colon == std::string::npos ? 10800 : std::stoul(value.substr(colon + 1));
+
+					m.lock();
+					this->_connections.emplace_back(new Entry{std::shared_ptr<Connection>(), ip, port});
+					SokuLib::playSEWaveBuffer(0x28);
+				} catch (std::exception &e) {
+					puts(e.what());
+					SokuLib::playSEWaveBuffer(0x29);
+				}
+			});
+			openInputDialog("Enter lobby ip", "localhost:10800");
 		}
 		if (SokuLib::inputMgrs.input.a == 1) {
 			SokuLib::playSEWaveBuffer(0x28);
@@ -318,6 +344,7 @@ int LobbyMenu::onRender()
 		this->_connections[i]->playerCount.draw();
 	}
 	this->_connectionsMutex.unlock();
+	inputBoxRender();
 	return 0;
 }
 

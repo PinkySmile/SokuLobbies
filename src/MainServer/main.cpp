@@ -10,22 +10,11 @@
 #include <cstring>
 #include <arpa/inet.h>
 #include "Socket.hpp"
+#include "GuardedMutex.hpp"
 
 std::mutex mutex;
 std::list<struct Entry> entries;
 in_addr myIp;
-
-class GuardedMutex {
-private:
-	std::mutex &_mutex;
-	bool _locked = false;
-
-public:
-	GuardedMutex(std::mutex &m) : _mutex(m) {}
-	~GuardedMutex() { this->unlock(); }
-	void lock() { if (!this->_locked) this->_mutex.lock(); this->_locked = true; }
-	void unlock() { if (!this->_locked) return; this->_mutex.unlock(); this->_locked = false; }
-};
 
 struct Entry {
 	Socket s;

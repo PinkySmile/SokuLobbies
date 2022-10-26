@@ -18,7 +18,7 @@ InLobbyMenu *activeMenu = nullptr;
 static WNDPROC Original_WndProc = nullptr;
 static std::mutex ptrMutex;
 
-LRESULT __stdcall Hooked_WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+static LRESULT __stdcall Hooked_WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	ptrMutex.lock();
 	if (uMsg == WM_KEYDOWN && activeMenu) {
