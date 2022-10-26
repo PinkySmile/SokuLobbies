@@ -15,6 +15,18 @@ std::mutex mutex;
 std::list<struct Entry> entries;
 in_addr myIp;
 
+class GuardedMutex {
+private:
+	std::mutex &_mutex;
+	bool _locked = false;
+
+public:
+	GuardedMutex(std::mutex &m) : _mutex(m) {}
+	~GuardedMutex() { this->unlock(); }
+	void lock() { if (!this->_locked) this->_mutex.lock(); this->_locked = true; }
+	void unlock() { if (!this->_locked) return; this->_mutex.unlock(); this->_locked = false; }
+};
+
 struct Entry {
 	Socket s;
 	std::thread _netThread = std::thread([this]{
@@ -37,7 +49,10 @@ struct Entry {
 				}
 
 				std::cout << "Send list" << std::endl;
-				mutex.lock();
+
+				GuardedMutex m(mutex);
+
+				m.lock();
 				for (auto &entry : entries) {
 					if (entry.port) {
 						auto remote = entry.s.getRemote();
@@ -56,7 +71,7 @@ struct Entry {
 						} catch (...) {}
 					}
 				}
-				mutex.unlock();
+				m.unlock();
 				memset(packet, 0, sizeof(packet));
 				this->s.send(&packet, sizeof(packet));
 			}
@@ -115,8 +130,9 @@ int main(int argc, char **argv)
 	std::thread thread{[]{
 		while (true) {
 			time_t current = time(nullptr);
+			GuardedMutex m{mutex};
 
-			mutex.lock();
+			m.lock();
 			for (auto &entry : entries) {
 				if (current - entry.last > 30) {
 					entry.connected = false;
@@ -124,7 +140,7 @@ int main(int argc, char **argv)
 				}
 			}
 			entries.remove_if([](const Entry &e) { return !e.connected; });
-			mutex.unlock();
+			m.unlock();
 			std::this_thread::sleep_for(std::chrono::seconds(10));
 		}
 	}};
@@ -134,9 +150,10 @@ int main(int argc, char **argv)
 	sock.bind(port);
 	while (true) {
 		auto s = sock.accept();
+		GuardedMutex m(mutex);
 
-		mutex.lock();
+		m.lock();
 		entries.emplace_back(s);
-		mutex.unlock();
+		m.unlock();
 	}
 }
