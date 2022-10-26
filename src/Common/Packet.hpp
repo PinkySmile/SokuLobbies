@@ -9,10 +9,11 @@
 #include <cstdint>
 #include <string>
 
-#define MOD_VERSION 5
+#define MOD_VERSION 6
 
 namespace Lobbies
 {
+#pragma pack(push, 1)
 	enum Opcode : uint8_t {
 		OPCODE_HELLO,
 		OPCODE_OLLEH,
@@ -274,6 +275,7 @@ namespace Lobbies
 		Packet();
 		std::string toString() const;
 	};
+#pragma pack(pop)
 }
 
 
