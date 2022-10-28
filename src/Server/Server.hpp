@@ -15,6 +15,8 @@ struct BanEntry {
 	char uniqueId[16];
 	char profileName[33];
 	char ip[22];
+	char reason[64];
+	unsigned fdpScore = 0;
 };
 
 class Server {
@@ -29,6 +31,7 @@ private:
 	std::vector<BanEntry> _banList;
 	std::thread _mainServerThread;
 	std::map<uint8_t, std::vector<Connection *>> _machines;
+	std::vector<std::string> _bannedWords;
 
 	bool _processCommands(Connection &author, const std::string &msg);
 	std::string _sanitizeName(const std::string &name, const Connection *con);
@@ -55,6 +58,7 @@ private:
 	void _teleportCmd(Connection &author, const std::vector<std::string> &args);
 
 public:
+	Server();
 	~Server();
 	void run(unsigned short port, unsigned maxPlayers, const std::string &name);
 	void close();

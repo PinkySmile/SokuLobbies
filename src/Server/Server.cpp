@@ -9,10 +9,23 @@ extern std::mutex logMutex;
 #endif
 #include <memory>
 #include <cstring>
+#include <fstream>
 #ifdef _WIN32
 #include <shlwapi.h>
 #endif
 #include "Server.hpp"
+
+Server::Server()
+{
+	std::ifstream stream{"slurs.txt"};
+	std::string line;
+
+	if (!stream)
+		return;
+
+	while (std::getline(stream, line))
+		this->_bannedWords.push_back(line);
+}
 
 Server::~Server()
 {
@@ -223,6 +236,20 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 		}
 
 		Lobbies::PacketMessage msgPacket{channel, id, "[" + connection.getName() + "]: " + realMessage};
+
+		for (auto &word : this->_bannedWords) {
+			auto pos = msg.find(word);
+
+			if (pos == std::string::npos)
+				continue;
+			if (pos != 0 && isalpha(msg[pos - 1]))
+				continue;
+			if (pos != msg.size() - word.size() && isalpha(msg[pos + word.size()]))
+				continue;
+			printf("Message from %s has been shadow banned (%s)\n", connection.getName().c_str(), realMessage.c_str());
+			connection.send(&msgPacket, sizeof(msgPacket));
+			return;
+		}
 
 		this->_connectionsMutex.lock();
 		for (auto &c : this->_connections)
