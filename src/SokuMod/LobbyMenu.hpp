@@ -53,6 +53,12 @@ private:
 	void _masterServerLoop();
 	void _connectLoop();
 
+	static bool (LobbyMenu::* const _updateCallbacks[])();
+
+	bool _normalMenuUpdate();
+	bool _joinLobbyUpdate();
+	bool _customizeAvatarUpdate();
+
 public:
 	struct Avatar {
 		SokuLib::DrawUtils::Sprite sprite;

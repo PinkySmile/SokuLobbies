@@ -15,6 +15,17 @@
 
 #define CRenderer_Unknown1 ((void (__thiscall *)(int, int))0x404AF0)
 
+enum MenuItems {
+	MENUITEM_CREATE_LOBBY,
+	MENUITEM_JOIN_LOBBY,
+	MENUITEM_CUSTOMIZE_LOBBY,
+	MENUITEM_CUSTOMIZE_AVATAR,
+	MENUITEM_ACHIVEMENTS,
+	MENUITEM_OPTIONS,
+	MENUITEM_STATISTICS,
+	MENUITEM_EXIT,
+};
+
 extern wchar_t profileFolderPath[MAX_PATH];
 extern char servHost[64];
 extern unsigned short servPort;
@@ -217,6 +228,12 @@ void LobbyMenu::_()
 	*(int *)0x882a94 = 0x16;
 }
 
+bool (LobbyMenu::* const LobbyMenu::_updateCallbacks[])() = {
+	&LobbyMenu::_normalMenuUpdate,
+	&LobbyMenu::_joinLobbyUpdate,
+	&LobbyMenu::_customizeAvatarUpdate
+};
+
 int LobbyMenu::onProcess()
 {
 	inputBoxUpdate();
@@ -231,85 +248,98 @@ int LobbyMenu::onProcess()
 		this->_loadingGear.setRotation(this->_loadingGear.getRotation() + 0.1);
 		return true;
 	}
-	if (this->_menuState == 0) {
-		if (SokuLib::inputMgrs.input.b == 1) {
-			SokuLib::playSEWaveBuffer(0x29);
-			this->_open = false;
-			return false;
-		}
-		if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.verticalAxis) > 36 && std::abs(SokuLib::inputMgrs.input.verticalAxis) % 6 == 0)) {
-			if (SokuLib::inputMgrs.input.verticalAxis < 0) {
-				this->_menuCursor += 8;
-				this->_menuCursor--;
-			} else
-				this->_menuCursor++;
-			this->_menuCursor %= 8;
-			SokuLib::playSEWaveBuffer(0x27);
-		}
-		if (SokuLib::inputMgrs.input.changeCard == 1) {
-			setInputBoxCallbacks([this](const std::string &value){
-				GuardedMutex m{this->_connectionsMutex};
+	return (this->*_updateCallbacks[this->_menuState])();
+}
 
-				try {
-					auto colon = value.find_last_of(':');
-					auto ip = value.substr(0, colon);
-					unsigned short port = colon == std::string::npos ? 10800 : std::stoul(value.substr(colon + 1));
+bool LobbyMenu::_normalMenuUpdate()
+{
+	if (SokuLib::inputMgrs.input.b == 1) {
+		SokuLib::playSEWaveBuffer(0x29);
+		this->_open = false;
+		return false;
+	}
+	if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.verticalAxis) > 36 && std::abs(SokuLib::inputMgrs.input.verticalAxis) % 6 == 0)) {
+		if (SokuLib::inputMgrs.input.verticalAxis < 0) {
+			this->_menuCursor += 8;
+			this->_menuCursor--;
+		} else
+			this->_menuCursor++;
+		this->_menuCursor %= 8;
+		SokuLib::playSEWaveBuffer(0x27);
+	}
+	if (SokuLib::inputMgrs.input.changeCard == 1) {
+		setInputBoxCallbacks([this](const std::string &value){
+			GuardedMutex m{this->_connectionsMutex};
 
-					m.lock();
-					this->_connections.emplace_back(new Entry{std::shared_ptr<Connection>(), ip, port});
-					SokuLib::playSEWaveBuffer(0x28);
-				} catch (std::exception &e) {
-					puts(e.what());
-					SokuLib::playSEWaveBuffer(0x29);
-				}
-			});
-			openInputDialog("Enter lobby ip", "localhost:10800");
-		}
-		if (SokuLib::inputMgrs.input.a == 1) {
-			SokuLib::playSEWaveBuffer(0x28);
-			switch (this->_menuCursor) {
-			case 1:
+			try {
+				auto colon = value.find_last_of(':');
+				auto ip = value.substr(0, colon);
+				unsigned short port = colon == std::string::npos ? 10800 : std::stoul(value.substr(colon + 1));
+
+				m.lock();
+				this->_connections.emplace_back(new Entry{std::shared_ptr<Connection>(), ip, port});
+				SokuLib::playSEWaveBuffer(0x28);
+			} catch (std::exception &e) {
+				puts(e.what());
+				SokuLib::playSEWaveBuffer(0x29);
+			}
+		});
+		openInputDialog("Enter lobby ip", "localhost:10800");
+	}
+	if (SokuLib::inputMgrs.input.a == 1) {
+		SokuLib::playSEWaveBuffer(0x28);
+		switch (this->_menuCursor) {
+			case MENUITEM_JOIN_LOBBY:
 				this->_menuState = 1;
 				break;
-			case 0:
-			case 2:
-			case 3:
-			case 4:
-			case 5:
-			case 6:
+			case MENUITEM_CUSTOMIZE_AVATAR:
+				this->_menuState = 2;
+				break;
+			case MENUITEM_CREATE_LOBBY:
+			case MENUITEM_CUSTOMIZE_LOBBY:
+			case MENUITEM_ACHIVEMENTS:
+			case MENUITEM_OPTIONS:
+			case MENUITEM_STATISTICS:
 				MessageBox(SokuLib::window, "Not implemented", "Not implemented", MB_ICONINFORMATION);
 				break;
-			case 7:
+			case MENUITEM_EXIT:
 				return false;
-			}
 		}
-	} else if (this->_menuState == 1) {
-		if (SokuLib::inputMgrs.input.b == 1) {
-			SokuLib::playSEWaveBuffer(0x29);
-			this->_menuState = 0;
-			return true;
-		}
-		this->_connectionsMutex.lock();
-		if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.verticalAxis) > 36 && std::abs(SokuLib::inputMgrs.input.verticalAxis) % 6 == 0)) {
-			if (SokuLib::inputMgrs.input.verticalAxis < 0) {
-				this->_lobbyCtr += this->_connections.size();
-				this->_lobbyCtr--;
-			} else
-				this->_lobbyCtr++;
-			if (!this->_connections.empty())
-				this->_lobbyCtr %= this->_connections.size();
-			SokuLib::playSEWaveBuffer(0x27);
-		}
-		if (SokuLib::inputMgrs.input.a == 1) {
-			if (this->_lobbyCtr < this->_connections.size() && this->_connections[this->_lobbyCtr]->c && this->_connections[this->_lobbyCtr]->c->isConnected()) {
-				SokuLib::activateMenu(new InLobbyMenu(this, this->_parent, *this->_connections[this->_lobbyCtr]->c));
-				this->_active = false;
-				SokuLib::playSEWaveBuffer(0x28);
-			} else
-				SokuLib::playSEWaveBuffer(0x29);
-		}
-		this->_connectionsMutex.unlock();
 	}
+}
+
+bool LobbyMenu::_joinLobbyUpdate()
+{
+	if (SokuLib::inputMgrs.input.b == 1) {
+		SokuLib::playSEWaveBuffer(0x29);
+		this->_menuState = 0;
+		return true;
+	}
+	this->_connectionsMutex.lock();
+	if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.verticalAxis) > 36 && std::abs(SokuLib::inputMgrs.input.verticalAxis) % 6 == 0)) {
+		if (SokuLib::inputMgrs.input.verticalAxis < 0) {
+			this->_lobbyCtr += this->_connections.size();
+			this->_lobbyCtr--;
+		} else
+			this->_lobbyCtr++;
+		if (!this->_connections.empty())
+			this->_lobbyCtr %= this->_connections.size();
+		SokuLib::playSEWaveBuffer(0x27);
+	}
+	if (SokuLib::inputMgrs.input.a == 1) {
+		if (this->_lobbyCtr < this->_connections.size() && this->_connections[this->_lobbyCtr]->c && this->_connections[this->_lobbyCtr]->c->isConnected()) {
+			SokuLib::activateMenu(new InLobbyMenu(this, this->_parent, *this->_connections[this->_lobbyCtr]->c));
+			this->_active = false;
+			SokuLib::playSEWaveBuffer(0x28);
+		} else
+			SokuLib::playSEWaveBuffer(0x29);
+	}
+	this->_connectionsMutex.unlock();
+	return true;
+}
+
+bool LobbyMenu::_customizeAvatarUpdate()
+{
 	return true;
 }
 
