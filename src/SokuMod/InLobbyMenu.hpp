@@ -51,7 +51,7 @@ private:
 	unsigned _chatOffset = 0;
 	uint8_t _background = 0;
 	std::string _music;
-	SokuLib::SWRFont _defaultFont12;
+	SokuLib::SWRFont _chatFont;
 	SokuLib::SWRFont _defaultFont16;
 	SokuLib::DrawUtils::Sprite _chatSeat;
 	SokuLib::DrawUtils::Sprite _loadingText;

@@ -10,8 +10,9 @@
 #define CURSOR_ENDX 637
 #define CURSOR_STARTX 293
 #define CURSOR_STARTY 184
-#define CURSOR_STEP 6
-#define MAX_CHAR_PER_LINE 57
+#define CURSOR_STEP 7
+#define MAX_LINE_SIZE 342
+#define SCROLL_AMOUNT 20
 
 extern wchar_t profileFolderPath[MAX_PATH];
 
@@ -67,9 +68,9 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 	desc.weight = FW_REGULAR;
 	this->_defaultFont16.create();
 	this->_defaultFont16.setIndirect(desc);
-	desc.height = 12 + hasEnglishPatch * 2;
-	this->_defaultFont12.create();
-	this->_defaultFont12.setIndirect(desc);
+	desc.height = 14 + hasEnglishPatch * 2;
+	this->_chatFont.create();
+	this->_chatFont.setIndirect(desc);
 
 	this->_inBattle.texture.loadFromFile((std::filesystem::path(profileFolderPath) / "assets/lobby/inarcade.png").string().c_str());
 	this->_inBattle.setSize({
@@ -441,7 +442,7 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 			sprintf(color, "<color %06x>", channel);
 			text = color + text + "</color>";
 		}
-		txt.sprite.texture.createFromText(text.c_str(), this->_defaultFont12, {350, 300}, &txt.realSize);
+		txt.sprite.texture.createFromText(text.c_str(), this->_chatFont, {350, 300}, &txt.realSize);
 		txt.sprite.rect.width = txt.realSize.x;
 		txt.sprite.rect.height = txt.realSize.y;
 		txt.pos.x = startPos;
@@ -466,7 +467,7 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 			emoteId |= (c & 0x7F) << ((2 - emoteCtr) * 7);
 			emoteCtr--;
 			if (!emoteCtr) {
-				if (pos + EMOTE_SIZE > MAX_CHAR_PER_LINE * CURSOR_STEP)
+				if (pos + EMOTE_SIZE > MAX_LINE_SIZE)
 					nextLine();
 				m->emotes.emplace_back();
 				m->emotes.back().id = emoteId;
@@ -517,7 +518,7 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 			word += c;
 			wordPos += CURSOR_STEP;
 		}
-		if (pos + wordPos > MAX_CHAR_PER_LINE * CURSOR_STEP) {
+		if (pos + wordPos > MAX_LINE_SIZE) {
 			if (pos == 0) {
 				line = word.substr(0, word.size() - 1);
 				word.erase(word.begin(), word.end() - 1);
@@ -575,6 +576,21 @@ void InLobbyMenu::_inputBoxUpdate()
 	}
 	if (this->_timers[VK_RETURN] == 1)
 		this->_returnPressed = true;
+	if (this->_timers[VK_PRIOR] == 1 || (this->_timers[VK_PRIOR] > 36 && this->_timers[VK_PRIOR] % 6 == 0)) {
+		SokuLib::playSEWaveBuffer(0x27);
+		this->_chatOffset += SCROLL_AMOUNT;
+		this->_chatTimer = max(this->_chatTimer, 180);
+		return;
+	}
+	if (this->_timers[VK_NEXT] == 1 || (this->_timers[VK_NEXT] > 36 && this->_timers[VK_NEXT] % 6 == 0)) {
+		if (this->_chatOffset < SCROLL_AMOUNT)
+			this->_chatOffset = 0;
+		else
+			this->_chatOffset -= SCROLL_AMOUNT;
+		this->_chatTimer = max(this->_chatTimer, 180);
+		SokuLib::playSEWaveBuffer(0x27);
+		return;
+	}
 	if (!this->_editingText) {
 		if (this->_returnPressed && this->_timers[VK_RETURN] == 0) {
 			this->_editingText = true;
@@ -583,7 +599,21 @@ void InLobbyMenu::_inputBoxUpdate()
 		}
 		return;
 	}
-
+	if (this->_timers[VK_UP] == 1 || (this->_timers[VK_UP] > 36 && this->_timers[VK_UP] % 6 == 0)) {
+		SokuLib::playSEWaveBuffer(0x27);
+		this->_chatOffset += SCROLL_AMOUNT;
+		this->_chatTimer = max(this->_chatTimer, 180);
+		return;
+	}
+	if (this->_timers[VK_DOWN] == 1 || (this->_timers[VK_DOWN] > 36 && this->_timers[VK_DOWN] % 6 == 0)) {
+		if (this->_chatOffset < SCROLL_AMOUNT)
+			this->_chatOffset = 0;
+		else
+			this->_chatOffset -= SCROLL_AMOUNT;
+		this->_chatTimer = max(this->_chatTimer, 180);
+		SokuLib::playSEWaveBuffer(0x27);
+		return;
+	}
 	if (this->_returnPressed) {
 		if (this->_timers[VK_RETURN] == 0) {
 			if (this->_buffer.size() != 1) {
@@ -593,6 +623,7 @@ void InLobbyMenu::_inputBoxUpdate()
 				SokuLib::playSEWaveBuffer(0x29);
 			this->_editingText = false;
 			this->_returnPressed = false;
+			this->_chatOffset = 0;
 		}
 		return;
 	}
@@ -622,7 +653,7 @@ void InLobbyMenu::_inputBoxUpdate()
 			this->_buffer.erase(this->_buffer.begin() + this->_textCursorPos);
 			SokuLib::playSEWaveBuffer(0x27);
 			this->_textChanged = true;
-			this->_textSprite.texture.createFromText(this->_sanitizeInput().c_str(), this->_defaultFont12, {8 * this->_buffer.size(), 1800});
+			this->_textSprite.texture.createFromText(this->_sanitizeInput().c_str(), this->_chatFont, {8 * this->_buffer.size(), 1800});
 		}
 	}
 	if (this->_timers[VK_LEFT] == 1 || (this->_timers[VK_LEFT] > 36 && this->_timers[VK_LEFT] % 3 == 0)) {
@@ -647,7 +678,7 @@ void InLobbyMenu::_inputBoxUpdate()
 		}
 	}
 	if (this->_textChanged)
-		this->_textSprite.texture.createFromText(this->_sanitizeInput().c_str(), this->_defaultFont12, {max(TEXTURE_MAX_SIZE, 8 * this->_buffer.size()), 18});
+		this->_textSprite.texture.createFromText(this->_sanitizeInput().c_str(), this->_chatFont, {max(TEXTURE_MAX_SIZE, 8 * this->_buffer.size()), 18});
 	this->_textChanged = false;
 	this->_textMutex.unlock();
 }
@@ -661,7 +692,7 @@ void InLobbyMenu::_initInputBox()
 	this->_buffer.clear();
 	this->_buffer.push_back(0);
 
-	this->_textSprite.texture.createFromText(this->_sanitizeInput().c_str(), this->_defaultFont12, {max(TEXTURE_MAX_SIZE, 8 * this->_buffer.size()), 20});
+	this->_textSprite.texture.createFromText(this->_sanitizeInput().c_str(), this->_chatFont, {max(TEXTURE_MAX_SIZE, 8 * this->_buffer.size()), 20});
 	this->_textSprite.rect.left = 0;
 
 	this->_textCursorPos = 0;
@@ -771,17 +802,24 @@ void InLobbyMenu::updateChat()
 			msg.farUp = false;
 			msg.farDown = true;
 			for (auto &text : msg.text) {
-				if (remaining <= text.realSize.y) {
-					this->_updateMessageSprite(text.pos + pos, remaining, text.realSize, text.sprite, alpha);
+				if (remaining <= text.realSize.y - text.pos.y) {
+					auto p = pos;
+
+					if (!remaining)
+						p += text.pos;
+					else
+						p.y += min(0, text.pos.y + static_cast<int>(remaining));
+					this->_updateMessageSprite(p, remaining < -text.pos.y ? 0 : remaining + text.pos.y, text.realSize, text.sprite, alpha);
 					msg.farDown = false;
-				}
+				} else
+					text.sprite.tint.a = 0;
 				maxSize = max(maxSize, text.realSize.y);
 			}
 			for (auto &emote : msg.emotes) {
 				emote.offset = pos;
 				emote.cutRemain = remaining;
 			}
-			if (remaining <= EMOTE_SIZE)
+			if (remaining <= EMOTE_SIZE && !msg.emotes.empty())
 				msg.farDown = false;
 			if (remaining > maxSize)
 				remaining -= maxSize;
