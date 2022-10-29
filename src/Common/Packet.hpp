@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <string>
 
-#define MOD_VERSION 6
+#define MOD_VERSION 7
 
 namespace Lobbies
 {

@@ -263,6 +263,8 @@ void inputBoxLoadAssets()
 
 void inputBoxUnloadAssets()
 {
+	if (!loaded)
+		return;
 	loaded = false;
 	titleSprite.texture.destroy();
 	textSprite.texture.destroy();

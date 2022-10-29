@@ -10,7 +10,8 @@
 #define CURSOR_ENDX 637
 #define CURSOR_STARTX 293
 #define CURSOR_STARTY 184
-#define CURSOR_STEP 5
+#define CURSOR_STEP 6
+#define MAX_CHAR_PER_LINE 57
 
 extern wchar_t profileFolderPath[MAX_PATH];
 
@@ -66,9 +67,9 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 	desc.weight = FW_REGULAR;
 	this->_defaultFont16.create();
 	this->_defaultFont16.setIndirect(desc);
-	desc.height = 10 + hasEnglishPatch * 2;
-	this->_defaultFont10.create();
-	this->_defaultFont10.setIndirect(desc);
+	desc.height = 12 + hasEnglishPatch * 2;
+	this->_defaultFont12.create();
+	this->_defaultFont12.setIndirect(desc);
 
 	this->_inBattle.texture.loadFromFile((std::filesystem::path(profileFolderPath) / "assets/lobby/inarcade.png").string().c_str());
 	this->_inBattle.setSize({
@@ -416,18 +417,118 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 	this->_chatTimer = 900;
 	this->_chatMessages.emplace_front();
 
-	auto &m = this->_chatMessages.front();
-	auto text = msg;
+	auto *m = &this->_chatMessages.front();
+	std::string line;
+	std::string word;
+	unsigned startPos = 0;
+	unsigned pos = 0;
+	unsigned wordPos = 0;
+	bool skip = false;
+	unsigned short emoteId;
+	unsigned char emoteCtr = 0;
+	auto pushText = [&]{
+		if (line.empty())
+			return;
 
-	if (player == 0) {
-		char color[40];
+		m->text.emplace_back();
 
-		sprintf(color, "<color %06x>", channel);
-		text = color + text + "</color>";
+		auto &txt = m->text.back();
+		auto text = line;
+
+		if (player == 0) {
+			char color[40];
+
+			sprintf(color, "<color %06x>", channel);
+			text = color + text + "</color>";
+		}
+		txt.sprite.texture.createFromText(text.c_str(), this->_defaultFont12, {350, 300}, &txt.realSize);
+		txt.sprite.rect.width = txt.realSize.x;
+		txt.sprite.rect.height = txt.realSize.y;
+		txt.pos.x = startPos;
+		if (!m->emotes.empty())
+			txt.pos.y = (txt.realSize.y - EMOTE_SIZE) / 2;
+		startPos = pos;
+		line.clear();
+	};
+	auto nextLine = [&]{
+		pushText();
+		this->_chatMessages.emplace_front();
+		m = &this->_chatMessages.front();
+		pos = 0;
+	};
+
+	line.reserve(msg.size());
+	word.reserve(msg.size());
+	for (auto c : msg) {
+		unsigned char arraySection = c >> 4U;
+
+		if (emoteCtr) {
+			emoteId |= (c & 0x7F) << ((2 - emoteCtr) * 7);
+			emoteCtr--;
+			if (!emoteCtr) {
+				if (pos + EMOTE_SIZE > MAX_CHAR_PER_LINE * CURSOR_STEP)
+					nextLine();
+				m->emotes.emplace_back();
+				m->emotes.back().id = emoteId;
+				m->emotes.back().pos.x = startPos;
+				pos += EMOTE_SIZE;
+				startPos = pos;
+				for (auto &g : m->text)
+					g.pos.y = (g.realSize.y - EMOTE_SIZE) / 2;
+			}
+		} else if (skip) {
+			skip = false;
+			word += c;
+			wordPos += CURSOR_STEP;
+		} else if (c == 1) {
+			line += word;
+			pos += wordPos;
+			wordPos = 0;
+			word.clear();
+			pushText();
+			emoteId = 0;
+			emoteCtr = 2;
+			continue;
+		} else if (c == '\n') {
+			line += word;
+			pos += wordPos;
+			word.clear();
+			wordPos = 0;
+			nextLine();
+			startPos = 0;
+			continue;
+		} else if (arraySection == 0x8 || arraySection == 0x9 || arraySection == 0xE) {
+			skip = true;
+			word += c;
+			continue;
+		} else if (isspace(c)) {
+			if (word.empty()) {
+				if (pos == 0)
+					continue;
+			} else {
+				line += word;
+				pos += wordPos;
+				word.clear();
+				wordPos = 0;
+			}
+			line += ' ';
+			pos += CURSOR_STEP;
+		} else {
+			word += c;
+			wordPos += CURSOR_STEP;
+		}
+		if (pos + wordPos > MAX_CHAR_PER_LINE * CURSOR_STEP) {
+			if (pos == 0) {
+				line = word.substr(0, word.size() - 1);
+				word.erase(word.begin(), word.end() - 1);
+				wordPos = CURSOR_STEP;
+			}
+			nextLine();
+			startPos = 0;
+		}
 	}
-	m.sprite.texture.createFromText(text.c_str(), this->_defaultFont10, {350, 300}, &m.realSize);
-	m.sprite.rect.width = m.realSize.x;
-	m.sprite.rect.height = m.realSize.y;
+	line += word;
+	pushText();
 }
 
 void InLobbyMenu::onKeyPressed(int chr)
@@ -485,7 +586,11 @@ void InLobbyMenu::_inputBoxUpdate()
 
 	if (this->_returnPressed) {
 		if (this->_timers[VK_RETURN] == 0) {
-			this->_sendMessage(std::string{this->_buffer.begin(), this->_buffer.end() - 1});
+			if (this->_buffer.size() != 1) {
+				this->_sendMessage(std::string{this->_buffer.begin(), this->_buffer.end() - 1});
+				SokuLib::playSEWaveBuffer(0x28);
+			} else
+				SokuLib::playSEWaveBuffer(0x29);
 			this->_editingText = false;
 			this->_returnPressed = false;
 		}
@@ -517,7 +622,7 @@ void InLobbyMenu::_inputBoxUpdate()
 			this->_buffer.erase(this->_buffer.begin() + this->_textCursorPos);
 			SokuLib::playSEWaveBuffer(0x27);
 			this->_textChanged = true;
-			this->_textSprite.texture.createFromText(this->_sanitizeInput().c_str(), this->_defaultFont10, {8 * this->_buffer.size(), 1800});
+			this->_textSprite.texture.createFromText(this->_sanitizeInput().c_str(), this->_defaultFont12, {8 * this->_buffer.size(), 1800});
 		}
 	}
 	if (this->_timers[VK_LEFT] == 1 || (this->_timers[VK_LEFT] > 36 && this->_timers[VK_LEFT] % 3 == 0)) {
@@ -542,7 +647,7 @@ void InLobbyMenu::_inputBoxUpdate()
 		}
 	}
 	if (this->_textChanged)
-		this->_textSprite.texture.createFromText(this->_sanitizeInput().c_str(), this->_defaultFont10, {max(TEXTURE_MAX_SIZE, 8 * this->_buffer.size()), 18});
+		this->_textSprite.texture.createFromText(this->_sanitizeInput().c_str(), this->_defaultFont12, {max(TEXTURE_MAX_SIZE, 8 * this->_buffer.size()), 18});
 	this->_textChanged = false;
 	this->_textMutex.unlock();
 }
@@ -556,7 +661,7 @@ void InLobbyMenu::_initInputBox()
 	this->_buffer.clear();
 	this->_buffer.push_back(0);
 
-	this->_textSprite.texture.createFromText(this->_sanitizeInput().c_str(), this->_defaultFont10, {max(TEXTURE_MAX_SIZE, 8 * this->_buffer.size()), 20});
+	this->_textSprite.texture.createFromText(this->_sanitizeInput().c_str(), this->_defaultFont12, {max(TEXTURE_MAX_SIZE, 8 * this->_buffer.size()), 20});
 	this->_textSprite.rect.left = 0;
 
 	this->_textCursorPos = 0;
@@ -596,13 +701,48 @@ std::string InLobbyMenu::_sanitizeInput()
 
 void InLobbyMenu::_sendMessage(const std::string &msg)
 {
-	Lobbies::PacketMessage msgPacket{0, 0, msg};
+	std::string realMsg;
+	std::string currentEmote;
+	bool colon = false;
+	bool skip = false;
 
-	if (this->_buffer.size() != 1) {
-		this->connection.send(&msgPacket, sizeof(msgPacket));
-		SokuLib::playSEWaveBuffer(0x28);
-	} else
-		SokuLib::playSEWaveBuffer(0x29);
+	realMsg.reserve(msg.size());
+	for (auto c : msg) {
+		unsigned char arraySection = c >> 4U;
+
+		if (!skip && c == ':') {
+			colon = !colon;
+			if (colon)
+				continue;
+
+			auto it = this->_menu->emotesByName.find(currentEmote);
+
+			if (it == this->_menu->emotesByName.end()) {
+				realMsg += ':';
+				realMsg += currentEmote;
+				realMsg += ':';
+			} else {
+				auto nb = it->second->id;
+
+				realMsg += '\x01';
+				for (int i = 0; i < 2; i++) {
+					realMsg += static_cast<char>(nb & 0x7F | 0x80);
+					nb >>= 7;
+				}
+			}
+			currentEmote.clear();
+		} else
+			(colon ? currentEmote : realMsg) += c;
+		skip = !skip && (arraySection == 0x8 || arraySection == 0x9 || arraySection == 0xE);
+	}
+	if (colon) {
+		realMsg += ':';
+		realMsg += currentEmote;
+	}
+
+	Lobbies::PacketMessage msgPacket{0, 0, realMsg};
+
+	this->connection.send(&msgPacket, sizeof(msgPacket));
 }
 
 void InLobbyMenu::updateChat()
@@ -621,31 +761,34 @@ void InLobbyMenu::updateChat()
 		SokuLib::Vector2i pos{292, 180};
 
 		for (auto &msg : this->_chatMessages) {
-			if (remaining > msg.realSize.y) {
-				msg.sprite.rect.height = 0;
-				remaining -= msg.realSize.y;
-				continue;
-			}
 			if (pos.y <= 3) {
-				msg.sprite.rect.width = 0;
+				msg.farUp = true;
 				break;
 			}
-			msg.sprite.tint.a = alpha;
-			msg.sprite.rect.top = 0;
-			msg.sprite.rect.width = msg.realSize.x;
-			msg.sprite.rect.height = msg.realSize.y - remaining;
-			remaining = 0;
-			pos.y -= msg.sprite.rect.height;
-			if (pos.y < 3) {
-				msg.sprite.rect.height -= 3 - pos.y;
-				msg.sprite.rect.top = 3 - pos.y;
-				pos.y = 3;
+
+			int maxSize = msg.emotes.empty() ? 0 : EMOTE_SIZE;
+
+			msg.farUp = false;
+			msg.farDown = true;
+			for (auto &text : msg.text) {
+				if (remaining <= text.realSize.y) {
+					this->_updateMessageSprite(text.pos + pos, remaining, text.realSize, text.sprite, alpha);
+					msg.farDown = false;
+				}
+				maxSize = max(maxSize, text.realSize.y);
 			}
-			msg.sprite.setSize({
-				static_cast<unsigned int>(msg.sprite.rect.width),
-				static_cast<unsigned int>(msg.sprite.rect.height)
-			});
-			msg.sprite.setPosition(pos);
+			for (auto &emote : msg.emotes) {
+				emote.offset = pos;
+				emote.cutRemain = remaining;
+			}
+			if (remaining <= EMOTE_SIZE)
+				msg.farDown = false;
+			if (remaining > maxSize)
+				remaining -= maxSize;
+			else {
+				pos.y -= maxSize - remaining;
+				remaining = 0;
+			}
 		}
 	}
 }
@@ -655,11 +798,28 @@ void InLobbyMenu::renderChat()
 	if (this->_chatSeat.tint.a) {
 		this->_chatSeat.draw();
 		for (auto &msg: this->_chatMessages) {
-			if (!msg.sprite.rect.height)
+			if (msg.farUp)
 				continue;
-			if (!msg.sprite.rect.width)
+			if (msg.farDown)
 				break;
-			msg.sprite.draw();
+			for (auto &text : msg.text)
+				text.sprite.draw();
+			for (auto &emote : msg.emotes) {
+				auto &emoteObj = this->_menu->emotes[emote.id < this->_menu->emotes.size() ? emote.id : 0];
+				auto pos = emote.pos + emote.offset;
+
+				emoteObj.sprite.tint.a = this->_chatSeat.tint.a;
+				emoteObj.sprite.rect.top = 0;
+				emoteObj.sprite.rect.height = emoteObj.sprite.texture.getSize().y - emote.cutRemain;
+				pos.y -= EMOTE_SIZE;
+				if (pos.y < 3) {
+					emoteObj.sprite.rect.height -= 3 - pos.y;
+					emoteObj.sprite.rect.top = 3 - pos.y;
+					pos.y = 3;
+				}
+				emoteObj.sprite.setPosition(pos);
+				emoteObj.sprite.draw();
+			}
 		}
 	}
 	if (this->_editingText) {
@@ -671,4 +831,28 @@ void InLobbyMenu::renderChat()
 bool InLobbyMenu::isInputing()
 {
 	return this->_editingText;
+}
+
+bool InLobbyMenu::_isEmoteLocked()
+{
+	return false;
+}
+
+void InLobbyMenu::_updateMessageSprite(SokuLib::Vector2i pos, unsigned int remaining, SokuLib::Vector2i realSize, SokuLib::DrawUtils::Sprite &sprite, unsigned char alpha)
+{
+	sprite.tint.a = alpha;
+	sprite.rect.top = 0;
+	sprite.rect.width = realSize.x;
+	sprite.rect.height = realSize.y - remaining;
+	pos.y -= sprite.rect.height;
+	if (pos.y < 3) {
+		sprite.rect.height -= 3 - pos.y;
+		sprite.rect.top = 3 - pos.y;
+		pos.y = 3;
+	}
+	sprite.setSize({
+		static_cast<unsigned int>(sprite.rect.width),
+		static_cast<unsigned int>(sprite.rect.height)
+	});
+	sprite.setPosition(pos);
 }

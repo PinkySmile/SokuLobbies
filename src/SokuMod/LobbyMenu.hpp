@@ -12,6 +12,8 @@
 #include "Player.hpp"
 #include "Socket.hpp"
 
+#define EMOTE_SIZE 32
+
 class Connection;
 class LobbyMenu : public SokuLib::IMenu {
 private:
@@ -81,9 +83,20 @@ public:
 		Background() = default;
 		Background(const Background &) { assert(false); }
 	};
+	struct Emote {
+		unsigned short id;
+		std::string filepath;
+		std::vector<std::string> alias;
+		SokuLib::DrawUtils::Sprite sprite;
+
+		Emote() = default;
+		Emote(const Emote &) { assert(false); }
+	};
 
 	std::vector<Avatar> avatars;
 	std::vector<Background> backgrounds;
+	std::vector<Emote> emotes;
+	std::map<std::string, Emote *> emotesByName;
 
 	LobbyMenu(SokuLib::MenuConnect *parent);
 	~LobbyMenu();

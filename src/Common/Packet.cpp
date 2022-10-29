@@ -19,6 +19,7 @@ namespace Lobbies
 	std::string PacketHello::toString() const
 	{
 		return "Packet HELLO: Player '" + std::string(this->name, strnlen(this->name, sizeof(this->name))) + "' "
+		       "modVersion: " + std::to_string(this->modVersion) + " "
 		       "title: " + std::to_string(this->custom.title) + " "
 		       "avatar: " + std::to_string(this->custom.avatar) + " "
 		       "head: " + std::to_string(this->custom.head) + " "

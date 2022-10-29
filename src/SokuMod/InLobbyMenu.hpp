@@ -17,9 +17,22 @@ private:
 	struct PlayerData {
 		SokuLib::DrawUtils::Sprite name;
 	};
-	struct Message {
+	struct MessageText {
 		SokuLib::DrawUtils::Sprite sprite;
 		SokuLib::Vector2i realSize;
+		SokuLib::Vector2i pos;
+	};
+	struct MessageEmote {
+		unsigned id;
+		unsigned cutRemain;
+		SokuLib::Vector2i pos;
+		SokuLib::Vector2i offset;
+	};
+	struct Message {
+		std::vector<MessageEmote> emotes;
+		std::list<MessageText> text;
+		bool farDown = false;
+		bool farUp = false;
 	};
 
 	std::function<void (const std::string &ip, unsigned short port, bool spectate)> onConnectRequest;
@@ -38,7 +51,7 @@ private:
 	unsigned _chatOffset = 0;
 	uint8_t _background = 0;
 	std::string _music;
-	SokuLib::SWRFont _defaultFont10;
+	SokuLib::SWRFont _defaultFont12;
 	SokuLib::SWRFont _defaultFont16;
 	SokuLib::DrawUtils::Sprite _chatSeat;
 	SokuLib::DrawUtils::Sprite _loadingText;
@@ -61,6 +74,7 @@ private:
 	bool _editingText = false;
 	bool _returnPressed = false;
 
+	void _updateMessageSprite(SokuLib::Vector2i pos, unsigned int remaining, SokuLib::Vector2i realSize, SokuLib::DrawUtils::Sprite &sprite, unsigned char alpha);
 	void _addMessageToList(unsigned channel, unsigned player, const std::string &msg);
 	void _inputBoxUpdate();
 	void _initInputBox();
@@ -68,6 +82,7 @@ private:
 	void _sendMessage(const std::string &msg);
 	std::string _sanitizeInput();
 	void _unhook();
+	bool _isEmoteLocked();
 
 public:
 	InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connection &connection);

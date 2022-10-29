@@ -393,7 +393,7 @@ bool Server::_processCommands(Connection &author, const std::string &msg)
 	auto it = Server::_commands.find(parsed[0]);
 
 	if (it == Server::_commands.end()) {
-		Lobbies::PacketMessage m{0xFF0000, 0, "Unknown command \"" + parsed[0]+ "\"<br>Use /help for a list of command"};
+		Lobbies::PacketMessage m{0xFF0000, 0, "Unknown command \"" + parsed[0]+ "\"\nUse /help for a list of command"};
 
 		author.send(&m, sizeof(m));
 		return true;
@@ -541,22 +541,16 @@ Connection *Server::_findPlayer(const std::string &name)
 }
 
 const std::map<std::string, Server::Cmd> Server::_commands{
-	{"help",    {"[command]", "Displays list of commands.<br>Example:<br>/help<br>/help help", &Server::_helpCmd}},
-	{"join",    {"(player_id)|@(player_name)", "Join an arcade machine. The id must be in the range 0 to 4294967295<br>Example:<br>/join 1<br>/join @PinkySmile", &Server::_joinCmd}},
+	{"help",    {"[command]", "Displays list of commands.\nExample:\n/help\n/help help", &Server::_helpCmd}},
+	{"join",    {"(player_id)|@(player_name)", "Join an arcade machine. The id must be in the range 0 to 4294967295\nExample:\n/join 1\n/join @PinkySmile", &Server::_joinCmd}},
 	{"list",    {"", "Displays the list of connected players.", &Server::_listCmd}},
-	{"locate",  {"(player_id)|@(player_name)", "Locate a player in the field.<br>Example:<br>/locate 1<br>/locate @PinkySmile", &Server::_locateCmd}},
-	{"teleport",{"(player_id)|@(player_name)", "Teleports to a player or a location<br>Example:<br>/teleport 10<br>/teleport @PinkySmile", &Server::_teleportCmd}},
+	{"locate",  {"(player_id)|@(player_name)", "Locate a player in the field.\nExample:\n/locate 1\n/locate @PinkySmile", &Server::_locateCmd}},
+	{"teleport",{"(player_id)|@(player_name)", "Teleports to a player or a location\nExample:\n/teleport 10\n/teleport @PinkySmile", &Server::_teleportCmd}},
 };
 
 void Server::_helpCmd(Connection &author, const std::vector<std::string> &args)
 {
-	std::string msg;
-
-	if (args.empty()) {
-		msg = "Available commands:";
-		for (auto &cmd : Server::_commands)
-			msg += "<br>/" + cmd.first;
-	} else {
+	if (!args.empty()) {
 		auto it = Server::_commands.find(args[0]);
 
 		if (it == Server::_commands.end()) {
@@ -565,7 +559,27 @@ void Server::_helpCmd(Connection &author, const std::vector<std::string> &args)
 			author.send(&m, sizeof(m));
 			return;
 		}
-		msg = "/" + it->first + " " + it->second.usage + ": " + it->second.description;
+
+		Lobbies::PacketMessage m{0xFFFF00, 0, "/" + it->first + " " + it->second.usage + ": " + it->second.description};
+
+		author.send(&m, sizeof(m));
+		return;
+	}
+
+	std::string msg;
+
+	msg += "Available commands:";
+	for (auto &cmd : Server::_commands) {
+		auto tmp = "/" + cmd.first + " " + cmd.second.usage;
+
+		if (msg.size() + tmp.size() < sizeof(Lobbies::PacketMessage::message))
+			msg += "\n" + tmp;
+		else {
+			Lobbies::PacketMessage m{0xFFFF00, 0, msg};
+
+			author.send(&m, sizeof(m));
+			msg = tmp;
+		}
 	}
 
 	Lobbies::PacketMessage m{0xFFFF00, 0, msg};
@@ -625,7 +639,7 @@ void Server::_listCmd(Connection &author, const std::vector<std::string> &)
 
 	for (auto &c : this->_connections)
 		if (c->isInit())
-			msg += "<br>" + std::to_string(c->getId()) + ": " + c->getName();
+			msg += "\n" + std::to_string(c->getId()) + ": " + c->getName();
 	this->_connectionsMutex.unlock();
 
 	Lobbies::PacketMessage m{0xFFFF00, 0, msg};

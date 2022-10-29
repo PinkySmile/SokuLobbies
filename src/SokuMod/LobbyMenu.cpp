@@ -51,23 +51,16 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 	_parent(parent),
 	avatars()
 {
-	std::ifstream ips{std::filesystem::path(profileFolderPath) / "ip.txt"};
-	std::string ip;
-
-	inputBoxLoadAssets();
-	std::getline(ips, ip);
-	if (ip.empty())
-		ip = "localhost";
-	ips.close();
-
 	auto path = std::filesystem::path(profileFolderPath) / "assets/avatars/list.json";
 	std::ifstream stream{path};
 	nlohmann::json j;
 
 	if (stream.fail())
 		throw std::runtime_error("Cannot open file " + path.string());
+	printf("Loading %s\n", path.string().c_str());
 	stream >> j;
 	stream.close();
+	inputBoxLoadAssets();
 	this->avatars.reserve(j.size());
 	for (auto &val : j) {
 		this->avatars.emplace_back();
@@ -85,11 +78,13 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 			static_cast<unsigned int>(avatar.sprite.rect.height * val["scale"].get<float>())
 		});
 	}
+	printf("There are %zu avatars\n", this->avatars.size());
 
 	path = std::filesystem::path(profileFolderPath) / "assets/backgrounds/list.json";
 	stream.open(path);
 	if (stream.fail())
 		throw std::runtime_error("Cannot open file " + path.string());
+	printf("Loading %s\n", path.string().c_str());
 	stream >> j;
 	stream.close();
 	this->backgrounds.reserve(j.size());
@@ -112,6 +107,37 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 		bg.bg.rect.width = bg.bg.getSize().x;
 		bg.bg.rect.height = bg.bg.getSize().y;
 	}
+	printf("There are %zu backgrounds\n", this->avatars.size());
+
+	path = std::filesystem::path(profileFolderPath) / "assets/emotes/list.json";
+	stream.open(path);
+	if (stream.fail())
+		throw std::runtime_error("Cannot open file " + path.string());
+	printf("Loading %s\n", path.string().c_str());
+	stream >> j;
+	stream.close();
+	this->emotes.reserve(j.size());
+	for (auto &val : j) {
+		this->emotes.emplace_back();
+
+		auto &emote = this->emotes.back();
+
+		emote.id = this->emotes.size() - 1;
+		emote.filepath = val["path"];
+		emote.alias = val["alias"].get<std::vector<std::string>>();
+		emote.sprite.texture.loadFromFile((std::filesystem::path(profileFolderPath) / emote.filepath).string().c_str());
+		emote.sprite.setSize({EMOTE_SIZE, EMOTE_SIZE});
+		emote.sprite.rect.width = emote.sprite.texture.getSize().x;
+		emote.sprite.rect.height = emote.sprite.texture.getSize().y;
+		for (auto &alias : emote.alias) {
+			auto it = this->emotesByName.find(alias);
+
+			if (it != this->emotesByName.end())
+				throw std::runtime_error("Duplicate alias " + alias);
+			this->emotesByName[alias] = &emote;
+		}
+	}
+	printf("There are %zu emotes (%zu different alias)\n", this->emotes.size(), this->emotesByName.size());
 
 	this->title.texture.loadFromFile((std::filesystem::path(profileFolderPath) / "assets/menu/title.png").string().c_str());
 	this->title.setSize(this->title.texture.getSize());
