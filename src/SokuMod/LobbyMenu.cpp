@@ -315,23 +315,24 @@ bool LobbyMenu::_normalMenuUpdate()
 	if (SokuLib::inputMgrs.input.a == 1) {
 		SokuLib::playSEWaveBuffer(0x28);
 		switch (this->_menuCursor) {
-			case MENUITEM_JOIN_LOBBY:
-				this->_menuState = 1;
-				break;
-			case MENUITEM_CUSTOMIZE_AVATAR:
-				this->_menuState = 2;
-				break;
-			case MENUITEM_CREATE_LOBBY:
-			case MENUITEM_CUSTOMIZE_LOBBY:
-			case MENUITEM_ACHIVEMENTS:
-			case MENUITEM_OPTIONS:
-			case MENUITEM_STATISTICS:
-				MessageBox(SokuLib::window, "Not implemented", "Not implemented", MB_ICONINFORMATION);
-				break;
-			case MENUITEM_EXIT:
-				return false;
+		case MENUITEM_JOIN_LOBBY:
+			this->_menuState = 1;
+			break;
+		case MENUITEM_CUSTOMIZE_AVATAR:
+			this->_menuState = 2;
+			break;
+		case MENUITEM_CREATE_LOBBY:
+		case MENUITEM_CUSTOMIZE_LOBBY:
+		case MENUITEM_ACHIVEMENTS:
+		case MENUITEM_OPTIONS:
+		case MENUITEM_STATISTICS:
+			MessageBox(SokuLib::window, "Not implemented", "Not implemented", MB_ICONINFORMATION);
+			break;
+		case MENUITEM_EXIT:
+			return false;
 		}
 	}
+	return true;
 }
 
 bool LobbyMenu::_joinLobbyUpdate()

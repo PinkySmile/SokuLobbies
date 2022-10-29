@@ -799,9 +799,9 @@ void InLobbyMenu::renderChat()
 		this->_chatSeat.draw();
 		for (auto &msg: this->_chatMessages) {
 			if (msg.farUp)
-				continue;
-			if (msg.farDown)
 				break;
+			if (msg.farDown)
+				continue;
 			for (auto &text : msg.text)
 				text.sprite.draw();
 			for (auto &emote : msg.emotes) {
@@ -810,13 +810,14 @@ void InLobbyMenu::renderChat()
 
 				emoteObj.sprite.tint.a = this->_chatSeat.tint.a;
 				emoteObj.sprite.rect.top = 0;
-				emoteObj.sprite.rect.height = emoteObj.sprite.texture.getSize().y - emote.cutRemain;
-				pos.y -= EMOTE_SIZE;
+				emoteObj.sprite.rect.height = EMOTE_SIZE - emote.cutRemain;
+				pos.y -= emoteObj.sprite.rect.height;
 				if (pos.y < 3) {
 					emoteObj.sprite.rect.height -= 3 - pos.y;
 					emoteObj.sprite.rect.top = 3 - pos.y;
 					pos.y = 3;
 				}
+				emoteObj.sprite.setSize({EMOTE_SIZE, static_cast<unsigned int>(emoteObj.sprite.rect.height)});
 				emoteObj.sprite.setPosition(pos);
 				emoteObj.sprite.draw();
 			}
