@@ -53,7 +53,8 @@ struct Entry {
 			}
 			this->last = time(nullptr);
 			if (buffer[0] == 0) {
-				std::cout << "New lobby registered" << std::endl;
+				if (!this->port)
+					std::cout << "New lobby registered" << std::endl;
 				this->port = buffer[1] | (buffer[2] << 8);
 				return;
 			}
