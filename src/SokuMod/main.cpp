@@ -71,7 +71,7 @@ int __fastcall LoadingWatchOnProcess(SokuLib::LoadingWatch *This)
 }
 int __fastcall BattleClientOnProcess(SokuLib::BattleClient *This)
 {
-	processCommon(true);
+	processCommon(false);
 	return (This->*og_BattleClientOnProcess)();
 }
 int __fastcall SelectClientOnProcess(SokuLib::SelectClient *This)
@@ -81,7 +81,7 @@ int __fastcall SelectClientOnProcess(SokuLib::SelectClient *This)
 }
 int __fastcall BattleServerOnProcess(SokuLib::BattleServer *This)
 {
-	processCommon(true);
+	processCommon(false);
 	return (This->*og_BattleServerOnProcess)();
 }
 int __fastcall SelectServerOnProcess(SokuLib::SelectServer *This)
