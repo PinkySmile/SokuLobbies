@@ -125,7 +125,7 @@ public:
 	static HttpRequest parseHttpRequest(const std::string &requ);
 
 	void bind(unsigned short port);
-
+	bool hasData() const;
 	Socket accept();
 
 	//! @brief Return the socket value.

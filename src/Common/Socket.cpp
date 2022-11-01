@@ -186,7 +186,7 @@ std::string Socket::readUntilEOF() {
 		FD_SET(this->_sockfd, &rd);
 		timeout.tv_sec = 1;
 		timeout.tv_usec = 0;
-		switch (select(FD_SETSIZE, &rd, nullptr, nullptr, &timeout)) {
+		switch (select(this->_sockfd + 1, &rd, nullptr, nullptr, &timeout)) {
 		case 0:
 			if (result.empty() && (--time))
 				continue;
@@ -219,7 +219,7 @@ bool Socket::isOpen() const {
 
 	FD_ZERO(&set);
 	FD_SET(this->_sockfd, &set);
-	if (this->_opened && select(0, &set, nullptr, nullptr, &time) == -1)
+	if (this->_opened && select(this->_sockfd + 1, &set, nullptr, nullptr, &time) == -1)
 		this->_opened = false;
 	return (this->_opened);
 }
@@ -331,7 +331,7 @@ bool Socket::isDisconnected() const {
 	return !this->isOpen();
 }
 
-Socket::Socket(const Socket &socket): _opened(socket.isOpen()), _sockfd(socket.getSockFd()), _remote(socket.getRemote()) {
+Socket::Socket(const Socket &socket): _sockfd(socket.getSockFd()), _opened(socket.isOpen()), _remote(socket.getRemote()) {
 	socket.setNoDestroy(true);
 	this->setNoDestroy(false);
 }
@@ -370,4 +370,19 @@ Socket::HttpResponse Socket::parseHttpResponse(const std::string &respon) {
 
 	request.body = respon.substr(response.tellg());
 	return request;
+}
+
+bool Socket::hasData() const
+{
+	timeval timeout{0, 0};
+	FD_SET rd;
+
+	FD_ZERO(&rd);
+	FD_SET(this->_sockfd, &rd);
+
+	auto r = select(this->_sockfd + 1, &rd, nullptr, nullptr, &timeout);
+
+	if (r < 0)
+		this->_opened = false;
+	return r > 0;
 }
