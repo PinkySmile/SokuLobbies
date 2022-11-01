@@ -8,11 +8,11 @@
 #include <iostream>
 #include <algorithm>
 #include <cstring>
+#include <signal.h>
 #ifndef _WIN32
 #include <arpa/inet.h>
 #endif
 #include "Socket.hpp"
-#include "GuardedMutex.hpp"
 
 std::list<struct Entry> entries;
 in_addr myIp;
@@ -53,12 +53,10 @@ struct Entry {
 			}
 			this->last = time(nullptr);
 			if (buffer[0] == 0) {
-				std::cout << "Update entry" << std::endl;
+				std::cout << "New lobby registered" << std::endl;
 				this->port = buffer[1] | (buffer[2] << 8);
 				return;
 			}
-
-			std::cout << "Send list" << std::endl;
 
 			for (auto &entry : entries) {
 				if (entry.port) {
@@ -113,6 +111,8 @@ void getIp()
 	printf("My ip is %s\n", inet_ntoa(myIp));
 }
 
+void _(int){}
+
 int main(int argc, char **argv)
 {
 	getIp();
@@ -123,6 +123,9 @@ int main(int argc, char **argv)
 	if (argc >= 2)
 		port = std::stoul(argv[1]);
 	sock.bind(port);
+#ifdef SIGPIPE
+	signal(SIGPIPE, _);
+#endif
 	while (true) {
 		if (sock.hasData()) {
 			std::cout << "Accepting..." << std::endl;
