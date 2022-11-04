@@ -82,7 +82,6 @@ private:
 	void _sendMessage(const std::string &msg);
 	std::string _sanitizeInput();
 	void _unhook();
-	bool _isEmoteLocked();
 
 public:
 	InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connection &connection);

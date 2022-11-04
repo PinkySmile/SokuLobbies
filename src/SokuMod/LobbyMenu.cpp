@@ -51,7 +51,8 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 	_parent(parent),
 	avatars()
 {
-	auto path = std::filesystem::path(profileFolderPath) / "assets/avatars/list.json";
+	std::filesystem::path folder = profileFolderPath;
+	auto path = folder / "assets/avatars/list.json";
 	std::ifstream stream{path};
 	nlohmann::json j;
 
@@ -67,15 +68,18 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 
 		auto &avatar = this->avatars.back();
 
-		avatar.accessoriesPlacement = val["accessories"];
+		avatar.id = this->avatars.size() - 1;
+		avatar.name = val["name"];
+		avatar.scale = val["scale"];
 		avatar.nbAnimations = val["animations"];
 		avatar.animationsStep = val["anim_step"];
+		avatar.accessoriesPlacement = val["accessories"];
 		avatar.sprite.texture.loadFromFile((std::filesystem::path(profileFolderPath) / val["spritesheet"].get<std::string>()).string().c_str());
 		avatar.sprite.rect.width = avatar.sprite.texture.getSize().x / avatar.nbAnimations;
 		avatar.sprite.rect.height = avatar.sprite.texture.getSize().y / 2;
 		avatar.sprite.setSize({
-			static_cast<unsigned int>(avatar.sprite.rect.width * val["scale"].get<float>()),
-			static_cast<unsigned int>(avatar.sprite.rect.height * val["scale"].get<float>())
+			static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale),
+			static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale)
 		});
 	}
 	printf("There are %zu avatars\n", this->avatars.size());
@@ -93,6 +97,7 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 
 		auto &bg = this->backgrounds.back();
 
+		bg.id = this->backgrounds.size() - 1;
 		bg.groundPos = val["ground"];
 		bg.parallaxFactor = val["parallax_factor"];
 		bg.platformInterval = val["platform_interval"];
@@ -150,15 +155,29 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 	this->ui.rect.width = this->ui.getSize().x;
 	this->ui.rect.height = this->ui.getSize().y;
 
-	//TODO: Save and load this in a file
-	this->_loadedSettings.settings.hostPref = Lobbies::HOSTPREF_NO_PREF;
-	this->_loadedSettings.player.title = 0;
-	this->_loadedSettings.player.avatar = time(nullptr) % this->avatars.size();//0;
-	this->_loadedSettings.player.head = 0;
-	this->_loadedSettings.player.body = 0;
-	this->_loadedSettings.player.back = 0;
-	this->_loadedSettings.player.env = 0;
-	this->_loadedSettings.player.feet = 0;
+	this->_customizeSeat.texture.loadFromFile((std::filesystem::path(profileFolderPath) / "assets/menu/customSeat.png").string().c_str());
+	this->_customizeSeat.setSize(this->_customizeSeat.texture.getSize());
+	this->_customizeSeat.rect.width = this->_customizeSeat.getSize().x;
+	this->_customizeSeat.rect.height = this->_customizeSeat.getSize().y;
+
+	std::ifstream s{folder / "settings.dat", std::ifstream::binary};
+
+	if (s) {
+		char version;
+
+		s.read(&version, 1);
+		s.read((char *)&this->_loadedSettings.settings, sizeof(this->_loadedSettings.settings));
+		s.read((char *)&this->_loadedSettings.player, sizeof(this->_loadedSettings.player));
+	} else {
+		this->_loadedSettings.settings.hostPref = Lobbies::HOSTPREF_NO_PREF;
+		this->_loadedSettings.player.title = 0;
+		this->_loadedSettings.player.avatar = 0;
+		this->_loadedSettings.player.head = 0;
+		this->_loadedSettings.player.body = 0;
+		this->_loadedSettings.player.back = 0;
+		this->_loadedSettings.player.env = 0;
+		this->_loadedSettings.player.feet = 0;
+	}
 	this->_loadedSettings.name = SokuLib::profile1.name.operator std::string();
 	this->_loadedSettings.pos.x = 20;
 
@@ -188,6 +207,43 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 	desc.height = 16 + hasEnglishPatch * 2;
 	this->_defaultFont16.create();
 	this->_defaultFont16.setIndirect(desc);
+	desc.height = 20 + hasEnglishPatch * 2;
+	this->_defaultFont20.create();
+	this->_defaultFont20.setIndirect(desc);
+
+	SokuLib::Vector2i size;
+
+	this->_playerName.texture.createFromText(SokuLib::profile1.name, this->_defaultFont16, {200, 20}, &size);
+	this->_playerName.setSize(size.to<unsigned>());
+	this->_playerName.rect.width = size.x;
+	this->_playerName.rect.height = size.y;
+
+	this->_customizeTexts[0].texture.createFromText("Avatar", this->_defaultFont20, {600, 74});
+	this->_customizeTexts[0].setSize({
+		this->_customizeTexts[0].texture.getSize().x,
+		this->_customizeTexts[0].texture.getSize().y
+	});
+	this->_customizeTexts[0].rect.width = this->_customizeTexts[0].texture.getSize().x;
+	this->_customizeTexts[0].rect.height = this->_customizeTexts[0].texture.getSize().y;
+	this->_customizeTexts[0].setPosition({120, 98});
+
+	this->_customizeTexts[1].texture.createFromText("Accessory", this->_defaultFont20, {600, 74});
+	this->_customizeTexts[1].setSize({
+		this->_customizeTexts[1].texture.getSize().x,
+		this->_customizeTexts[1].texture.getSize().y
+	});
+	this->_customizeTexts[1].rect.width = this->_customizeTexts[1].texture.getSize().x;
+	this->_customizeTexts[1].rect.height = this->_customizeTexts[1].texture.getSize().y;
+	this->_customizeTexts[1].setPosition({280, 98});
+
+	this->_customizeTexts[2].texture.createFromText("Title", this->_defaultFont20, {600, 74});
+	this->_customizeTexts[2].setSize({
+		this->_customizeTexts[2].texture.getSize().x,
+		this->_customizeTexts[2].texture.getSize().y
+	});
+	this->_customizeTexts[2].rect.width = this->_customizeTexts[2].texture.getSize().x;
+	this->_customizeTexts[2].rect.height = this->_customizeTexts[2].texture.getSize().y;
+	this->_customizeTexts[2].setPosition({475, 98});
 
 	this->_loadingText.texture.createFromText("Connecting to server...", this->_defaultFont16, {600, 74});
 	this->_loadingText.setSize({
@@ -222,6 +278,23 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 
 LobbyMenu::~LobbyMenu()
 {
+	auto path = std::filesystem::path(profileFolderPath) / "settings.dat";
+	std::ofstream s{path, std::ofstream::binary};
+	char version = 0;
+
+	if (s) {
+		s.write(&version, 1);
+		s.write((char *)&this->_loadedSettings.settings, sizeof(this->_loadedSettings.settings));
+		s.write((char *)&this->_loadedSettings.player, sizeof(this->_loadedSettings.player));
+	} else {
+		auto err = strerror(errno);
+		auto str = new wchar_t[strlen(err)];
+
+		for (int i = 0; err[i]; i++)
+			str[i] = err[i];
+		MessageBoxW(SokuLib::window, (L"Cannot open " + path.wstring() + L" for writing: " + str).c_str(), L"Saving error", MB_ICONERROR);
+		delete[] str;
+	}
 	inputBoxUnloadAssets();
 	this->_open = false;
 	if (this->_netThread.joinable())
@@ -258,6 +331,11 @@ bool (LobbyMenu::* const LobbyMenu::_updateCallbacks[])() = {
 	&LobbyMenu::_normalMenuUpdate,
 	&LobbyMenu::_joinLobbyUpdate,
 	&LobbyMenu::_customizeAvatarUpdate
+};
+void (LobbyMenu::* const LobbyMenu::_renderCallbacks[])() = {
+	&LobbyMenu::_dummyRender,
+	&LobbyMenu::_dummyRender,
+	&LobbyMenu::_customizeAvatarRender
 };
 
 int LobbyMenu::onProcess()
@@ -319,6 +397,13 @@ bool LobbyMenu::_normalMenuUpdate()
 			this->_menuState = 1;
 			break;
 		case MENUITEM_CUSTOMIZE_AVATAR:
+			this->_customCursor = 0;
+			this->_refreshAvatarCustomText();
+			this->showcases.resize(0);
+			this->showcases.resize(this->avatars.size());
+			this->_customizeTexts[0].tint = SokuLib::Color::White;
+			this->_customizeTexts[1].tint = SokuLib::Color{0x80, 0x80, 0x80, 0xFF};
+			this->_customizeTexts[2].tint = SokuLib::Color{0x80, 0x80, 0x80, 0xFF};
 			this->_menuState = 2;
 			break;
 		case MENUITEM_CREATE_LOBBY:
@@ -367,6 +452,52 @@ bool LobbyMenu::_joinLobbyUpdate()
 
 bool LobbyMenu::_customizeAvatarUpdate()
 {
+	if (SokuLib::inputMgrs.input.a == 1 && this->_customCursor >= 0) {
+		SokuLib::playSEWaveBuffer(0x28);
+		this->_loadedSettings.player.avatar = this->_customCursor;
+		return true;
+	}
+	if (SokuLib::inputMgrs.input.b == 1) {
+		SokuLib::playSEWaveBuffer(0x29);
+		this->_menuState = 0;
+		return true;
+	}
+	if (std::abs(SokuLib::inputMgrs.input.horizontalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.horizontalAxis) > 36 && std::abs(SokuLib::inputMgrs.input.horizontalAxis) % 6 == 0)) {
+		SokuLib::playSEWaveBuffer(0x27);
+		if (this->_customCursor == 0 && SokuLib::inputMgrs.input.horizontalAxis < 0)
+			this->_customCursor += this->avatars.size() - 1 - (this->avatars.size() - 1) % 4;
+		else
+			this->_customCursor = (this->_customCursor + (int)std::copysign(1, SokuLib::inputMgrs.input.horizontalAxis)) % this->avatars.size();
+		this->_refreshAvatarCustomText();
+	}
+	if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.verticalAxis) > 36 && std::abs(SokuLib::inputMgrs.input.verticalAxis) % 6 == 0)) {
+		SokuLib::playSEWaveBuffer(0x27);
+		if (this->_customCursor < 4 && SokuLib::inputMgrs.input.verticalAxis < 0)
+			this->_customCursor = this->avatars.size() - 1 - this->_customCursor;
+		else if (this->_customCursor + 4 >= this->avatars.size() && SokuLib::inputMgrs.input.verticalAxis > 0)
+			this->_customCursor = this->_customCursor % 4;
+		else
+			this->_customCursor = this->_customCursor + (int)std::copysign(4, SokuLib::inputMgrs.input.verticalAxis);
+		this->_refreshAvatarCustomText();
+	}
+	for (int i = 0; i < this->avatars.size(); i++) {
+		auto &avatar = this->avatars[i];
+		auto &showcase = this->showcases[i];
+
+		showcase.animCtr++;
+		if (showcase.animCtr < avatar.animationsStep)
+			continue;
+		showcase.animCtr = 0;
+		showcase.anim++;
+		if (showcase.anim < avatar.nbAnimations)
+			continue;
+		showcase.anim = 0;
+		showcase.action++;
+		if (showcase.action < 8)
+			continue;
+		showcase.action = 0;
+		showcase.side = !showcase.side;
+	}
 	return true;
 }
 
@@ -401,8 +532,63 @@ int LobbyMenu::onRender()
 		this->_connections[i]->playerCount.draw();
 	}
 	this->_connectionsMutex.unlock();
+	(this->*_renderCallbacks[this->_menuState])();
 	inputBoxRender();
 	return 0;
+}
+
+void LobbyMenu::_dummyRender()
+{
+}
+
+void LobbyMenu::_customizeAvatarRender()
+{
+	this->_customizeSeat.draw();
+	for (auto &sprite : this->_customizeTexts)
+		sprite.draw();
+
+	SokuLib::Vector2i pos{78, 130};
+	int size = 0;
+#ifdef _DEBUG
+	SokuLib::DrawUtils::RectangleShape rect;
+
+	rect.setBorderColor(SokuLib::Color::White);
+	rect.setFillColor(SokuLib::Color{0xFF, 0xFF, 0xFF, 0xA0});
+#endif
+	for (int i = 0; i < this->avatars.size(); i++) {
+		auto &avatar = this->avatars[i];
+		auto &showcase = this->showcases[i];
+
+		avatar.sprite.setSize({
+			static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale / 2),
+			static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale / 2)
+		});
+		if (pos.x + avatar.sprite.rect.width > 347) {
+			pos.x = 78;
+			pos.y += size;
+			size = 0;
+		}
+		avatar.sprite.setPosition(pos);
+#ifdef _DEBUG
+		rect.setSize(avatar.sprite.getSize());
+		rect.setPosition(pos);
+		rect.draw();
+#endif
+		if (this->_customCursor == i)
+			displaySokuCursor(pos + SokuLib::Vector2i{8, 0}, avatar.sprite.getSize());
+		pos.x += avatar.sprite.rect.width;
+		size = max(size, avatar.sprite.rect.height);
+		avatar.sprite.setMirroring(showcase.side, false);
+		avatar.sprite.rect.left = avatar.sprite.rect.width * showcase.anim;
+		avatar.sprite.rect.top = avatar.sprite.rect.height * (showcase.action / 4);
+		avatar.sprite.draw();
+		avatar.sprite.setSize({
+			static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale),
+			static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale)
+		});
+	}
+	this->_renderAvatarCustomText();
+	this->_renderCustomAvatarPreview();
 }
 
 void LobbyMenu::setActive()
@@ -598,4 +784,95 @@ void LobbyMenu::_connectLoop()
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		i = (i + 1) % 200;
 	}
+}
+
+bool LobbyMenu::isLocked(const LobbyMenu::Emote &emote)
+{
+	return false;
+}
+
+bool LobbyMenu::isLocked(const LobbyMenu::Avatar &avatar)
+{
+	return false;
+}
+
+bool LobbyMenu::isLocked(const LobbyMenu::Background &background)
+{
+	return false;
+}
+
+void LobbyMenu::_refreshAvatarCustomText()
+{
+	auto &avatar = this->avatars[this->_customCursor];
+
+	this->_customAvatarName.texture.createFromText(avatar.name.c_str(), this->_defaultFont16, {600, 74});
+	this->_customAvatarName.setSize(this->_customAvatarName.texture.getSize());
+	this->_customAvatarName.rect.width = this->_loadingText.texture.getSize().x;
+	this->_customAvatarName.rect.height = this->_loadingText.texture.getSize().y;
+	this->_customAvatarName.setPosition({354 + avatar.sprite.rect.width, 312});
+	this->_customAvatarName.tint = isLocked(avatar) ? SokuLib::Color::Red : SokuLib::Color::Green;
+
+	this->_customAvatarRequ.texture.createFromText("Unlocked by default", this->_defaultFont12, {600, 74});
+	this->_customAvatarRequ.setSize(this->_customAvatarRequ.texture.getSize());
+	this->_customAvatarRequ.rect.width = this->_customAvatarRequ.texture.getSize().x;
+	this->_customAvatarRequ.rect.height = this->_customAvatarRequ.texture.getSize().y;
+	this->_customAvatarRequ.setPosition({354 + avatar.sprite.rect.width, 330});
+}
+
+void LobbyMenu::_renderAvatarCustomText()
+{
+	auto &avatar = this->avatars[this->_customCursor];
+
+	avatar.sprite.setSize({
+		static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale / 2),
+		static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale / 2)
+	});
+	avatar.sprite.setPosition({352, static_cast<int>(360 - avatar.sprite.getSize().y)});
+#ifdef _DEBUG
+	SokuLib::DrawUtils::RectangleShape rect;
+
+	rect.setBorderColor(SokuLib::Color::White);
+	rect.setFillColor(SokuLib::Color{0xFF, 0xFF, 0xFF, 0xA0});
+	rect.setSize(avatar.sprite.getSize());
+	rect.setPosition({352, static_cast<int>(360 - avatar.sprite.getSize().y)});
+	rect.draw();
+#endif
+	avatar.sprite.setMirroring(true, false);
+	avatar.sprite.rect.left = 0;
+	avatar.sprite.rect.top = 0;
+	avatar.sprite.draw();
+	avatar.sprite.setSize({
+		static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale),
+		static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale)
+	});
+	this->_customAvatarName.draw();
+	this->_customAvatarRequ.draw();
+}
+
+void LobbyMenu::_renderCustomAvatarPreview()
+{
+	auto &avatar = this->avatars[this->_loadedSettings.player.avatar];
+
+	avatar.sprite.setPosition({
+		455 - static_cast<int>(avatar.sprite.getSize().x / 2),
+		static_cast<int>(285 - avatar.sprite.getSize().y)
+	});
+#ifdef _DEBUG
+	SokuLib::DrawUtils::RectangleShape rect;
+
+	rect.setBorderColor(SokuLib::Color::White);
+	rect.setFillColor(SokuLib::Color{0xFF, 0xFF, 0xFF, 0xA0});
+	rect.setSize(avatar.sprite.getSize());
+	rect.setPosition(avatar.sprite.getPosition());
+	rect.draw();
+#endif
+	avatar.sprite.rect.top = 0;
+	avatar.sprite.rect.left = this->showcases[this->_customCursor].anim * avatar.sprite.rect.width;
+	avatar.sprite.setMirroring(false, false);
+	avatar.sprite.draw();
+	this->_playerName.setPosition({
+		455 - static_cast<int>(this->_playerName.getSize().x / 2),
+		20 + static_cast<int>(285 - avatar.sprite.getSize().y)
+	});
+	this->_playerName.draw();
 }

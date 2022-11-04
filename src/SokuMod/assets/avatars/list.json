@@ -4,76 +4,87 @@
         "accessories": 0,
         "animations": 4,
         "scale": 2,
-        "anim_step": 8
-    },
-    {
-        "spritesheet": "assets/avatars/220827 Remilia-Sheet Indexed.png",
-        "accessories": 0,
-        "animations": 4,
-        "scale": 2,
-        "anim_step": 8
-    },
-    {
-        "spritesheet": "assets/avatars/220829 Cirno-Sheet Indexed.png",
-        "accessories": 0,
-        "animations": 4,
-        "scale": 2,
-        "anim_step": 8
-    },
-    {
-        "spritesheet": "assets/avatars/220905 Okuu-Sheet Indexed.png",
-        "accessories": 0,
-        "animations": 4,
-        "scale": 2,
-        "anim_step": 8
+        "anim_step": 8,
+        "name": "Blue Reimu"
     },
     {
         "spritesheet": "assets/avatars/220906 Reimu-Sheet Indexed.png",
         "accessories": 0,
         "animations": 4,
         "scale": 2,
-        "anim_step": 8
-    },
-    {
-        "spritesheet": "assets/avatars/220909 Reisen-Sheet Indexed.png",
-        "accessories": 0,
-        "animations": 4,
-        "scale": 2,
-        "anim_step": 8
-    },
-    {
-        "spritesheet": "assets/avatars/220909 Youmu-Sheet Indexed.png",
-        "accessories": 0,
-        "animations": 4,
-        "scale": 2,
-        "anim_step": 8
-    },
-    {
-        "spritesheet": "assets/avatars/221011 Sanae-Sheet Indexed.png",
-        "accessories": 0,
-        "animations": 4,
-        "scale": 2,
-        "anim_step": 8
+        "anim_step": 8,
+        "name": "Reimu Hakurei"
     },
     {
         "spritesheet": "assets/avatars/221011 Marisa-Sheet Indexed.png",
         "accessories": 0,
         "animations": 4,
         "scale": 2,
-        "anim_step": 8
+        "anim_step": 8,
+        "name": "Marisa Kirisame"
+    },
+    {
+        "spritesheet": "assets/avatars/220827 Remilia-Sheet Indexed.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Remilia Scarlet"
+    },
+    {
+        "spritesheet": "assets/avatars/220909 Youmu-Sheet Indexed.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Youmu Konpaku"
     },
     {
         "spritesheet": "assets/avatars/221024 Aya-Sheet Indexed.png",
         "accessories": 0,
         "animations": 4,
         "scale": 2,
-        "anim_step": 8
+        "anim_step": 8,
+        "name": "Aya Shameimaru"
     },
     {
         "spritesheet": "assets/avatars/221024 Komachi-Sheet Indexed.png",
         "accessories": 0,
         "animations": 4,
         "scale": 2,
-        "anim_step": 8
+        "anim_step": 8,
+        "name": "Komachi Onozuka"
+    },
+    {
+        "spritesheet": "assets/avatars/220909 Reisen-Sheet Indexed.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Reisen Udongein Inaba"
+    },
+    {
+        "spritesheet": "assets/avatars/221011 Sanae-Sheet Indexed.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Sanae Kochiya"
+    },
+    {
+        "spritesheet": "assets/avatars/220829 Cirno-Sheet Indexed.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Cirno"
+    },
+    {
+        "spritesheet": "assets/avatars/220905 Okuu-Sheet Indexed.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Utsuho Reiuji"
     }
 ]

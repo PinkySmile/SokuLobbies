@@ -368,7 +368,12 @@ int InLobbyMenu::onRender()
 	bg.fg.draw();
 
 	auto players = this->connection.getPlayers();
+#ifdef _DEBUG
+	SokuLib::DrawUtils::RectangleShape rect;
 
+	rect.setBorderColor(SokuLib::Color::White);
+	rect.setFillColor(SokuLib::Color{0xFF, 0xFF, 0xFF, 0xA0});
+#endif
 	for (auto &player : players) {
 		auto &avatar = this->_menu->avatars[player.player.avatar];
 
@@ -379,6 +384,11 @@ int InLobbyMenu::onRender()
 		avatar.sprite.rect.top = avatar.sprite.rect.height * ((player.dir & 0b00011) != 0);
 		avatar.sprite.rect.left = player.currentAnimation * avatar.sprite.rect.width;
 		avatar.sprite.setMirroring((player.dir & 0b10000) == 0, false);
+#ifdef _DEBUG
+		rect.setSize(avatar.sprite.getSize());
+		rect.setPosition(avatar.sprite.getPosition());
+		rect.draw();
+#endif
 		avatar.sprite.draw();
 	}
 	for (auto &player : players) {
@@ -748,7 +758,7 @@ void InLobbyMenu::_sendMessage(const std::string &msg)
 
 			auto it = this->_menu->emotesByName.find(currentEmote);
 
-			if (it == this->_menu->emotesByName.end()) {
+			if (it == this->_menu->emotesByName.end() || this->_menu->isLocked(*it->second)) {
 				realMsg += ':';
 				realMsg += currentEmote;
 				realMsg += ':';
@@ -870,11 +880,6 @@ void InLobbyMenu::renderChat()
 bool InLobbyMenu::isInputing()
 {
 	return this->_editingText;
-}
-
-bool InLobbyMenu::_isEmoteLocked()
-{
-	return false;
 }
 
 void InLobbyMenu::_updateMessageSprite(SokuLib::Vector2i pos, unsigned int remaining, SokuLib::Vector2i realSize, SokuLib::DrawUtils::Sprite &sprite, unsigned char alpha)
