@@ -192,9 +192,10 @@ namespace Lobbies
 		       std::string(this->message, strnlen(this->message, sizeof(this->message)));
 	}
 
-	PacketArcadeEngage::PacketArcadeEngage(uint32_t id) :
+	PacketArcadeEngage::PacketArcadeEngage(uint32_t id, uint32_t machineId) :
 		opcode(OPCODE_ARCADE_ENGAGE),
-		id(id)
+		id(id),
+		machineId(machineId)
 	{
 	}
 

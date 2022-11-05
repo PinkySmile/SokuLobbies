@@ -47,9 +47,7 @@ void displaySokuCursor(SokuLib::Vector2i pos, SokuLib::Vector2u size)
 	CRenderer_Unknown1(0x896B4C, 1);
 }
 
-LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
-	_parent(parent),
-	avatars()
+void LobbyMenu::_loadAvatars()
 {
 	std::filesystem::path folder = profileFolderPath;
 	auto path = folder / "assets/avatars/list.json";
@@ -83,9 +81,15 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 		});
 	}
 	printf("There are %zu avatars\n", this->avatars.size());
+}
 
-	path = std::filesystem::path(profileFolderPath) / "assets/backgrounds/list.json";
-	stream.open(path);
+void LobbyMenu::_loadBackgrounds()
+{
+	std::filesystem::path folder = profileFolderPath;
+	auto path = folder / "assets/backgrounds/list.json";
+	std::ifstream stream{path};
+	nlohmann::json j;
+
 	if (stream.fail())
 		throw std::runtime_error("Cannot open file " + path.string());
 	printf("Loading %s\n", path.string().c_str());
@@ -103,19 +107,25 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 		bg.platformInterval = val["platform_interval"];
 		bg.platformWidth = val["platform_width"];
 		bg.platformCount = val["platform_count"];
-		bg.fg.texture.loadFromFile((std::filesystem::path(profileFolderPath) / val["fg"].get<std::string>()).string().c_str());
+		bg.fg.texture.loadFromFile((folder / val["fg"].get<std::string>()).string().c_str());
 		bg.fg.setSize(bg.fg.texture.getSize());
 		bg.fg.rect.width = bg.fg.getSize().x;
 		bg.fg.rect.height = bg.fg.getSize().y;
-		bg.bg.texture.loadFromFile((std::filesystem::path(profileFolderPath) / val["bg"].get<std::string>()).string().c_str());
+		bg.bg.texture.loadFromFile((folder / val["bg"].get<std::string>()).string().c_str());
 		bg.bg.setSize(bg.bg.texture.getSize());
 		bg.bg.rect.width = bg.bg.getSize().x;
 		bg.bg.rect.height = bg.bg.getSize().y;
 	}
 	printf("There are %zu backgrounds\n", this->avatars.size());
+}
 
-	path = std::filesystem::path(profileFolderPath) / "assets/emotes/list.json";
-	stream.open(path);
+void LobbyMenu::_loadEmotes()
+{
+	std::filesystem::path folder = profileFolderPath;
+	auto path = folder / "assets/emotes/list.json";
+	std::ifstream stream{path};
+	nlohmann::json j;
+
 	if (stream.fail())
 		throw std::runtime_error("Cannot open file " + path.string());
 	printf("Loading %s\n", path.string().c_str());
@@ -130,7 +140,7 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 		emote.id = this->emotes.size() - 1;
 		emote.filepath = val["path"];
 		emote.alias = val["alias"].get<std::vector<std::string>>();
-		emote.sprite.texture.loadFromFile((std::filesystem::path(profileFolderPath) / emote.filepath).string().c_str());
+		emote.sprite.texture.loadFromFile((folder / emote.filepath).string().c_str());
 		emote.sprite.setSize({EMOTE_SIZE, EMOTE_SIZE});
 		emote.sprite.rect.width = emote.sprite.texture.getSize().x;
 		emote.sprite.rect.height = emote.sprite.texture.getSize().y;
@@ -143,6 +153,70 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 		}
 	}
 	printf("There are %zu emotes (%zu different alias)\n", this->emotes.size(), this->emotesByName.size());
+}
+
+static void extractArcadeAnimation(LobbyMenu::ArcadeAnimation &animation, const nlohmann::json &j)
+{
+	animation.file = j["file"];
+	animation.size.x = j["sizeX"];
+	animation.size.y = j["sizeY"];
+	animation.frameRate = j["rate"];
+	animation.frameCount = j["frames"];
+	animation.loop = j.contains("loop") && j["loop"];
+	animation.sprite.texture.loadFromFile((std::filesystem::path(profileFolderPath) / animation.file).string().c_str());
+	animation.sprite.setSize(animation.size);
+	animation.sprite.rect.width = animation.size.x;
+	animation.sprite.rect.height = animation.size.y;
+	animation.tilePerLine = animation.sprite.texture.getSize().x / animation.size.x;
+}
+
+void LobbyMenu::_loadArcades()
+{
+	std::filesystem::path folder = profileFolderPath;
+	auto path = folder / "assets/arcades/list.json";
+	std::ifstream stream{path};
+	nlohmann::json j;
+
+	if (stream.fail())
+		throw std::runtime_error("Cannot open file " + path.string());
+	printf("Loading %s\n", path.string().c_str());
+	stream >> j;
+	stream.close();
+	extractArcadeAnimation(this->arcades.intro, j["intro"]);
+	extractArcadeAnimation(this->arcades.select, j["select"]);
+	this->arcades.game.reserve(j["games"].size());
+	for (auto &val : j["games"]) {
+		this->arcades.game.emplace_back();
+		extractArcadeAnimation(this->arcades.game.back(), val);
+	}
+	this->arcades.skins.reserve(j["arcades"].size());
+	for (auto &val : j["arcades"]) {
+		this->arcades.skins.emplace_back();
+
+		auto &skin = this->arcades.skins.back();
+
+		skin.file = val["file"];
+		skin.animationOffsets.x = val["offsetX"];
+		skin.animationOffsets.y = val["offsetY"];
+		skin.frameRate = val["rate"];
+		skin.frameCount = val["frames"];
+		skin.sprite.texture.loadFromFile((std::filesystem::path(profileFolderPath) / skin.file).string().c_str());
+		skin.sprite.setSize(skin.sprite.texture.getSize());
+		skin.sprite.rect.width = skin.sprite.getSize().x;
+		skin.sprite.rect.height = skin.sprite.getSize().y;
+	}
+}
+
+LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
+	_parent(parent),
+	avatars()
+{
+	std::filesystem::path folder = profileFolderPath;
+
+	this->_loadAvatars();
+	this->_loadBackgrounds();
+	this->_loadEmotes();
+	this->_loadArcades();
 
 	this->title.texture.loadFromFile((std::filesystem::path(profileFolderPath) / "assets/menu/title.png").string().c_str());
 	this->title.setSize(this->title.texture.getSize());

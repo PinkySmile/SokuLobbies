@@ -321,6 +321,9 @@ void Connection::_handlePacket(const Lobbies::PacketArcadeEngage &packet, size_t
 	size -= sizeof(packet);
 	this->_playerMutex.lock();
 	this->_players[packet.id].battleStatus = 1;
+	this->_players[packet.id].machineId = packet.machineId;
+	if (this->onArcadeEngage)
+		this->onArcadeEngage(this->_players[packet.id], packet.machineId);
 	this->_playerMutex.unlock();
 }
 
@@ -333,6 +336,8 @@ void Connection::_handlePacket(const Lobbies::PacketArcadeLeave &packet, size_t 
 	size -= sizeof(packet);
 	this->_playerMutex.lock();
 	this->_players[packet.id].battleStatus = 0;
+	if (this->onArcadeLeave)
+		this->onArcadeLeave(this->_players[packet.id], this->_players[packet.id].machineId);
 	this->_playerMutex.unlock();
 }
 

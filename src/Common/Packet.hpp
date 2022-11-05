@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <string>
 
-#define MOD_VERSION 7
+#define MOD_VERSION 8
 
 namespace Lobbies
 {
@@ -226,8 +226,9 @@ namespace Lobbies
 
 	public:
 		uint32_t id;
+		uint32_t machineId;
 
-		PacketArcadeEngage(uint32_t id);
+		PacketArcadeEngage(uint32_t id, uint32_t machineId);
 		std::string toString() const;
 	};
 

@@ -6,6 +6,7 @@
 #define SOKULOBBIES_INLOBBYMENU_HPP
 
 
+#include <mutex>
 #include <thread>
 #include <Socket.hpp>
 #include <SokuLib.hpp>
@@ -34,6 +35,22 @@ private:
 		bool farDown = false;
 		bool farUp = false;
 	};
+	struct ArcadeMachine {
+		unsigned id;
+		SokuLib::Vector2i pos;
+		LobbyMenu::ArcadeAnimation *currentAnim;
+		LobbyMenu::ArcadeSkin &skin;
+		std::mutex mutex;
+		unsigned skinAnimationCtr = 0;
+		unsigned skinAnimation = 0;
+		unsigned animationCtr = 0;
+		unsigned animation = 0;
+		unsigned playerCount = 0;
+		bool animIdle = false;
+
+		ArcadeMachine(unsigned id, SokuLib::Vector2i pos, LobbyMenu::ArcadeAnimation *currentAnim, LobbyMenu::ArcadeSkin &skin);
+		ArcadeMachine(const ArcadeMachine &);
+	};
 
 	std::function<void (const std::string &ip, unsigned short port, bool spectate)> onConnectRequest;
 	std::function<void (const std::string &msg)> onError;
@@ -42,6 +59,8 @@ private:
 	std::function<void (const Player &)> onPlayerJoin;
 	std::function<unsigned short ()> onHostRequest;
 	std::function<void (const Lobbies::PacketOlleh &)> onConnect;
+	std::function<void (const Player &, uint32_t id)> onArcadeEngage;
+	std::function<void (const Player &, uint32_t id)> onArcadeLeave;
 	SokuLib::Vector2i _translate{0, 0};
 	Connection &connection;
 	SokuLib::MenuConnect *parent;
@@ -61,6 +80,7 @@ private:
 	std::list<Message> _chatMessages;
 	std::map<uint32_t, PlayerData> _extraPlayerData;
 	std::vector<char> _buffer;
+	std::vector<ArcadeMachine> _machines;
 
 	// Chat input box
 	SokuLib::DrawUtils::RectangleShape _textCursor;

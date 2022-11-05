@@ -5,6 +5,7 @@
 #include "InLobbyMenu.hpp"
 #include <dinput.h>
 #include <filesystem>
+#include <random>
 
 #define TEXTURE_MAX_SIZE 344
 #define CURSOR_ENDX 637
@@ -19,6 +20,7 @@ extern wchar_t profileFolderPath[MAX_PATH];
 InLobbyMenu *activeMenu = nullptr;
 static WNDPROC Original_WndProc = nullptr;
 static std::mutex ptrMutex;
+static std::mt19937 random;
 
 static LRESULT __stdcall Hooked_WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -127,12 +129,26 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 	this->_textSprite.setSize({350, 18});
 	this->_textSprite.setPosition({CURSOR_STARTX - hasEnglishPatch * 2, CURSOR_STARTY});
 
+	auto &bg = this->_menu->backgrounds.front();
+
 	this->onConnectRequest = connection.onConnectRequest;
 	this->onError = connection.onError;
 	this->onImpMsg = connection.onImpMsg;
 	this->onMsg = connection.onMsg;
 	this->onHostRequest = connection.onHostRequest;
 	this->onConnect = connection.onConnect;
+	this->_machines.reserve((bg.fg.getSize().x / 200 - 1) * (bg.platformCount + 1));
+
+	int id = 0;
+
+	for (int j = 0; j < bg.platformCount + 1; j++)
+		for (int i = 200; i < bg.fg.getSize().x; i += 200)
+			this->_machines.emplace_back(
+				id++,
+				SokuLib::Vector2i{i, static_cast<int>(bg.fg.getSize().y - bg.groundPos + j * bg.platformInterval)},
+				&this->_menu->arcades.intro,
+				this->_menu->arcades.skins.front()
+			);
 	connection.onPlayerJoin = [this](const Player &r){
 		SokuLib::Vector2i size;
 
@@ -178,6 +194,48 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 		this->connection.getMe()->battleStatus = 2;
 		this->parent->setupHost(10800, true);
 		return 10800;
+	};
+	connection.onArcadeEngage = [this](const Player &, uint32_t id){
+		if (id >= this->_machines.size())
+			return;
+
+		auto &machine = this->_machines[id];
+
+		machine.mutex.lock();
+		machine.playerCount++;
+		if (machine.playerCount == 1) {
+			machine.animation = 0;
+			machine.animationCtr = 0;
+			machine.animIdle = false;
+			machine.currentAnim = &this->_menu->arcades.select;
+		} else if (machine.playerCount == 2) {
+			machine.animation = 0;
+			machine.animationCtr = 0;
+			machine.animIdle = false;
+			machine.currentAnim = &this->_menu->arcades.game[random() % this->_menu->arcades.game.size()];
+		}
+		machine.mutex.unlock();
+	};
+	connection.onArcadeLeave = [this](const Player &, uint32_t id){
+		if (id >= this->_machines.size())
+			return;
+
+		auto &machine = this->_machines[id];
+
+		machine.mutex.lock();
+		machine.playerCount--;
+		if (machine.playerCount == 1) {
+			machine.animation = 0;
+			machine.animationCtr = 0;
+			machine.animIdle = false;
+			machine.currentAnim = &this->_menu->arcades.select;
+		} else if (machine.playerCount == 0) {
+			machine.animIdle = true;
+			machine.animationCtr = 0;
+			machine.currentAnim = &this->_menu->arcades.intro;
+			machine.animation = machine.currentAnim->frameCount - 1;
+		}
+		machine.mutex.unlock();
 	};
 	connection.connect();
 	activeMenu = this;
@@ -260,11 +318,23 @@ int InLobbyMenu::onProcess()
 			return false;
 		}
 		if (SokuLib::inputMgrs.input.a == 1) {
-			Lobbies::PacketGameRequest packet{0};
+			for (auto &machine : this->_machines) {
+				if (me->pos.x < machine.pos.x - machine.skin.sprite.getSize().x / 2)
+					continue;
+				if (me->pos.y < machine.pos.y)
+					continue;
+				if (me->pos.x > machine.pos.x + machine.skin.sprite.getSize().x / 2)
+					continue;
+				if (me->pos.y > machine.pos.y + machine.skin.sprite.getSize().y)
+					continue;
 
-			me->battleStatus = 1;
-			this->connection.send(&packet, sizeof(packet));
-			SokuLib::playSEWaveBuffer(0x28);
+				Lobbies::PacketGameRequest packet{machine.id};
+
+				me->battleStatus = 1;
+				this->connection.send(&packet, sizeof(packet));
+				SokuLib::playSEWaveBuffer(0x28);
+				break;
+			}
 		}
 
 		bool dirChanged;
@@ -324,6 +394,35 @@ int InLobbyMenu::onProcess()
 			SokuLib::playSEWaveBuffer(0x29);
 		}
 	}
+	for (auto &machine : this->_machines) {
+		machine.mutex.lock();
+		if (machine.animIdle)
+			goto checkSkinAnim;
+		machine.animationCtr++;
+		if (machine.animationCtr < 60 / machine.currentAnim->frameRate)
+			goto checkSkinAnim;
+		machine.animationCtr = 0;
+		machine.animation++;
+		if (machine.animation < machine.currentAnim->frameCount)
+			goto checkSkinAnim;
+		if (machine.currentAnim->loop)
+			machine.animation = 0;
+		else {
+			machine.animIdle = true;
+			machine.animation--;
+		}
+	checkSkinAnim:
+		machine.skinAnimationCtr++;
+		if (machine.skinAnimationCtr < 60 / machine.skin.frameRate)
+			goto done;
+		machine.skinAnimationCtr = 0;
+		machine.skinAnimation++;
+		if (machine.skinAnimation < machine.skin.frameCount)
+			goto done;
+		machine.skinAnimation = 0;
+	done:
+		machine.mutex.unlock();
+	}
 
 	this->connection.updatePlayers(this->_menu->avatars);
 	if (me->pos.x < 320)
@@ -366,6 +465,25 @@ int InLobbyMenu::onRender()
 		this->_translate.y - static_cast<int>(bg.fg.getSize().y) + 480
 	});
 	bg.fg.draw();
+	for (auto &machine : this->_machines) {
+		SokuLib::Vector2i pos{
+			static_cast<int>(machine.pos.x) - static_cast<int>(machine.skin.sprite.getSize().x / 2) + this->_translate.x,
+			480 - static_cast<int>(machine.pos.y + machine.skin.sprite.getSize().y) + this->_translate.y
+		};
+
+		machine.mutex.lock();
+		machine.skin.sprite.setPosition(pos);
+		machine.skin.sprite.rect.left = machine.skinAnimation * machine.skin.sprite.rect.width;
+		machine.skin.sprite.draw();
+		pos += machine.skin.animationOffsets;
+		machine.currentAnim->sprite.setPosition(pos);
+		if (machine.currentAnim->tilePerLine) {
+			machine.currentAnim->sprite.rect.left = machine.animation % machine.currentAnim->tilePerLine * machine.currentAnim->size.x;
+			machine.currentAnim->sprite.rect.top = machine.animation / machine.currentAnim->tilePerLine * machine.currentAnim->size.y;
+		}
+		machine.currentAnim->sprite.draw();
+		machine.mutex.unlock();
+	}
 
 	auto players = this->connection.getPlayers();
 #ifdef _DEBUG
@@ -421,6 +539,8 @@ void InLobbyMenu::_unhook()
 	this->connection.onHostRequest = this->onHostRequest;
 	this->connection.onConnect = this->onConnect;
 	this->connection.onPlayerJoin = this->onPlayerJoin;
+	this->connection.onArcadeEngage = this->onArcadeEngage;
+	this->connection.onArcadeLeave = this->onArcadeLeave;
 }
 
 void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const std::string &msg)
@@ -781,6 +901,17 @@ void InLobbyMenu::_sendMessage(const std::string &msg)
 		realMsg += currentEmote;
 	}
 
+	size_t pos = realMsg.find("bgs");
+
+	if (
+		pos != std::string::npos &&
+		(pos == 0 || !isalpha(realMsg[pos-1])) ||
+		(pos + 3 == realMsg.size() - 1 || !isalpha(realMsg[pos + 3]))
+	) {
+		realMsg.erase(realMsg.begin() + pos, realMsg.begin() + pos + 3);
+		realMsg.insert(pos, "GGs, thanks for the games. It was very nice playing with you, let's play again later");
+	}
+
 	Lobbies::PacketMessage msgPacket{0, 0, realMsg};
 
 	this->connection.send(&msgPacket, sizeof(msgPacket));
@@ -899,4 +1030,18 @@ void InLobbyMenu::_updateMessageSprite(SokuLib::Vector2i pos, unsigned int remai
 		static_cast<unsigned int>(sprite.rect.height)
 	});
 	sprite.setPosition(pos);
+}
+
+InLobbyMenu::ArcadeMachine::ArcadeMachine(unsigned id, SokuLib::Vector2i pos, LobbyMenu::ArcadeAnimation *currentAnim, LobbyMenu::ArcadeSkin &skin):
+	id(id),
+	pos(pos),
+	currentAnim(currentAnim),
+	skin(skin)
+{
+}
+
+InLobbyMenu::ArcadeMachine::ArcadeMachine(const InLobbyMenu::ArcadeMachine &):
+	skin(*(LobbyMenu::ArcadeSkin*)nullptr)
+{
+	assert(false);
 }

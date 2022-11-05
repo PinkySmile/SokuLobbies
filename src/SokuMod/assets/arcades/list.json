@@ -1,0 +1,35 @@
+{
+	"intro": {
+		"file": "assets/arcades/intro.png",
+		"frames": 437,
+		"sizeX": 32,
+		"sizeY": 24,
+		"rate": 30
+	},
+	"select": {
+		"file": "assets/arcades/select.png",
+		"frames": 1,
+		"sizeX": 32,
+		"sizeY": 24,
+		"rate": 30
+	},
+	"games": [
+		{
+			"file": "assets/arcades/loading.png",
+			"frames": 1,
+			"sizeX": 32,
+			"sizeY": 24,
+			"loop": true,
+			"rate": 30
+		}
+	],
+	"arcades": [
+		{
+			"file": "assets/arcades/arcade1.png",
+			"frames": 1,
+			"rate": 30,
+			"offsetX": 16,
+			"offsetY": 29
+		}
+	]
+}

@@ -212,8 +212,8 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 				connection.send(&join2, sizeof(join2));
 				connection.send(&pos, sizeof(pos));
 				connection.send(&move, sizeof(move));
-				if (connection.getBattleStatus()) {
-					Lobbies::PacketArcadeEngage engage{c->getId()};
+				if (c->getBattleStatus()) {
+					Lobbies::PacketArcadeEngage engage{c->getId(), c->getActiveMachine()};
 
 					connection.send(&engage, sizeof(engage));
 				}
@@ -228,11 +228,11 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 
 		auto realMessage = msg;
 
-		for (size_t i = 0; i < realMessage.size(); i++) {
-			if (realMessage[i] == '<')
-				realMessage[i] = '{';
-			if (realMessage[i] == '>')
-				realMessage[i] = '}';
+		for (char &i : realMessage) {
+			if (i == '<')
+				i = '{';
+			if (i == '>')
+				i = '}';
 		}
 
 		Lobbies::PacketMessage msgPacket{channel, id, "[" + connection.getName() + "]: " + realMessage};
@@ -310,6 +310,14 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 		} else
 			machine.erase(std::find(machine.begin(), machine.end(), &connection));
 		this->_machinesMutex.unlock();
+
+		Lobbies::PacketArcadeLeave leave{connection.getId()};
+
+		this->_connectionsMutex.lock();
+		for (auto &c : this->_connections)
+			if (c->getId() != connection.getId() && c->isInit())
+				c->send(&leave, sizeof(leave));
+		this->_connectionsMutex.unlock();
 	};
 	connection.setId(id);
 	connection.startThread();
@@ -451,7 +459,7 @@ void Server::_onPlayerJoinArcade(Connection &connection, unsigned int aid)
 		return;
 
 	Lobbies::PacketMessage msgPacket{0x00FFFF, 0, "You joined arcade " + std::to_string(aid) + "."};
-	Lobbies::PacketArcadeEngage engage{connection.getId()};
+	Lobbies::PacketArcadeEngage engage{connection.getId(), aid};
 
 	connection.setActiveMachine(aid);
 	this->_machinesMutex.lock();
@@ -478,7 +486,7 @@ void Server::_onPlayerJoinArcade(Connection &connection, unsigned int aid)
 
 	this->_connectionsMutex.lock();
 	for (auto &c : this->_connections)
-		if (c->getId() != connection.getId() && c->isInit())
+		if (c->isInit())
 			c->send(&engage, sizeof(engage));
 	this->_connectionsMutex.unlock();
 }
@@ -626,7 +634,7 @@ void Server::_joinCmd(Connection &author, const std::vector<std::string> &args)
 	}
 	this->_onPlayerJoinArcade(author, id);
 
-	Lobbies::PacketArcadeEngage engage{author.getId()};
+	Lobbies::PacketArcadeEngage engage{author.getId(), id};
 
 	author.send(&engage, sizeof(engage));
 }

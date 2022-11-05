@@ -75,6 +75,11 @@ private:
 	void _dummyRender();
 	void _customizeAvatarRender();
 
+	void _loadAvatars();
+	void _loadBackgrounds();
+	void _loadEmotes();
+	void _loadArcades();
+
 public:
 	struct Avatar {
 		unsigned short id = 0;
@@ -116,12 +121,41 @@ public:
 		Emote() = default;
 		Emote(const Emote &) { assert(false); }
 	};
+	struct ArcadeAnimation {
+		std::string file;
+		SokuLib::DrawUtils::Sprite sprite;
+		unsigned tilePerLine;
+		SokuLib::Vector2u size;
+		unsigned frameRate;
+		unsigned frameCount;
+		bool loop;
+
+		ArcadeAnimation() = default;
+		ArcadeAnimation(const ArcadeAnimation &) { assert(false); }
+	};
+	struct ArcadeSkin {
+		std::string file;
+		SokuLib::DrawUtils::Sprite sprite;
+		SokuLib::Vector2i animationOffsets;
+		unsigned frameRate;
+		unsigned frameCount;
+
+		ArcadeSkin() = default;
+		ArcadeSkin(const ArcadeSkin &) { assert(false); }
+	};
+	struct ArcadeData {
+		ArcadeAnimation intro;
+		ArcadeAnimation select;
+		std::vector<ArcadeAnimation> game;
+		std::vector<ArcadeSkin> skins;
+	};
 
 	std::vector<AvatarShowcase> showcases;
 	std::vector<Avatar> avatars;
 	std::vector<Background> backgrounds;
 	std::vector<Emote> emotes;
 	std::map<std::string, Emote *> emotesByName;
+	ArcadeData arcades;
 
 	LobbyMenu(SokuLib::MenuConnect *parent);
 	~LobbyMenu();

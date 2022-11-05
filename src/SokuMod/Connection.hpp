@@ -70,6 +70,8 @@ public:
 	std::function<void (int32_t channel, int32_t player, const std::string &msg)> onMsg;
 	std::function<void (const Lobbies::PacketOlleh &)> onConnect;
 	std::function<void (const Player &)> onPlayerJoin;
+	std::function<void (const Player &, uint32_t id)> onArcadeEngage;
+	std::function<void (const Player &, uint32_t id)> onArcadeLeave;
 	std::function<unsigned short ()> onHostRequest;
 	std::mutex meMutex;
 
