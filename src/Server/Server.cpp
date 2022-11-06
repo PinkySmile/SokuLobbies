@@ -3,7 +3,7 @@
 //
 
 #include <iostream>
-#incldue <future>
+#include <future>
 #ifndef _LOBBYNOLOG
 #include <mutex>
 extern std::mutex logMutex;
