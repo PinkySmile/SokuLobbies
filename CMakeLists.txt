@@ -16,6 +16,9 @@ if (CMAKE_BUILD_TYPE STREQUAL Debug)
 else ()
 	add_compile_definitions(NDEBUG=1)
 endif ()
+if (NOLOG)
+	add_compile_definitions(_LOBBYNOLOG=1)
+endif()
 
 include_directories(src/Common)
 find_package(SFML)
@@ -25,7 +28,11 @@ add_executable(
 	src/Common/Socket.hpp
 	src/Common/Socket.cpp
 	src/MainServer/main.cpp
-	src/Common/GuardedMutex.cpp src/Common/GuardedMutex.hpp)
+	src/Common/GuardedMutex.cpp
+	src/Common/GuardedMutex.hpp
+	src/Common/Utils.cpp
+	src/Common/Utils.hpp
+)
 if (WIN32)
 	target_link_libraries(SokuLobbiesMainServer ws2_32)
 endif()
@@ -42,7 +49,11 @@ if (SFML_FOUND)
 		src/Server/Connection.hpp
 		src/Server/Server.cpp
 		src/Server/Server.hpp
-		src/Common/GuardedMutex.cpp src/Common/GuardedMutex.hpp)
+		src/Common/GuardedMutex.cpp
+		src/Common/GuardedMutex.hpp
+		src/Common/Utils.cpp
+		src/Common/Utils.hpp
+	)
 	target_include_directories(SokuLobbiesServer PRIVATE ${SFML_INCLUDE_DIRS})
 	if (WIN32)
 		target_link_libraries(SokuLobbiesServer ${SFML_NETWORK_LIBRARY} ${SFML_SYSTEM_LIBRARY} ws2_32)
@@ -83,7 +94,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 		src/SokuMod/getPublicIp.cpp
 		src/SokuMod/Player.cpp
 		src/SokuMod/Player.hpp
-		src/Common/GuardedMutex.cpp src/Common/GuardedMutex.hpp)
+		src/Common/GuardedMutex.cpp src/Common/GuardedMutex.hpp src/Common/Utils.cpp src/Common/Utils.hpp)
 	target_compile_options(SokuLobbiesMod PRIVATE /Zi)
 	target_compile_definitions("SokuLobbiesMod" PRIVATE DIRECTINPUT_VERSION=0x0800 _CRT_SECURE_NO_WARNINGS)
 	target_link_directories("SokuLobbiesMod" PRIVATE lib)

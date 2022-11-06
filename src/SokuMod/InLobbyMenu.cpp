@@ -905,7 +905,7 @@ void InLobbyMenu::_sendMessage(const std::string &msg)
 
 	if (
 		pos != std::string::npos &&
-		(pos == 0 || !isalpha(realMsg[pos-1])) ||
+		(pos == 0 || !isalpha(realMsg[pos-1])) &&
 		(pos + 3 == realMsg.size() - 1 || !isalpha(realMsg[pos + 3]))
 	) {
 		realMsg.erase(realMsg.begin() + pos, realMsg.begin() + pos + 3);

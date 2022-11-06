@@ -262,6 +262,15 @@ void Connection::_handlePacket(const Lobbies::PacketHello &packet, size_t &size)
 	if (packet.modVersion < MOD_VERSION)
 		return this->kick("You are running an old version of SokuLobbies! Please update your mod and try again.");
 	memcpy(this->_uniqueId, packet.uniqueId, sizeof(packet.uniqueId));
+
+	char buffer[sizeof(packet.name) + 1];
+	char invalidChars[] = {'\\', '/', ':', '*', '?', '\"', '<', '>', '|'};
+
+	memset(buffer, 0, sizeof(buffer));
+	strncpy(buffer, packet.name, sizeof(packet.name));
+	for (auto c : invalidChars)
+		if (strchr(buffer, c))
+			return this->kick("Invalid name (contains " + std::string(&c, 1) + ")");
 	if (!this->onJoin(
 		packet,
 		this->_socket->getRemoteAddress().toString() + ":" + std::to_string(this->_socket->getRemotePort()),
@@ -411,4 +420,11 @@ void Connection::_handlePacket(const Lobbies::PacketMessage &packet, size_t &siz
 void Connection::_handlePacket(const Lobbies::PacketImportantMessage &, size_t &)
 {
 	this->kick("Protocol error: OPCODE_IMPORTANT_MESSAGE unexpected");
+}
+
+sf::IpAddress Connection::getIp() const
+{
+	if (this->_socket)
+		return this->_socket->getRemoteAddress();
+	return sf::IpAddress::Any;
 }

@@ -12,8 +12,11 @@ extern std::mutex logMutex;
 #include <fstream>
 #ifdef _WIN32
 #include <shlwapi.h>
+#include <future>
+
 #endif
 #include "Server.hpp"
+#include "Utils.hpp"
 
 Server::Server()
 {
@@ -34,12 +37,30 @@ Server::~Server()
 		this->_mainServerThread.join();
 }
 
+static std::future<std::string> readLine()
+{
+	std::promise<std::string> promise;
+	auto future = promise.get_future();
+	std::thread thread([](std::promise<std::string> p){
+		std::string line;
+
+		std::cout << "> ";
+		std::cout.flush();
+		std:getline(std::cin, line);
+		p.set_value(line);
+	}, std::move(promise));
+
+	thread.detach();
+	return future;
+}
+
 void Server::run(unsigned short port, unsigned maxPlayers, const std::string &name)
 {
 #ifndef _DEBUG
 	try {
 #endif
 		auto socket = std::make_unique<sf::TcpSocket>();
+		auto future = readLine();
 
 		this->_port = port;
 		this->_infos.maxPlayers = maxPlayers;
@@ -59,7 +80,7 @@ void Server::run(unsigned short port, unsigned maxPlayers, const std::string &na
 				this->_connectionsMutex.lock();
 			#ifndef _LOBBYNOLOG
 				logMutex.lock();
-				std::cout << "New conenction from " << socket->getRemoteAddress().toString() << ":" << socket->getRemotePort() << std::endl;
+				std::cout << "New connection from " << socket->getRemoteAddress().toString() << ":" << socket->getRemotePort() << std::endl;
 				logMutex.unlock();
 			#endif
 				this->_connections.emplace_back(new Connection(socket));
@@ -74,6 +95,10 @@ void Server::run(unsigned short port, unsigned maxPlayers, const std::string &na
 				return !c->isConnected();
 			}), this->_connections.end());
 			this->_connectionsMutex.unlock();
+			if (future.wait_for(std::chrono::milliseconds(100)) == std::future_status::ready) {
+				this->_processCommands(nullptr, future.get());
+				future = readLine();
+			}
 		}
 #ifndef _DEBUG
 	} catch (std::exception &e) {
@@ -141,9 +166,10 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 		if (!connection.isInit())
 			return;
 
-		Lobbies::PacketMessage msg{0xFF00FF, 0, connection.getName() + reason};
+		Lobbies::PacketMessage msg{0xFFFF00, 0, connection.getName() + reason};
 		Lobbies::PacketPlayerLeave leave{connection.getId()};
 
+		std::cout << connection.getName() << reason << std::endl;
 		this->_connectionsMutex.lock();
 		for (auto &c : this->_connections)
 			if (c->isInit()) {
@@ -185,19 +211,21 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 		}
 
 		auto it = std::find_if(this->_banList.begin(), this->_banList.end(), [&connection, &ip](BanEntry entry){
-			return entry.ip == ip || memcmp(entry.uniqueId, connection.getUniqueId(), sizeof(entry.uniqueId)) == 0;
+			return entry.ip == connection.getIp().toString();// || memcmp(entry.uniqueId, connection.getUniqueId(), sizeof(entry.uniqueId)) == 0;
 		});
 
 		if (it != this->_banList.end()) {
-			connection.kick("You are banned from this server");
+			std::cout << connection.getName() << " (" << connection.getIp() << ") tried to join but is banned (" << it->profileName << " " << it->ip << " " << it->reason << ")." << std::endl;
+			connection.kick("You are banned from this server: " + std::string(it->reason, strnlen(it->reason, sizeof(it->reason))));
 			return false;
 		}
 		name = this->_sanitizeName(std::string(packet.name, strnlen(packet.name, sizeof(packet.name))), &connection);
 
 		Lobbies::PacketOlleh res{name, id};
 		Lobbies::PacketPlayerJoin join{id, name, packet.custom};
-		Lobbies::PacketMessage msgPacket{0xFF00FF, 0, connection.getName() + " has joined the lobby."};
+		Lobbies::PacketMessage msgPacket{0xFFFF00, 0, connection.getName() + " has joined the lobby."};
 
+		std::cout << connection.getName() << " has joined the lobby." << std::endl;
 		connection.send(&res, sizeof(res));
 		connection.send(&msgPacket, sizeof(msgPacket));
 		this->_connectionsMutex.lock();
@@ -223,10 +251,11 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 		return true;
 	};
 	connection.onMessage = [this, &connection, id](uint8_t channel, const std::string &msg){
-		if (this->_processCommands(connection, msg))
-			return;
+		std::cout << "<" << connection.getName() << ">: " << msg;
+		if (!msg.empty() && msg.front() == '/')
+			return this->_processCommands(&connection, msg);
 
-		auto realMessage = msg;
+		auto realMessage = "[" + connection.getName() + "]: " + msg;
 
 		for (char &i : realMessage) {
 			if (i == '<')
@@ -235,7 +264,7 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 				i = '}';
 		}
 
-		Lobbies::PacketMessage msgPacket{channel, id, "[" + connection.getName() + "]: " + realMessage};
+		Lobbies::PacketMessage msgPacket{channel, id, realMessage};
 
 		for (auto &word : this->_bannedWords) {
 			auto pos = msg.find(word);
@@ -246,7 +275,7 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 				continue;
 			if (pos != msg.size() - word.size() && isalpha(msg[pos + word.size()]))
 				continue;
-			printf("Message from %s has been shadow banned (%s)\n", connection.getName().c_str(), realMessage.c_str());
+			std::cout << "Message from " << connection.getName() << " has been shadow banned (" << msg.substr(pos, pos + word.size()) << ")" << std::endl;
 			connection.send(&msgPacket, sizeof(msgPacket));
 			return;
 		}
@@ -392,23 +421,27 @@ bool Server::_startRoom(const std::vector<Connection *> &machine)
 	return true;
 }
 
-bool Server::_processCommands(Connection &author, const std::string &msg)
+void Server::_processCommands(Connection *author, const std::string &msg)
 {
-	if (msg.empty() || msg.front() != '/')
-		return false;
+	if (msg.empty())
+		return;
 
-	auto parsed = this->_parseCommand(msg.substr(1));
-	auto it = Server::_commands.find(parsed[0]);
+	auto parsed = this->_parseCommand(msg.front() == '/' ? msg.substr(1) : msg);
+	auto it = Server::_commands.find(parsed.front());
 
-	if (it == Server::_commands.end()) {
-		Lobbies::PacketMessage m{0xFF0000, 0, "Unknown command \"" + parsed[0]+ "\"\nUse /help for a list of command"};
-
-		author.send(&m, sizeof(m));
-		return true;
+	if (it != Server::_commands.end()) {
+		parsed.erase(parsed.begin());
+		return (this->*it->second.callback)(author, parsed);
 	}
-	parsed.erase(parsed.begin());
-	(this->*it->second.callback)(author, parsed);
-	return true;
+	if (!author || author->getIp() == sf::IpAddress::LocalHost) {
+		auto ita = Server::_adminCommands.find(parsed.front());
+
+		if (ita != Server::_adminCommands.end()) {
+			parsed.erase(parsed.begin());
+			return (this->*ita->second.callback)(author, parsed);
+		}
+	}
+	sendSystemMessageTo(author, "Unknown command \"" + parsed[0]+ "\"\nUse /help for a list of command", 0xFF0000);
 }
 
 void Server::_registerToMainServer()
@@ -550,28 +583,45 @@ Connection *Server::_findPlayer(const std::string &name)
 
 const std::map<std::string, Server::Cmd> Server::_commands{
 	{"help",    {"[command]", "Displays list of commands.\nExample:\n/help\n/help help", &Server::_helpCmd}},
-	{"join",    {"(player_id)|@(player_name)", "Join an arcade machine. The id must be in the range 0 to 4294967295\nExample:\n/join 1\n/join @PinkySmile", &Server::_joinCmd}},
+	{"join",    {"(player_name)", "Join an arcade machine. The id must be in the range 0 to 4294967295\nExample:\n/join 1\n/join @PinkySmile", &Server::_joinCmd}},
 	{"list",    {"", "Displays the list of connected players.", &Server::_listCmd}},
-	{"locate",  {"(player_id)|@(player_name)", "Locate a player in the field.\nExample:\n/locate 1\n/locate @PinkySmile", &Server::_locateCmd}},
-	{"teleport",{"(player_id)|@(player_name)", "Teleports to a player or a location\nExample:\n/teleport 10\n/teleport @PinkySmile", &Server::_teleportCmd}},
+	{"locate",  {"(player_name)", "Locate a player in the field.\nExample:\n/locate 1\n/locate @PinkySmile", &Server::_locateCmd}},
+	{"teleport",{"(player_name)", "Teleports to a player or a location\nExample:\n/teleport 10\n/teleport @PinkySmile", &Server::_teleportCmd}},
+	{"msg",     {"(player_name) (message)", "Sends a message privately\nExample:\n/msg @PinkySmile Hello!", &Server::_msgCmd}},
 };
 
-void Server::_helpCmd(Connection &author, const std::vector<std::string> &args)
+const std::map<std::string, Server::Cmd> Server::_adminCommands{
+	{"ban",    {"(player_name) (reason)", "Bans a player.\nExample:\n/ban @PinkySmile\n/ban 1", &Server::_banCmd}},
+	{"banip",  {"(ip) (reason)", "Bans a player.\nExample:\n/ban @PinkySmile\n/ban 1", &Server::_banipCmd}},
+	{"kick",   {"(player_name) (reason)", "Kicks a player.\nExample:\n/ban @PinkySmile\n/ban 1", &Server::_kickCmd}},
+	{"say",    {"(message)", "Sends a message as the server.\nExample:\n/say Hello!", &Server::_sayCmd}},
+	{"warn",   {"(message)", "Sends an important message to everyone.\nExample:\n/warn The server will close in 5 minutes.", &Server::_warnCmd}},
+};
+
+void Server::sendSystemMessageTo(Connection *recipient, const std::string &msg, unsigned color)
+{
+	if (recipient) {
+		Lobbies::PacketMessage m{static_cast<int>(color), 0, msg};
+
+		recipient->send(&m, sizeof(m));
+	} else
+		std::cout << msg << std::endl;
+}
+
+void Server::_helpCmd(Connection *author, const std::vector<std::string> &args)
 {
 	if (!args.empty()) {
 		auto it = Server::_commands.find(args[0]);
 
-		if (it == Server::_commands.end()) {
-			Lobbies::PacketMessage m{0xFF0000, 0, "Unknown command \"" + args[0] + "\""};
+		if (it != Server::_commands.end())
+			return sendSystemMessageTo(author, "/" + it->first + " " + it->second.usage + ": " + it->second.description, 0xFFFF00);
+		if (!author || author->getIp() == sf::IpAddress::LocalHost) {
+			auto ita = Server::_adminCommands.find(args[0]);
 
-			author.send(&m, sizeof(m));
-			return;
+			if (ita != Server::_adminCommands.end())
+				return sendSystemMessageTo(author, "/" + ita->first + " " + ita->second.usage + ": " + ita->second.description, 0xFFFF00);
 		}
-
-		Lobbies::PacketMessage m{0xFFFF00, 0, "/" + it->first + " " + it->second.usage + ": " + it->second.description};
-
-		author.send(&m, sizeof(m));
-		return;
+		return sendSystemMessageTo(author, "Unknown command \"" + args[0] + "\"", 0xFF0000);
 	}
 
 	std::string msg;
@@ -583,161 +633,281 @@ void Server::_helpCmd(Connection &author, const std::vector<std::string> &args)
 		if (msg.size() + tmp.size() < sizeof(Lobbies::PacketMessage::message))
 			msg += "\n" + tmp;
 		else {
-			Lobbies::PacketMessage m{0xFFFF00, 0, msg};
-
-			author.send(&m, sizeof(m));
+			sendSystemMessageTo(author, msg, 0xFFFF00);
 			msg = tmp;
 		}
 	}
+	if (!author || author->getIp() == sf::IpAddress::LocalHost)
+		for (auto &cmd : Server::_adminCommands) {
+			auto tmp = "/" + cmd.first + " " + cmd.second.usage;
 
-	Lobbies::PacketMessage m{0xFFFF00, 0, msg};
-
-	author.send(&m, sizeof(m));
+			if (msg.size() + tmp.size() < sizeof(Lobbies::PacketMessage::message))
+				msg += "\n" + tmp;
+			else {
+				sendSystemMessageTo(author, msg, 0xFFFF00);
+				msg = tmp;
+			}
+		}
+	sendSystemMessageTo(author, msg, 0xFFFF00);
 }
 
-void Server::_joinCmd(Connection &author, const std::vector<std::string> &args)
+void Server::_joinCmd(Connection *author, const std::vector<std::string> &args)
 {
-	if (args.empty()) {
-		Lobbies::PacketMessage m{0xFF0000, 0, "Missing argument #1 for command /join. Use /help join for more information"};
+	if (args.empty())
+		return sendSystemMessageTo(author, "Missing argument #1 for command /join. Use /help join for more information", 0xFF0000);
+	if (!author)
+		return sendSystemMessageTo(author, "Can only be used in a lobby", 0xFF0000);
 
-		author.send(&m, sizeof(m));
-		return;
-	}
+	auto name = args.front();
+	auto player = this->_findPlayer(name);
 
-	if (args[0].front() == '@') {
-		auto name = args[0].substr(1);
-		auto player = this->_findPlayer(name);
-
-		if (!player) {
-			Lobbies::PacketMessage m{0xFF0000, 0, "Cannot find " + name + "."};
-
-			author.send(&m, sizeof(m));
-		} else if (!player->getBattleStatus()) {
-			Lobbies::PacketMessage m{0xFF0000, 0, name + " is not at an arcade machine."};
-
-			author.send(&m, sizeof(m));
-		} else
-			this->_onPlayerJoinArcade(author, player->getActiveMachine());
-		return;
-	}
-
-	uint64_t id;
-	try {
-		id = std::stoul(args[0]);
-		if (id > UINT32_MAX)
-			throw std::exception();
-	} catch (...) {
-		Lobbies::PacketMessage m{0xFF0000, 0, args[0] + " is not a valid number"};
-
-		author.send(&m, sizeof(m));
-		return;
-	}
-	this->_onPlayerJoinArcade(author, id);
-
-	Lobbies::PacketArcadeEngage engage{author.getId(), id};
-
-	author.send(&engage, sizeof(engage));
+	if (!player)
+		sendSystemMessageTo(author, "Cannot find " + name + ".", 0xFF0000);
+	else if (!player->getBattleStatus())
+		sendSystemMessageTo(author, name + " is not at an arcade machine.", 0xFF0000);
+	else
+		this->_onPlayerJoinArcade(*author, player->getActiveMachine());
 }
 
-void Server::_listCmd(Connection &author, const std::vector<std::string> &)
+void Server::_listCmd(Connection *author, const std::vector<std::string> &)
 {
 	this->_connectionsMutex.lock();
 
-	std::string msg = "There are " + std::to_string(this->_connections.size()) + " players connected.";
+	std::vector<Connection *> players;
 
 	for (auto &c : this->_connections)
 		if (c->isInit())
-			msg += "\n" + std::to_string(c->getId()) + ": " + c->getName();
+			players.push_back(&*c);
+	std::sort(players.begin(), players.end(), [](Connection *a, Connection *b){
+		return a->getId() < b->getId();
+	});
+
+	std::string msg = "There are " + std::to_string(players.size()) + " players connected.";
+
+	for (auto &c : players)
+		msg += "\n" + std::to_string(c->getId()) + ": " + c->getName();
 	this->_connectionsMutex.unlock();
-
-	Lobbies::PacketMessage m{0xFFFF00, 0, msg};
-
-	author.send(&m, sizeof(m));
+	sendSystemMessageTo(author, msg, 0xFFFF00);
 }
 
-void Server::_locateCmd(Connection &author, const std::vector<std::string> &args)
+void Server::_locateCmd(Connection *author, const std::vector<std::string> &args)
 {
-	Connection *player;
+	if (args.empty())
+		return sendSystemMessageTo(author, "Missing argument #1 for command /locate. Use /help locate for more information", 0xFF0000);
 
-	if (args[0].front() == '@') {
-		auto name = args[0].substr(1);
+	auto name = args.front();
+	auto player = this->_findPlayer(name);
 
-		player = this->_findPlayer(name);
-		if (!player) {
-			Lobbies::PacketMessage m{0xFF0000, 0, "Cannot find " + name + "."};
-
-			author.send(&m, sizeof(m));
-			return;
-		}
-	} else {
-		uint64_t id;
-
-		try {
-			id = std::stoul(args[0]);
-			if (id > UINT32_MAX)
-				throw std::exception();
-		} catch (...) {
-			Lobbies::PacketMessage m{0xFF0000, 0, args[0] + " is not a valid number"};
-
-			author.send(&m, sizeof(m));
-			return;
-		}
-		player = this->_findPlayer(id);
-		if (!player) {
-			Lobbies::PacketMessage m{0xFF0000, 0, "Cannot find player #" + std::to_string(id) + "."};
-
-			author.send(&m, sizeof(m));
-			return;
-		}
-	}
-
-	Lobbies::PacketMessage m{0xFFFF00, 0, player->getName() + " is at x:" + std::to_string(player->getPos().x) + " y:" + std::to_string(player->getPos().y) + "."};
-
-	author.send(&m, sizeof(m));
+	if (!player)
+		return sendSystemMessageTo(author, "Cannot find " + name + ".", 0xFF0000);
+	sendSystemMessageTo(author, player->getName() + " is at x:" + std::to_string(player->getPos().x) + " y:" + std::to_string(player->getPos().y) + ".", 0xFFFF00);
 }
 
-void Server::_teleportCmd(Connection &author, const std::vector<std::string> &args)
+void Server::_teleportCmd(Connection *author, const std::vector<std::string> &args)
 {
-	Connection *player;
+	if (!author)
+		return sendSystemMessageTo(author, "Can only be used in a lobby", 0xFF0000);
+	if (args.empty())
+		return sendSystemMessageTo(author, "Missing argument #1 for command /teleport. Use /help teleport for more information", 0xFF0000);
 
-	if (args[0].front() == '@') {
-		auto name = args[0].substr(1);
+	auto name = args.front();
+	auto player = this->_findPlayer(name);
 
-		player = this->_findPlayer(name);
-		if (!player) {
-			Lobbies::PacketMessage m{0xFF0000, 0, "Cannot find " + name + "."};
+	if (!player)
+		return sendSystemMessageTo(author, "Cannot find " + name + ".", 0xFF0000);
 
-			author.send(&m, sizeof(m));
-			return;
-		}
-	} else {
-		uint64_t id;
+	Lobbies::PacketPosition pos{author->getId(), player->getPos().x, player->getPos().y};
 
-		try {
-			id = std::stoul(args[0]);
-			if (id > UINT32_MAX)
-				throw std::exception();
-		} catch (...) {
-			Lobbies::PacketMessage m{0xFF0000, 0, args[0] + " is not a valid number"};
+	sendSystemMessageTo(author, "Teleporting to " + player->getName() + " at x:" + std::to_string(player->getPos().x) + " y:" + std::to_string(player->getPos().y) + ".", 0xFFFF00);
+	author->send(&pos, sizeof(pos));
+	author->send(&pos, sizeof(pos));
+	author->send(&pos, sizeof(pos));
+	author->send(&pos, sizeof(pos));
+}
 
-			author.send(&m, sizeof(m));
-			return;
-		}
-		player = this->_findPlayer(id);
-		if (!player) {
-			Lobbies::PacketMessage m{0xFF0000, 0, "Cannot find player #" + std::to_string(id) + "."};
+void Server::_msgCmd(Connection *author, const std::vector<std::string> &args)
+{
+	if (!author)
+		return sendSystemMessageTo(author, "Can only be used in a lobby", 0xFF0000);
+	if (args.empty())
+		return sendSystemMessageTo(author, "Missing argument #1 for command /teleport. Use /help teleport for more information", 0xFF0000);
 
-			author.send(&m, sizeof(m));
-			return;
-		}
+	auto name = args.front();
+	auto player = this->_findPlayer(name);
+	auto msg = join(args.begin() + 1, args.end(), ' ');
+
+	if (!player)
+		return sendSystemMessageTo(author, "Cannot find " + name + ".", 0xFF0000);
+
+	auto realMessage1 = "[from " + (author ? author->getName() : std::string("*CONSOLE*")) + "]: " + msg;
+	auto realMessage2 = "[to " + player->getName() + "]: " + msg;
+
+	for (char &i : realMessage1) {
+		if (i == '<')
+			i = '{';
+		if (i == '>')
+			i = '}';
+	}
+	for (char &i : realMessage2) {
+		if (i == '<')
+			i = '{';
+		if (i == '>')
+			i = '}';
 	}
 
-	Lobbies::PacketPosition pos{author.getId(), player->getPos().x, player->getPos().y};
-	Lobbies::PacketMessage m{0xFFFF00, 0, "Teleporting to " + player->getName() + " at x:" + std::to_string(player->getPos().x) + " y:" + std::to_string(player->getPos().y) + "."};
+	Lobbies::PacketMessage msgPacket1{-1, author ? author->getId() : 0, realMessage1};
+	Lobbies::PacketMessage msgPacket2{-1, author ? author->getId() : 0, realMessage2};
 
-	author.send(&m, sizeof(m));
-	author.send(&pos, sizeof(pos));
-	author.send(&pos, sizeof(pos));
-	author.send(&pos, sizeof(pos));
-	author.send(&pos, sizeof(pos));
+	std::cout << '[' << (author ? author->getName() : std::string("*CONSOLE*")) << " -> " << player->getName() << "]: " << msg;
+	if (author)
+		author->send(&msgPacket2, sizeof(msgPacket2));
+	for (auto &word : this->_bannedWords) {
+		auto pos = msg.find(word);
+
+		if (pos == std::string::npos)
+			continue;
+		if (pos != 0 && isalpha(msg[pos - 1]))
+			continue;
+		if (pos != msg.size() - word.size() && isalpha(msg[pos + word.size()]))
+			continue;
+		std::cout << "Private message from " << (author ? author->getName() : std::string("*CONSOLE*")) << " to " << player->getName() << " has been shadow banned (" << msg.substr(pos, pos + word.size()) << ")" << std::endl;
+		return;
+	}
+	player->send(&msgPacket1, sizeof(msgPacket1));
+}
+
+void Server::_banCmd(Connection *author, const std::vector<std::string> &args)
+{
+	if (args.empty())
+		return sendSystemMessageTo(author, "Missing argument #1 for command /banip. Use /help banip for more information", 0xFF0000);
+
+	auto reason = args.size() == 1 ? "Banned by an operator" : join(args.begin() + 1, args.end(), ' ');
+	Connection *player = this->_findPlayer(args[0]);
+
+	if (!player)
+		return sendSystemMessageTo(author, "Cannot find " + args[0] + ".", 0xFF0000);
+	this->_banList.emplace_back();
+
+	auto &entry = this->_banList.back();
+
+	memset(&entry, 0, sizeof(entry));
+	sendSystemMessageTo(author, "Banned " + player->getName(), 0xFFFF00);
+	strncpy(entry.ip, player->getIp().toString().c_str(), sizeof(entry.ip));
+	strncpy(entry.profileName, player->getRealName().c_str(), sizeof(entry.profileName));
+	strncpy(entry.reason, reason.c_str(), sizeof(entry.reason));
+	player->kick(reason);
+}
+
+void Server::_banipCmd(Connection *author, const std::vector<std::string> &args)
+{
+	if (args.empty())
+		return sendSystemMessageTo(author, "Missing argument #1 for command /banip. Use /help banip for more information", 0xFF0000);
+
+	auto ip = sf::IpAddress(args.front());
+	auto reason = args.size() == 1 ? "Banned by an operator" : join(args.begin() + 1, args.end(), ' ');
+	Connection *player = nullptr;
+	std::string name;
+
+	if (ip == sf::IpAddress::None)
+		return sendSystemMessageTo(author, "Invalid ip provided", 0xFF0000);
+
+	auto it = std::find_if(this->_banList.begin(), this->_banList.end(), [ip](BanEntry &entry){
+		return ip.toString() == entry.ip;
+	});
+
+	if (it == this->_banList.end()) {
+		this->_banList.emplace_back();
+		auto &entry = this->_banList.back();
+		sendSystemMessageTo(author, "Banned " + ip.toString(), 0xFFFF00);
+		memset(&entry, 0, sizeof(entry));
+		strncpy(entry.ip, ip.toString().c_str(), sizeof(entry.ip));
+		strncpy(entry.profileName, ip.toString().c_str(), sizeof(entry.profileName));
+		strncpy(entry.reason, reason.c_str(), sizeof(entry.reason));
+	} else {
+		sendSystemMessageTo(author, "Updated entry for " + std::string(it->profileName), 0xFFFF00);
+		strncpy(it->reason, reason.c_str(), sizeof(it->reason));
+	}
+
+	std::vector<Connection *> toKick;
+
+	this->_connectionsMutex.lock();
+	for (auto &c : this->_connections)
+		if (c->getIp() == ip && c->isInit())
+			toKick.push_back(&*c);
+	this->_connectionsMutex.unlock();
+	for (auto c : toKick)
+		c->kick(reason);
+}
+
+void Server::_kickCmd(Connection *author, const std::vector<std::string> &args)
+{
+	if (args.empty())
+		return sendSystemMessageTo(author, "Missing argument #1 for command /banip. Use /help banip for more information", 0xFF0000);
+
+	auto reason = args.size() == 1 ? "Kicked by an operator" : join(args.begin() + 1, args.end(), ' ');
+	Connection *player = this->_findPlayer(args[0]);
+
+	if (!player)
+		return sendSystemMessageTo(author, "Cannot find " + args[0] + ".", 0xFF0000);
+	player->kick(reason);
+}
+
+void Server::_sayCmd(Connection *author, const std::vector<std::string> &args)
+{
+	auto realMessage = "[*CONSOLE*]: " + join(args.begin(), args.end(), ' ');
+
+	for (char &i : realMessage) {
+		if (i == '<')
+			i = '{';
+		if (i == '>')
+			i = '}';
+	}
+
+	Lobbies::PacketMessage msgPacket{-1, 0, realMessage};
+
+	std::cout << realMessage << std::endl;
+	for (auto &word : this->_bannedWords) {
+		auto pos = realMessage.find(word);
+
+		if (pos == std::string::npos)
+			continue;
+		if (pos != 0 && isalpha(realMessage[pos - 1]))
+			continue;
+		if (pos != realMessage.size() - word.size() && isalpha(realMessage[pos + word.size()]))
+			continue;
+		std::cout << "Message from " << (author ? author->getName() : std::string("*CONSOLE*")) << " has been shadow banned (" << realMessage.substr(pos, pos + word.size()) << ")" << std::endl;
+		if (author)
+			author->send(&msgPacket, sizeof(msgPacket));
+		return;
+	}
+
+	this->_connectionsMutex.lock();
+	for (auto &c : this->_connections)
+		if (c->isInit())
+			c->send(&msgPacket, sizeof(msgPacket));
+	this->_connectionsMutex.unlock();
+}
+
+void Server::_warnCmd(Connection *author, const std::vector<std::string> &args)
+{
+	auto realMessage = join(args.begin(), args.end(), ' ');
+
+	for (char &i : realMessage) {
+		if (i == '<')
+			i = '{';
+		if (i == '>')
+			i = '}';
+	}
+
+	Lobbies::PacketMessage msgPacket{0xFFFF00, 0, realMessage};
+	Lobbies::PacketImportantMessage msgPacket2{realMessage};
+
+	std::cout << realMessage << std::endl;
+	this->_connectionsMutex.lock();
+	for (auto &c : this->_connections)
+		if (c->isInit()) {
+			c->send(&msgPacket, sizeof(msgPacket));
+			c->send(&msgPacket2, sizeof(msgPacket2));
+		}
+	this->_connectionsMutex.unlock();
 }

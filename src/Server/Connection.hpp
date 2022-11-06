@@ -74,6 +74,7 @@ public:
 
 	Connection(std::unique_ptr<sf::TcpSocket> &socket);
 	~Connection();
+	sf::IpAddress getIp() const;
 	void kick(const std::string &msg);
 	void startThread();
 	void setId(uint32_t id);
