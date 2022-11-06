@@ -47,7 +47,7 @@ static std::future<std::string> readLine()
 
 		std::cout << "> ";
 		std::cout.flush();
-		std:getline(std::cin, line);
+		std::getline(std::cin, line);
 		p.set_value(line);
 	}, std::move(promise));
 
@@ -252,7 +252,7 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 		return true;
 	};
 	connection.onMessage = [this, &connection, id](uint8_t channel, const std::string &msg){
-		std::cout << "<" << connection.getName() << ">: " << msg;
+		std::cout << "<" << connection.getName() << ">: " << msg << std::endl;
 		if (!msg.empty() && msg.front() == '/')
 			return this->_processCommands(&connection, msg);
 
