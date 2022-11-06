@@ -2,8 +2,8 @@
 // Created by PinkySmile on 01/10/2022.
 //
 
-#ifndef _LOBBYNOLOG
 #include <iostream>
+#ifndef _LOBBYNOLOG
 #include <mutex>
 extern std::mutex logMutex;
 #endif
