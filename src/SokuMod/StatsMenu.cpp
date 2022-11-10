@@ -43,7 +43,6 @@ StatsMenu::StatsMenu()
 	this->_stats.emplace_back(new ChrEntry());
 
 	auto ptr = this->_stats.front();
-	auto start = ptr;
 	SokuLib::Vector2i size;
 	unsigned id = 0;
 
@@ -90,7 +89,10 @@ StatsMenu::StatsMenu()
 		this->_stats.emplace_back(new ChrEntry());
 		ptr = this->_stats.back();
 
-		ptr->portrait.texture.loadFromGame(("data/character/" + chr.second.codeName + "/face/face000.png").c_str());
+		if (chr.first != SokuLib::CHARACTER_RANDOM)
+			ptr->portrait.texture.loadFromGame(("data/character/" + chr.second.codeName + "/face/face000.png").c_str());
+		else
+			ptr->portrait.texture.loadFromFile((std::filesystem::path(profileFolderPath) / "assets/menu/random_face000.png").string().c_str());
 		ptr->portrait.setSize({ptr->portrait.texture.getSize().x / 2, ptr->portrait.texture.getSize().y / 2});
 		ptr->portrait.rect.width = ptr->portrait.texture.getSize().x;
 		ptr->portrait.rect.height = ptr->portrait.texture.getSize().y;
