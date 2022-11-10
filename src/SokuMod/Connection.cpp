@@ -425,7 +425,7 @@ std::vector<std::string> Connection::getMessages() const
 	return result;
 }
 
-void Connection::updatePlayers(const std::vector<LobbyMenu::Avatar> &avatars)
+void Connection::updatePlayers(const std::vector<LobbyData::Avatar> &avatars)
 {
 	this->_playerMutex.lock();
 	for (auto &p : this->_players) {

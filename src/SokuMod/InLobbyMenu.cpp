@@ -2,10 +2,12 @@
 // Created by PinkySmile on 02/10/2022.
 //
 
-#include "InLobbyMenu.hpp"
 #include <dinput.h>
 #include <filesystem>
 #include <random>
+#include "InLobbyMenu.hpp"
+#include "LobbyData.hpp"
+#include "data.hpp"
 
 #define TEXTURE_MAX_SIZE 344
 #define CURSOR_ENDX 637
@@ -14,8 +16,6 @@
 #define CURSOR_STEP 7
 #define MAX_LINE_SIZE 342
 #define SCROLL_AMOUNT 20
-
-extern wchar_t profileFolderPath[MAX_PATH];
 
 InLobbyMenu *activeMenu = nullptr;
 static WNDPROC Original_WndProc = nullptr;
@@ -129,7 +129,7 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 	this->_textSprite.setSize({350, 18});
 	this->_textSprite.setPosition({CURSOR_STARTX - hasEnglishPatch * 2, CURSOR_STARTY});
 
-	auto &bg = this->_menu->backgrounds.front();
+	auto &bg = lobbyData->backgrounds.front();
 
 	this->onConnectRequest = connection.onConnectRequest;
 	this->onError = connection.onError;
@@ -146,8 +146,8 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 			this->_machines.emplace_back(
 				id++,
 				SokuLib::Vector2i{i, static_cast<int>(bg.fg.getSize().y - bg.groundPos + j * bg.platformInterval)},
-				&this->_menu->arcades.intro,
-				this->_menu->arcades.skins.front()
+				&lobbyData->arcades.intro,
+				lobbyData->arcades.skins.front()
 			);
 	connection.onPlayerJoin = [this](const Player &r){
 		SokuLib::Vector2i size;
@@ -159,7 +159,7 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 	};
 	connection.onConnect = [this, &connection](const Lobbies::PacketOlleh &r){
 		this->_background = r.bg;
-		connection.getMe()->pos.y = this->_menu->backgrounds[r.bg].fg.getSize().y - this->_menu->backgrounds[r.bg].groundPos;
+		connection.getMe()->pos.y = lobbyData->backgrounds[r.bg].fg.getSize().y - lobbyData->backgrounds[r.bg].groundPos;
 
 		SokuLib::Vector2i size;
 
@@ -207,12 +207,12 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 			machine.animation = 0;
 			machine.animationCtr = 0;
 			machine.animIdle = false;
-			machine.currentAnim = &this->_menu->arcades.select;
+			machine.currentAnim = &lobbyData->arcades.select;
 		} else if (machine.playerCount == 2) {
 			machine.animation = 0;
 			machine.animationCtr = 0;
 			machine.animIdle = false;
-			machine.currentAnim = &this->_menu->arcades.game[random() % this->_menu->arcades.game.size()];
+			machine.currentAnim = &lobbyData->arcades.game[random() % lobbyData->arcades.game.size()];
 		}
 		machine.mutex.unlock();
 	};
@@ -228,11 +228,11 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 			machine.animation = 0;
 			machine.animationCtr = 0;
 			machine.animIdle = false;
-			machine.currentAnim = &this->_menu->arcades.select;
+			machine.currentAnim = &lobbyData->arcades.select;
 		} else if (machine.playerCount == 0) {
 			machine.animIdle = true;
 			machine.animationCtr = 0;
-			machine.currentAnim = &this->_menu->arcades.intro;
+			machine.currentAnim = &lobbyData->arcades.intro;
 			machine.animation = machine.currentAnim->frameCount - 1;
 		}
 		machine.mutex.unlock();
@@ -307,7 +307,7 @@ int InLobbyMenu::onProcess()
 			this->_editingText = false;
 	}
 
-	auto &bg = this->_menu->backgrounds[this->_background];
+	auto &bg = lobbyData->backgrounds[this->_background];
 
 	if (me->battleStatus == 0 && !this->_editingText) {
 		if (SokuLib::inputMgrs.input.b == 1) {
@@ -424,7 +424,7 @@ int InLobbyMenu::onProcess()
 		machine.mutex.unlock();
 	}
 
-	this->connection.updatePlayers(this->_menu->avatars);
+	this->connection.updatePlayers(lobbyData->avatars);
 	if (me->pos.x < 320)
 		this->_translate.x = 0;
 	else if (me->pos.x > bg.fg.getSize().x - 320)
@@ -453,7 +453,7 @@ int InLobbyMenu::onRender()
 		return 0;
 	}
 
-	auto &bg = this->_menu->backgrounds[this->_background];
+	auto &bg = lobbyData->backgrounds[this->_background];
 
 	bg.bg.setPosition({
 		static_cast<int>(this->_translate.x / bg.parallaxFactor),
@@ -486,31 +486,43 @@ int InLobbyMenu::onRender()
 	}
 
 	auto players = this->connection.getPlayers();
+	SokuLib::DrawUtils::RectangleShape rect2;
 #ifdef _DEBUG
 	SokuLib::DrawUtils::RectangleShape rect;
 
 	rect.setBorderColor(SokuLib::Color::White);
 	rect.setFillColor(SokuLib::Color{0xFF, 0xFF, 0xFF, 0xA0});
 #endif
+	rect2.setBorderColor(SokuLib::Color::Black);
+	rect2.setFillColor(SokuLib::Color{0x00, 0x00, 0x00, 0xA0});
 	for (auto &player : players) {
-		auto &avatar = this->_menu->avatars[player.player.avatar];
+		if (player.player.avatar < lobbyData->avatars.size()) {
+			auto &avatar = lobbyData->avatars[player.player.avatar];
 
-		avatar.sprite.setPosition({
-			static_cast<int>(player.pos.x) - static_cast<int>(avatar.sprite.getSize().x / 2) + this->_translate.x,
-			480 - static_cast<int>(player.pos.y + avatar.sprite.getSize().y) + this->_translate.y
-		});
-		avatar.sprite.rect.top = avatar.sprite.rect.height * ((player.dir & 0b00011) != 0);
-		avatar.sprite.rect.left = player.currentAnimation * avatar.sprite.rect.width;
-		avatar.sprite.setMirroring((player.dir & 0b10000) == 0, false);
-#ifdef _DEBUG
-		rect.setSize(avatar.sprite.getSize());
-		rect.setPosition(avatar.sprite.getPosition());
-		rect.draw();
-#endif
-		avatar.sprite.draw();
+			avatar.sprite.setPosition({
+				static_cast<int>(player.pos.x) - static_cast<int>(avatar.sprite.getSize().x / 2) + this->_translate.x,
+				480 - static_cast<int>(player.pos.y + avatar.sprite.getSize().y) + this->_translate.y
+			});
+			avatar.sprite.rect.top = avatar.sprite.rect.height * ((player.dir & 0b00011) != 0);
+			avatar.sprite.rect.left = player.currentAnimation * avatar.sprite.rect.width;
+			avatar.sprite.setMirroring((player.dir & 0b10000) == 0, false);
+		#ifdef _DEBUG
+			rect.setSize(avatar.sprite.getSize());
+			rect.setPosition(avatar.sprite.getPosition());
+			rect.draw();
+		#endif
+			avatar.sprite.draw();
+		} else {
+			rect2.setSize({64, 64});
+			rect2.setPosition({
+				static_cast<int>(player.pos.x) - 32 + this->_translate.x,
+				480 - static_cast<int>(player.pos.y + 64) + this->_translate.y
+			});
+			rect2.draw();
+		}
 	}
 	for (auto &player : players) {
-		auto &avatar = this->_menu->avatars[player.player.avatar];
+		auto &avatar = lobbyData->avatars[player.player.avatar];
 
 		this->_extraPlayerData[player.id].name.setPosition({
 			static_cast<int>(player.pos.x) - static_cast<int>(this->_extraPlayerData[player.id].name.getSize().x / 2) + this->_translate.x,
@@ -876,9 +888,9 @@ void InLobbyMenu::_sendMessage(const std::string &msg)
 			if (colon)
 				continue;
 
-			auto it = this->_menu->emotesByName.find(currentEmote);
+			auto it = lobbyData->emotesByName.find(currentEmote);
 
-			if (it == this->_menu->emotesByName.end() || this->_menu->isLocked(*it->second)) {
+			if (it == lobbyData->emotesByName.end() || lobbyData->isLocked(*it->second)) {
 				realMsg += ':';
 				realMsg += currentEmote;
 				realMsg += ':';
@@ -984,7 +996,7 @@ void InLobbyMenu::renderChat()
 			for (auto &text : msg.text)
 				text.sprite.draw();
 			for (auto &emote : msg.emotes) {
-				auto &emoteObj = this->_menu->emotes[emote.id < this->_menu->emotes.size() ? emote.id : 0];
+				auto &emoteObj = lobbyData->emotes[emote.id < lobbyData->emotes.size() ? emote.id : 0];
 				auto pos = emote.pos + emote.offset;
 
 				emoteObj.sprite.tint.a = this->_chatSeat.tint.a;
@@ -1032,7 +1044,7 @@ void InLobbyMenu::_updateMessageSprite(SokuLib::Vector2i pos, unsigned int remai
 	sprite.setPosition(pos);
 }
 
-InLobbyMenu::ArcadeMachine::ArcadeMachine(unsigned id, SokuLib::Vector2i pos, LobbyMenu::ArcadeAnimation *currentAnim, LobbyMenu::ArcadeSkin &skin):
+InLobbyMenu::ArcadeMachine::ArcadeMachine(unsigned id, SokuLib::Vector2i pos, LobbyData::ArcadeAnimation *currentAnim, LobbyData::ArcadeSkin &skin):
 	id(id),
 	pos(pos),
 	currentAnim(currentAnim),
@@ -1041,7 +1053,7 @@ InLobbyMenu::ArcadeMachine::ArcadeMachine(unsigned id, SokuLib::Vector2i pos, Lo
 }
 
 InLobbyMenu::ArcadeMachine::ArcadeMachine(const InLobbyMenu::ArcadeMachine &):
-	skin(*(LobbyMenu::ArcadeSkin*)nullptr)
+	skin(*(LobbyData::ArcadeSkin*)nullptr)
 {
 	assert(false);
 }

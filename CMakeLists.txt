@@ -94,7 +94,12 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 		src/SokuMod/getPublicIp.cpp
 		src/SokuMod/Player.cpp
 		src/SokuMod/Player.hpp
-		src/Common/GuardedMutex.cpp src/Common/GuardedMutex.hpp src/Common/Utils.cpp src/Common/Utils.hpp)
+		src/Common/GuardedMutex.cpp
+		src/Common/GuardedMutex.hpp
+		src/Common/Utils.cpp
+		src/Common/Utils.hpp
+		src/SokuMod/data.hpp
+		src/SokuMod/StatsMenu.cpp src/SokuMod/StatsMenu.hpp src/SokuMod/LobbyData.cpp src/SokuMod/LobbyData.hpp)
 	target_compile_options(SokuLobbiesMod PRIVATE /Zi)
 	target_compile_definitions("SokuLobbiesMod" PRIVATE DIRECTINPUT_VERSION=0x0800 _CRT_SECURE_NO_WARNINGS)
 	target_link_directories("SokuLobbiesMod" PRIVATE lib)

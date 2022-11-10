@@ -8,10 +8,13 @@
 #include <../directx/dinput.h>
 #include "nlohmann/json.hpp"
 #include "LobbyMenu.hpp"
+#include "LobbyData.hpp"
 #include "InLobbyMenu.hpp"
 #include "Exceptions.hpp"
 #include "InputBox.hpp"
 #include "GuardedMutex.hpp"
+#include "data.hpp"
+#include "StatsMenu.hpp"
 
 #define CRenderer_Unknown1 ((void (__thiscall *)(int, int))0x404AF0)
 
@@ -25,10 +28,6 @@ enum MenuItems {
 	MENUITEM_STATISTICS,
 	MENUITEM_EXIT,
 };
-
-extern wchar_t profileFolderPath[MAX_PATH];
-extern char servHost[64];
-extern unsigned short servPort;
 
 void displaySokuCursor(SokuLib::Vector2i pos, SokuLib::Vector2u size)
 {
@@ -47,177 +46,15 @@ void displaySokuCursor(SokuLib::Vector2i pos, SokuLib::Vector2u size)
 	CRenderer_Unknown1(0x896B4C, 1);
 }
 
-void LobbyMenu::_loadAvatars()
-{
-	std::filesystem::path folder = profileFolderPath;
-	auto path = folder / "assets/avatars/list.json";
-	std::ifstream stream{path};
-	nlohmann::json j;
-
-	if (stream.fail())
-		throw std::runtime_error("Cannot open file " + path.string());
-	printf("Loading %s\n", path.string().c_str());
-	stream >> j;
-	stream.close();
-	inputBoxLoadAssets();
-	this->avatars.reserve(j.size());
-	for (auto &val : j) {
-		this->avatars.emplace_back();
-
-		auto &avatar = this->avatars.back();
-
-		avatar.id = this->avatars.size() - 1;
-		avatar.name = val["name"];
-		avatar.scale = val["scale"];
-		avatar.nbAnimations = val["animations"];
-		avatar.animationsStep = val["anim_step"];
-		avatar.accessoriesPlacement = val["accessories"];
-		avatar.sprite.texture.loadFromFile((std::filesystem::path(profileFolderPath) / val["spritesheet"].get<std::string>()).string().c_str());
-		avatar.sprite.rect.width = avatar.sprite.texture.getSize().x / avatar.nbAnimations;
-		avatar.sprite.rect.height = avatar.sprite.texture.getSize().y / 2;
-		avatar.sprite.setSize({
-			static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale),
-			static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale)
-		});
-	}
-	printf("There are %zu avatars\n", this->avatars.size());
-}
-
-void LobbyMenu::_loadBackgrounds()
-{
-	std::filesystem::path folder = profileFolderPath;
-	auto path = folder / "assets/backgrounds/list.json";
-	std::ifstream stream{path};
-	nlohmann::json j;
-
-	if (stream.fail())
-		throw std::runtime_error("Cannot open file " + path.string());
-	printf("Loading %s\n", path.string().c_str());
-	stream >> j;
-	stream.close();
-	this->backgrounds.reserve(j.size());
-	for (auto &val : j) {
-		this->backgrounds.emplace_back();
-
-		auto &bg = this->backgrounds.back();
-
-		bg.id = this->backgrounds.size() - 1;
-		bg.groundPos = val["ground"];
-		bg.parallaxFactor = val["parallax_factor"];
-		bg.platformInterval = val["platform_interval"];
-		bg.platformWidth = val["platform_width"];
-		bg.platformCount = val["platform_count"];
-		bg.fg.texture.loadFromFile((folder / val["fg"].get<std::string>()).string().c_str());
-		bg.fg.setSize(bg.fg.texture.getSize());
-		bg.fg.rect.width = bg.fg.getSize().x;
-		bg.fg.rect.height = bg.fg.getSize().y;
-		bg.bg.texture.loadFromFile((folder / val["bg"].get<std::string>()).string().c_str());
-		bg.bg.setSize(bg.bg.texture.getSize());
-		bg.bg.rect.width = bg.bg.getSize().x;
-		bg.bg.rect.height = bg.bg.getSize().y;
-	}
-	printf("There are %zu backgrounds\n", this->avatars.size());
-}
-
-void LobbyMenu::_loadEmotes()
-{
-	std::filesystem::path folder = profileFolderPath;
-	auto path = folder / "assets/emotes/list.json";
-	std::ifstream stream{path};
-	nlohmann::json j;
-
-	if (stream.fail())
-		throw std::runtime_error("Cannot open file " + path.string());
-	printf("Loading %s\n", path.string().c_str());
-	stream >> j;
-	stream.close();
-	this->emotes.reserve(j.size());
-	for (auto &val : j) {
-		this->emotes.emplace_back();
-
-		auto &emote = this->emotes.back();
-
-		emote.id = this->emotes.size() - 1;
-		emote.filepath = val["path"];
-		emote.alias = val["alias"].get<std::vector<std::string>>();
-		emote.sprite.texture.loadFromFile((folder / emote.filepath).string().c_str());
-		emote.sprite.setSize({EMOTE_SIZE, EMOTE_SIZE});
-		emote.sprite.rect.width = emote.sprite.texture.getSize().x;
-		emote.sprite.rect.height = emote.sprite.texture.getSize().y;
-		for (auto &alias : emote.alias) {
-			auto it = this->emotesByName.find(alias);
-
-			if (it != this->emotesByName.end())
-				throw std::runtime_error("Duplicate alias " + alias);
-			this->emotesByName[alias] = &emote;
-		}
-	}
-	printf("There are %zu emotes (%zu different alias)\n", this->emotes.size(), this->emotesByName.size());
-}
-
-static void extractArcadeAnimation(LobbyMenu::ArcadeAnimation &animation, const nlohmann::json &j)
-{
-	animation.file = j["file"];
-	animation.size.x = j["sizeX"];
-	animation.size.y = j["sizeY"];
-	animation.frameRate = j["rate"];
-	animation.frameCount = j["frames"];
-	animation.loop = j.contains("loop") && j["loop"];
-	animation.sprite.texture.loadFromFile((std::filesystem::path(profileFolderPath) / animation.file).string().c_str());
-	animation.sprite.setSize(animation.size);
-	animation.sprite.rect.width = animation.size.x;
-	animation.sprite.rect.height = animation.size.y;
-	animation.tilePerLine = animation.sprite.texture.getSize().x / animation.size.x;
-}
-
-void LobbyMenu::_loadArcades()
-{
-	std::filesystem::path folder = profileFolderPath;
-	auto path = folder / "assets/arcades/list.json";
-	std::ifstream stream{path};
-	nlohmann::json j;
-
-	if (stream.fail())
-		throw std::runtime_error("Cannot open file " + path.string());
-	printf("Loading %s\n", path.string().c_str());
-	stream >> j;
-	stream.close();
-	extractArcadeAnimation(this->arcades.intro, j["intro"]);
-	extractArcadeAnimation(this->arcades.select, j["select"]);
-	this->arcades.game.reserve(j["games"].size());
-	for (auto &val : j["games"]) {
-		this->arcades.game.emplace_back();
-		extractArcadeAnimation(this->arcades.game.back(), val);
-	}
-	this->arcades.skins.reserve(j["arcades"].size());
-	for (auto &val : j["arcades"]) {
-		this->arcades.skins.emplace_back();
-
-		auto &skin = this->arcades.skins.back();
-
-		skin.file = val["file"];
-		skin.animationOffsets.x = val["offsetX"];
-		skin.animationOffsets.y = val["offsetY"];
-		skin.frameRate = val["rate"];
-		skin.frameCount = val["frames"];
-		skin.sprite.texture.loadFromFile((std::filesystem::path(profileFolderPath) / skin.file).string().c_str());
-		skin.sprite.setSize(skin.sprite.texture.getSize());
-		skin.sprite.rect.width = skin.sprite.getSize().x;
-		skin.sprite.rect.height = skin.sprite.getSize().y;
-	}
-}
-
 LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
-	_parent(parent),
-	avatars()
+	_parent(parent)
 {
+	if (!lobbyData)
+		lobbyData = new LobbyData();
+
 	std::filesystem::path folder = profileFolderPath;
 
-	this->_loadAvatars();
-	this->_loadBackgrounds();
-	this->_loadEmotes();
-	this->_loadArcades();
-
+	inputBoxLoadAssets();
 	this->title.texture.loadFromFile((std::filesystem::path(profileFolderPath) / "assets/menu/title.png").string().c_str());
 	this->title.setSize(this->title.texture.getSize());
 	this->title.setPosition({23, 6});
@@ -473,8 +310,8 @@ bool LobbyMenu::_normalMenuUpdate()
 		case MENUITEM_CUSTOMIZE_AVATAR:
 			this->_customCursor = 0;
 			this->_refreshAvatarCustomText();
-			this->showcases.resize(0);
-			this->showcases.resize(this->avatars.size());
+			this->_showcases.resize(0);
+			this->_showcases.resize(lobbyData->avatars.size());
 			this->_customizeTexts[0].tint = SokuLib::Color::White;
 			this->_customizeTexts[1].tint = SokuLib::Color{0x80, 0x80, 0x80, 0xFF};
 			this->_customizeTexts[2].tint = SokuLib::Color{0x80, 0x80, 0x80, 0xFF};
@@ -484,8 +321,10 @@ bool LobbyMenu::_normalMenuUpdate()
 		case MENUITEM_CUSTOMIZE_LOBBY:
 		case MENUITEM_ACHIVEMENTS:
 		case MENUITEM_OPTIONS:
-		case MENUITEM_STATISTICS:
 			MessageBox(SokuLib::window, "Not implemented", "Not implemented", MB_ICONINFORMATION);
+			break;
+		case MENUITEM_STATISTICS:
+			SokuLib::activateMenu(new StatsMenu());
 			break;
 		case MENUITEM_EXIT:
 			return false;
@@ -539,24 +378,24 @@ bool LobbyMenu::_customizeAvatarUpdate()
 	if (std::abs(SokuLib::inputMgrs.input.horizontalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.horizontalAxis) > 36 && std::abs(SokuLib::inputMgrs.input.horizontalAxis) % 6 == 0)) {
 		SokuLib::playSEWaveBuffer(0x27);
 		if (this->_customCursor == 0 && SokuLib::inputMgrs.input.horizontalAxis < 0)
-			this->_customCursor += this->avatars.size() - 1 - (this->avatars.size() - 1) % 4;
+			this->_customCursor += lobbyData->avatars.size() - 1 - (lobbyData->avatars.size() - 1) % 4;
 		else
-			this->_customCursor = (this->_customCursor + (int)std::copysign(1, SokuLib::inputMgrs.input.horizontalAxis)) % this->avatars.size();
+			this->_customCursor = (this->_customCursor + (int)std::copysign(1, SokuLib::inputMgrs.input.horizontalAxis)) % lobbyData->avatars.size();
 		this->_refreshAvatarCustomText();
 	}
 	if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.verticalAxis) > 36 && std::abs(SokuLib::inputMgrs.input.verticalAxis) % 6 == 0)) {
 		SokuLib::playSEWaveBuffer(0x27);
 		if (this->_customCursor < 4 && SokuLib::inputMgrs.input.verticalAxis < 0)
-			this->_customCursor = this->avatars.size() - 1 - this->_customCursor;
-		else if (this->_customCursor + 4 >= this->avatars.size() && SokuLib::inputMgrs.input.verticalAxis > 0)
+			this->_customCursor = lobbyData->avatars.size() - 1 - this->_customCursor;
+		else if (this->_customCursor + 4 >= lobbyData->avatars.size() && SokuLib::inputMgrs.input.verticalAxis > 0)
 			this->_customCursor = this->_customCursor % 4;
 		else
 			this->_customCursor = this->_customCursor + (int)std::copysign(4, SokuLib::inputMgrs.input.verticalAxis);
 		this->_refreshAvatarCustomText();
 	}
-	for (int i = 0; i < this->avatars.size(); i++) {
-		auto &avatar = this->avatars[i];
-		auto &showcase = this->showcases[i];
+	for (int i = 0; i < lobbyData->avatars.size(); i++) {
+		auto &avatar = lobbyData->avatars[i];
+		auto &showcase = this->_showcases[i];
 
 		showcase.animCtr++;
 		if (showcase.animCtr < avatar.animationsStep)
@@ -629,9 +468,9 @@ void LobbyMenu::_customizeAvatarRender()
 	rect.setBorderColor(SokuLib::Color::White);
 	rect.setFillColor(SokuLib::Color{0xFF, 0xFF, 0xFF, 0xA0});
 #endif
-	for (int i = 0; i < this->avatars.size(); i++) {
-		auto &avatar = this->avatars[i];
-		auto &showcase = this->showcases[i];
+	for (int i = 0; i < lobbyData->avatars.size(); i++) {
+		auto &avatar = lobbyData->avatars[i];
+		auto &showcase = this->_showcases[i];
 
 		avatar.sprite.setSize({
 			static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale / 2),
@@ -860,31 +699,16 @@ void LobbyMenu::_connectLoop()
 	}
 }
 
-bool LobbyMenu::isLocked(const LobbyMenu::Emote &emote)
-{
-	return false;
-}
-
-bool LobbyMenu::isLocked(const LobbyMenu::Avatar &avatar)
-{
-	return false;
-}
-
-bool LobbyMenu::isLocked(const LobbyMenu::Background &background)
-{
-	return false;
-}
-
 void LobbyMenu::_refreshAvatarCustomText()
 {
-	auto &avatar = this->avatars[this->_customCursor];
+	auto &avatar = lobbyData->avatars[this->_customCursor];
 
 	this->_customAvatarName.texture.createFromText(avatar.name.c_str(), this->_defaultFont16, {600, 74});
 	this->_customAvatarName.setSize(this->_customAvatarName.texture.getSize());
 	this->_customAvatarName.rect.width = this->_loadingText.texture.getSize().x;
 	this->_customAvatarName.rect.height = this->_loadingText.texture.getSize().y;
 	this->_customAvatarName.setPosition({354 + avatar.sprite.rect.width, 312});
-	this->_customAvatarName.tint = isLocked(avatar) ? SokuLib::Color::Red : SokuLib::Color::Green;
+	this->_customAvatarName.tint = lobbyData->isLocked(avatar) ? SokuLib::Color::Red : SokuLib::Color::Green;
 
 	this->_customAvatarRequ.texture.createFromText("Unlocked by default", this->_defaultFont12, {600, 74});
 	this->_customAvatarRequ.setSize(this->_customAvatarRequ.texture.getSize());
@@ -895,7 +719,7 @@ void LobbyMenu::_refreshAvatarCustomText()
 
 void LobbyMenu::_renderAvatarCustomText()
 {
-	auto &avatar = this->avatars[this->_customCursor];
+	auto &avatar = lobbyData->avatars[this->_customCursor];
 
 	avatar.sprite.setSize({
 		static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale / 2),
@@ -925,7 +749,7 @@ void LobbyMenu::_renderAvatarCustomText()
 
 void LobbyMenu::_renderCustomAvatarPreview()
 {
-	auto &avatar = this->avatars[this->_loadedSettings.player.avatar];
+	auto &avatar = lobbyData->avatars[this->_loadedSettings.player.avatar];
 
 	avatar.sprite.setPosition({
 		455 - static_cast<int>(avatar.sprite.getSize().x / 2),
@@ -941,7 +765,7 @@ void LobbyMenu::_renderCustomAvatarPreview()
 	rect.draw();
 #endif
 	avatar.sprite.rect.top = 0;
-	avatar.sprite.rect.left = this->showcases[this->_customCursor].anim * avatar.sprite.rect.width;
+	avatar.sprite.rect.left = this->_showcases[this->_customCursor].anim * avatar.sprite.rect.width;
 	avatar.sprite.setMirroring(false, false);
 	avatar.sprite.draw();
 	this->_playerName.setPosition({

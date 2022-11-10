@@ -11,6 +11,7 @@
 #include <Socket.hpp>
 #include <SokuLib.hpp>
 #include "Connection.hpp"
+#include "LobbyData.hpp"
 #include "LobbyMenu.hpp"
 
 class InLobbyMenu : public SokuLib::IMenu {
@@ -38,8 +39,8 @@ private:
 	struct ArcadeMachine {
 		unsigned id;
 		SokuLib::Vector2i pos;
-		LobbyMenu::ArcadeAnimation *currentAnim;
-		LobbyMenu::ArcadeSkin &skin;
+		LobbyData::ArcadeAnimation *currentAnim;
+		LobbyData::ArcadeSkin &skin;
 		std::mutex mutex;
 		unsigned skinAnimationCtr = 0;
 		unsigned skinAnimation = 0;
@@ -48,7 +49,7 @@ private:
 		unsigned playerCount = 0;
 		bool animIdle = false;
 
-		ArcadeMachine(unsigned id, SokuLib::Vector2i pos, LobbyMenu::ArcadeAnimation *currentAnim, LobbyMenu::ArcadeSkin &skin);
+		ArcadeMachine(unsigned id, SokuLib::Vector2i pos, LobbyData::ArcadeAnimation *currentAnim, LobbyData::ArcadeSkin &skin);
 		ArcadeMachine(const ArcadeMachine &);
 	};
 
@@ -62,9 +63,9 @@ private:
 	std::function<void (const Player &, uint32_t id)> onArcadeEngage;
 	std::function<void (const Player &, uint32_t id)> onArcadeLeave;
 	SokuLib::Vector2i _translate{0, 0};
+	LobbyMenu *_menu;
 	Connection &connection;
 	SokuLib::MenuConnect *parent;
-	LobbyMenu *_menu;
 	bool _wasConnected = false;
 	unsigned _chatTimer = 0;
 	unsigned _chatOffset = 0;

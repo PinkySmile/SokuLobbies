@@ -12,8 +12,6 @@
 #include "Player.hpp"
 #include "Socket.hpp"
 
-#define EMOTE_SIZE 32
-
 class Connection;
 class LobbyMenu : public SokuLib::IMenu {
 private:
@@ -27,6 +25,12 @@ private:
 		SokuLib::DrawUtils::Sprite name;
 		SokuLib::DrawUtils::Sprite playerCount;
 	};
+	struct AvatarShowcase {
+		unsigned char action = 0;
+		unsigned animCtr = 0;
+		unsigned anim = 0;
+		bool side = false;
+	};
 
 	SokuLib::DrawUtils::Sprite title;
 	SokuLib::DrawUtils::Sprite ui;
@@ -38,7 +42,6 @@ private:
 	int _customCursor = 0;
 	unsigned _menuCursor = 0;
 	unsigned char _menuState = 0;
-	//TODO: Make this a vector of shared_ptr to facilitate access in threads
 	std::vector<std::shared_ptr<Entry>> _connections;
 	int _lobbyCtr = 0;
 	std::string _lastError;
@@ -57,6 +60,7 @@ private:
 	SokuLib::DrawUtils::Sprite _loadingText;
 	SokuLib::DrawUtils::Sprite _messageBox;
 	SokuLib::DrawUtils::Sprite _loadingGear;
+	std::vector<AvatarShowcase> _showcases;
 
 	void _netLoop();
 	void _masterServerLoop();
@@ -75,98 +79,13 @@ private:
 	void _dummyRender();
 	void _customizeAvatarRender();
 
-	void _loadAvatars();
-	void _loadBackgrounds();
-	void _loadEmotes();
-	void _loadArcades();
-
 public:
-	struct Avatar {
-		unsigned short id = 0;
-		std::string name;
-		float scale = 0;
-		SokuLib::DrawUtils::Sprite sprite;
-		unsigned accessoriesPlacement = 0;
-		unsigned animationsStep = 0;
-		unsigned nbAnimations = 0;
-
-		Avatar() = default;
-		Avatar(const Avatar &) { assert(false); }
-	};
-	struct AvatarShowcase {
-		unsigned char action = 0;
-		unsigned animCtr = 0;
-		unsigned anim = 0;
-		bool side = false;
-	};
-	struct Background {
-		unsigned short id = 0;
-		SokuLib::DrawUtils::Sprite bg;
-		SokuLib::DrawUtils::Sprite fg;
-		unsigned groundPos = 0;
-		float parallaxFactor = 0;
-		unsigned platformInterval = 0;
-		unsigned platformWidth = 0;
-		unsigned platformCount = 0;
-
-		Background() = default;
-		Background(const Background &) { assert(false); }
-	};
-	struct Emote {
-		unsigned short id = 0;
-		std::string filepath;
-		std::vector<std::string> alias;
-		SokuLib::DrawUtils::Sprite sprite;
-
-		Emote() = default;
-		Emote(const Emote &) { assert(false); }
-	};
-	struct ArcadeAnimation {
-		std::string file;
-		SokuLib::DrawUtils::Sprite sprite;
-		unsigned tilePerLine;
-		SokuLib::Vector2u size;
-		unsigned frameRate;
-		unsigned frameCount;
-		bool loop;
-
-		ArcadeAnimation() = default;
-		ArcadeAnimation(const ArcadeAnimation &) { assert(false); }
-	};
-	struct ArcadeSkin {
-		std::string file;
-		SokuLib::DrawUtils::Sprite sprite;
-		SokuLib::Vector2i animationOffsets;
-		unsigned frameRate;
-		unsigned frameCount;
-
-		ArcadeSkin() = default;
-		ArcadeSkin(const ArcadeSkin &) { assert(false); }
-	};
-	struct ArcadeData {
-		ArcadeAnimation intro;
-		ArcadeAnimation select;
-		std::vector<ArcadeAnimation> game;
-		std::vector<ArcadeSkin> skins;
-	};
-
-	std::vector<AvatarShowcase> showcases;
-	std::vector<Avatar> avatars;
-	std::vector<Background> backgrounds;
-	std::vector<Emote> emotes;
-	std::map<std::string, Emote *> emotesByName;
-	ArcadeData arcades;
-
 	LobbyMenu(SokuLib::MenuConnect *parent);
 	~LobbyMenu();
 	void _() override;
 	int onProcess() override;
 	int onRender() override;
 	void setActive();
-	bool isLocked(const Emote &emote);
-	bool isLocked(const Avatar &avatar);
-	bool isLocked(const Background &background);
 };
-
 
 #endif //SOKULOBBIES_LOBBYMENU_HPP

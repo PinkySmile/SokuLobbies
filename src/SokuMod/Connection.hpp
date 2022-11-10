@@ -13,7 +13,7 @@
 #include <Vector2.hpp> //From SokuLib
 #include "Player.hpp"
 #include "Socket.hpp"
-#include "LobbyMenu.hpp"
+#include "LobbyData.hpp"
 
 #define PLAYER_H_SPEED 4
 #define PLAYER_V_SPEED 4
@@ -89,7 +89,7 @@ public:
 	const Player *getMe() const;
 	std::vector<Player> getPlayers() const;
 	std::vector<std::string> getMessages() const;
-	void updatePlayers(const std::vector<LobbyMenu::Avatar> &avatars);
+	void updatePlayers(const std::vector<LobbyData::Avatar> &avatars);
 };
 
 

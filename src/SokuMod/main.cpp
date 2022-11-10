@@ -2,12 +2,17 @@
 // Created by PinkySmile on 31/10/2020
 //
 
+#include <sstream>
+#include <fstream>
 #include <SokuLib.hpp>
 #include <shlwapi.h>
+#include "data.hpp"
 #include "LobbyMenu.hpp"
 #include "InLobbyMenu.hpp"
+#include "LobbyData.hpp"
 
 static bool wasBlocking = false;
+static int (SokuLib::Logo::*og_LogoOnProcess)();
 static int (SokuLib::MenuConnect::*og_ConnectOnProcess)();
 static int (SokuLib::BattleWatch::*og_BattleWatchOnProcess)();
 static int (SokuLib::BattleWatch::*og_BattleWatchOnRender)();
@@ -27,6 +32,33 @@ wchar_t profilePath[MAX_PATH];
 wchar_t profileFolderPath[MAX_PATH];
 char servHost[64];
 unsigned short servPort;
+bool hasSoku2 = false;
+auto load = std::pair(false, false);
+
+std::map<unsigned int, Character> characters{
+	{ SokuLib::CHARACTER_REIMU,     {"Reimu",     "Reimu Hakurei",          "reimu"}},
+	{ SokuLib::CHARACTER_MARISA,    {"Marisa",    "Marisa Kirisame",        "marisa"}},
+	{ SokuLib::CHARACTER_SAKUYA,    {"Sakuya",    "Sakuya Izayoi",          "sakuya"}},
+	{ SokuLib::CHARACTER_ALICE,     {"Alice",     "Alice Margatroid",       "alice"}},
+	{ SokuLib::CHARACTER_PATCHOULI, {"Patchouli", "Patchouli Knowledge",    "patchouli"}},
+	{ SokuLib::CHARACTER_YOUMU,     {"Youmu",     "Youmu Konpaku",          "youmu"}},
+	{ SokuLib::CHARACTER_REMILIA,   {"Remilia",   "Remilia Scarlet",        "remilia"}},
+	{ SokuLib::CHARACTER_YUYUKO,    {"Yuyuko",    "Yuyuko Saigyouji",       "yuyuko"}},
+	{ SokuLib::CHARACTER_YUKARI,    {"Yukari",    "Yukari Yakumo",          "yukari"}},
+	{ SokuLib::CHARACTER_SUIKA,     {"Suika",     "Suika Ibuki",            "suika"}},
+	{ SokuLib::CHARACTER_REISEN,    {"Reisen",    "Reisen Undongein Inaba", "udonge"}},
+	{ SokuLib::CHARACTER_AYA,       {"Aya",       "Aya Shameimaru",         "aya"}},
+	{ SokuLib::CHARACTER_KOMACHI,   {"Komachi",   "Komachi Onozuka",        "komachi"}},
+	{ SokuLib::CHARACTER_IKU,       {"Iku",       "Iku Nagae",              "iku"}},
+	{ SokuLib::CHARACTER_TENSHI,    {"Tenshi",    "Tenshi Hinanawi",        "tenshi"}},
+	{ SokuLib::CHARACTER_SANAE,     {"Sanae",     "Sanae Kochiya",          "sanae"}},
+	{ SokuLib::CHARACTER_CIRNO,     {"Cirno",     "Cirno",                  "chirno"}},
+	{ SokuLib::CHARACTER_MEILING,   {"Meiling",   "Hong Meiling",           "meirin"}},
+	{ SokuLib::CHARACTER_UTSUHO,    {"Utsuho",    "Utsuho Reiuji",          "utsuho"}},
+	{ SokuLib::CHARACTER_SUWAKO,    {"Suwako",    "Suwako Moriya",          "suwako"}},
+	{ SokuLib::CHARACTER_NAMAZU,    {"Namazu",    "Giant Catfish",          "namazu"}},
+	{ SokuLib::CHARACTER_RANDOM,    {"Random",    "Random Select",          "random_select"}},
+};
 
 int __fastcall ConnectOnProcess(SokuLib::MenuConnect *This)
 {
@@ -41,6 +73,41 @@ int __fastcall ConnectOnProcess(SokuLib::MenuConnect *This)
 			SokuLib::playSEWaveBuffer(0x29);
 		}
 	}
+	return res;
+}
+
+int __fastcall LogoOnProcess(SokuLib::Logo *This)
+{
+	if (!load.second) {
+		load.first = true;
+		load.second = true;
+		std::thread{[]{
+			try {
+				lobbyData = new LobbyData();
+			} catch (std::exception &e) {
+				MessageBoxA(
+					SokuLib::window,
+					(
+						"Error while loading lobby data.\n"
+						"Statistic saving, achievements and blank card rewards are now disabled.\n"
+						"To try to load data again, go to the lobby screen.\n"
+						"If loading succeeds, it will be enabled again.\n"
+						"\n"
+						"Error:\n" +
+						std::string(e.what())
+					).c_str(),
+					"SokuLobby error",
+					MB_ICONERROR
+				);
+			}
+			load.first = false;
+		}}.detach();
+	}
+
+	auto res = (This->*og_LogoOnProcess)();
+
+	if (load.first)
+		return SokuLib::SCENE_LOGO;
 	return res;
 }
 
@@ -134,6 +201,102 @@ int __fastcall SelectServerOnRender(SokuLib::SelectServer *This)
 	return ret;
 }
 
+
+void loadSoku2CSV(LPWSTR path)
+{
+	std::ifstream stream{path};
+	std::string line;
+
+	if (stream.fail()) {
+		printf("%S: %s\n", path, strerror(errno));
+		return;
+	}
+	while (std::getline(stream, line)) {
+		std::stringstream str{line};
+		unsigned id;
+		std::string idStr;
+		std::string codeName;
+		std::string shortName;
+		std::string fullName;
+
+		std::getline(str, idStr, ';');
+		std::getline(str, codeName, ';');
+		std::getline(str, shortName, ';');
+		std::getline(str, fullName, ';');
+		if (str.fail()) {
+			printf("Skipping line %s: Stream failed\n", line.c_str());
+			continue;
+		}
+		try {
+			id = std::stoi(idStr);
+		} catch (...){
+			printf("Skipping line %s: Invalid id\n", line.c_str());
+			continue;
+		}
+		characters[id].firstName = shortName;
+		characters[id].fullName = fullName;
+		characters[id].codeName = codeName;
+	}
+}
+
+void loadSoku2Config()
+{
+	puts("Looking for Soku2 config...");
+
+	int argc;
+	wchar_t app_path[MAX_PATH];
+	wchar_t setting_path[MAX_PATH];
+	wchar_t **arg_list = CommandLineToArgvW(GetCommandLineW(), &argc);
+
+	wcsncpy(app_path, arg_list[0], MAX_PATH);
+	PathRemoveFileSpecW(app_path);
+	if (GetEnvironmentVariableW(L"SWRSTOYS", setting_path, sizeof(setting_path)) <= 0) {
+		if (arg_list && argc > 1 && StrStrIW(arg_list[1], L"ini")) {
+			wcscpy(setting_path, arg_list[1]);
+			LocalFree(arg_list);
+		} else {
+			wcscpy(setting_path, app_path);
+			PathAppendW(setting_path, L"\\SWRSToys.ini");
+		}
+		if (arg_list) {
+			LocalFree(arg_list);
+		}
+	}
+	printf("Config file is %S\n", setting_path);
+
+	wchar_t moduleKeys[1024];
+	wchar_t moduleValue[MAX_PATH];
+	GetPrivateProfileStringW(L"Module", nullptr, nullptr, moduleKeys, sizeof(moduleKeys), setting_path);
+	for (wchar_t *key = moduleKeys; *key; key += wcslen(key) + 1) {
+		wchar_t module_path[MAX_PATH];
+
+		GetPrivateProfileStringW(L"Module", key, nullptr, moduleValue, sizeof(moduleValue), setting_path);
+
+		wchar_t *filename = wcsrchr(moduleValue, '/');
+
+		printf("Check %S\n", moduleValue);
+		if (!filename)
+			filename = app_path;
+		else
+			filename++;
+		for (int i = 0; filename[i]; i++)
+			filename[i] = tolower(filename[i]);
+		if (wcscmp(filename, L"soku2.dll") != 0)
+			continue;
+
+		hasSoku2 = true;
+		wcscpy(module_path, app_path);
+		PathAppendW(module_path, moduleValue);
+		while (auto result = wcschr(module_path, '/'))
+			*result = '\\';
+		PathRemoveFileSpecW(module_path);
+		printf("Found Soku2 module folder at %S\n", module_path);
+		PathAppendW(module_path, L"\\config\\info\\characters.csv");
+		loadSoku2CSV(module_path);
+		return;
+	}
+}
+
 static void __fastcall KeymapManagerSetInputs(SokuLib::KeymapManager *This)
 {
 	(This->*s_origKeymapManager_SetInputs)();
@@ -172,6 +335,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 #endif
 	wchar_t servHostW[sizeof(servHost)];
 
+	loadSoku2Config();
 	GetModuleFileNameW(hMyModule, profilePath, 1024);
 	PathRemoveFileSpecW(profilePath);
 	wcscpy(profileFolderPath, profilePath);
@@ -182,7 +346,8 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 
 	// DWORD old;
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
-	og_ConnectOnProcess = SokuLib::TamperDword(&SokuLib::VTable_ConnectMenu.onProcess, ConnectOnProcess);
+	og_LogoOnProcess         = SokuLib::TamperDword(&SokuLib::VTable_Logo.onProcess,         LogoOnProcess);
+	og_ConnectOnProcess      = SokuLib::TamperDword(&SokuLib::VTable_ConnectMenu.onProcess,  ConnectOnProcess);
 	og_BattleWatchOnProcess  = SokuLib::TamperDword(&SokuLib::VTable_BattleWatch.onProcess,  BattleWatchOnProcess);
 	og_BattleWatchOnRender   = SokuLib::TamperDword(&SokuLib::VTable_BattleWatch.onRender,   BattleWatchOnRender);
 	og_LoadingWatchOnProcess = SokuLib::TamperDword(&SokuLib::VTable_LoadingWatch.onProcess, LoadingWatchOnProcess);
