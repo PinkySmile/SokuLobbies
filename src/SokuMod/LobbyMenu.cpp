@@ -50,7 +50,7 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 	_parent(parent)
 {
 	if (!lobbyData)
-		lobbyData = new LobbyData();
+		lobbyData = std::make_unique<LobbyData>();
 
 	std::filesystem::path folder = profileFolderPath;
 

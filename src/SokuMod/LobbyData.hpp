@@ -16,21 +16,43 @@
 
 class LobbyData {
 private:
-	void _saveCharacterStats();
-	void _loadCharacterStats();
+	void _saveStats();
+	void _loadStats();
 	void _loadAvatars();
 	void _loadBackgrounds();
 	void _loadEmotes();
 	void _loadArcades();
 
+	unsigned _getExpectedMagic();
+	void _loadCharacterStats(std::istream &stream);
+	void _loadCharacterCardUsage(std::istream &stream);
+	void _loadMatchupStats(std::istream &stream);
+	void _saveCharacterStats(std::ostream &stream);
+	void _saveCharacterCardUsage(std::ostream &stream);
+	void _saveMatchupStats(std::ostream &stream);
+
 public:
+	//Stats
 	struct CharacterStatEntry {
-		unsigned char id;
 		unsigned wins;
 		unsigned losses;
 		unsigned againstWins;
 		unsigned againstLosses;
 	};
+	struct MatchupStatEntry {
+		unsigned wins;
+		unsigned losses;
+	};
+	struct CardStatEntry {
+		unsigned inDeck;
+		unsigned used;
+		unsigned burnt;
+	};
+	struct CardChrStatEntry {
+		unsigned totalCards;
+		CardStatEntry cards[35];
+	};
+
 	struct Avatar {
 		unsigned short id = 0;
 		std::string name;
@@ -100,6 +122,8 @@ public:
 	std::vector<Background> backgrounds;
 	std::map<std::string, Emote *> emotesByName;
 	std::map<unsigned char, CharacterStatEntry> loadedCharacterStats;
+	std::map<unsigned char, CardChrStatEntry> loadedCharacterCardUsage;
+	std::map<std::pair<unsigned char, unsigned char>, MatchupStatEntry> loadedMatchupStats;
 
 	LobbyData();
 	~LobbyData();
@@ -108,6 +132,6 @@ public:
 	bool isLocked(const Background &background);
 };
 
-extern LobbyData *lobbyData;
+extern std::unique_ptr<LobbyData> lobbyData;
 
 #endif //SOKULOBBIES_LOBBYDATA_HPP

@@ -83,7 +83,7 @@ int __fastcall LogoOnProcess(SokuLib::Logo *This)
 		load.second = true;
 		std::thread{[]{
 			try {
-				lobbyData = new LobbyData();
+				lobbyData = std::make_unique<LobbyData>();
 			} catch (std::exception &e) {
 				MessageBoxA(
 					SokuLib::window,

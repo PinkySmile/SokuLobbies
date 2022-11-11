@@ -8,80 +8,50 @@
 #include "data.hpp"
 #include "LobbyData.hpp"
 
-LobbyData *lobbyData = nullptr;
+std::unique_ptr<LobbyData> lobbyData;
 
-void LobbyData::_saveCharacterStats()
+void LobbyData::_saveStats()
 {
-	auto path = std::filesystem::path(profileFolderPath) / "chrstats.dat";
+	auto path = std::filesystem::path(profileFolderPath) / "stats.dat";
 
-	rename(path.string().c_str(), (path.string() + ".backup").c_str());
+	_wrename(path.wstring().c_str(), (path.wstring() + L".backup").c_str());
 
 	std::ofstream stream{path, std::fstream::binary};
-	unsigned magic = CHR_STATS_MAGIC;
 
 	if (stream.fail()) {
-		fprintf(stderr, "Cannot save stats %s\n", strerror(errno));
+		MessageBoxA(SokuLib::window, ("Cannot open " + path.string() + ": " + strerror(errno)).c_str(), "Stat saving error", MB_ICONERROR);
 		return;
 	}
-	for (auto &entry : this->loadedCharacterStats) {
-		magic -= entry.second.id;
-		magic -= entry.second.losses;
-		magic -= entry.second.wins;
-		magic -= entry.second.againstWins;
-		magic -= entry.second.againstLosses;
-	}
-	magic -= this->loadedCharacterStats.size();
+
+	unsigned magic = this->_getExpectedMagic();
+
 	stream.write((char *)&magic, sizeof(magic));
-	magic = this->loadedCharacterStats.size();
-	stream.write((char *)&magic, sizeof(magic));
-	for (auto &entry : this->loadedCharacterStats) {
-		stream.write((char *)&entry.second.id, sizeof(entry.second.id));
-		stream.write((char *)&entry.second.losses, sizeof(entry.second.losses));
-		stream.write((char *)&entry.second.wins, sizeof(entry.second.wins));
-		stream.write((char *)&entry.second.againstWins, sizeof(entry.second.againstWins));
-		stream.write((char *)&entry.second.againstLosses, sizeof(entry.second.againstLosses));
-	}
+	this->_saveCharacterStats(stream);
+	this->_saveCharacterCardUsage(stream);
+	this->_saveMatchupStats(stream);
 	if (stream.fail()) {
 		MessageBoxA(SokuLib::window, ("Error when saving stats to file: " + std::string(errno ? strerror(errno) : "Unknown error")).c_str(), "Save error", MB_ICONERROR);
 		unlink(path.string().c_str());
-		rename((path.string() + ".backup").c_str(), path.string().c_str());
+		_wrename((path.wstring() + L".backup").c_str(), path.wstring().c_str());
 	}
 }
 
-void LobbyData::_loadCharacterStats()
+void LobbyData::_loadStats()
 {
-	std::ifstream stream{std::filesystem::path(profileFolderPath) / "chrstats.dat", std::fstream::binary};
+	std::ifstream stream{std::filesystem::path(profileFolderPath) / "stats.dat", std::fstream::binary};
 	unsigned magic;
-	unsigned len;
 
 	this->loadedCharacterStats.clear();
 	if (stream.fail())
 		return;
 	stream.read((char *)&magic, sizeof(magic));
-	stream.read((char *)&len, sizeof(len));
-	magic += len;
 	if (stream.fail())
-		throw std::invalid_argument("Cannot load chrstats.dat: Unexpected end of file in header");
-	while (len--) {
-		CharacterStatEntry entry;
-
-		stream.read((char *)&entry.id, sizeof(entry.id));
-		stream.read((char *)&entry.losses, sizeof(entry.losses));
-		stream.read((char *)&entry.wins, sizeof(entry.wins));
-		stream.read((char *)&entry.againstWins, sizeof(entry.againstWins));
-		stream.read((char *)&entry.againstLosses, sizeof(entry.againstLosses));
-		magic += entry.id;
-		magic += entry.losses;
-		magic += entry.wins;
-		magic += entry.againstWins;
-		magic += entry.againstLosses;
-		if (stream.fail())
-			throw std::invalid_argument("Cannot load chrstats.dat: Unexpected end of file");
-		if (this->loadedCharacterStats.find(entry.id) != this->loadedCharacterStats.end())
-			throw std::invalid_argument("Cannot load chrstats.dat: Duplicated entry " + std::to_string(entry.id));
-	}
-	if (magic != CHR_STATS_MAGIC)
-		throw std::invalid_argument("Cannot load chrstats.dat: Invalid magic");
+		throw std::invalid_argument("Cannot load stats.dat: Unexpected end of file in header");
+	this->_loadCharacterStats(stream);
+	this->_loadCharacterCardUsage(stream);
+	this->_loadMatchupStats(stream);
+	if (magic != this->_getExpectedMagic())
+		throw std::invalid_argument("Cannot load stats.dat: Invalid magic");
 }
 
 void LobbyData::_loadAvatars()
@@ -112,9 +82,9 @@ void LobbyData::_loadAvatars()
 		avatar.sprite.rect.width = avatar.sprite.texture.getSize().x / avatar.nbAnimations;
 		avatar.sprite.rect.height = avatar.sprite.texture.getSize().y / 2;
 		avatar.sprite.setSize({
-					      static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale),
-					      static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale)
-				      });
+			static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale),
+			static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale)
+		});
 	}
 	printf("There are %zu avatars\n", this->avatars.size());
 }
@@ -245,7 +215,7 @@ void LobbyData::_loadArcades()
 
 LobbyData::LobbyData()
 {
-	this->_loadCharacterStats();
+	this->_loadStats();
 	this->_loadAvatars();
 	this->_loadBackgrounds();
 	this->_loadEmotes();
@@ -254,7 +224,7 @@ LobbyData::LobbyData()
 
 LobbyData::~LobbyData()
 {
-	this->_saveCharacterStats();
+	this->_saveStats();
 }
 
 bool LobbyData::isLocked(const LobbyData::Emote &emote)
@@ -270,4 +240,148 @@ bool LobbyData::isLocked(const LobbyData::Avatar &avatar)
 bool LobbyData::isLocked(const LobbyData::Background &background)
 {
 	return false;
+}
+
+unsigned LobbyData::_getExpectedMagic()
+{
+	unsigned magic = CHR_STATS_MAGIC;
+
+	for (auto &entry : this->loadedCharacterStats) {
+		magic -= entry.first;
+		magic -= entry.second.losses;
+		magic -= entry.second.wins;
+		magic -= entry.second.againstWins;
+		magic -= entry.second.againstLosses;
+	}
+	magic -= this->loadedCharacterStats.size();
+
+	for (auto &entry : this->loadedCharacterCardUsage) {
+		magic -= entry.first;
+		magic -= entry.second.totalCards;
+		for (auto &card : entry.second.cards) {
+			magic -= card.burnt;
+			magic -= card.inDeck;
+			magic -= card.used;
+		}
+	}
+	magic -= this->loadedCharacterCardUsage.size();
+
+	for (auto &entry : this->loadedMatchupStats) {
+		magic -= entry.first.first;
+		magic -= entry.first.second;
+		magic -= entry.second.losses;
+		magic -= entry.second.wins;
+	}
+	magic -= this->loadedMatchupStats.size();
+	return magic;
+}
+
+void LobbyData::_loadCharacterStats(std::istream &stream)
+{
+	unsigned len;
+
+	stream.read((char *)&len, sizeof(len));
+	while (len--) {
+		CharacterStatEntry entry;
+		unsigned char id;
+
+		stream.read((char *)&id, sizeof(id));
+		stream.read((char *)&entry.losses, sizeof(entry.losses));
+		stream.read((char *)&entry.wins, sizeof(entry.wins));
+		stream.read((char *)&entry.againstWins, sizeof(entry.againstWins));
+		stream.read((char *)&entry.againstLosses, sizeof(entry.againstLosses));
+		if (stream.fail())
+			throw std::invalid_argument("Cannot load stats.dat: Reading ChrStats Unexpected end of file");
+		if (this->loadedCharacterStats.find(id) != this->loadedCharacterStats.end())
+			throw std::invalid_argument("Cannot load stats.dat: Reading ChrStats Duplicated entry " + std::to_string(id));
+		this->loadedCharacterStats[id] = entry;
+	}
+}
+
+void LobbyData::_loadCharacterCardUsage(std::istream &stream)
+{
+	unsigned len;
+
+	stream.read((char *)&len, sizeof(len));
+	while (len--) {
+		CardChrStatEntry entry;
+		unsigned char id;
+
+		stream.read((char *)&id, sizeof(id));
+		stream.read((char *)&entry.totalCards, sizeof(entry.totalCards));
+		for (auto &card : entry.cards) {
+			stream.read((char *)&card.inDeck, sizeof(card.inDeck));
+			stream.read((char *)&card.used, sizeof(card.used));
+			stream.read((char *)&card.burnt, sizeof(card.burnt));
+		}
+		if (stream.fail())
+			throw std::invalid_argument("Cannot load stats.dat: Reading CardChrStats Unexpected end of file");
+		if (this->loadedCharacterCardUsage.find(id) != this->loadedCharacterCardUsage.end())
+			throw std::invalid_argument("Cannot load stats.dat: Reading CardChrStats Duplicated entry " + std::to_string(id));
+		this->loadedCharacterCardUsage[id] = entry;
+	}
+}
+
+void LobbyData::_loadMatchupStats(std::istream &stream)
+{
+	unsigned len;
+
+	stream.read((char *)&len, sizeof(len));
+	while (len--) {
+		MatchupStatEntry entry;
+		std::pair<unsigned char, unsigned char> id;
+
+		stream.read((char *)&id.first, sizeof(id.first));
+		stream.read((char *)&id.second, sizeof(id.second));
+		stream.read((char *)&entry.losses, sizeof(entry.losses));
+		stream.read((char *)&entry.wins, sizeof(entry.wins));
+		if (stream.fail())
+			throw std::invalid_argument("Cannot load stats.dat: Reading MUStats Unexpected end of file");
+		if (this->loadedMatchupStats.find(id) != this->loadedMatchupStats.end())
+			throw std::invalid_argument("Cannot load stats.dat: Reading MUStats Duplicated entry " + std::to_string(id.first) + "," + std::to_string(id.second));
+		this->loadedMatchupStats[id] = entry;
+	}
+}
+
+void LobbyData::_saveCharacterStats(std::ostream &stream)
+{
+	unsigned size = this->loadedCharacterStats.size();
+
+	stream.write((char *)&size, sizeof(size));
+	for (auto &entry : this->loadedCharacterStats) {
+		stream.write((char *)&entry.first, sizeof(entry.first));
+		stream.write((char *)&entry.second.losses, sizeof(entry.second.losses));
+		stream.write((char *)&entry.second.wins, sizeof(entry.second.wins));
+		stream.write((char *)&entry.second.againstWins, sizeof(entry.second.againstWins));
+		stream.write((char *)&entry.second.againstLosses, sizeof(entry.second.againstLosses));
+	}
+}
+
+void LobbyData::_saveCharacterCardUsage(std::ostream &stream)
+{
+	unsigned size = this->loadedCharacterCardUsage.size();
+
+	stream.write((char *)&size, sizeof(size));
+	for (auto &entry : this->loadedCharacterCardUsage) {
+		stream.write((char *)&entry.first, sizeof(entry.first));
+		stream.write((char *)&entry.second.totalCards, sizeof(entry.second.totalCards));
+		for (auto &card : entry.second.cards) {
+			stream.write((char *)&card.inDeck, sizeof(card.inDeck));
+			stream.write((char *)&card.used, sizeof(card.used));
+			stream.write((char *)&card.burnt, sizeof(card.burnt));
+		}
+	}
+}
+
+void LobbyData::_saveMatchupStats(std::ostream &stream)
+{
+	unsigned size = this->loadedMatchupStats.size();
+
+	stream.write((char *)&size, sizeof(size));
+	for (auto &entry : this->loadedMatchupStats) {
+		stream.write((char *)&entry.first.first, sizeof(entry.first.first));
+		stream.write((char *)&entry.first.second, sizeof(entry.first.second));
+		stream.write((char *)&entry.second.losses, sizeof(entry.second.losses));
+		stream.write((char *)&entry.second.wins, sizeof(entry.second.wins));
+	}
 }

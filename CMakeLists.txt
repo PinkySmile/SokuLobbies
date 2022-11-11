@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.20)
 project(SokuLobbies)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -110,6 +110,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 		ws2_32
 		d3dx9
 	)
+	target_link_directories(SokuLobbiesMod PRIVATE lib)
 	if (CMAKE_BUILD_TYPE STREQUAL Debug)
 	else ()
 		target_compile_definitions(SokuLobbiesMod PRIVATE _LOBBYNOLOG=1)
