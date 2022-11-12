@@ -94,8 +94,8 @@ void countGame()
 		lobbyData->loadedCharacterStats[oid] = entry;
 		data = lobbyData->loadedCharacterStats.find(oid);
 	}
-	data->second.againstWins += opp.score >= 2;
-	data->second.againstLosses += opp.score < 2;
+	data->second.againstWins += chr.score >= 2;
+	data->second.againstLosses += chr.score < 2;
 }
 
 int __fastcall ConnectOnProcess(SokuLib::MenuConnect *This)
