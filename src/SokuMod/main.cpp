@@ -13,6 +13,7 @@
 
 static bool wasBlocking = false;
 static int (SokuLib::Logo::*og_LogoOnProcess)();
+static int (SokuLib::Battle::*og_BattleOnProcess)();
 static int (SokuLib::MenuConnect::*og_ConnectOnProcess)();
 static int (SokuLib::BattleWatch::*og_BattleWatchOnProcess)();
 static int (SokuLib::BattleWatch::*og_BattleWatchOnRender)();
@@ -33,7 +34,9 @@ wchar_t profileFolderPath[MAX_PATH];
 char servHost[64];
 unsigned short servPort;
 bool hasSoku2 = false;
+bool counted = false;
 auto load = std::pair(false, false);
+std::function<int ()> onGameEnd;
 
 std::map<unsigned int, Character> characters{
 	{ SokuLib::CHARACTER_REIMU,     {"Reimu",     "Reimu Hakurei",          "reimu"}},
@@ -59,6 +62,41 @@ std::map<unsigned int, Character> characters{
 	{ SokuLib::CHARACTER_NAMAZU,    {"Namazu",    "Giant Catfish",          "namazu"}},
 	{ SokuLib::CHARACTER_RANDOM,    {"Random",    "Random Select",          "random_select"}},
 };
+
+void countGame()
+{
+	puts("End game");
+	if (!lobbyData)
+		return;
+	if (SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER && SokuLib::mainMode != SokuLib::BATTLE_MODE_VSCLIENT)
+		return;
+
+	auto &battle = SokuLib::getBattleMgr();
+	auto mid = SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER ? SokuLib::rightChar : SokuLib::leftChar;
+	auto oid = SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER ? SokuLib::leftChar : SokuLib::rightChar;
+	auto &chr = SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER ? battle.rightCharacterManager : battle.leftCharacterManager;
+	auto &opp = SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER ? battle.leftCharacterManager : battle.rightCharacterManager;
+	auto data = lobbyData->loadedCharacterStats.find(mid);
+
+	if (data == lobbyData->loadedCharacterStats.end()) {
+		LobbyData::CharacterStatEntry entry{0, 0, 0, 0};
+
+		lobbyData->loadedCharacterStats[mid] = entry;
+		data = lobbyData->loadedCharacterStats.find(mid);
+	}
+	data->second.wins += chr.score >= 2;
+	data->second.losses += chr.score < 2;
+
+	data = lobbyData->loadedCharacterStats.find(oid);
+	if (data == lobbyData->loadedCharacterStats.end()) {
+		LobbyData::CharacterStatEntry entry{0, 0, 0, 0};
+
+		lobbyData->loadedCharacterStats[oid] = entry;
+		data = lobbyData->loadedCharacterStats.find(oid);
+	}
+	data->second.againstWins += opp.score >= 2;
+	data->second.againstLosses += opp.score < 2;
+}
 
 int __fastcall ConnectOnProcess(SokuLib::MenuConnect *This)
 {
@@ -126,6 +164,22 @@ void renderCommon(bool showChat)
 		activeMenu->renderChat();
 }
 
+int __fastcall BattleOnProcess(SokuLib::Battle *This)
+{
+	auto ret = (This->*og_BattleOnProcess)();
+	auto &mgr = SokuLib::getBattleMgr();
+
+	if (mgr.matchState > 3 && !counted) {
+		counted = true;
+		if (onGameEnd)
+			ret = onGameEnd();
+		else
+			countGame();
+	}
+	if (ret != SokuLib::SCENE_BATTLE)
+		counted = false;
+	return ret;
+}
 int __fastcall BattleWatchOnProcess(SokuLib::BattleWatch *This)
 {
 	processCommon(true);
@@ -139,7 +193,20 @@ int __fastcall LoadingWatchOnProcess(SokuLib::LoadingWatch *This)
 int __fastcall BattleClientOnProcess(SokuLib::BattleClient *This)
 {
 	processCommon(false);
-	return (This->*og_BattleClientOnProcess)();
+
+	auto ret = (This->*og_BattleClientOnProcess)();
+	auto &mgr = SokuLib::getBattleMgr();
+
+	if (mgr.matchState > 3 && !counted) {
+		counted = true;
+		if (onGameEnd)
+			ret = onGameEnd();
+		else
+			countGame();
+	}
+	if (ret != SokuLib::SCENE_BATTLECL)
+		counted = false;
+	return ret;
 }
 int __fastcall SelectClientOnProcess(SokuLib::SelectClient *This)
 {
@@ -149,7 +216,20 @@ int __fastcall SelectClientOnProcess(SokuLib::SelectClient *This)
 int __fastcall BattleServerOnProcess(SokuLib::BattleServer *This)
 {
 	processCommon(false);
-	return (This->*og_BattleServerOnProcess)();
+
+	auto ret = (This->*og_BattleServerOnProcess)();
+	auto &mgr = SokuLib::getBattleMgr();
+
+	if (mgr.matchState > 3 && !counted) {
+		counted = true;
+		if (onGameEnd)
+			ret = onGameEnd();
+		else
+			countGame();
+	}
+	if (ret != SokuLib::SCENE_BATTLESV)
+		counted = false;
+	return ret;
 }
 int __fastcall SelectServerOnProcess(SokuLib::SelectServer *This)
 {
@@ -347,6 +427,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	// DWORD old;
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
 	og_LogoOnProcess         = SokuLib::TamperDword(&SokuLib::VTable_Logo.onProcess,         LogoOnProcess);
+	og_BattleOnProcess       = SokuLib::TamperDword(&SokuLib::VTable_Battle.onProcess,       BattleOnProcess);
 	og_ConnectOnProcess      = SokuLib::TamperDword(&SokuLib::VTable_ConnectMenu.onProcess,  ConnectOnProcess);
 	og_BattleWatchOnProcess  = SokuLib::TamperDword(&SokuLib::VTable_BattleWatch.onProcess,  BattleWatchOnProcess);
 	og_BattleWatchOnRender   = SokuLib::TamperDword(&SokuLib::VTable_BattleWatch.onRender,   BattleWatchOnRender);

@@ -8,6 +8,7 @@
 
 #include <windows.h>
 #include <map>
+#include <functional>
 
 struct Character {
 	std::string firstName;
@@ -21,6 +22,7 @@ extern char servHost[64];
 extern unsigned short servPort;
 extern bool hasSoku2;
 extern std::map<unsigned int, Character> characters;
+extern std::function<int ()> onGameEnd;
 
 
 #endif //SOKULOBBIES_DATA_HPP
