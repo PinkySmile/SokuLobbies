@@ -1,0 +1,1 @@
+from unidecode import unidecode

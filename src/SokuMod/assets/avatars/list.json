@@ -24,6 +24,14 @@
         "name": "Marisa Kirisame"
     },
     {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Sakuya Izayoi"
+    },
+    {
         "spritesheet": "assets/avatars/2 Alice.png",
         "accessories": 1,
         "animations": 4,
@@ -40,6 +48,14 @@
         "name": "Patchouli Knowledge"
     },
     {
+        "spritesheet": "assets/avatars/5 Youmu.png",
+        "accessories": 4,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Youmu Konpaku"
+    },
+    {
         "spritesheet": "assets/avatars/6 Remilia.png",
         "accessories": 5,
         "animations": 4,
@@ -48,12 +64,36 @@
         "name": "Remilia Scarlet"
     },
     {
-        "spritesheet": "assets/avatars/5 Youmu.png",
-        "accessories": 4,
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
         "animations": 4,
         "scale": 2,
         "anim_step": 8,
-        "name": "Youmu Konpaku"
+        "name": "Yuyuko Saigyouji"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Yukari Yukumo"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Suika Ibuki"
+    },
+    {
+        "spritesheet": "assets/avatars/1 Reisen.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Reisen Udongein Inaba"
     },
     {
         "spritesheet": "assets/avatars/2 Aya.png",
@@ -72,12 +112,20 @@
         "name": "Komachi Onozuka"
     },
     {
-        "spritesheet": "assets/avatars/1 Reisen.png",
+        "spritesheet": "assets/avatars/placeholder.png",
         "accessories": 0,
         "animations": 4,
         "scale": 2,
         "anim_step": 8,
-        "name": "Reisen Udongein Inaba"
+        "name": "Iku Nagae"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Tenshi Hinanawi"
     },
     {
         "spritesheet": "assets/avatars/1 Sanae.png",
@@ -96,11 +144,27 @@
         "name": "Cirno"
     },
     {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Hong Meiling"
+    },
+    {
         "spritesheet": "assets/avatars/4 Okuu.png",
         "accessories": 3,
         "animations": 4,
         "scale": 2,
         "anim_step": 8,
         "name": "Utsuho Reiuji"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Suwako Moriya"
     }
 ]
