@@ -62,15 +62,14 @@ public:
 	};
 
 	struct Achievement {
-		std::string shortDescription;
 		std::string description;
 		std::string name;
 		nlohmann::json requirement;
 		std::vector<nlohmann::json> rewards;
 		bool awarded;
 		SokuLib::DrawUtils::Sprite nameSprite;
+		SokuLib::DrawUtils::Sprite nameSpriteFull;
 		SokuLib::DrawUtils::Sprite descSprite;
-		SokuLib::DrawUtils::Sprite shortDescSprite;
 
 		Achievement() = default;
 		Achievement(const Achievement &) { assert(false); }
@@ -138,6 +137,7 @@ public:
 		std::vector<ArcadeSkin> skins;
 	};
 	struct AchievementHolder {
+		SokuLib::DrawUtils::Sprite getText;
 		SokuLib::DrawUtils::Sprite holder;
 		SokuLib::DrawUtils::Sprite behindGear;
 	};

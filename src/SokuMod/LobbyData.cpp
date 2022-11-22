@@ -135,14 +135,22 @@ void LobbyData::_loadAchievements()
 		auto flagBit = arrayIndex % 8;
 
 		bit += bit >= flagBit;
-		achievement.shortDescription = val["short_description"];
 		achievement.description = val["description"];
 		achievement.name = val["name"];
 		achievement.requirement = val["requirement"];
 		achievement.rewards = val["rewards"].get<std::vector<nlohmann::json>>();
 		achievement.awarded = (buffer[arrayIndex] & (1 << bit)) != 0;
 
-		achievement.nameSprite.texture.createFromText(achievement.name.c_str(), this->getFont(14), {400, 20});
+		achievement.nameSpriteFull.texture.createFromText(achievement.name.c_str(), this->getFont(14), {400, 20});
+		achievement.nameSpriteFull.rect.width = achievement.nameSpriteFull.texture.getSize().x;
+		achievement.nameSpriteFull.rect.height = achievement.nameSpriteFull.texture.getSize().y;
+		achievement.nameSpriteFull.setSize({
+			static_cast<unsigned int>(achievement.nameSpriteFull.rect.width),
+			static_cast<unsigned int>(achievement.nameSpriteFull.rect.height)
+		});
+		achievement.nameSpriteFull.setPosition({0, -20});
+
+		achievement.nameSprite.texture.createFromText(achievement.name.c_str(), this->getFont(12), {400, 20});
 		achievement.nameSprite.rect.width = achievement.nameSprite.texture.getSize().x;
 		achievement.nameSprite.rect.height = achievement.nameSprite.texture.getSize().y;
 		achievement.nameSprite.setSize({
@@ -160,18 +168,14 @@ void LobbyData::_loadAchievements()
 		});
 		achievement.descSprite.setPosition({0, -20});
 
-		achievement.shortDescSprite.texture.createFromText(achievement.shortDescription.c_str(), this->getFont(12), {400, 50});
-		achievement.shortDescSprite.rect.width = achievement.shortDescSprite.texture.getSize().x;
-		achievement.shortDescSprite.rect.height = achievement.shortDescSprite.texture.getSize().y;
-		achievement.shortDescSprite.setSize({
-			static_cast<unsigned int>(achievement.shortDescSprite.rect.width),
-			static_cast<unsigned int>(achievement.shortDescSprite.rect.height)
-		});
-		achievement.shortDescSprite.setPosition({0, -20});
 		this->achievementByRequ[achievement.requirement["type"]].push_back(&achievement);
+		this->achievementAwardQueue.push_back(&achievement);
 		index++;
 	}
 	delete[] buffer;
+	for (auto &achievement : this->achievements)
+		if (achievement.name.size() > 33)
+			printf("Warning: Too long achievement name '%s'\n", achievement.name.c_str());
 	printf("There are %zu achievements and they are %slocked\n", this->achievements.size(), (this->achievementsLocked ? "" : "un"));
 }
 
@@ -338,6 +342,12 @@ LobbyData::LobbyData()
 	this->_loadEmotes();
 	this->_loadArcades();
 	this->_loadAchievements();
+
+	this->achHolder.getText.texture.createFromText("Achievement Unlocked!", this->getFont(16), {400, 20});
+	this->achHolder.getText.setSize(this->achHolder.getText.texture.getSize());
+	this->achHolder.getText.rect.width = this->achHolder.getText.getSize().x;
+	this->achHolder.getText.rect.height = this->achHolder.getText.getSize().y;
+	this->achHolder.getText.tint = SokuLib::Color::Yellow;
 
 	this->achHolder.holder.texture.loadFromFile((std::filesystem::path(profileFolderPath) / "assets/ACHIEVEMENT_BAR.png").string().c_str());
 	this->achHolder.holder.setSize(this->achHolder.holder.texture.getSize());
@@ -587,7 +597,7 @@ void LobbyData::update()
 	auto type = reward["type"];
 
 	if (achievement->rewards.empty() || achievement->rewards[0]["type"] == "title") {
-		achievement->nameSprite.setPosition(this->achHolder.holder.getPosition() + SokuLib::Vector2i{5, 5});
+		this->achHolder.getText.setPosition(this->achHolder.holder.getPosition() + SokuLib::Vector2i{5, 5});
 		this->achHolder.holder.setPosition(this->achHolder.behindGear.getPosition() + SokuLib::Vector2i{
 			this->achHolder.behindGear.rect.width / 2,
 			(this->achHolder.behindGear.rect.height - this->achHolder.holder.rect.height) / 2
@@ -597,7 +607,7 @@ void LobbyData::update()
 			this->achHolder.behindGear.rect.width * 3 / 4,
 			(this->achHolder.behindGear.rect.height - this->achHolder.holder.rect.height) / 2
 		});
-		achievement->nameSprite.setPosition({
+		this->achHolder.getText.setPosition({
 			static_cast<int>(this->achHolder.behindGear.getPosition().x + this->achHolder.behindGear.getSize().x + 4),
 			this->achHolder.holder.getPosition().y + 5
 		});
@@ -625,7 +635,7 @@ void LobbyData::update()
 		}
 	}
 
-	achievement->shortDescSprite.setPosition(achievement->nameSprite.getPosition() + SokuLib::Vector2i{0, achievement->nameSprite.rect.height - 2});
+	achievement->nameSprite.setPosition(this->achHolder.getText.getPosition() + SokuLib::Vector2i{0, 16});
 	this->achHolder.behindGear.setRotation(this->achHolder.behindGear.getRotation() + 0.05);
 	if (this->_achTimer >= ACH_GET_TOTAL_TIME) {
 		this->_achTimer = 0;
@@ -655,8 +665,8 @@ void LobbyData::render()
 		this->achHolder.behindGear.draw();
 	}
 
+	this->achHolder.getText.draw();
 	achievement->nameSprite.draw();
-	achievement->shortDescSprite.draw();
 	if (type == "avatar") {
 		auto &avatar = lobbyData->avatars[reward["id"]];
 		auto pos = this->achHolder.behindGear.getPosition();
@@ -669,7 +679,7 @@ void LobbyData::render()
 			pos.y = 480 - avatar.sprite.rect.height + static_cast<int>(this->achHolder.behindGear.rect.height * (ACH_GET_FADE_OUT_ANIM - (ACH_GET_TOTAL_TIME - this->_achTimer)) / ACH_GET_FADE_OUT_ANIM);
 		else
 			pos.y = 480 - avatar.sprite.rect.height;
-		avatar.sprite.setPosition(pos);
+		avatar.sprite.setPosition(pos + SokuLib::Vector2i{2, 2});
 		avatar.sprite.setSize({
 			static_cast<unsigned int>(avatar.sprite.rect.width),
 			static_cast<unsigned int>(avatar.sprite.rect.height)
@@ -677,6 +687,10 @@ void LobbyData::render()
 		avatar.sprite.setMirroring(false, false);
 		avatar.sprite.rect.left = avatar.sprite.rect.width * this->_anim;
 		avatar.sprite.rect.top = 0;
+		avatar.sprite.tint = SokuLib::Color::Black;
+		avatar.sprite.draw();
+		avatar.sprite.setPosition(avatar.sprite.getPosition() - SokuLib::Vector2u{2, 2});
+		avatar.sprite.tint = SokuLib::Color::White;
 		avatar.sprite.draw();
 		avatar.sprite.setSize({
 			static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale),
@@ -685,8 +699,12 @@ void LobbyData::render()
 	} else if (type == "emote") {
 		auto emote = this->emotesByName[reward["name"]];
 
-		emote->sprite.setPosition(this->achHolder.behindGear.getPosition() + SokuLib::Vector2u{offset, offset - 2});
+		emote->sprite.setPosition(this->achHolder.behindGear.getPosition() + SokuLib::Vector2u{offset + 2, offset});
 		emote->sprite.setSize(this->achHolder.behindGear.getSize() - SokuLib::Vector2u{offset * 2, offset * 2});
+		emote->sprite.tint = SokuLib::Color::Black;
+		emote->sprite.draw();
+		emote->sprite.setPosition(emote->sprite.getPosition() - SokuLib::Vector2u{2, 2});
+		emote->sprite.tint = SokuLib::Color::White;
 		emote->sprite.draw();
 	} else if (type == "prop") {
 

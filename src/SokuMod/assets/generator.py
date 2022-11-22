@@ -47,7 +47,7 @@ names = [
 ]
 requs = [
     {"type": "win",    "count": 10},
-    {"type": "loose",  "count": 10},
+    {"type": "lose",   "count": 10},
     {"type": "play",   "count": 10},
     {"type": "cards"},
     {"type": "play",   "count": 100},
@@ -102,11 +102,7 @@ with open("data.txt", encoding="utf-8") as fd:
                 ],
                 "name": name[-1],
                 "description": (
-                    "Use every " + names[index] + "'s skill and spell at least once" if requ["type"] == "cards"
-                    else requ["type"].capitalize() + " " + str(requ["count"]) + " games as " + names[index]
-                ),
-                "short_description": (
-                    "Use all of " + names[index] + "'s card once" if requ["type"] == "cards"
+                    "Use each " + names[index] + "'s skill and spell at least once" if requ["type"] == "cards"
                     else requ["type"].capitalize() + " " + str(requ["count"]) + " games as " + names[index]
                 )
             }
