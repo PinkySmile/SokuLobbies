@@ -169,12 +169,11 @@ void LobbyData::_loadAchievements()
 		achievement.descSprite.setPosition({0, -20});
 
 		this->achievementByRequ[achievement.requirement["type"]].push_back(&achievement);
-		this->achievementAwardQueue.push_back(&achievement);
 		index++;
 	}
 	delete[] buffer;
 	for (auto &achievement : this->achievements)
-		if (achievement.name.size() > 33)
+		if (achievement.name.size() > 39)
 			printf("Warning: Too long achievement name '%s'\n", achievement.name.c_str());
 	printf("There are %zu achievements and they are %slocked\n", this->achievements.size(), (this->achievementsLocked ? "" : "un"));
 }
