@@ -49,7 +49,7 @@ requs = [
     {"type": "win",    "count": 10},
     {"type": "loose",  "count": 10},
     {"type": "play",   "count": 10},
-    {"type": "skills"},
+    {"type": "cards"},
     {"type": "play",   "count": 100},
     {"type": "play",   "count": 1000}
 ]
@@ -102,20 +102,28 @@ with open("data.txt", encoding="utf-8") as fd:
                 ],
                 "name": name[-1],
                 "description": (
-                    "Use every " + names[index] + "'s skill and spell at least once" if requ["type"] == "skills"
-                    else requ["type"].capitalize() + " " + str(requ["count"]) + " games as " + names[index])
+                    "Use every " + names[index] + "'s skill and spell at least once" if requ["type"] == "cards"
+                    else requ["type"].capitalize() + " " + str(requ["count"]) + " games as " + names[index]
+                ),
+                "short_description": (
+                    "Use all of " + names[index] + "'s card once" if requ["type"] == "cards"
+                    else requ["type"].capitalize() + " " + str(requ["count"]) + " games as " + names[index]
+                )
             }
             rval = None
             if not rewards[rid]:
                 pass
             elif rewards[rid]["type"] == "emote":
                 rval = {"type": "emote", "name": emotes[index]}
+            elif rewards[rid]["type"] == "avatar":
+                rval = {"type": "avatar", "id": index + 1}
             else:
                 rval = {"type": rewards[rid]["type"], "id": index}
             if rval and rid >= 4:
                 rval["comment"] = unidecode(lines[i * 10 + rid + 3])
             result["requirement"]["chr"] = index
-            result["rewards"].append(rval)
+            if rval:
+                result["rewards"].insert(0, rval)
             elems.append(result)
 
 with open("achievements.json", "w") as fd:

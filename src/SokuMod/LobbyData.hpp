@@ -10,18 +10,19 @@
 #include <vector>
 #include <string>
 #include <SokuLib.hpp>
+#include "nlohmann/json.hpp"
 
 #define EMOTE_SIZE 32
 #define CHR_STATS_MAGIC 0xF2A6E790
 
 class LobbyData {
 private:
-	void _saveStats();
 	void _loadStats();
 	void _loadAvatars();
 	void _loadBackgrounds();
 	void _loadEmotes();
 	void _loadArcades();
+	void _loadAchievements();
 
 	unsigned _getExpectedMagic();
 	void _loadCharacterStats(std::istream &stream);
@@ -30,6 +31,13 @@ private:
 	void _saveCharacterStats(std::ostream &stream);
 	void _saveCharacterCardUsage(std::ostream &stream);
 	void _saveMatchupStats(std::ostream &stream);
+
+	void _loadFont(SokuLib::SWRFont &font, unsigned size);
+
+	std::map<unsigned, SokuLib::SWRFont> _fonts;
+	unsigned _achTimer = 0;
+	unsigned _animCtr = 0;
+	unsigned _anim = 0;
 
 public:
 	//Stats
@@ -53,6 +61,20 @@ public:
 		CardStatEntry cards[35];
 	};
 
+	struct Achievement {
+		std::string shortDescription;
+		std::string description;
+		std::string name;
+		nlohmann::json requirement;
+		std::vector<nlohmann::json> rewards;
+		bool awarded;
+		SokuLib::DrawUtils::Sprite nameSprite;
+		SokuLib::DrawUtils::Sprite descSprite;
+		SokuLib::DrawUtils::Sprite shortDescSprite;
+
+		Achievement() = default;
+		Achievement(const Achievement &) { assert(false); }
+	};
 	struct Avatar {
 		unsigned short id = 0;
 		std::string name;
@@ -115,21 +137,35 @@ public:
 		std::vector<ArcadeAnimation> game;
 		std::vector<ArcadeSkin> skins;
 	};
+	struct AchievementHolder {
+		SokuLib::DrawUtils::Sprite holder;
+		SokuLib::DrawUtils::Sprite behindGear;
+	};
 
+	bool achievementsLocked = false;
 	ArcadeData arcades;
+	AchievementHolder achHolder;
 	std::vector<Emote> emotes;
 	std::vector<Avatar> avatars;
 	std::vector<Background> backgrounds;
+	std::vector<Achievement> achievements;
 	std::map<std::string, Emote *> emotesByName;
 	std::map<unsigned char, CharacterStatEntry> loadedCharacterStats;
 	std::map<unsigned char, CardChrStatEntry> loadedCharacterCardUsage;
+	std::map<std::string, std::vector<Achievement *>> achievementByRequ;
 	std::map<std::pair<unsigned char, unsigned char>, MatchupStatEntry> loadedMatchupStats;
+	std::list<Achievement *> achievementAwardQueue;
 
 	LobbyData();
 	~LobbyData();
 	bool isLocked(const Emote &emote);
 	bool isLocked(const Avatar &avatar);
 	bool isLocked(const Background &background);
+	SokuLib::SWRFont &getFont(unsigned size);
+	void saveAchievements();
+	void saveStats();
+	void update();
+	void render();
 };
 
 extern std::unique_ptr<LobbyData> lobbyData;

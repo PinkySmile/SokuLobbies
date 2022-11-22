@@ -16,6 +16,7 @@
 #define CURSOR_STEP 7
 #define MAX_LINE_SIZE 342
 #define SCROLL_AMOUNT 20
+#define CHAT_FONT_HEIGHT 14
 
 InLobbyMenu *activeMenu = nullptr;
 static WNDPROC Original_WndProc = nullptr;
@@ -47,33 +48,6 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 	parent(parent),
 	_menu(menu)
 {
-	SokuLib::FontDescription desc;
-	bool hasEnglishPatch = (*(int *)0x411c64 == 1);
-
-	desc.r1 = 255;
-	desc.r2 = 255;
-	desc.g1 = 255;
-	desc.g2 = 255;
-	desc.b1 = 255;
-	desc.b2 = 255;
-	desc.height = 16 + hasEnglishPatch * 2;
-	desc.weight = FW_NORMAL;
-	desc.italic = 0;
-	desc.shadow = 1;
-	desc.bufferSize = 1000000;
-	desc.charSpaceX = 0;
-	desc.charSpaceY = hasEnglishPatch * -2;
-	desc.offsetX = 0;
-	desc.offsetY = 0;
-	desc.useOffset = 0;
-	strcpy(desc.faceName, "MonoSpatialModSWR");
-	desc.weight = FW_REGULAR;
-	this->_defaultFont16.create();
-	this->_defaultFont16.setIndirect(desc);
-	desc.height = 14 + hasEnglishPatch * 2;
-	this->_chatFont.create();
-	this->_chatFont.setIndirect(desc);
-
 	this->_inBattle.texture.loadFromFile((std::filesystem::path(profileFolderPath) / "assets/lobby/inarcade.png").string().c_str());
 	this->_inBattle.setSize({
 		this->_inBattle.texture.getSize().x,
@@ -93,7 +67,7 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 	this->_chatSeat.setPosition({290, 0});
 	this->_chatSeat.tint = SokuLib::Color{0xFF, 0xFF, 0xFF, 0};
 
-	this->_loadingText.texture.createFromText("Joining Lobby...", this->_defaultFont16, {300, 74});
+	this->_loadingText.texture.createFromText("Joining Lobby...", lobbyData->getFont(16), {300, 74});
 	this->_loadingText.setSize({
 		this->_loadingText.texture.getSize().x,
 		this->_loadingText.texture.getSize().y
@@ -127,7 +101,7 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 	this->_textSprite.rect.width = 350;
 	this->_textSprite.rect.height = 18;
 	this->_textSprite.setSize({350, 18});
-	this->_textSprite.setPosition({CURSOR_STARTX - hasEnglishPatch * 2, CURSOR_STARTY});
+	this->_textSprite.setPosition({CURSOR_STARTX - (*(int *)0x411c64 == 1) * 2, CURSOR_STARTY});
 
 	auto &bg = lobbyData->backgrounds.front();
 
@@ -152,7 +126,7 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 	connection.onPlayerJoin = [this](const Player &r){
 		SokuLib::Vector2i size;
 
-		this->_extraPlayerData[r.id].name.texture.createFromText(r.name.c_str(), this->_defaultFont16, {200, 20}, &size);
+		this->_extraPlayerData[r.id].name.texture.createFromText(r.name.c_str(), lobbyData->getFont(16), {200, 20}, &size);
 		this->_extraPlayerData[r.id].name.setSize(size.to<unsigned>());
 		this->_extraPlayerData[r.id].name.rect.width = size.x;
 		this->_extraPlayerData[r.id].name.rect.height = size.y;
@@ -163,7 +137,7 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 
 		SokuLib::Vector2i size;
 
-		this->_extraPlayerData[r.id].name.texture.createFromText(std::string(r.realName, strnlen(r.realName, sizeof(r.realName))).c_str(), this->_defaultFont16, {200, 20}, &size);
+		this->_extraPlayerData[r.id].name.texture.createFromText(std::string(r.realName, strnlen(r.realName, sizeof(r.realName))).c_str(), lobbyData->getFont(16), {200, 20}, &size);
 		this->_extraPlayerData[r.id].name.setSize(size.to<unsigned>());
 		this->_extraPlayerData[r.id].name.rect.width = size.x;
 		this->_extraPlayerData[r.id].name.rect.height = size.y;
@@ -249,7 +223,6 @@ InLobbyMenu::~InLobbyMenu()
 	this->_unhook();
 	this->connection.disconnect();
 	this->_menu->setActive();
-	this->_defaultFont16.destruct();
 	if (!this->_music.empty())
 		SokuLib::playBGM("data/bgm/op2.ogg");
 }
@@ -584,7 +557,7 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 			sprintf(color, "<color %06x>", channel);
 			text = color + text + "</color>";
 		}
-		txt.sprite.texture.createFromText(text.c_str(), this->_chatFont, {350, 300}, &txt.realSize);
+		txt.sprite.texture.createFromText(text.c_str(), lobbyData->getFont(CHAT_FONT_HEIGHT), {350, 300}, &txt.realSize);
 		txt.sprite.rect.width = txt.realSize.x;
 		txt.sprite.rect.height = txt.realSize.y;
 		txt.pos.x = startPos;
@@ -795,7 +768,7 @@ void InLobbyMenu::_inputBoxUpdate()
 			this->_buffer.erase(this->_buffer.begin() + this->_textCursorPos);
 			SokuLib::playSEWaveBuffer(0x27);
 			this->_textChanged = true;
-			this->_textSprite.texture.createFromText(this->_sanitizeInput().c_str(), this->_chatFont, {8 * this->_buffer.size(), 1800});
+			this->_textSprite.texture.createFromText(this->_sanitizeInput().c_str(), lobbyData->getFont(CHAT_FONT_HEIGHT), {8 * this->_buffer.size(), 1800});
 		}
 	}
 	if (this->_timers[VK_LEFT] == 1 || (this->_timers[VK_LEFT] > 36 && this->_timers[VK_LEFT] % 3 == 0)) {
@@ -820,7 +793,7 @@ void InLobbyMenu::_inputBoxUpdate()
 		}
 	}
 	if (this->_textChanged)
-		this->_textSprite.texture.createFromText(this->_sanitizeInput().c_str(), this->_chatFont, {max(TEXTURE_MAX_SIZE, 8 * this->_buffer.size()), 18});
+		this->_textSprite.texture.createFromText(this->_sanitizeInput().c_str(), lobbyData->getFont(CHAT_FONT_HEIGHT), {max(TEXTURE_MAX_SIZE, 8 * this->_buffer.size()), 18});
 	this->_textChanged = false;
 	this->_textMutex.unlock();
 }
@@ -834,7 +807,7 @@ void InLobbyMenu::_initInputBox()
 	this->_buffer.clear();
 	this->_buffer.push_back(0);
 
-	this->_textSprite.texture.createFromText(this->_sanitizeInput().c_str(), this->_chatFont, {max(TEXTURE_MAX_SIZE, 8 * this->_buffer.size()), 20});
+	this->_textSprite.texture.createFromText(this->_sanitizeInput().c_str(), lobbyData->getFont(CHAT_FONT_HEIGHT), {max(TEXTURE_MAX_SIZE, 8 * this->_buffer.size()), 20});
 	this->_textSprite.rect.left = 0;
 
 	this->_textCursorPos = 0;

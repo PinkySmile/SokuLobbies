@@ -10,8 +10,13 @@
 #include "LobbyMenu.hpp"
 #include "InLobbyMenu.hpp"
 #include "LobbyData.hpp"
+#include "dinput.h"
 
+typedef HRESULT(__stdcall* EndSceneFn)(IDirect3DDevice9*);
+
+static EndSceneFn Original_EndScene;
 static bool wasBlocking = false;
+static void (*og_onUpdate)();
 static int (SokuLib::Logo::*og_LogoOnProcess)();
 static int (SokuLib::Battle::*og_BattleOnProcess)();
 static int (SokuLib::MenuConnect::*og_ConnectOnProcess)();
@@ -319,6 +324,14 @@ void loadSoku2CSV(LPWSTR path)
 	}
 }
 
+void onUpdate()
+{
+	if (SokuLib::sceneId != SokuLib::SCENE_LOGO && lobbyData)
+		lobbyData->update();
+	if (og_onUpdate)
+		og_onUpdate();
+}
+
 void loadSoku2Config()
 {
 	puts("Looking for Soku2 config...");
@@ -399,6 +412,48 @@ static void __fastcall KeymapManagerSetInputs(SokuLib::KeymapManager *This)
 		wasBlocking = false;
 }
 
+int __stdcall Hooked_EndScene(IDirect3DDevice9* pDevice)
+{
+	if (SokuLib::sceneId != SokuLib::SCENE_LOGO && lobbyData) {
+#ifdef _DEBUG
+		if (SokuLib::checkKeyOneshot(DIK_F4, false, false, false)) {
+			load.first = true;
+			load.second = true;
+			std::thread{[]{
+				try {
+					lobbyData = std::make_unique<LobbyData>();
+				} catch (std::exception &e) {
+					MessageBoxA(
+						SokuLib::window,
+						(
+							"Error while loading lobby data.\n"
+							"Statistic saving, achievements and blank card rewards are now disabled.\n"
+							"To try to load data again, go to the lobby screen.\n"
+							"If loading succeeds, it will be enabled again.\n"
+							"\n"
+							"Error:\n" +
+							std::string(e.what())
+						).c_str(),
+						"SokuLobby error",
+						MB_ICONERROR
+					);
+				}
+				load.first = false;
+			}}.detach();
+		}
+#endif
+		lobbyData->render();
+	}
+
+	//This is necessary, so we can fit in the hook...
+	//That said, the return value is never even checked in soku.
+	if (!Original_EndScene)
+		(*(EndSceneFn**)pDevice)[42](pDevice);
+	else
+		Original_EndScene(pDevice);
+	return 0x8a0e14;
+}
+
 extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
 	return true;
 }
@@ -447,6 +502,20 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 
 	VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
 	s_origKeymapManager_SetInputs = SokuLib::union_cast<void (SokuLib::KeymapManager::*)()>(SokuLib::TamperNearJmpOpr(0x40A45D, KeymapManagerSetInputs));
+
+	if (*((uint8_t*)0x40104c) != 0xe8) {
+		memcpy((void *)0x40104c, "\xe8\x00\x00\x00\x00\x50\x90", 7);
+		SokuLib::TamperNearJmpOpr(0x40104c, Hooked_EndScene);
+		Original_EndScene = nullptr;
+	} else
+		Original_EndScene = (EndSceneFn)SokuLib::TamperNearJmpOpr(0x40104c, Hooked_EndScene);
+	if (*(unsigned char *)0x407E6A != 0x90) {
+		*(unsigned char *)0x407E41 = 0x28;
+		memset((void *)0x407E6A, 0x90, 52);
+		SokuLib::TamperNearCall(0x407E6B, onUpdate);
+		og_onUpdate = nullptr;
+	} else
+		og_onUpdate = SokuLib::TamperNearJmpOpr(0x407E6B, onUpdate);
 	VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 
 	FlushInstructionCache(GetCurrentProcess(), nullptr, 0);

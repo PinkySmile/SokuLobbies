@@ -49,9 +49,6 @@ private:
 	volatile bool _open = true;
 	bool _active = true;
 	std::thread _masterThread;
-	SokuLib::SWRFont _defaultFont12;
-	SokuLib::SWRFont _defaultFont16;
-	SokuLib::SWRFont _defaultFont20;
 	SokuLib::DrawUtils::Sprite _customizeTexts[3];
 	SokuLib::DrawUtils::Sprite _customizeSeat;
 	SokuLib::DrawUtils::Sprite _playerName;

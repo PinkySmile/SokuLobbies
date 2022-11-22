@@ -92,44 +92,14 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 	this->_loadedSettings.name = SokuLib::profile1.name.operator std::string();
 	this->_loadedSettings.pos.x = 20;
 
-	SokuLib::FontDescription desc;
-	bool hasEnglishPatch = (*(int *)0x411c64 == 1);
-
-	desc.r1 = 255;
-	desc.r2 = 255;
-	desc.g1 = 255;
-	desc.g2 = 255;
-	desc.b1 = 255;
-	desc.b2 = 255;
-	desc.height = 12 + hasEnglishPatch * 2;
-	desc.weight = FW_NORMAL;
-	desc.italic = 0;
-	desc.shadow = 1;
-	desc.bufferSize = 1000000;
-	desc.charSpaceX = 0;
-	desc.charSpaceY = hasEnglishPatch * -2;
-	desc.offsetX = 0;
-	desc.offsetY = 0;
-	desc.useOffset = 0;
-	strcpy(desc.faceName, "MonoSpatialModSWR");
-	desc.weight = FW_REGULAR;
-	this->_defaultFont12.create();
-	this->_defaultFont12.setIndirect(desc);
-	desc.height = 16 + hasEnglishPatch * 2;
-	this->_defaultFont16.create();
-	this->_defaultFont16.setIndirect(desc);
-	desc.height = 20 + hasEnglishPatch * 2;
-	this->_defaultFont20.create();
-	this->_defaultFont20.setIndirect(desc);
-
 	SokuLib::Vector2i size;
 
-	this->_playerName.texture.createFromText(SokuLib::profile1.name, this->_defaultFont16, {200, 20}, &size);
+	this->_playerName.texture.createFromText(SokuLib::profile1.name, lobbyData->getFont(16), {200, 20}, &size);
 	this->_playerName.setSize(size.to<unsigned>());
 	this->_playerName.rect.width = size.x;
 	this->_playerName.rect.height = size.y;
 
-	this->_customizeTexts[0].texture.createFromText("Avatar", this->_defaultFont20, {600, 74});
+	this->_customizeTexts[0].texture.createFromText("Avatar", lobbyData->getFont(20), {600, 74});
 	this->_customizeTexts[0].setSize({
 		this->_customizeTexts[0].texture.getSize().x,
 		this->_customizeTexts[0].texture.getSize().y
@@ -138,7 +108,7 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 	this->_customizeTexts[0].rect.height = this->_customizeTexts[0].texture.getSize().y;
 	this->_customizeTexts[0].setPosition({120, 98});
 
-	this->_customizeTexts[1].texture.createFromText("Accessory", this->_defaultFont20, {600, 74});
+	this->_customizeTexts[1].texture.createFromText("Accessory", lobbyData->getFont(20), {600, 74});
 	this->_customizeTexts[1].setSize({
 		this->_customizeTexts[1].texture.getSize().x,
 		this->_customizeTexts[1].texture.getSize().y
@@ -147,7 +117,7 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 	this->_customizeTexts[1].rect.height = this->_customizeTexts[1].texture.getSize().y;
 	this->_customizeTexts[1].setPosition({280, 98});
 
-	this->_customizeTexts[2].texture.createFromText("Title", this->_defaultFont20, {600, 74});
+	this->_customizeTexts[2].texture.createFromText("Title", lobbyData->getFont(20), {600, 74});
 	this->_customizeTexts[2].setSize({
 		this->_customizeTexts[2].texture.getSize().x,
 		this->_customizeTexts[2].texture.getSize().y
@@ -156,7 +126,7 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 	this->_customizeTexts[2].rect.height = this->_customizeTexts[2].texture.getSize().y;
 	this->_customizeTexts[2].setPosition({475, 98});
 
-	this->_loadingText.texture.createFromText("Connecting to server...", this->_defaultFont16, {600, 74});
+	this->_loadingText.texture.createFromText("Connecting to server...", lobbyData->getFont(16), {600, 74});
 	this->_loadingText.setSize({
 		this->_loadingText.texture.getSize().x,
 		this->_loadingText.texture.getSize().y
@@ -516,12 +486,12 @@ void LobbyMenu::_masterServerLoop()
 
 		if (this->_mainServer.isDisconnected())
 			try {
-				this->_loadingText.texture.createFromText("Connecting to server...", this->_defaultFont16, {600, 74});
+				this->_loadingText.texture.createFromText("Connecting to server...", lobbyData->getFont(16), {600, 74});
 				this->_lastError.clear();
 				this->_mainServer.connect(servHost, servPort);
 				puts("Connected!");
 			} catch (std::exception &e) {
-				this->_loadingText.texture.createFromText(("Connection failed:<br><color FF0000>" + std::string(e.what()) + "</color>").c_str(), this->_defaultFont16, {600, 74});
+				this->_loadingText.texture.createFromText(("Connection failed:<br><color FF0000>" + std::string(e.what()) + "</color>").c_str(), lobbyData->getFont(16), {600, 74});
 				this->_lastError = e.what();
 				goto fail;
 			}
@@ -561,7 +531,7 @@ void LobbyMenu::_masterServerLoop()
 					auto c = this->_connections.back();
 
 					this->_connectionsMutex.unlock();
-					c->name.texture.createFromText("Connection to the lobby in queue...", this->_defaultFont16, {300, 74});
+					c->name.texture.createFromText("Connection to the lobby in queue...", lobbyData->getFont(16), {300, 74});
 					c->name.setSize({
 						c->name.texture.getSize().x,
 						c->name.texture.getSize().y
@@ -575,7 +545,7 @@ void LobbyMenu::_masterServerLoop()
 		} catch (std::exception &e) {
 			if (dynamic_cast<EOFException *>(&e))
 				this->_mainServer.disconnect();
-			this->_loadingText.texture.createFromText(("<color FF0000>Error when communicating with master server:</color><br>" + std::string(e.what())).c_str(), this->_defaultFont16, {600, 74});
+			this->_loadingText.texture.createFromText(("<color FF0000>Error when communicating with master server:</color><br>" + std::string(e.what())).c_str(), lobbyData->getFont(16), {600, 74});
 			this->_lastError = e.what();
 			if (_locked)
 				this->_connectionsMutex.unlock();
@@ -610,7 +580,7 @@ void LobbyMenu::_connectLoop()
 						continue;
 
 					connection->first = false;
-					connection->name.texture.createFromText("Connecting to lobby...", this->_defaultFont16, {300, 74});
+					connection->name.texture.createFromText("Connecting to lobby...", lobbyData->getFont(16), {300, 74});
 					connection->name.setSize({
 						connection->name.texture.getSize().x,
 						connection->name.texture.getSize().y
@@ -624,7 +594,7 @@ void LobbyMenu::_connectLoop()
 						auto c = weak.lock();
 
 						c->lastName = msg;
-						c->name.texture.createFromText(c->lastName.c_str(), this->_defaultFont16, {300, 74});
+						c->name.texture.createFromText(c->lastName.c_str(), lobbyData->getFont(16), {300, 74});
 						c->name.setSize({
 							c->name.texture.getSize().x,
 							c->name.texture.getSize().y
@@ -639,7 +609,7 @@ void LobbyMenu::_connectLoop()
 						auto c = weak.lock();
 
 						c->lastName = msg;
-						c->name.texture.createFromText(c->lastName.c_str(), this->_defaultFont16, {300, 74});
+						c->name.texture.createFromText(c->lastName.c_str(), lobbyData->getFont(16), {300, 74});
 						c->name.setSize({
 							c->name.texture.getSize().x,
 							c->name.texture.getSize().y
@@ -657,7 +627,7 @@ void LobbyMenu::_connectLoop()
 
 				if (connection->lastName != info.name) {
 					connection->lastName = info.name;
-					connection->name.texture.createFromText(connection->lastName.c_str(), this->_defaultFont16, {300, 74});
+					connection->name.texture.createFromText(connection->lastName.c_str(), lobbyData->getFont(16), {300, 74});
 					connection->name.setSize({
 						connection->name.texture.getSize().x,
 						connection->name.texture.getSize().y
@@ -673,7 +643,7 @@ void LobbyMenu::_connectLoop()
 					SokuLib::Vector2i size;
 
 					connection->lastPlayerCount = {info.currentPlayers, info.maxPlayers};
-					connection->playerCount.texture.createFromText((std::to_string(info.currentPlayers) + "/" + std::to_string(info.maxPlayers)).c_str(), this->_defaultFont16, {300, 74}, &size);
+					connection->playerCount.texture.createFromText((std::to_string(info.currentPlayers) + "/" + std::to_string(info.maxPlayers)).c_str(), lobbyData->getFont(16), {300, 74}, &size);
 					connection->playerCount.setSize(size.to<unsigned>());
 					connection->playerCount.rect.width = connection->playerCount.getSize().x;
 					connection->playerCount.rect.height = connection->playerCount.getSize().y;
@@ -682,7 +652,7 @@ void LobbyMenu::_connectLoop()
 			} catch (std::exception &e) {
 				connection->lastName.clear();
 				connection->lastPlayerCount = {0, 0};
-				connection->name.texture.createFromText(e.what(), this->_defaultFont16, {300, 74});
+				connection->name.texture.createFromText(e.what(), lobbyData->getFont(16), {300, 74});
 				connection->name.setSize({
 					connection->name.texture.getSize().x,
 					connection->name.texture.getSize().y
@@ -703,14 +673,14 @@ void LobbyMenu::_refreshAvatarCustomText()
 {
 	auto &avatar = lobbyData->avatars[this->_customCursor];
 
-	this->_customAvatarName.texture.createFromText(avatar.name.c_str(), this->_defaultFont16, {600, 74});
+	this->_customAvatarName.texture.createFromText(avatar.name.c_str(), lobbyData->getFont(16), {600, 74});
 	this->_customAvatarName.setSize(this->_customAvatarName.texture.getSize());
 	this->_customAvatarName.rect.width = this->_loadingText.texture.getSize().x;
 	this->_customAvatarName.rect.height = this->_loadingText.texture.getSize().y;
 	this->_customAvatarName.setPosition({354 + avatar.sprite.rect.width, 312});
 	this->_customAvatarName.tint = lobbyData->isLocked(avatar) ? SokuLib::Color::Red : SokuLib::Color::Green;
 
-	this->_customAvatarRequ.texture.createFromText("Unlocked by default", this->_defaultFont12, {600, 74});
+	this->_customAvatarRequ.texture.createFromText("Unlocked by default", lobbyData->getFont(12), {600, 74});
 	this->_customAvatarRequ.setSize(this->_customAvatarRequ.texture.getSize());
 	this->_customAvatarRequ.rect.width = this->_customAvatarRequ.texture.getSize().x;
 	this->_customAvatarRequ.rect.height = this->_customAvatarRequ.texture.getSize().y;
