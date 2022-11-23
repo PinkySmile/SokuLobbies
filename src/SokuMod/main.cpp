@@ -237,7 +237,7 @@ int __fastcall BattleClientOnProcess(SokuLib::BattleClient *This)
 	auto ret = (This->*og_BattleClientOnProcess)();
 	auto &mgr = SokuLib::getBattleMgr();
 
-	if (mgr.matchState > 3 && !counted) {
+	if (mgr.matchState > 4 && !counted) {
 		counted = true;
 		if (onGameEnd)
 			ret = onGameEnd();
@@ -260,7 +260,7 @@ int __fastcall BattleServerOnProcess(SokuLib::BattleServer *This)
 	auto ret = (This->*og_BattleServerOnProcess)();
 	auto &mgr = SokuLib::getBattleMgr();
 
-	if (mgr.matchState > 3 && !counted) {
+	if (mgr.matchState > 4 && !counted) {
 		counted = true;
 		if (onGameEnd)
 			ret = onGameEnd();
