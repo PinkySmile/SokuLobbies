@@ -73,8 +73,10 @@ void countGame()
 	puts("End game");
 	if (!lobbyData)
 		return;
+#ifndef _DEBUG
 	if (SokuLib::mainMode != SokuLib::BATTLE_MODE_VSSERVER && SokuLib::mainMode != SokuLib::BATTLE_MODE_VSCLIENT)
 		return;
+#endif
 
 	auto &battle = SokuLib::getBattleMgr();
 	auto mid = SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER ? SokuLib::rightChar : SokuLib::leftChar;
@@ -92,6 +94,36 @@ void countGame()
 	data->second.wins += chr.score >= 2;
 	data->second.losses += chr.score < 2;
 
+	auto &wins = lobbyData->achievementByRequ["win"];
+	auto &loss = lobbyData->achievementByRequ["lose"];
+	auto &play = lobbyData->achievementByRequ["play"];
+	auto it = std::find_if(wins.begin(), wins.end(), [mid, &data](LobbyData::Achievement *achievement){
+		return !achievement->awarded && achievement->requirement["chr"] == mid && achievement->requirement["count"] <= data->second.wins;
+	});
+
+	if (it != wins.end()) {
+		(*it)->awarded = true;
+		lobbyData->achievementAwardQueue.push_back(*it);
+	}
+
+	it = std::find_if(loss.begin(), loss.end(), [mid, &data](LobbyData::Achievement *achievement){
+		return !achievement->awarded && achievement->requirement["chr"] == mid && achievement->requirement["count"] <= data->second.losses;
+	});
+	if (it != loss.end()) {
+		(*it)->awarded = true;
+		lobbyData->achievementAwardQueue.push_back(*it);
+	}
+
+	it = std::find_if(play.begin(), play.end(), [mid, &data](LobbyData::Achievement *achievement){
+		return !achievement->awarded && achievement->requirement["chr"] == mid && achievement->requirement["count"] <= data->second.losses + data->second.wins;
+	});
+	if (it != play.end()) {
+		(*it)->awarded = true;
+		lobbyData->achievementAwardQueue.push_back(*it);
+	}
+
+	lobbyData->saveAchievements();
+
 	data = lobbyData->loadedCharacterStats.find(oid);
 	if (data == lobbyData->loadedCharacterStats.end()) {
 		LobbyData::CharacterStatEntry entry{0, 0, 0, 0};
@@ -101,6 +133,9 @@ void countGame()
 	}
 	data->second.againstWins += chr.score >= 2;
 	data->second.againstLosses += chr.score < 2;
+	lobbyData->saveStats();
+	if (lobbyData->achievementsLocked)
+		return;
 }
 
 int __fastcall ConnectOnProcess(SokuLib::MenuConnect *This)

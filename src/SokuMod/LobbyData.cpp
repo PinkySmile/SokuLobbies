@@ -9,7 +9,7 @@
 #include "LobbyData.hpp"
 #include "dinput.h"
 
-#define ACH_GET_TOTAL_TIME 420
+#define ACH_GET_TOTAL_TIME 360
 #define ACH_GET_FADE_IN_ANIM 45
 #define ACH_GET_FADE_OUT_ANIM 45
 
@@ -56,7 +56,11 @@ void LobbyData::_loadStats()
 	this->_loadCharacterCardUsage(stream);
 	this->_loadMatchupStats(stream);
 	if (magic != this->_getExpectedMagic())
+#ifndef _DEBUG
 		throw std::invalid_argument("Cannot load stats.dat: Invalid magic");
+#else
+		MessageBox(SokuLib::window, "Warning: Invalid magic", "Warning", MB_ICONWARNING);
+#endif
 }
 
 void LobbyData::_loadAvatars()
@@ -341,22 +345,26 @@ LobbyData::LobbyData()
 	this->_loadEmotes();
 	this->_loadArcades();
 	this->_loadAchievements();
+	this->_grantStatsAchievements();
 
 	this->achHolder.getText.texture.createFromText("Achievement Unlocked!", this->getFont(16), {400, 20});
 	this->achHolder.getText.setSize(this->achHolder.getText.texture.getSize());
 	this->achHolder.getText.rect.width = this->achHolder.getText.getSize().x;
 	this->achHolder.getText.rect.height = this->achHolder.getText.getSize().y;
 	this->achHolder.getText.tint = SokuLib::Color::Yellow;
+	this->achHolder.getText.setPosition((this->achHolder.getText.getSize() * -1).to<int>());
 
 	this->achHolder.holder.texture.loadFromFile((std::filesystem::path(profileFolderPath) / "assets/ACHIEVEMENT_BAR.png").string().c_str());
 	this->achHolder.holder.setSize(this->achHolder.holder.texture.getSize());
 	this->achHolder.holder.rect.width = this->achHolder.holder.getSize().x;
 	this->achHolder.holder.rect.height = this->achHolder.holder.getSize().y;
+	this->achHolder.holder.setPosition((this->achHolder.holder.getSize() * -1).to<int>());
 
 	this->achHolder.behindGear.texture.loadFromGame("data/menu/gear/4L-mid_S.png");
 	this->achHolder.behindGear.setSize(this->achHolder.behindGear.texture.getSize());
 	this->achHolder.behindGear.rect.width = this->achHolder.behindGear.getSize().x;
 	this->achHolder.behindGear.rect.height = this->achHolder.behindGear.getSize().y;
+	this->achHolder.behindGear.setPosition((this->achHolder.behindGear.getSize() * -1).to<int>());
 }
 
 LobbyData::~LobbyData()
@@ -635,7 +643,7 @@ void LobbyData::update()
 	}
 
 	achievement->nameSprite.setPosition(this->achHolder.getText.getPosition() + SokuLib::Vector2i{0, 16});
-	this->achHolder.behindGear.setRotation(this->achHolder.behindGear.getRotation() + 0.05);
+	this->achHolder.behindGear.setRotation(this->achHolder.behindGear.getRotation() + 0.015);
 	if (this->_achTimer >= ACH_GET_TOTAL_TIME) {
 		this->_achTimer = 0;
 		this->achievementAwardQueue.pop_front();
@@ -709,5 +717,52 @@ void LobbyData::render()
 
 	} else if (type == "accessory") {
 
+	}
+}
+
+void LobbyData::_grantStatsAchievements()
+{
+	if (this->achievementsLocked)
+		return;
+
+	auto &wins = this->achievementByRequ["win"];
+	auto &loss = this->achievementByRequ["lose"];
+	auto &play = this->achievementByRequ["play"];
+
+	for (auto &data : this->loadedCharacterStats) {
+		unsigned mid = data.first;
+		auto it = std::find_if(wins.begin(), wins.end(), [mid, &data](LobbyData::Achievement *achievement){
+			return !achievement->awarded && achievement->requirement["chr"] == mid && achievement->requirement["count"] <= data.second.wins;
+		});
+
+		while (it != wins.end()) {
+			(*it)->awarded = true;
+			this->achievementAwardQueue.push_back(*it);
+			it = std::find_if(wins.begin(), wins.end(), [mid, &data](LobbyData::Achievement *achievement){
+				return !achievement->awarded && achievement->requirement["chr"] == mid && achievement->requirement["count"] <= data.second.wins;
+			});
+		}
+
+		it = std::find_if(loss.begin(), loss.end(), [mid, &data](LobbyData::Achievement *achievement){
+			return !achievement->awarded && achievement->requirement["chr"] == mid && achievement->requirement["count"] <= data.second.losses;
+		});
+		while (it != loss.end()) {
+			(*it)->awarded = true;
+			this->achievementAwardQueue.push_back(*it);
+			it = std::find_if(loss.begin(), loss.end(), [mid, &data](LobbyData::Achievement *achievement){
+				return !achievement->awarded && achievement->requirement["chr"] == mid && achievement->requirement["count"] <= data.second.losses;
+			});
+		}
+
+		it = std::find_if(play.begin(), play.end(), [mid, &data](LobbyData::Achievement *achievement){
+			return !achievement->awarded && achievement->requirement["chr"] == mid && achievement->requirement["count"] <= data.second.losses + data.second.wins;
+		});
+		while (it != play.end()) {
+			(*it)->awarded = true;
+			this->achievementAwardQueue.push_back(*it);
+			it = std::find_if(play.begin(), play.end(), [mid, &data](LobbyData::Achievement *achievement){
+				return !achievement->awarded && achievement->requirement["chr"] == mid && achievement->requirement["count"] <= data.second.losses + data.second.wins;
+			});
+		}
 	}
 }

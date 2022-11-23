@@ -33,6 +33,7 @@ private:
 	void _saveMatchupStats(std::ostream &stream);
 
 	void _loadFont(SokuLib::SWRFont &font, unsigned size);
+	void _grantStatsAchievements();
 
 	std::map<unsigned, SokuLib::SWRFont> _fonts;
 	unsigned _achTimer = 0;
