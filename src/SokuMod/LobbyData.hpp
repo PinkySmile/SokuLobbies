@@ -83,6 +83,7 @@ public:
 		unsigned accessoriesPlacement = 0;
 		unsigned animationsStep = 0;
 		unsigned nbAnimations = 0;
+		Achievement *requirement = nullptr;
 
 		Avatar() = default;
 		Avatar(const Avatar &) { assert(false); }
@@ -96,6 +97,7 @@ public:
 		unsigned platformInterval = 0;
 		unsigned platformWidth = 0;
 		unsigned platformCount = 0;
+		Achievement *requirement = nullptr;
 
 		Background() = default;
 		Background(const Background &) { assert(false); }
@@ -105,6 +107,7 @@ public:
 		std::string filepath;
 		std::vector<std::string> alias;
 		SokuLib::DrawUtils::Sprite sprite;
+		Achievement *requirement = nullptr;
 
 		Emote() = default;
 		Emote(const Emote &) { assert(false); }
@@ -127,6 +130,7 @@ public:
 		SokuLib::Vector2i animationOffsets;
 		unsigned frameRate;
 		unsigned frameCount;
+		Achievement *requirement = nullptr;
 
 		ArcadeSkin() = default;
 		ArcadeSkin(const ArcadeSkin &) { assert(false); }

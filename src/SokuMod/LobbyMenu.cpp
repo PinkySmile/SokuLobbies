@@ -336,8 +336,11 @@ bool LobbyMenu::_joinLobbyUpdate()
 bool LobbyMenu::_customizeAvatarUpdate()
 {
 	if (SokuLib::inputMgrs.input.a == 1 && this->_customCursor >= 0) {
-		SokuLib::playSEWaveBuffer(0x28);
-		this->_loadedSettings.player.avatar = this->_customCursor;
+		if (!lobbyData->isLocked(lobbyData->avatars[this->_customCursor])) {
+			SokuLib::playSEWaveBuffer(0x28);
+			this->_loadedSettings.player.avatar = this->_customCursor;
+		} else
+			SokuLib::playSEWaveBuffer(0x29);
 		return true;
 	}
 	if (SokuLib::inputMgrs.input.b == 1) {
@@ -464,6 +467,7 @@ void LobbyMenu::_customizeAvatarRender()
 		avatar.sprite.setMirroring(showcase.side, false);
 		avatar.sprite.rect.left = avatar.sprite.rect.width * showcase.anim;
 		avatar.sprite.rect.top = avatar.sprite.rect.height * (showcase.action / 4);
+		avatar.sprite.tint = lobbyData->isLocked(avatar) ? SokuLib::Color{0x40, 0x40, 0x40, 0xFF} : SokuLib::Color::White;
 		avatar.sprite.draw();
 		avatar.sprite.setSize({
 			static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale),
@@ -680,11 +684,26 @@ void LobbyMenu::_refreshAvatarCustomText()
 	this->_customAvatarName.setPosition({354 + avatar.sprite.rect.width, 312});
 	this->_customAvatarName.tint = lobbyData->isLocked(avatar) ? SokuLib::Color::Red : SokuLib::Color::Green;
 
-	this->_customAvatarRequ.texture.createFromText("Unlocked by default", lobbyData->getFont(12), {600, 74});
+	this->_customAvatarRequ.setPosition({354 + avatar.sprite.rect.width, 330});
+	if (!avatar.requirement)
+		this->_customAvatarRequ.texture.createFromText("Unlocked by default", lobbyData->getFont(12), {600, 74});
+	else if (avatar.requirement->name.size() <= 22)
+		this->_customAvatarRequ.texture.createFromText(("Unlocked by completing<br>\"<color 8080FF>" + avatar.requirement->name + "</color>\"").c_str(), lobbyData->getFont(12), {600, 74});
+	else {
+		auto name = avatar.requirement->name;
+		int pos = 23;
+		constexpr int offset = 6;
+
+		while (!isspace(name[pos]))
+			pos--;
+		name = name.substr(0, pos) + "<br>" + name.substr(pos + 1);
+		this->_customAvatarRequ.texture.createFromText(("Unlocked by completing<br>\"<color 8080FF>" + name + "</color>\"").c_str(), lobbyData->getFont(12), {600, 74});
+		this->_customAvatarName.setPosition({354 + avatar.sprite.rect.width, 312 - offset});
+		this->_customAvatarRequ.setPosition({354 + avatar.sprite.rect.width, 330 - offset});
+	}
 	this->_customAvatarRequ.setSize(this->_customAvatarRequ.texture.getSize());
 	this->_customAvatarRequ.rect.width = this->_customAvatarRequ.texture.getSize().x;
 	this->_customAvatarRequ.rect.height = this->_customAvatarRequ.texture.getSize().y;
-	this->_customAvatarRequ.setPosition({354 + avatar.sprite.rect.width, 330});
 }
 
 void LobbyMenu::_renderAvatarCustomText()
@@ -708,6 +727,7 @@ void LobbyMenu::_renderAvatarCustomText()
 	avatar.sprite.setMirroring(true, false);
 	avatar.sprite.rect.left = 0;
 	avatar.sprite.rect.top = 0;
+	avatar.sprite.tint = lobbyData->isLocked(avatar) ? SokuLib::Color{0x40, 0x40, 0x40, 0xFF} : SokuLib::Color::White;
 	avatar.sprite.draw();
 	avatar.sprite.setSize({
 		static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale),

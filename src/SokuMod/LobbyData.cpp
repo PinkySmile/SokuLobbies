@@ -172,7 +172,23 @@ void LobbyData::_loadAchievements()
 		});
 		achievement.descSprite.setPosition({0, -20});
 
-		this->achievementByRequ[achievement.requirement["type"]].push_back(&achievement);
+		if (!achievement.rewards.empty()) {
+			auto reward = achievement.rewards[0];
+			auto type = reward["type"];
+
+			if (type != "title") {
+				this->achievementByRequ[type].push_back(&achievement);
+				if (type == "avatar")
+					this->avatars[reward["id"]].requirement = &achievement;
+				else if (type == "emote")
+					this->emotesByName[reward["name"]]->requirement = &achievement;
+				else if (type == "prop") {
+
+				} else if (type == "accessory") {
+
+				}
+			}
+		}
 		index++;
 	}
 	delete[] buffer;
@@ -377,17 +393,17 @@ LobbyData::~LobbyData()
 
 bool LobbyData::isLocked(const LobbyData::Emote &emote)
 {
-	return false;
+	return emote.requirement && !emote.requirement->awarded;
 }
 
 bool LobbyData::isLocked(const LobbyData::Avatar &avatar)
 {
-	return false;
+	return avatar.requirement && !avatar.requirement->awarded;
 }
 
 bool LobbyData::isLocked(const LobbyData::Background &background)
 {
-	return false;
+	return background.requirement && !background.requirement->awarded;
 }
 
 unsigned LobbyData::_getExpectedMagic()
