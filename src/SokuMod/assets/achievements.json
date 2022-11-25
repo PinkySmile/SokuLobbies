@@ -1,5 +1,7 @@
 [
     {
+        "comment1": "THIS FILE CONTAINS SPOILERS!!",
+        "comment2": "IF YOU WISH TO FIND ACHIEVEMENTS BY YOURSELF CLOSE IT!",
         "requirement": {
             "type": "win",
             "count": 10,
@@ -8,7 +10,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 6
+                "id": 8
             },
             {
                 "type": "title",
@@ -119,7 +121,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 7
+                "id": 9
             },
             {
                 "type": "title",
@@ -230,7 +232,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 1
+                "id": 3
             },
             {
                 "type": "title",
@@ -341,7 +343,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 2
+                "id": 4
             },
             {
                 "type": "title",
@@ -452,7 +454,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 16
+                "id": 18
             },
             {
                 "type": "title",
@@ -563,7 +565,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 3
+                "id": 5
             },
             {
                 "type": "title",
@@ -674,7 +676,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 4
+                "id": 6
             },
             {
                 "type": "title",
@@ -785,7 +787,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 5
+                "id": 7
             },
             {
                 "type": "title",
@@ -896,7 +898,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 8
+                "id": 10
             },
             {
                 "type": "title",
@@ -1007,7 +1009,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 9
+                "id": 11
             },
             {
                 "type": "title",
@@ -1118,7 +1120,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 17
+                "id": 19
             },
             {
                 "type": "title",
@@ -1229,7 +1231,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 14
+                "id": 16
             },
             {
                 "type": "title",
@@ -1340,7 +1342,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 11
+                "id": 13
             },
             {
                 "type": "title",
@@ -1451,7 +1453,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 10
+                "id": 12
             },
             {
                 "type": "title",
@@ -1562,7 +1564,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 15
+                "id": 17
             },
             {
                 "type": "title",
@@ -1673,7 +1675,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 12
+                "id": 14
             },
             {
                 "type": "title",
@@ -1784,7 +1786,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 13
+                "id": 15
             },
             {
                 "type": "title",
@@ -1895,7 +1897,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 18
+                "id": 20
             },
             {
                 "type": "title",
@@ -2006,7 +2008,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 19
+                "id": 21
             },
             {
                 "type": "title",
@@ -2117,7 +2119,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 20
+                "id": 22
             },
             {
                 "type": "title",

@@ -1,11 +1,27 @@
 [
     {
-        "spritesheet": "assets/avatars/1 Reimu Blue.png",
-        "accessories": 0,
+        "spritesheet": "assets/avatars/8 PC98 Reimu A.png",
+        "accessories": 7,
         "animations": 4,
         "scale": 2,
         "anim_step": 8,
-        "name": "Blue Reimu"
+        "name": "PC98 Reimu A"
+    },
+    {
+        "spritesheet": "assets/avatars/8 PC98 Reimu B.png",
+        "accessories": 7,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "PC98 Reimu B"
+    },
+    {
+        "spritesheet": "assets/avatars/8 PC98 Reimu C.png",
+        "accessories": 7,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "PC98 Reimu C"
     },
     {
         "spritesheet": "assets/avatars/1 Reimu.png",

@@ -68,6 +68,7 @@ public:
 		nlohmann::json requirement;
 		std::vector<nlohmann::json> rewards;
 		bool awarded;
+		bool hidden;
 		SokuLib::DrawUtils::Sprite nameSprite;
 		SokuLib::DrawUtils::Sprite nameSpriteFull;
 		SokuLib::DrawUtils::Sprite descSprite;

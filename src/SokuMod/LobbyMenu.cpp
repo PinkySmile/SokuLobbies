@@ -15,6 +15,7 @@
 #include "GuardedMutex.hpp"
 #include "data.hpp"
 #include "StatsMenu.hpp"
+#include "AchievementsMenu.hpp"
 
 #define CRenderer_Unknown1 ((void (__thiscall *)(int, int))0x404AF0)
 
@@ -297,9 +298,11 @@ bool LobbyMenu::_normalMenuUpdate()
 			break;
 		case MENUITEM_CREATE_LOBBY:
 		case MENUITEM_CUSTOMIZE_LOBBY:
-		case MENUITEM_ACHIVEMENTS:
 		case MENUITEM_OPTIONS:
 			MessageBox(SokuLib::window, "Not implemented", "Not implemented", MB_ICONINFORMATION);
+			break;
+		case MENUITEM_ACHIVEMENTS:
+			SokuLib::activateMenu(new AchievementsMenu());
 			break;
 		case MENUITEM_STATISTICS:
 			SokuLib::activateMenu(new StatsMenu());
@@ -341,6 +344,39 @@ bool LobbyMenu::_joinLobbyUpdate()
 	return true;
 }
 
+void LobbyMenu::_updateTopAvatarOffset()
+{
+	SokuLib::Vector2i pos{78, static_cast<int>(130 - this->_avatarTop)};
+	int size = 0;
+
+	for (int i = 0; i < lobbyData->avatars.size(); i++) {
+		auto &avatar = lobbyData->avatars[i];
+		auto &showcase = this->_showcases[i];
+		constexpr unsigned maxBottom = 362;
+
+		if (pos.x + avatar.sprite.rect.width > 347) {
+			pos.x = 78;
+			pos.y += size;
+			size = 0;
+		}
+
+		if (i == this->_customCursor) {
+			if (pos.y < 130) {
+				this->_avatarTop -= 130 - pos.y;
+				return;
+			}
+
+			auto bottom = pos.y + (avatar.sprite.texture.getSize().y / 2) * avatar.scale / 2;
+
+			if (bottom > maxBottom)
+				this->_avatarTop += (bottom - maxBottom) * 2 / avatar.scale;
+			return;
+		}
+		pos.x += avatar.sprite.rect.width;
+		size = max(size, avatar.sprite.texture.getSize().y / 2);
+	}
+}
+
 bool LobbyMenu::_customizeAvatarUpdate()
 {
 	if (SokuLib::inputMgrs.input.a == 1 && this->_customCursor >= 0) {
@@ -359,19 +395,21 @@ bool LobbyMenu::_customizeAvatarUpdate()
 	if (std::abs(SokuLib::inputMgrs.input.horizontalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.horizontalAxis) > 36 && std::abs(SokuLib::inputMgrs.input.horizontalAxis) % 6 == 0)) {
 		SokuLib::playSEWaveBuffer(0x27);
 		if (this->_customCursor == 0 && SokuLib::inputMgrs.input.horizontalAxis < 0)
-			this->_customCursor += lobbyData->avatars.size() - 1 - (lobbyData->avatars.size() - 1) % 4;
+			this->_customCursor += lobbyData->avatars.size() - 1;
 		else
 			this->_customCursor = (this->_customCursor + (int)std::copysign(1, SokuLib::inputMgrs.input.horizontalAxis)) % lobbyData->avatars.size();
+		this->_updateTopAvatarOffset();
 		this->_refreshAvatarCustomText();
 	}
 	if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.verticalAxis) > 36 && std::abs(SokuLib::inputMgrs.input.verticalAxis) % 6 == 0)) {
 		SokuLib::playSEWaveBuffer(0x27);
 		if (this->_customCursor < 4 && SokuLib::inputMgrs.input.verticalAxis < 0)
-			this->_customCursor = lobbyData->avatars.size() - 1 - this->_customCursor;
+			this->_customCursor = 0;
 		else if (this->_customCursor + 4 >= lobbyData->avatars.size() && SokuLib::inputMgrs.input.verticalAxis > 0)
-			this->_customCursor = this->_customCursor % 4;
+			this->_customCursor = lobbyData->avatars.size() - 1;
 		else
 			this->_customCursor = this->_customCursor + (int)std::copysign(4, SokuLib::inputMgrs.input.verticalAxis);
+		this->_updateTopAvatarOffset();
 		this->_refreshAvatarCustomText();
 	}
 	for (int i = 0; i < lobbyData->avatars.size(); i++) {
@@ -441,7 +479,7 @@ void LobbyMenu::_customizeAvatarRender()
 	for (auto &sprite : this->_customizeTexts)
 		sprite.draw();
 
-	SokuLib::Vector2i pos{78, 130};
+	SokuLib::Vector2i pos{78, static_cast<int>(130 - this->_avatarTop)};
 	int size = 0;
 #ifdef _DEBUG
 	SokuLib::DrawUtils::RectangleShape rect;
@@ -452,42 +490,72 @@ void LobbyMenu::_customizeAvatarRender()
 	for (int i = 0; i < lobbyData->avatars.size(); i++) {
 		auto &avatar = lobbyData->avatars[i];
 		auto &showcase = this->_showcases[i];
+		constexpr unsigned maxBottom = 362;
 
-		avatar.sprite.setSize({
-			static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale / 2),
-			static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale / 2)
-		});
 		if (pos.x + avatar.sprite.rect.width > 347) {
 			pos.x = 78;
 			pos.y += size;
 			size = 0;
+			if (pos.y >= maxBottom)
+				break;
+		}
+
+		auto bottom = pos.y + (avatar.sprite.texture.getSize().y / 2) * avatar.scale / 2;
+
+		if (bottom > maxBottom)
+			avatar.sprite.rect.height = avatar.sprite.texture.getSize().y / 2 - (bottom - maxBottom) * 2 / avatar.scale;
+		else
+			avatar.sprite.rect.height = avatar.sprite.texture.getSize().y / 2;
+		avatar.sprite.setSize({
+			static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale / 2),
+			static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale / 2)
+		});
+		avatar.sprite.rect.left = avatar.sprite.rect.width * showcase.anim;
+		avatar.sprite.rect.top = (avatar.sprite.texture.getSize().y / 2) * (showcase.action / 4);
+
+		auto realPos = pos;
+
+		if (pos.y + avatar.sprite.getSize().y <= 130);
+		else if (pos.y < 130) {
+			avatar.sprite.rect.top += 130 - pos.y;
+			avatar.sprite.rect.height -= (130 - pos.y) * 2 / avatar.scale;
+			pos.y = 130;
+			avatar.sprite.setSize({
+				static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale / 2),
+				static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale / 2)
+			});
 		}
 		avatar.sprite.setPosition(pos);
 #ifdef _DEBUG
 		rect.setSize(avatar.sprite.getSize());
 		rect.setPosition(pos);
-		rect.draw();
+		if (avatar.sprite.getPosition().y >= 130)
+			rect.draw();
 #endif
 
 		auto locked = lobbyData->isLocked(avatar);
 
 		if (this->_customCursor == i)
 			displaySokuCursor(pos + SokuLib::Vector2i{8, 0}, avatar.sprite.getSize());
-		pos.x += avatar.sprite.rect.width;
-		size = max(size, avatar.sprite.rect.height);
+		pos = realPos;
+		size = max(size, avatar.sprite.texture.getSize().y / 2);
 		avatar.sprite.setMirroring(showcase.side, false);
-		avatar.sprite.rect.left = avatar.sprite.rect.width * showcase.anim;
-		avatar.sprite.rect.top = avatar.sprite.rect.height * (showcase.action / 4);
-		avatar.sprite.tint = locked ? SokuLib::Color{0x40, 0x40, 0x40, 0xFF} : SokuLib::Color::White;
-		avatar.sprite.draw();
-		if (locked) {
-			this->_lock.setPosition(
-				avatar.sprite.getPosition() +
-				avatar.sprite.getSize() * 0.5 -
-				SokuLib::Vector2d{this->_lock.getSize().x * 0.5, 0}
-			);
-			this->_lock.draw();
+		avatar.sprite.tint = lobbyData->isLocked(avatar) ? SokuLib::Color{0x40, 0x40, 0x40, 0xFF} : SokuLib::Color::White;
+		if (avatar.sprite.getPosition().y >= 130) {
+			avatar.sprite.draw();
+			if (locked && bottom <= maxBottom) {
+				this->_lock.setPosition(
+					pos + SokuLib::Vector2i{
+						static_cast<int>((avatar.sprite.rect.width * avatar.scale / 2) / 2 - this->_lock.getSize().x / 2),
+						static_cast<int>(((avatar.sprite.texture.getSize().y / 2) * avatar.scale / 2) / 2)
+					}
+				);
+				if (this->_lock.getPosition().y >= 130)
+					this->_lock.draw();
+			}
 		}
+		pos.x += avatar.sprite.rect.width;
+		avatar.sprite.rect.height = avatar.sprite.texture.getSize().y / 2;
 		avatar.sprite.setSize({
 			static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale),
 			static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale)

@@ -112,7 +112,7 @@ with open("data.txt", encoding="utf-8") as fd:
             elif rewards[rid]["type"] == "emote":
                 rval = {"type": "emote", "name": emotes[index]}
             elif rewards[rid]["type"] == "avatar":
-                rval = {"type": "avatar", "id": index + 1}
+                rval = {"type": "avatar", "id": index + 3}
             else:
                 rval = {"type": rewards[rid]["type"], "id": index}
             if rval and rid >= 4:

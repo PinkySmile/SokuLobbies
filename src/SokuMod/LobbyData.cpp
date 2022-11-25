@@ -393,17 +393,17 @@ LobbyData::~LobbyData()
 
 bool LobbyData::isLocked(const LobbyData::Emote &emote)
 {
-	return emote.requirement && !emote.requirement->awarded;
+	return !this->achievementsLocked && emote.requirement && !emote.requirement->awarded;
 }
 
 bool LobbyData::isLocked(const LobbyData::Avatar &avatar)
 {
-	return avatar.requirement && !avatar.requirement->awarded;
+	return !this->achievementsLocked && avatar.requirement && !avatar.requirement->awarded;
 }
 
 bool LobbyData::isLocked(const LobbyData::Background &background)
 {
-	return background.requirement && !background.requirement->awarded;
+	return !this->achievementsLocked && background.requirement && !background.requirement->awarded;
 }
 
 unsigned LobbyData::_getExpectedMagic()
