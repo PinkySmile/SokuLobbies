@@ -172,12 +172,12 @@ void LobbyData::_loadAchievements()
 		});
 		achievement.descSprite.setPosition({0, -20});
 
+		this->achievementByRequ[achievement.requirement["type"]].push_back(&achievement);
 		if (!achievement.rewards.empty()) {
 			auto reward = achievement.rewards[0];
 			auto type = reward["type"];
 
 			if (type != "title") {
-				this->achievementByRequ[type].push_back(&achievement);
 				if (type == "avatar")
 					this->avatars[reward["id"]].requirement = &achievement;
 				else if (type == "emote")

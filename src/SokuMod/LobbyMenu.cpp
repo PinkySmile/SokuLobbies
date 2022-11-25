@@ -55,18 +55,18 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 	std::filesystem::path folder = profileFolderPath;
 
 	inputBoxLoadAssets();
-	this->title.texture.loadFromFile((std::filesystem::path(profileFolderPath) / "assets/menu/title.png").string().c_str());
+	this->title.texture.loadFromFile((folder / "assets/menu/title.png").string().c_str());
 	this->title.setSize(this->title.texture.getSize());
 	this->title.setPosition({23, 6});
 	this->title.rect.width = this->title.getSize().x;
 	this->title.rect.height = this->title.getSize().y;
 
-	this->ui.texture.loadFromFile((std::filesystem::path(profileFolderPath) / "assets/menu/lobbylist.png").string().c_str());
+	this->ui.texture.loadFromFile((folder / "assets/menu/lobbylist.png").string().c_str());
 	this->ui.setSize(this->ui.texture.getSize());
 	this->ui.rect.width = this->ui.getSize().x;
 	this->ui.rect.height = this->ui.getSize().y;
 
-	this->_customizeSeat.texture.loadFromFile((std::filesystem::path(profileFolderPath) / "assets/menu/customSeat.png").string().c_str());
+	this->_customizeSeat.texture.loadFromFile((folder / "assets/menu/customSeat.png").string().c_str());
 	this->_customizeSeat.setSize(this->_customizeSeat.texture.getSize());
 	this->_customizeSeat.rect.width = this->_customizeSeat.getSize().x;
 	this->_customizeSeat.rect.height = this->_customizeSeat.getSize().y;
@@ -151,6 +151,14 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 	});
 	this->_loadingGear.rect.width = this->_loadingGear.texture.getSize().x;
 	this->_loadingGear.rect.height = this->_loadingGear.texture.getSize().y;
+
+	this->_lock.texture.loadFromFile((folder / "assets/menu/lock.png").string().c_str());
+	this->_lock.setSize({
+		this->_lock.texture.getSize().x,
+		this->_lock.texture.getSize().y
+	});
+	this->_lock.rect.width = this->_lock.texture.getSize().x;
+	this->_lock.rect.height = this->_lock.texture.getSize().y;
 
 	this->_netThread = std::thread(&LobbyMenu::_netLoop, this);
 	this->_connectThread = std::thread(&LobbyMenu::_connectLoop, this);
@@ -460,6 +468,9 @@ void LobbyMenu::_customizeAvatarRender()
 		rect.setPosition(pos);
 		rect.draw();
 #endif
+
+		auto locked = lobbyData->isLocked(avatar);
+
 		if (this->_customCursor == i)
 			displaySokuCursor(pos + SokuLib::Vector2i{8, 0}, avatar.sprite.getSize());
 		pos.x += avatar.sprite.rect.width;
@@ -467,8 +478,16 @@ void LobbyMenu::_customizeAvatarRender()
 		avatar.sprite.setMirroring(showcase.side, false);
 		avatar.sprite.rect.left = avatar.sprite.rect.width * showcase.anim;
 		avatar.sprite.rect.top = avatar.sprite.rect.height * (showcase.action / 4);
-		avatar.sprite.tint = lobbyData->isLocked(avatar) ? SokuLib::Color{0x40, 0x40, 0x40, 0xFF} : SokuLib::Color::White;
+		avatar.sprite.tint = locked ? SokuLib::Color{0x40, 0x40, 0x40, 0xFF} : SokuLib::Color::White;
 		avatar.sprite.draw();
+		if (locked) {
+			this->_lock.setPosition(
+				avatar.sprite.getPosition() +
+				avatar.sprite.getSize() * 0.5 -
+				SokuLib::Vector2d{this->_lock.getSize().x * 0.5, 0}
+			);
+			this->_lock.draw();
+		}
 		avatar.sprite.setSize({
 			static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale),
 			static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale)

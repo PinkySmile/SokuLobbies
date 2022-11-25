@@ -57,6 +57,7 @@ private:
 	SokuLib::DrawUtils::Sprite _loadingText;
 	SokuLib::DrawUtils::Sprite _messageBox;
 	SokuLib::DrawUtils::Sprite _loadingGear;
+	SokuLib::DrawUtils::Sprite _lock;
 	std::vector<AvatarShowcase> _showcases;
 
 	void _netLoop();
