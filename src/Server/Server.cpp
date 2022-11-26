@@ -759,7 +759,7 @@ void Server::_msgCmd(Connection *author, const std::vector<std::string> &args)
 	Lobbies::PacketMessage msgPacket1{-1, author ? author->getId() : 0, realMessage1};
 	Lobbies::PacketMessage msgPacket2{-1, author ? author->getId() : 0, realMessage2};
 
-	std::cout << '[' << (author ? author->getName() : std::string("*CONSOLE*")) << " -> " << player->getName() << "]: " << msg;
+	std::cout << '[' << (author ? author->getName() : std::string("*CONSOLE*")) << " -> " << player->getName() << "]: " << msg << std::endl;
 	if (author)
 		author->send(&msgPacket2, sizeof(msgPacket2));
 	for (auto &word : this->_bannedWords) {
