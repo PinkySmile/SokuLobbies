@@ -452,29 +452,11 @@ int __stdcall Hooked_EndScene(IDirect3DDevice9* pDevice)
 	if (SokuLib::sceneId != SokuLib::SCENE_LOGO && lobbyData) {
 #ifdef _DEBUG
 		if (SokuLib::checkKeyOneshot(DIK_F4, false, false, false)) {
-			load.first = true;
-			load.second = true;
-			std::thread{[]{
-				try {
-					lobbyData = std::make_unique<LobbyData>();
-				} catch (std::exception &e) {
-					MessageBoxA(
-						SokuLib::window,
-						(
-							"Error while loading lobby data.\n"
-							"Statistic saving, achievements and blank card rewards are now disabled.\n"
-							"To try to load data again, go to the lobby screen.\n"
-							"If loading succeeds, it will be enabled again.\n"
-							"\n"
-							"Error:\n" +
-							std::string(e.what())
-						).c_str(),
-						"SokuLobby error",
-						MB_ICONERROR
-					);
-				}
-				load.first = false;
-			}}.detach();
+			try {
+				lobbyData = std::make_unique<LobbyData>();
+			} catch (std::exception &e) {
+				MessageBoxA(SokuLib::window, e.what(), "SokuLobby error", MB_ICONERROR);
+			}
 		}
 #endif
 		lobbyData->render();

@@ -71,6 +71,7 @@ public:
 		bool hidden;
 		SokuLib::DrawUtils::Sprite nameSprite;
 		SokuLib::DrawUtils::Sprite nameSpriteFull;
+		SokuLib::DrawUtils::Sprite nameSpriteTitle;
 		SokuLib::DrawUtils::Sprite descSprite;
 
 		Achievement() = default;

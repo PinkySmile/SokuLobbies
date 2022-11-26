@@ -137,13 +137,21 @@ void LobbyData::_loadAchievements()
 		auto arrayIndex = index / 7;
 		auto bit = index % 7;
 		auto flagBit = arrayIndex % 8;
+		SokuLib::Vector2i size;
 
 		bit += bit >= flagBit;
 		achievement.description = val["description"];
 		achievement.name = val["name"];
 		achievement.requirement = val["requirement"];
+		achievement.hidden = val["hidden"];
 		achievement.rewards = val["rewards"].get<std::vector<nlohmann::json>>();
 		achievement.awarded = (buffer[arrayIndex] & (1 << bit)) != 0;
+
+		achievement.nameSpriteTitle.texture.createFromText(achievement.name.c_str(), this->getFont(18), {400, 22}, &size);
+		achievement.nameSpriteTitle.rect.width = size.x;
+		achievement.nameSpriteTitle.rect.height = size.y;
+		achievement.nameSpriteTitle.setSize(size.to<unsigned>());
+		achievement.nameSpriteTitle.setPosition(SokuLib::Vector2i{315 + 151, 125} - SokuLib::Vector2i{size.x / 2, 0});
 
 		achievement.nameSpriteFull.texture.createFromText(achievement.name.c_str(), this->getFont(14), {400, 20});
 		achievement.nameSpriteFull.rect.width = achievement.nameSpriteFull.texture.getSize().x;
@@ -163,14 +171,12 @@ void LobbyData::_loadAchievements()
 		});
 		achievement.nameSprite.setPosition({0, -20});
 
-		achievement.descSprite.texture.createFromText(achievement.description.c_str(), this->getFont(12), {400, 50});
-		achievement.descSprite.rect.width = achievement.descSprite.texture.getSize().x;
-		achievement.descSprite.rect.height = achievement.descSprite.texture.getSize().y;
-		achievement.descSprite.setSize({
-			static_cast<unsigned int>(achievement.descSprite.rect.width),
-			static_cast<unsigned int>(achievement.descSprite.rect.height)
-		});
+		achievement.descSprite.texture.createFromText(achievement.description.c_str(), this->getFont(14), {400, 100}, &size);
+		achievement.descSprite.rect.width = size.x;
+		achievement.descSprite.rect.height = size.y;
+		achievement.descSprite.setSize(size.to<unsigned>());
 		achievement.descSprite.setPosition({0, -20});
+		achievement.descSprite.tint = SokuLib::Color{0x80, 0xFF, 0x80};
 
 		this->achievementByRequ[achievement.requirement["type"]].push_back(&achievement);
 		if (!achievement.rewards.empty()) {

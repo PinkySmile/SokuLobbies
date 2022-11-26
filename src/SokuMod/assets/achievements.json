@@ -18,7 +18,8 @@
             }
         ],
         "name": "Phantom Gardener",
-        "description": "Win 10 games as Youmu"
+        "description": "Win 10 games as Youmu",
+        "hidden": false
     },
     {
         "requirement": {
@@ -37,7 +38,8 @@
             }
         ],
         "name": "Half-Baked",
-        "description": "Lose 10 games as Youmu"
+        "description": "Lose 10 games as Youmu",
+        "hidden": false
     },
     {
         "requirement": {
@@ -56,7 +58,8 @@
             }
         ],
         "name": "Youki's Disciple",
-        "description": "Play 10 games as Youmu"
+        "description": "Play 10 games as Youmu",
+        "hidden": false
     },
     {
         "requirement": {
@@ -70,7 +73,8 @@
             }
         ],
         "name": "Konpaku's Kenjutsu Master",
-        "description": "Use each Youmu's skill and spell at least once"
+        "description": "Use each Youmu's skill and spell at<br>least once",
+        "hidden": false
     },
     {
         "requirement": {
@@ -90,7 +94,8 @@
             }
         ],
         "name": "Phantom Samurai",
-        "description": "Play 100 games as Youmu"
+        "description": "Play 100 games as Youmu",
+        "hidden": false
     },
     {
         "requirement": {
@@ -110,7 +115,8 @@
             }
         ],
         "name": "Saigyouji's Ronin",
-        "description": "Play 1000 games as Youmu"
+        "description": "Play 1000 games as Youmu",
+        "hidden": false
     },
     {
         "requirement": {
@@ -129,7 +135,8 @@
             }
         ],
         "name": "Young Scarlet Moon",
-        "description": "Win 10 games as Remilia"
+        "description": "Win 10 games as Remilia",
+        "hidden": false
     },
     {
         "requirement": {
@@ -148,7 +155,8 @@
             }
         ],
         "name": "Devil May Whine",
-        "description": "Lose 10 games as Remilia"
+        "description": "Lose 10 games as Remilia",
+        "hidden": false
     },
     {
         "requirement": {
@@ -167,7 +175,8 @@
             }
         ],
         "name": "Dracul's Descendant",
-        "description": "Play 10 games as Remilia"
+        "description": "Play 10 games as Remilia",
+        "hidden": false
     },
     {
         "requirement": {
@@ -181,7 +190,8 @@
             }
         ],
         "name": "Lady of The Mansion",
-        "description": "Use each Remilia's skill and spell at least once"
+        "description": "Use each Remilia's skill and spell at<br>least once",
+        "hidden": false
     },
     {
         "requirement": {
@@ -201,7 +211,8 @@
             }
         ],
         "name": "Skerlet Vampir",
-        "description": "Play 100 games as Remilia"
+        "description": "Play 100 games as Remilia",
+        "hidden": false
     },
     {
         "requirement": {
@@ -221,7 +232,8 @@
             }
         ],
         "name": "Soaked in Red",
-        "description": "Play 1000 games as Remilia"
+        "description": "Play 1000 games as Remilia",
+        "hidden": false
     },
     {
         "requirement": {
@@ -240,7 +252,8 @@
             }
         ],
         "name": "Eternal Shrine Maiden",
-        "description": "Win 10 games as Reimu"
+        "description": "Win 10 games as Reimu",
+        "hidden": false
     },
     {
         "requirement": {
@@ -259,7 +272,8 @@
             }
         ],
         "name": "Bankrupt",
-        "description": "Lose 10 games as Reimu"
+        "description": "Lose 10 games as Reimu",
+        "hidden": false
     },
     {
         "requirement": {
@@ -278,7 +292,8 @@
             }
         ],
         "name": "Yin Yang Connoisseur",
-        "description": "Play 10 games as Reimu"
+        "description": "Play 10 games as Reimu",
+        "hidden": false
     },
     {
         "requirement": {
@@ -292,7 +307,8 @@
             }
         ],
         "name": "Hand to Gohei Style",
-        "description": "Use each Reimu's skill and spell at least once"
+        "description": "Use each Reimu's skill and spell at<br>least once",
+        "hidden": false
     },
     {
         "requirement": {
@@ -312,7 +328,8 @@
             }
         ],
         "name": "Gensokyo's Barrier",
-        "description": "Play 100 games as Reimu"
+        "description": "Play 100 games as Reimu",
+        "hidden": false
     },
     {
         "requirement": {
@@ -332,7 +349,8 @@
             }
         ],
         "name": "\"8 Million Gods\"",
-        "description": "Play 1000 games as Reimu"
+        "description": "Play 1000 games as Reimu",
+        "hidden": false
     },
     {
         "requirement": {
@@ -351,7 +369,8 @@
             }
         ],
         "name": "Just a Normal Witch",
-        "description": "Win 10 games as Marisa"
+        "description": "Win 10 games as Marisa",
+        "hidden": false
     },
     {
         "requirement": {
@@ -370,7 +389,8 @@
             }
         ],
         "name": "Human Magician",
-        "description": "Lose 10 games as Marisa"
+        "description": "Lose 10 games as Marisa",
+        "hidden": false
     },
     {
         "requirement": {
@@ -389,7 +409,8 @@
             }
         ],
         "name": "Ordinary Magician",
-        "description": "Play 10 games as Marisa"
+        "description": "Play 10 games as Marisa",
+        "hidden": false
     },
     {
         "requirement": {
@@ -403,7 +424,8 @@
             }
         ],
         "name": "Powerhouse in Black",
-        "description": "Use each Marisa's skill and spell at least once"
+        "description": "Use each Marisa's skill and spell at<br>least once",
+        "hidden": false
     },
     {
         "requirement": {
@@ -423,7 +445,8 @@
             }
         ],
         "name": "Powered by Astronomy",
-        "description": "Play 100 games as Marisa"
+        "description": "Play 100 games as Marisa",
+        "hidden": false
     },
     {
         "requirement": {
@@ -443,7 +466,8 @@
             }
         ],
         "name": "Magical Event Horizon",
-        "description": "Play 1000 games as Marisa"
+        "description": "Play 1000 games as Marisa",
+        "hidden": false
     },
     {
         "requirement": {
@@ -462,7 +486,8 @@
             }
         ],
         "name": "Deified Shrine Maiden",
-        "description": "Win 10 games as Sanae"
+        "description": "Win 10 games as Sanae",
+        "hidden": false
     },
     {
         "requirement": {
@@ -481,7 +506,8 @@
             }
         ],
         "name": "2nd Class Shrine Maiden",
-        "description": "Lose 10 games as Sanae"
+        "description": "Lose 10 games as Sanae",
+        "hidden": false
     },
     {
         "requirement": {
@@ -500,7 +526,8 @@
             }
         ],
         "name": "Actually 3 Adversaries",
-        "description": "Play 10 games as Sanae"
+        "description": "Play 10 games as Sanae",
+        "hidden": false
     },
     {
         "requirement": {
@@ -514,7 +541,8 @@
             }
         ],
         "name": "Master of Wind-Fu",
-        "description": "Use each Sanae's skill and spell at least once"
+        "description": "Use each Sanae's skill and spell at<br>least once",
+        "hidden": false
     },
     {
         "requirement": {
@@ -534,7 +562,8 @@
             }
         ],
         "name": "Moriya's Conspiracy",
-        "description": "Play 100 games as Sanae"
+        "description": "Play 100 games as Sanae",
+        "hidden": false
     },
     {
         "requirement": {
@@ -554,7 +583,8 @@
             }
         ],
         "name": "Everyday Miracle",
-        "description": "Play 1000 games as Sanae"
+        "description": "Play 1000 games as Sanae",
+        "hidden": false
     },
     {
         "requirement": {
@@ -573,7 +603,8 @@
             }
         ],
         "name": "Elegant Head-Maid",
-        "description": "Win 10 games as Sakuya"
+        "description": "Win 10 games as Sakuya",
+        "hidden": false
     },
     {
         "requirement": {
@@ -592,7 +623,8 @@
             }
         ],
         "name": "Maid in Time-Out",
-        "description": "Lose 10 games as Sakuya"
+        "description": "Lose 10 games as Sakuya",
+        "hidden": false
     },
     {
         "requirement": {
@@ -611,7 +643,8 @@
             }
         ],
         "name": "This time is only mine",
-        "description": "Play 10 games as Sakuya"
+        "description": "Play 10 games as Sakuya",
+        "hidden": false
     },
     {
         "requirement": {
@@ -625,7 +658,8 @@
             }
         ],
         "name": "Commando Pro",
-        "description": "Use each Sakuya's skill and spell at least once"
+        "description": "Use each Sakuya's skill and spell at<br>least once",
+        "hidden": false
     },
     {
         "requirement": {
@@ -645,7 +679,8 @@
             }
         ],
         "name": "Hound of the Devil",
-        "description": "Play 100 games as Sakuya"
+        "description": "Play 100 games as Sakuya",
+        "hidden": false
     },
     {
         "requirement": {
@@ -665,7 +700,8 @@
             }
         ],
         "name": "Spaceship Window Opener",
-        "description": "Play 1000 games as Sakuya"
+        "description": "Play 1000 games as Sakuya",
+        "hidden": false
     },
     {
         "requirement": {
@@ -684,7 +720,8 @@
             }
         ],
         "name": "Puppet Master",
-        "description": "Win 10 games as Alice"
+        "description": "Win 10 games as Alice",
+        "hidden": false
     },
     {
         "requirement": {
@@ -703,7 +740,8 @@
             }
         ],
         "name": "Broken Threads",
-        "description": "Lose 10 games as Alice"
+        "description": "Lose 10 games as Alice",
+        "hidden": false
     },
     {
         "requirement": {
@@ -722,7 +760,8 @@
             }
         ],
         "name": "Artful Puppet Show",
-        "description": "Play 10 games as Alice"
+        "description": "Play 10 games as Alice",
+        "hidden": false
     },
     {
         "requirement": {
@@ -736,7 +775,8 @@
             }
         ],
         "name": "Army of One",
-        "description": "Use each Alice's skill and spell at least once"
+        "description": "Use each Alice's skill and spell at<br>least once",
+        "hidden": false
     },
     {
         "requirement": {
@@ -756,7 +796,8 @@
             }
         ],
         "name": "Controlling People's Shapes",
-        "description": "Play 100 games as Alice"
+        "description": "Play 100 games as Alice",
+        "hidden": false
     },
     {
         "requirement": {
@@ -776,7 +817,8 @@
             }
         ],
         "name": "Grand Guignol's Artist",
-        "description": "Play 1000 games as Alice"
+        "description": "Play 1000 games as Alice",
+        "hidden": false
     },
     {
         "requirement": {
@@ -795,7 +837,8 @@
             }
         ],
         "name": "Great Library",
-        "description": "Win 10 games as Patchouli"
+        "description": "Win 10 games as Patchouli",
+        "hidden": false
     },
     {
         "requirement": {
@@ -814,7 +857,8 @@
             }
         ],
         "name": "Anemic Alchemist",
-        "description": "Lose 10 games as Patchouli"
+        "description": "Lose 10 games as Patchouli",
+        "hidden": false
     },
     {
         "requirement": {
@@ -833,7 +877,8 @@
             }
         ],
         "name": "Wu Xing Magician",
-        "description": "Play 10 games as Patchouli"
+        "description": "Play 10 games as Patchouli",
+        "hidden": false
     },
     {
         "requirement": {
@@ -847,7 +892,8 @@
             }
         ],
         "name": "Never Ending Knowledge",
-        "description": "Use each Patchouli's skill and spell at least once"
+        "description": "Use each Patchouli's skill and spell at<br>least once",
+        "hidden": false
     },
     {
         "requirement": {
@@ -867,7 +913,8 @@
             }
         ],
         "name": "Weekly Magic",
-        "description": "Play 100 games as Patchouli"
+        "description": "Play 100 games as Patchouli",
+        "hidden": false
     },
     {
         "requirement": {
@@ -887,7 +934,8 @@
             }
         ],
         "name": "Full Asthma Alchemist",
-        "description": "Play 1000 games as Patchouli"
+        "description": "Play 1000 games as Patchouli",
+        "hidden": false
     },
     {
         "requirement": {
@@ -906,7 +954,8 @@
             }
         ],
         "name": "Netherworld's Ghost",
-        "description": "Win 10 games as Yuyuko"
+        "description": "Win 10 games as Yuyuko",
+        "hidden": false
     },
     {
         "requirement": {
@@ -925,7 +974,8 @@
             }
         ],
         "name": "Lazy Ghost",
-        "description": "Lose 10 games as Yuyuko"
+        "description": "Lose 10 games as Yuyuko",
+        "hidden": false
     },
     {
         "requirement": {
@@ -944,7 +994,8 @@
             }
         ],
         "name": "Inscrutable White Jade",
-        "description": "Play 10 games as Yuyuko"
+        "description": "Play 10 games as Yuyuko",
+        "hidden": false
     },
     {
         "requirement": {
@@ -958,7 +1009,8 @@
             }
         ],
         "name": "Ageless Dream",
-        "description": "Use each Yuyuko's skill and spell at least once"
+        "description": "Use each Yuyuko's skill and spell at<br>least once",
+        "hidden": false
     },
     {
         "requirement": {
@@ -978,7 +1030,8 @@
             }
         ],
         "name": "Princess of Restless Souls",
-        "description": "Play 100 games as Yuyuko"
+        "description": "Play 100 games as Yuyuko",
+        "hidden": false
     },
     {
         "requirement": {
@@ -998,7 +1051,8 @@
             }
         ],
         "name": "Perfect Cherry Blossom",
-        "description": "Play 1000 games as Yuyuko"
+        "description": "Play 1000 games as Yuyuko",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1017,7 +1071,8 @@
             }
         ],
         "name": "Border of Phantasm",
-        "description": "Win 10 games as Yukari"
+        "description": "Win 10 games as Yukari",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1036,7 +1091,8 @@
             }
         ],
         "name": "Eternally Dormant",
-        "description": "Lose 10 games as Yukari"
+        "description": "Lose 10 games as Yukari",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1055,7 +1111,8 @@
             }
         ],
         "name": "Living Inside (Your) Walls",
-        "description": "Play 10 games as Yukari"
+        "description": "Play 10 games as Yukari",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1069,7 +1126,8 @@
             }
         ],
         "name": "Ancient \"Programmer\"",
-        "description": "Use each Yukari's skill and spell at least once"
+        "description": "Use each Yukari's skill and spell at<br>least once",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1089,7 +1147,8 @@
             }
         ],
         "name": "Shikigami's Spirit Medium (Master)",
-        "description": "Play 100 games as Yukari"
+        "description": "Play 100 games as Yukari",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1109,7 +1168,8 @@
             }
         ],
         "name": "Gensokyo's Sage",
-        "description": "Play 1000 games as Yukari"
+        "description": "Play 1000 games as Yukari",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1128,7 +1188,8 @@
             }
         ],
         "name": "Ice Fairy",
-        "description": "Win 10 games as Cirno"
+        "description": "Win 10 games as Cirno",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1147,7 +1208,8 @@
             }
         ],
         "name": "Cold Shoulders",
-        "description": "Lose 10 games as Cirno"
+        "description": "Lose 10 games as Cirno",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1166,7 +1228,8 @@
             }
         ],
         "name": "Genius Fairy",
-        "description": "Play 10 games as Cirno"
+        "description": "Play 10 games as Cirno",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1180,7 +1243,8 @@
             }
         ],
         "name": "Stronger Than a Grown Human",
-        "description": "Use each Cirno's skill and spell at least once"
+        "description": "Use each Cirno's skill and spell at<br>least once",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1200,7 +1264,8 @@
             }
         ],
         "name": "Naiad of The Lake",
-        "description": "Play 100 games as Cirno"
+        "description": "Play 100 games as Cirno",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1220,7 +1285,8 @@
             }
         ],
         "name": "Absolute Zero",
-        "description": "Play 1000 games as Cirno"
+        "description": "Play 1000 games as Cirno",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1239,7 +1305,8 @@
             }
         ],
         "name": "Messenger From the Dragon Palace",
-        "description": "Win 10 games as Iku"
+        "description": "Win 10 games as Iku",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1258,7 +1325,8 @@
             }
         ],
         "name": "Malfunctioning Spark",
-        "description": "Lose 10 games as Iku"
+        "description": "Lose 10 games as Iku",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1277,7 +1345,8 @@
             }
         ],
         "name": "Oarfish Covered In Scarlet Cloth",
-        "description": "Play 10 games as Iku"
+        "description": "Play 10 games as Iku",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1291,7 +1360,8 @@
             }
         ],
         "name": "Swimming in The Sky",
-        "description": "Use each Iku's skill and spell at least once"
+        "description": "Use each Iku's skill and spell at<br>least once",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1311,7 +1381,8 @@
             }
         ],
         "name": "The Will of The Great Spiral",
-        "description": "Play 100 games as Iku"
+        "description": "Play 100 games as Iku",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1331,7 +1402,8 @@
             }
         ],
         "name": "The Dragon's Veil",
-        "description": "Play 1000 games as Iku"
+        "description": "Play 1000 games as Iku",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1350,7 +1422,8 @@
             }
         ],
         "name": "Moon Rabbit on Earth",
-        "description": "Win 10 games as Reisen"
+        "description": "Win 10 games as Reisen",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1369,7 +1442,8 @@
             }
         ],
         "name": "Rabbit Stew",
-        "description": "Lose 10 games as Reisen"
+        "description": "Lose 10 games as Reisen",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1388,7 +1462,8 @@
             }
         ],
         "name": "Insanity Overdrive",
-        "description": "Play 10 games as Reisen"
+        "description": "Play 10 games as Reisen",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1402,7 +1477,8 @@
             }
         ],
         "name": "Lunar Soldier",
-        "description": "Use each Reisen's skill and spell at least once"
+        "description": "Use each Reisen's skill and spell at<br>least once",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1422,7 +1498,8 @@
             }
         ],
         "name": "Disciple of the God of Wisdom",
-        "description": "Play 100 games as Reisen"
+        "description": "Play 100 games as Reisen",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1442,7 +1519,8 @@
             }
         ],
         "name": "Lunatic Red Eyes",
-        "description": "Play 1000 games as Reisen"
+        "description": "Play 1000 games as Reisen",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1461,7 +1539,8 @@
             }
         ],
         "name": "Night Parade of a Hundred Demons",
-        "description": "Win 10 games as Suika"
+        "description": "Win 10 games as Suika",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1480,7 +1559,8 @@
             }
         ],
         "name": "Wasted",
-        "description": "Lose 10 games as Suika"
+        "description": "Lose 10 games as Suika",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1499,7 +1579,8 @@
             }
         ],
         "name": "Layered Like an Onion",
-        "description": "Play 10 games as Suika"
+        "description": "Play 10 games as Suika",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1513,7 +1594,8 @@
             }
         ],
         "name": "Material and Present Power",
-        "description": "Use each Suika's skill and spell at least once"
+        "description": "Use each Suika's skill and spell at<br>least once",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1533,7 +1615,8 @@
             }
         ],
         "name": "Deva of The Youkai Mountain",
-        "description": "Play 100 games as Suika"
+        "description": "Play 100 games as Suika",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1553,7 +1636,8 @@
             }
         ],
         "name": "A Million Oni in One",
-        "description": "Play 1000 games as Suika"
+        "description": "Play 1000 games as Suika",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1572,7 +1656,8 @@
             }
         ],
         "name": "Fallen Celestial",
-        "description": "Win 10 games as Tenshi"
+        "description": "Win 10 games as Tenshi",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1591,7 +1676,8 @@
             }
         ],
         "name": "Catastrophe of Bhavaagra",
-        "description": "Lose 10 games as Tenshi"
+        "description": "Lose 10 games as Tenshi",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1610,7 +1696,8 @@
             }
         ],
         "name": "Eldest Daughter of the Hinanawi",
-        "description": "Play 10 games as Tenshi"
+        "description": "Play 10 games as Tenshi",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1624,7 +1711,8 @@
             }
         ],
         "name": "Wielder of \"The Sword of Hisou\"",
-        "description": "Use each Tenshi's skill and spell at least once"
+        "description": "Use each Tenshi's skill and spell at<br>least once",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1644,7 +1732,8 @@
             }
         ],
         "name": "Manipulator of \"Earth\" and \"Spirit\"",
-        "description": "Play 100 games as Tenshi"
+        "description": "Play 100 games as Tenshi",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1664,7 +1753,8 @@
             }
         ],
         "name": "Sky of Scarlet Perception",
-        "description": "Play 1000 games as Tenshi"
+        "description": "Play 1000 games as Tenshi",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1683,7 +1773,8 @@
             }
         ],
         "name": "Wind God Girl",
-        "description": "Win 10 games as Aya"
+        "description": "Win 10 games as Aya",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1702,7 +1793,8 @@
             }
         ],
         "name": "Paparazzi",
-        "description": "Lose 10 games as Aya"
+        "description": "Lose 10 games as Aya",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1721,7 +1813,8 @@
             }
         ],
         "name": "Speed-o'-Sound Youkai",
-        "description": "Play 10 games as Aya"
+        "description": "Play 10 games as Aya",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1735,7 +1828,8 @@
             }
         ],
         "name": "Infinite Nightmare",
-        "description": "Use each Aya's skill and spell at least once"
+        "description": "Use each Aya's skill and spell at<br>least once",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1755,7 +1849,8 @@
             }
         ],
         "name": "Pure and Honest",
-        "description": "Play 100 games as Aya"
+        "description": "Play 100 games as Aya",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1775,7 +1870,8 @@
             }
         ],
         "name": "Fastest in Gensokyo",
-        "description": "Play 1000 games as Aya"
+        "description": "Play 1000 games as Aya",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1794,7 +1890,8 @@
             }
         ],
         "name": "Shinigami of The Sanzu River",
-        "description": "Win 10 games as Komachi"
+        "description": "Win 10 games as Komachi",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1813,7 +1910,8 @@
             }
         ],
         "name": "Lazy Charon",
-        "description": "Lose 10 games as Komachi"
+        "description": "Lose 10 games as Komachi",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1832,7 +1930,8 @@
             }
         ],
         "name": "Lover of Apples",
-        "description": "Play 10 games as Komachi"
+        "description": "Play 10 games as Komachi",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1846,7 +1945,8 @@
             }
         ],
         "name": "Divine Comedy of Errors",
-        "description": "Use each Komachi's skill and spell at least once"
+        "description": "Use each Komachi's skill and spell at<br>least once",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1866,7 +1966,8 @@
             }
         ],
         "name": "E-scythe-ing Guide of The Lifeless",
-        "description": "Play 100 games as Komachi"
+        "description": "Play 100 games as Komachi",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1886,7 +1987,8 @@
             }
         ],
         "name": "Ferry-Woman of The Acheron",
-        "description": "Play 1000 games as Komachi"
+        "description": "Play 1000 games as Komachi",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1905,7 +2007,8 @@
             }
         ],
         "name": "Green Martial Artist",
-        "description": "Win 10 games as Meiling"
+        "description": "Win 10 games as Meiling",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1924,7 +2027,8 @@
             }
         ],
         "name": "Sleeping on The Job",
-        "description": "Lose 10 games as Meiling"
+        "description": "Lose 10 games as Meiling",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1943,7 +2047,8 @@
             }
         ],
         "name": "Keeper of Gates",
-        "description": "Play 10 games as Meiling"
+        "description": "Play 10 games as Meiling",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1957,7 +2062,8 @@
             }
         ],
         "name": "Yi Er Fanclub",
-        "description": "Use each Meiling's skill and spell at least once"
+        "description": "Use each Meiling's skill and spell at<br>least once",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1977,7 +2083,8 @@
             }
         ],
         "name": "Dreamy Savior of Gensokyo",
-        "description": "Play 100 games as Meiling"
+        "description": "Play 100 games as Meiling",
+        "hidden": false
     },
     {
         "requirement": {
@@ -1997,7 +2104,8 @@
             }
         ],
         "name": "Legendary Dragon of Gensou",
-        "description": "Play 1000 games as Meiling"
+        "description": "Play 1000 games as Meiling",
+        "hidden": false
     },
     {
         "requirement": {
@@ -2016,7 +2124,8 @@
             }
         ],
         "name": "Hell Raven",
-        "description": "Win 10 games as Utsuho"
+        "description": "Win 10 games as Utsuho",
+        "hidden": false
     },
     {
         "requirement": {
@@ -2035,7 +2144,8 @@
             }
         ],
         "name": "Bird-Brained God",
-        "description": "Lose 10 games as Utsuho"
+        "description": "Lose 10 games as Utsuho",
+        "hidden": false
     },
     {
         "requirement": {
@@ -2054,7 +2164,8 @@
             }
         ],
         "name": "Low Crusher of The Inferi",
-        "description": "Play 10 games as Utsuho"
+        "description": "Play 10 games as Utsuho",
+        "hidden": false
     },
     {
         "requirement": {
@@ -2068,7 +2179,8 @@
             }
         ],
         "name": "Sector 7G's Finest Employee",
-        "description": "Use each Utsuho's skill and spell at least once"
+        "description": "Use each Utsuho's skill and spell at<br>least once",
+        "hidden": false
     },
     {
         "requirement": {
@@ -2088,7 +2200,8 @@
             }
         ],
         "name": "The Black Sun of Yatagarasu",
-        "description": "Play 100 games as Utsuho"
+        "description": "Play 100 games as Utsuho",
+        "hidden": false
     },
     {
         "requirement": {
@@ -2108,7 +2221,8 @@
             }
         ],
         "name": "The Crow that Stole the Sun",
-        "description": "Play 1000 games as Utsuho"
+        "description": "Play 1000 games as Utsuho",
+        "hidden": false
     },
     {
         "requirement": {
@@ -2127,7 +2241,8 @@
             }
         ],
         "name": "Kero Kero",
-        "description": "Win 10 games as Suwako"
+        "description": "Win 10 games as Suwako",
+        "hidden": false
     },
     {
         "requirement": {
@@ -2146,7 +2261,8 @@
             }
         ],
         "name": "Vivisection",
-        "description": "Lose 10 games as Suwako"
+        "description": "Lose 10 games as Suwako",
+        "hidden": false
     },
     {
         "requirement": {
@@ -2165,7 +2281,8 @@
             }
         ],
         "name": "Braving the Elements",
-        "description": "Play 10 games as Suwako"
+        "description": "Play 10 games as Suwako",
+        "hidden": false
     },
     {
         "requirement": {
@@ -2179,7 +2296,8 @@
             }
         ],
         "name": "Snake God in Frog Skin",
-        "description": "Use each Suwako's skill and spell at least once"
+        "description": "Use each Suwako's skill and spell at<br>least once",
+        "hidden": false
     },
     {
         "requirement": {
@@ -2199,7 +2317,8 @@
             }
         ],
         "name": "Ruler of Suwa",
-        "description": "Play 100 games as Suwako"
+        "description": "Play 100 games as Suwako",
+        "hidden": false
     },
     {
         "requirement": {
@@ -2219,6 +2338,7 @@
             }
         ],
         "name": "Mishaguji-sama Destiny",
-        "description": "Play 1000 games as Suwako"
+        "description": "Play 1000 games as Suwako",
+        "hidden": false
     }
 ]

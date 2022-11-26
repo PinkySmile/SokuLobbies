@@ -92,20 +92,40 @@ with open("data.txt", encoding="utf-8") as fd:
         index = chrs.index(name)
         for rid, requ in enumerate(requs):
             name = unidecode(lines[i * 10 + rid + 1]).split(" / ")
-            result = {
-                "requirement": requ.copy(),
-                "rewards": [
-                    {
-                        "type": "title",
-                        "name": None if len(name) == 1 else name[0]
-                    }
-                ],
-                "name": name[-1],
-                "description": (
-                    "Use each " + names[index] + "'s skill and spell at least once" if requ["type"] == "cards"
-                    else requ["type"].capitalize() + " " + str(requ["count"]) + " games as " + names[index]
-                )
-            }
+            if len(elems):
+                result = {
+                    "requirement": requ.copy(),
+                    "rewards": [
+                        {
+                            "type": "title",
+                            "name": None if len(name) == 1 else name[0]
+                        }
+                    ],
+                    "name": name[-1],
+                    "description": (
+                        "Use each " + names[index] + "'s skill and spell at<br>least once" if requ["type"] == "cards"
+                        else requ["type"].capitalize() + " " + str(requ["count"]) + " games as " + names[index]
+                    ),
+                    "hidden": False
+                }
+            else:
+                result = {
+                    "comment1": "THIS FILE CONTAINS SPOILERS!!",
+                    "comment2": "IF YOU WISH TO FIND ACHIEVEMENTS BY YOURSELF CLOSE IT!",
+                    "requirement": requ.copy(),
+                    "rewards": [
+                        {
+                            "type": "title",
+                            "name": None if len(name) == 1 else name[0]
+                        }
+                    ],
+                    "name": name[-1],
+                    "description": (
+                        "Use each " + names[index] + "'s skill and spell<br>at least once" if requ["type"] == "cards"
+                        else requ["type"].capitalize() + " " + str(requ["count"]) + " games as " + names[index]
+                    ),
+                    "hidden": False
+                }
             rval = None
             if not rewards[rid]:
                 pass

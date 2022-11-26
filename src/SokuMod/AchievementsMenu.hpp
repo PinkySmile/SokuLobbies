@@ -14,10 +14,16 @@
 
 class AchievementsMenu : public SokuLib::IMenu {
 private:
-	SokuLib::DrawUtils::Sprite title;
-	SokuLib::DrawUtils::Sprite ui;
+	unsigned _top = 0;
+	unsigned _selected = 0;
+	SokuLib::DrawUtils::Sprite _title;
+	SokuLib::DrawUtils::Sprite _ui;
 	SokuLib::DrawUtils::Sprite _loadingText;
 	SokuLib::DrawUtils::Sprite _messageBox;
+	SokuLib::DrawUtils::Sprite _panelRightSprite;
+	SokuLib::DrawUtils::Sprite _hiddenSprite;
+
+	void _updateAchRightPanel();
 
 public:
 	AchievementsMenu();
@@ -27,4 +33,4 @@ public:
 	int onRender() override;
 };
 
-#endif //SOKULOBBIES_LOBBYMENU_HPP
+#endif //SOKULOBBIES_ACHIEVEMENTMENU_HPP
