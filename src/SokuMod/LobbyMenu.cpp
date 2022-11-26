@@ -297,6 +297,8 @@ bool LobbyMenu::_normalMenuUpdate()
 			this->_menuState = 2;
 			break;
 		case MENUITEM_CREATE_LOBBY:
+			MessageBox(SokuLib::window, "Creating lobbies in game is not yet supported.\nUse the RunServer.bat helper provided with the mod to create a lobby.", "Partially implemented", MB_ICONINFORMATION);
+			break;
 		case MENUITEM_CUSTOMIZE_LOBBY:
 		case MENUITEM_OPTIONS:
 			MessageBox(SokuLib::window, "Not implemented", "Not implemented", MB_ICONINFORMATION);
