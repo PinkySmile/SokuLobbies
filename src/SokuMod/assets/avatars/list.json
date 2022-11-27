@@ -40,8 +40,8 @@
         "name": "Marisa Kirisame"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
-        "accessories": 0,
+        "spritesheet": "assets/avatars/2 Sakuya.png",
+        "accessories": 1,
         "animations": 4,
         "scale": 2,
         "anim_step": 8,
@@ -160,7 +160,7 @@
         "name": "Cirno"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/1 Meiling.png",
         "accessories": 0,
         "animations": 4,
         "scale": 2,
