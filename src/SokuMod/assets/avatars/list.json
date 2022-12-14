@@ -80,24 +80,24 @@
         "name": "Remilia Scarlet"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
-        "accessories": 0,
+        "spritesheet": "assets/avatars/7 Yuyuko.png",
+        "accessories": 6,
         "animations": 4,
         "scale": 2,
         "anim_step": 8,
         "name": "Yuyuko Saigyouji"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
-        "accessories": 0,
+        "spritesheet": "assets/avatars/4 Yukari.png",
+        "accessories": 3,
         "animations": 4,
         "scale": 2,
         "anim_step": 8,
         "name": "Yukari Yukumo"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
-        "accessories": 0,
+        "spritesheet": "assets/avatars/6 Suika.png",
+        "accessories": 5,
         "animations": 4,
         "scale": 2,
         "anim_step": 8,
@@ -176,8 +176,8 @@
         "name": "Utsuho Reiuji"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
-        "accessories": 0,
+        "spritesheet": "assets/avatars/9 Suwako.png",
+        "accessories": 8,
         "animations": 4,
         "scale": 2,
         "anim_step": 8,
