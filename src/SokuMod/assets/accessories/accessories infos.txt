@@ -1,0 +1,53 @@
+[Mini-Hakkero] (Marisa)
+16x42
+Type: Flying Familiar
+
+
+[Froggie Companion] (Suwako)
+16x18
+Type: Ground Familiar
+* Walking anim présente
+
+[Miniature Sun] (Okuu)
+30x30
+Type: Flying Familiar
+
+
+[Ghostly Folding Fan] (Yuyuko)
+100x45
+Type: Wings
+
+
+[Shanghai Doll] (Alice)
+16x52
+Type: Flying Familiar
+
+
+[Goddesses Companions] (Sanae)
+106x36
+Type: Ground Familiar
+* Walking anim présente
+
+[Lunar Dial] (Sakuya)
+14x12
+Type: Pendant
+
+
+[Ibuki Gourd] (Suika)
+18x18
+Type: Waist Accessory
+
+
+[The Great Catfish] (Iku)
+46x47
+Type: Hat
+
+
+[Wandering Soul] (Komachi)
+16x32
+Type: Flying Familiar
+
+
+[Dragon Star] (Meiling)
+12x14
+Type: Front Hair Accessory

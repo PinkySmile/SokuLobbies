@@ -87,6 +87,8 @@ void LobbyData::_loadAvatars()
 		avatar.nbAnimations = val["animations"];
 		avatar.animationsStep = val["anim_step"];
 		avatar.accessoriesPlacement = val["accessories"];
+		if (val.contains("animation_style"))
+			avatar.animationStyle = val["animation_style"];
 		avatar.sprite.texture.loadFromFile((std::filesystem::path(profileFolderPath) / val["spritesheet"].get<std::string>()).string().c_str());
 		avatar.sprite.rect.width = avatar.sprite.texture.getSize().x / avatar.nbAnimations;
 		avatar.sprite.rect.height = avatar.sprite.texture.getSize().y / 2;

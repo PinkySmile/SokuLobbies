@@ -476,7 +476,7 @@ int InLobbyMenu::onRender()
 				static_cast<int>(player.pos.x) - static_cast<int>(avatar.sprite.getSize().x / 2) + this->_translate.x,
 				480 - static_cast<int>(player.pos.y + avatar.sprite.getSize().y) + this->_translate.y
 			});
-			avatar.sprite.rect.top = avatar.sprite.rect.height * ((player.dir & 0b00011) != 0);
+			avatar.sprite.rect.top = avatar.sprite.rect.height * player.animation;
 			avatar.sprite.rect.left = player.currentAnimation * avatar.sprite.rect.width;
 			avatar.sprite.setMirroring((player.dir & 0b10000) == 0, false);
 		#ifdef _DEBUG

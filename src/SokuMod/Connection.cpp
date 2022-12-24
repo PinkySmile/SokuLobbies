@@ -8,6 +8,8 @@
 std::mutex logMutex;
 #endif
 #include <cstring>
+#include <vector>
+#include <functional>
 #include <Exceptions.hpp>
 #include "Connection.hpp"
 #include "getPublicIp.hpp"
@@ -425,24 +427,57 @@ std::vector<std::string> Connection::getMessages() const
 	return result;
 }
 
+static void playerBasicAnimation(Player &player, const LobbyData::Avatar &avatar)
+{
+	if (player.dir & 1)
+		player.pos.x += PLAYER_H_SPEED;
+	if (player.dir & 2)
+		player.pos.x -= PLAYER_H_SPEED;
+	if (player.dir & 4)
+		player.pos.y += PLAYER_V_SPEED;
+	if (player.dir & 8)
+		player.pos.y -= PLAYER_V_SPEED;
+	player.animationCtr++;
+	if (player.animationCtr > avatar.animationsStep) {
+		player.currentAnimation++;
+		player.currentAnimation %= avatar.nbAnimations;
+		player.animationCtr = 0;
+	}
+	player.animation = (player.dir & 0b00011) != 0;
+}
+
+static void playerSuwakoAnimation(Player &player, const LobbyData::Avatar &avatar)
+{
+	if (player.dir & 1)
+		player.pos.x += PLAYER_H_SPEED;
+	if (player.dir & 2)
+		player.pos.x -= PLAYER_H_SPEED;
+	if (player.dir & 4)
+		player.pos.y += PLAYER_V_SPEED;
+	if (player.dir & 8)
+		player.pos.y -= PLAYER_V_SPEED;
+	player.animationCtr++;
+	if (player.animationCtr > avatar.animationsStep) {
+		player.currentAnimation++;
+		player.currentAnimation %= avatar.nbAnimations;
+		player.animationCtr = 0;
+	}
+	player.animation = (player.dir & 0b00011) != 0;
+}
+
+std::vector<std::function<void (Player &, const LobbyData::Avatar &)>> Connection::_playerUpdateHandles{
+	playerBasicAnimation,
+	playerSuwakoAnimation
+};
+
 void Connection::updatePlayers(const std::vector<LobbyData::Avatar> &avatars)
 {
 	this->_playerMutex.lock();
 	for (auto &p : this->_players) {
-		if (p.second.dir & 1)
-			p.second.pos.x += PLAYER_H_SPEED;
-		if (p.second.dir & 2)
-			p.second.pos.x -= PLAYER_H_SPEED;
-		if (p.second.dir & 4)
-			p.second.pos.y += PLAYER_V_SPEED;
-		if (p.second.dir & 8)
-			p.second.pos.y -= PLAYER_V_SPEED;
-		p.second.animationCtr++;
-		if (p.second.animationCtr > avatars[p.second.player.avatar].animationsStep) {
-			p.second.currentAnimation++;
-			p.second.currentAnimation %= avatars[p.second.player.avatar].nbAnimations;
-			p.second.animationCtr = 0;
-		}
+		// TODO: Check if avatar is valid or not
+		auto &avatar = avatars[p.second.player.avatar];
+
+		Connection::_playerUpdateHandles[avatar.animationStyle](p.second, avatar);
 	}
 	this->_playerMutex.unlock();
 }

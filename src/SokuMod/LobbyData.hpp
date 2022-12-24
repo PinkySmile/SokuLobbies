@@ -85,6 +85,7 @@ public:
 		unsigned accessoriesPlacement = 0;
 		unsigned animationsStep = 0;
 		unsigned nbAnimations = 0;
+		unsigned animationStyle = 0;
 		Achievement *requirement = nullptr;
 
 		Avatar() = default;

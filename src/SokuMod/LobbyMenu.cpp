@@ -19,6 +19,8 @@
 
 #define CRenderer_Unknown1 ((void (__thiscall *)(int, int))0x404AF0)
 
+extern bool activated;
+
 enum MenuItems {
 	MENUITEM_CREATE_LOBBY,
 	MENUITEM_JOIN_LOBBY,
@@ -261,7 +263,7 @@ bool LobbyMenu::_normalMenuUpdate()
 		this->_menuCursor %= 8;
 		SokuLib::playSEWaveBuffer(0x27);
 	}
-	if (SokuLib::inputMgrs.input.changeCard == 1) {
+	if (SokuLib::inputMgrs.input.spellcard == 1) {
 		setInputBoxCallbacks([this](const std::string &value){
 			GuardedMutex m{this->_connectionsMutex};
 
@@ -310,7 +312,8 @@ bool LobbyMenu::_normalMenuUpdate()
 			SokuLib::activateMenu(new StatsMenu());
 			break;
 		case MENUITEM_EXIT:
-			return false;
+			activated = false;
+			break;
 		}
 	}
 	return true;

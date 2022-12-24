@@ -43,6 +43,8 @@ private:
 	std::map<uint32_t, Player> _players;
 	std::vector<std::string> _messages; //TODO: properly handle channels
 
+	static std::vector<std::function<void (Player &, const LobbyData::Avatar &)>> _playerUpdateHandles;
+
 	void _netLoop();
 	void _posLoop();
 	void _handlePacket(const Lobbies::Packet &packet, size_t &size);

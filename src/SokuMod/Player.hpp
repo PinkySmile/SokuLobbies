@@ -20,6 +20,7 @@ struct Player {
 	Lobbies::LobbySettings settings;
 	Lobbies::PlayerCustomization player;
 	uint8_t dir = 0;
+	uint8_t animation = 0;
 	SokuLib::Vector2<uint32_t> pos = {0, 0};
 	uint8_t battleStatus = 0;
 	uint8_t machineId = 0;

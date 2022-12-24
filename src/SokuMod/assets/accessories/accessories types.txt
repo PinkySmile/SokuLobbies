@@ -1,0 +1,42 @@
+Tous les accessoires d'un type ont la même position (sauf exceptions)
+Des types peuvent avoir une position qui varie selon l'avatar
+
+Flying Familiar:
+X:35
+Y:19
+
+Ground Familiar:
+X:37
+Y:0
+[SAUF L'ACCESSOIRE GODDESSES COMPANIONS DE SANAE QUI EST EN X:0 Y:O]
+
+Wings:
+X:0
+Y:12
+
+Waist Accessory:
+X:6
+Y:10
+
+Hat:
+X:0
+Y:62
+
+Front Hair Accessory:
+X:-3
+Y:64
+
+Pendant:
+Différents selon le type d'avatar.
+Avatar type 1,2,3,7,8:
+X:-3
+Y:28
+Avatar type 4:
+X:-3
+Y:32
+Avatar type 5:
+X:-3
+Y:26
+Avatar type 6:
+X:-6
+Y:28

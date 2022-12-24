@@ -20,6 +20,8 @@ static void (*og_onUpdate)();
 static int (SokuLib::Logo::*og_LogoOnProcess)();
 static int (SokuLib::Battle::*og_BattleOnProcess)();
 static int (SokuLib::MenuConnect::*og_ConnectOnProcess)();
+static int (SokuLib::MenuConnect::*og_ConnectOnRender)();
+static int (SokuLib::MenuConnect::*og_ConnectOnUnknown)();
 static int (SokuLib::BattleWatch::*og_BattleWatchOnProcess)();
 static int (SokuLib::BattleWatch::*og_BattleWatchOnRender)();
 static int (SokuLib::LoadingWatch::*og_LoadingWatchOnProcess)();
@@ -40,8 +42,10 @@ char servHost[64];
 unsigned short servPort;
 bool hasSoku2 = false;
 bool counted = false;
+bool activated = true;
 auto load = std::pair(false, false);
 std::function<int ()> onGameEnd;
+LobbyMenu *menu = nullptr;
 
 std::map<unsigned int, Character> characters{
 	{ SokuLib::CHARACTER_REIMU,     {"Reimu",     "Reimu Hakurei",          "reimu"}},
@@ -140,18 +144,31 @@ void countGame()
 
 int __fastcall ConnectOnProcess(SokuLib::MenuConnect *This)
 {
-	auto res = (This->*og_ConnectOnProcess)();
+	if (!menu)
+		menu = new LobbyMenu(This);
+
+	auto res = activated ? menu->onProcess() : (This->*og_ConnectOnProcess)();
 
 	if (*(byte*)0x0448e4a != 0x30 && SokuLib::inputMgrs.input.changeCard == 1) {
-		try {
-			SokuLib::activateMenu(new LobbyMenu(This));
-			SokuLib::playSEWaveBuffer(0x28);
-		} catch (std::exception &e) {
-			MessageBox(SokuLib::window, e.what(), "Loading error", MB_ICONERROR);
-			SokuLib::playSEWaveBuffer(0x29);
-		}
+		SokuLib::playSEWaveBuffer(0x28);
+		activated = !activated;
+	}
+	if (res != 1) {
+		activated = true;
+		delete menu;
+		menu = nullptr;
 	}
 	return res;
+}
+
+int __fastcall ConnectOnRender(SokuLib::MenuConnect *This)
+{
+	return activated ? (menu ? menu->onRender() : 0) : (This->*og_ConnectOnRender)();
+}
+
+int __fastcall ConnectOnUnknown(SokuLib::MenuConnect *This)
+{
+	return activated ? (menu ? menu->_(), 0 : 0) : (This->*og_ConnectOnUnknown)();
 }
 
 int __fastcall LogoOnProcess(SokuLib::Logo *This)
@@ -501,6 +518,8 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	og_LogoOnProcess         = SokuLib::TamperDword(&SokuLib::VTable_Logo.onProcess,         LogoOnProcess);
 	og_BattleOnProcess       = SokuLib::TamperDword(&SokuLib::VTable_Battle.onProcess,       BattleOnProcess);
 	og_ConnectOnProcess      = SokuLib::TamperDword(&SokuLib::VTable_ConnectMenu.onProcess,  ConnectOnProcess);
+	og_ConnectOnRender       = SokuLib::TamperDword(&SokuLib::VTable_ConnectMenu.onRender,   ConnectOnRender);
+	og_ConnectOnUnknown      = SokuLib::union_cast<int (SokuLib::MenuConnect::*)()>(SokuLib::TamperDword(&SokuLib::VTable_ConnectMenu.unknown, ConnectOnUnknown));
 	og_BattleWatchOnProcess  = SokuLib::TamperDword(&SokuLib::VTable_BattleWatch.onProcess,  BattleWatchOnProcess);
 	og_BattleWatchOnRender   = SokuLib::TamperDword(&SokuLib::VTable_BattleWatch.onRender,   BattleWatchOnRender);
 	og_LoadingWatchOnProcess = SokuLib::TamperDword(&SokuLib::VTable_LoadingWatch.onProcess, LoadingWatchOnProcess);
@@ -537,6 +556,11 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 
 	FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
 	return true;
+}
+
+extern "C" __declspec(dllexport) int getPriority()
+{
+	return -50000;
 }
 
 extern "C" int APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved) {
