@@ -72,7 +72,7 @@
         "name": "Youmu Konpaku"
     },
     {
-        "spritesheet": "assets/avatars/6 Remilia.png",
+        "spritesheet": "assets/avatars/6 Remi.png",
         "accessories": 5,
         "animations": 4,
         "scale": 2,
@@ -88,8 +88,8 @@
         "name": "Yuyuko Saigyouji"
     },
     {
-        "spritesheet": "assets/avatars/4 Yukari.png",
-        "accessories": 3,
+        "spritesheet": "assets/avatars/3 Yukari.png",
+        "accessories": 2,
         "animations": 4,
         "scale": 2,
         "anim_step": 8,
@@ -128,7 +128,7 @@
         "name": "Komachi Onozuka"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/7 Iku.png",
         "accessories": 0,
         "animations": 4,
         "scale": 2,
@@ -136,7 +136,7 @@
         "name": "Iku Nagae"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/1 Tenshi.png",
         "accessories": 0,
         "animations": 4,
         "scale": 2,
