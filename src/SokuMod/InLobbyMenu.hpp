@@ -64,6 +64,7 @@ private:
 	std::function<void (const Player &, uint32_t id)> onArcadeLeave;
 	SokuLib::Vector2i _translate{0, 0};
 	LobbyMenu *_menu;
+	ArcadeMachine *_currentMachine = nullptr;
 	Connection &connection;
 	SokuLib::MenuConnect *parent;
 	bool _wasConnected = false;
@@ -80,6 +81,7 @@ private:
 	std::map<uint32_t, PlayerData> _extraPlayerData;
 	std::vector<char> _buffer;
 	std::vector<ArcadeMachine> _machines;
+	std::unique_ptr<class SmallHostlist> _hostlist;
 
 	// Chat input box
 	SokuLib::DrawUtils::RectangleShape _textCursor;
@@ -101,6 +103,7 @@ private:
 	void _sendMessage(const std::string &msg);
 	std::string _sanitizeInput();
 	void _unhook();
+	void _renderMachineOverlay();
 
 public:
 	InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connection &connection);

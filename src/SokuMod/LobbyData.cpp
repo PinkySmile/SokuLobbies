@@ -318,7 +318,7 @@ static void extractArcadeAnimation(LobbyData::ArcadeAnimation &animation, const 
 	animation.frameCount = j["frames"];
 	animation.loop = j.contains("loop") && j["loop"];
 	animation.sprite.texture.loadFromFile((std::filesystem::path(profileFolderPath) / animation.file).string().c_str());
-	animation.sprite.setSize(animation.size);
+	animation.sprite.setSize({32, 24});
 	animation.sprite.rect.width = animation.size.x;
 	animation.sprite.rect.height = animation.size.y;
 	animation.tilePerLine = animation.sprite.texture.getSize().x / animation.size.x;
@@ -338,6 +338,7 @@ void LobbyData::_loadArcades()
 	stream.close();
 	extractArcadeAnimation(this->arcades.intro, j["intro"]);
 	extractArcadeAnimation(this->arcades.select, j["select"]);
+	extractArcadeAnimation(this->arcades.hostlist, j["hostlist"]);
 	this->arcades.game.reserve(j["games"].size());
 	for (auto &val : j["games"]) {
 		this->arcades.game.emplace_back();
@@ -350,14 +351,29 @@ void LobbyData::_loadArcades()
 		auto &skin = this->arcades.skins.back();
 
 		skin.file = val["file"];
+
+		auto file = std::filesystem::path(profileFolderPath) / skin.file;
+
 		skin.animationOffsets.x = val["offsetX"];
 		skin.animationOffsets.y = val["offsetY"];
 		skin.frameRate = val["rate"];
 		skin.frameCount = val["frames"];
-		skin.sprite.texture.loadFromFile((std::filesystem::path(profileFolderPath) / skin.file).string().c_str());
-		skin.sprite.setSize(skin.sprite.texture.getSize());
+		skin.sprite.texture.loadFromFile(file.string().c_str());
+		skin.sprite.setSize({skin.sprite.texture.getSize().x / skin.frameCount, skin.sprite.texture.getSize().y});
 		skin.sprite.rect.width = skin.sprite.getSize().x;
 		skin.sprite.rect.height = skin.sprite.getSize().y;
+
+		skin.overlay.texture.loadFromFile(file.string().c_str());
+		skin.overlay.setSize({
+			skin.sprite.getSize().x * 12,
+			skin.sprite.getSize().y * 12
+		});
+		skin.overlay.setPosition({
+			128 - skin.animationOffsets.x * 12,
+			48 - skin.animationOffsets.y * 12
+		});
+		skin.overlay.rect.width = skin.sprite.getSize().x;
+		skin.overlay.rect.height = skin.sprite.getSize().y;
 	}
 }
 

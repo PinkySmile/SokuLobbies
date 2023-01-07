@@ -130,6 +130,7 @@ public:
 	struct ArcadeSkin {
 		std::string file;
 		SokuLib::DrawUtils::Sprite sprite;
+		SokuLib::DrawUtils::Sprite overlay;
 		SokuLib::Vector2i animationOffsets;
 		unsigned frameRate;
 		unsigned frameCount;
@@ -141,6 +142,7 @@ public:
 	struct ArcadeData {
 		ArcadeAnimation intro;
 		ArcadeAnimation select;
+		ArcadeAnimation hostlist;
 		std::vector<ArcadeAnimation> game;
 		std::vector<ArcadeSkin> skins;
 	};

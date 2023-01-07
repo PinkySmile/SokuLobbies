@@ -13,6 +13,13 @@
 		"sizeY": 24,
 		"rate": 30
 	},
+	"hostlist": {
+		"file": "assets/arcades/hostlist.png",
+		"frames": 1,
+		"sizeX": 32,
+		"sizeY": 24,
+		"rate": 30
+	},
 	"games": [
 		{
 			"file": "assets/arcades/loading.png",
@@ -25,11 +32,18 @@
 	],
 	"arcades": [
 		{
+			"file": "assets/arcades/arcade_old.png",
+			"frames": 14,
+			"rate": 10,
+			"offsetX": 12,
+			"offsetY": 16
+		},
+		{
 			"file": "assets/arcades/arcade1.png",
-			"frames": 1,
-			"rate": 30,
-			"offsetX": 16,
-			"offsetY": 29
+			"frames": 8,
+			"rate": 10,
+			"offsetX": 12,
+			"offsetY": 16
 		}
 	]
 }

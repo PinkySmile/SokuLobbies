@@ -68,6 +68,7 @@ Connection::Connection(const std::string &host, unsigned short port, const Playe
 
 Connection::~Connection()
 {
+	this->_init = false;
 	this->_socket.disconnect();
 	if (this->_netThread.joinable())
 		this->_netThread.join();
@@ -182,8 +183,8 @@ void Connection::_handlePacket(const Lobbies::PacketOlleh &packet, size_t &size)
 	this->_players[packet.id] = player;
 	this->meMutex.lock();
 	this->_me = &this->_players[packet.id];
-	this->_playerMutex.unlock();
 	this->meMutex.unlock();
+	this->_playerMutex.unlock();
 	this->_init = true;
 	this->_posThread = std::thread(&Connection::_posLoop, this);
 	if (this->onConnect)
