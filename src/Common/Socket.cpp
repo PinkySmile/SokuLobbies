@@ -34,7 +34,7 @@ std::string getLastSocketError(int err) {
 	LocalFree(s);
 	return stream.str();
 #else
-std::string getLastSocketError(int err = errno) {
+std::string getLastSocketError(int err) {
 	return strerror(err);
 #endif
 }

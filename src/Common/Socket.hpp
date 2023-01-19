@@ -16,7 +16,11 @@ typedef int SOCKET;
 #include <map>
 #include <string>
 
+#ifdef _WIN32
 std::string getLastSocketError(int err = WSAGetLastError());
+#else
+std::string getLastSocketError(int err = errno);
+#endif
 
 //! @brief Define a Socket
 class Socket {

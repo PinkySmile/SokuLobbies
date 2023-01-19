@@ -465,10 +465,10 @@ void Server::_registerToMainServer()
 		GetPrivateProfileString("Lobby", "Host", "pinkysmile.fr", buffer, sizeof(buffer), "./SokuLobbies.ini");
 		servPort = GetPrivateProfileInt("Lobby", "Port", 5254, "./SokuLobbies.ini");
 #else
-		// This is a dirty hack for the main server since it's running on linux
-		// and only need to talk to the main server on the loopback
-		// but it would be better to use real config files instead
-		strcpy(buffer, "localhost");
+		// FIXME: This is a dirty hack for the main server since it's running on linux
+		//        and only need to talk to the main server on the loopback
+		//        but it would be better to use real config files instead
+		strcpy(buffer, MAIN_SERVER_HOST);
 		servPort = 5254;
 #endif
 		std::cout << "Main server is " << buffer << ":" << servPort << std::endl;

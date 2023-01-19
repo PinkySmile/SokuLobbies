@@ -54,6 +54,9 @@ if (SFML_FOUND)
 		src/Common/Utils.cpp
 		src/Common/Utils.hpp
 	)
+	if (MAIN_SERVER_HOST)
+		target_compile_definitions(SokuLobbiesServer PRIVATE MAIN_SERVER_HOST="${MAIN_SERVER_HOST}")
+	endif ()
 	target_include_directories(SokuLobbiesServer PRIVATE ${SFML_INCLUDE_DIRS})
 	if (WIN32)
 		target_link_libraries(SokuLobbiesServer ${SFML_NETWORK_LIBRARY} ${SFML_SYSTEM_LIBRARY} ws2_32)
