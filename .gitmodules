@@ -1,3 +1,9 @@
 [submodule "src/SokuMod/SokuLib"]
 	path = src/SokuMod/SokuLib
 	url = https://github.com/SokuDev/SokuLib
+[submodule "src/SokuMod/mbedtls"]
+	path = src/SokuMod/mbedtls
+	url = https://github.com/ARMmbed/mbedtls.git
+[submodule "src/SokuMod/curl"]
+	path = src/SokuMod/curl
+	url = https://github.com/curl/curl.git

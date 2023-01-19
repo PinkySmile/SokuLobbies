@@ -19,7 +19,9 @@ struct Character {
 extern wchar_t profilePath[MAX_PATH];
 extern wchar_t profileFolderPath[MAX_PATH];
 extern char servHost[64];
+extern unsigned hostPref;
 extern unsigned short servPort;
+extern unsigned short hostPort;
 extern bool hasSoku2;
 extern std::map<unsigned int, Character> characters;
 extern std::function<int ()> onGameEnd;

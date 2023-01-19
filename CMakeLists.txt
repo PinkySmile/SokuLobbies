@@ -70,6 +70,56 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 		set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
 	endif()
 	add_subdirectory(src/SokuMod/SokuLib)
+
+	# mbedTLS
+	option(ENABLE_PROGRAMS "" OFF)
+	option(INSTALL_MBEDTLS_HEADERS "" OFF)
+	option(MBEDTLS_FATAL_WARNINGS "" OFF)
+	add_subdirectory(src/SokuMod/mbedtls EXCLUDE_FROM_ALL)
+
+	add_library(mbedtls_shim INTERFACE)
+	target_link_libraries(mbedtls_shim INTERFACE mbedtls mbedx509 mbedcrypto)
+
+	# workaround for curl: link against our local mbedtls rather than search for it
+	function(find_package)
+		if(ARGV0 STREQUAL "MbedTLS")
+			set(MBEDTLS_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/mbedtls/include" CACHE STRING "")
+			set(MBEDTLS_LIBRARIES "mbedtls_shim" CACHE STRING "")
+			mark_as_advanced(MBEDTLS_INCLUDE_DIRS MBEDTLS_LIBRARIES)
+		else()
+			_find_package(${ARGV})
+		endif()
+	endfunction()
+
+	# workaround for curl: don't try installing any export files
+	function(install)
+		if(ARGV0 STREQUAL "EXPORT")
+		else()
+			_install(${ARGV})
+		endif()
+	endfunction()
+
+
+	# cURL
+	option(BUILD_CURL_EXE "" OFF)
+	option(BUILD_SHARED_LIBS "" OFF)
+	option(BUILD_TESTING "" OFF)
+	option(CURL_STATIC_CRT "" ON)
+	option(ENABLE_INET_PTON "" OFF)
+	option(HTTP_ONLY "" ON)
+	option(CURL_DISABLE_CRYPTO_AUTH "" ON)
+	option(ENABLE_MANUAL "" OFF)
+	option(CMAKE_USE_OPENSSL "" OFF)
+	option(CMAKE_USE_MBEDTLS "" ON)
+	option(CURL_DISABLE_LDAP "" ON)
+	option(CURL_ZLIB "" OFF)
+	option(CMAKE_USE_LIBSSH2 "" OFF)
+	option(ENABLE_UNIX_SOCKETS "" OFF)
+	option(CURL_CA_BUNDLE "" none)
+	option(CURL_CA_PATH "" none)
+	option(CURL_WINDOWS_SSPI "" OFF)
+	add_subdirectory(src/SokuMod/curl EXCLUDE_FROM_ALL)
+
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /Brepro")
 	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /Brepro")
 	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /Brepro")
@@ -105,18 +155,22 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 		src/SokuMod/StatsMenu.hpp
 		src/SokuMod/LobbyData.cpp
 		src/SokuMod/LobbyData.hpp
-            src/SokuMod/SmallHostlist.cpp src/SokuMod/SmallHostlist.hpp)
+		src/SokuMod/SmallHostlist.cpp
+		src/SokuMod/SmallHostlist.hpp
+		src/SokuMod/BackgroundHost.cpp
+	)
 	target_compile_options(SokuLobbiesMod PRIVATE /Zi)
 	target_compile_definitions("SokuLobbiesMod" PRIVATE DIRECTINPUT_VERSION=0x0800 _CRT_SECURE_NO_WARNINGS)
-	target_link_directories("SokuLobbiesMod" PRIVATE lib)
 	target_link_libraries(
 		SokuLobbiesMod
 		SokuLib
 		shlwapi
 		ws2_32
 		d3dx9
+		CURL::libcurl
 	)
 	target_link_directories(SokuLobbiesMod PRIVATE lib)
+	target_include_directories(SokuLobbiesMod PRIVATE lib/include)
 	if (CMAKE_BUILD_TYPE STREQUAL Debug)
 	else ()
 		target_compile_definitions(SokuLobbiesMod PRIVATE _LOBBYNOLOG=1)

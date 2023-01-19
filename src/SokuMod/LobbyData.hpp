@@ -7,9 +7,11 @@
 
 
 #include <map>
+#include <mutex>
 #include <vector>
 #include <string>
 #include <SokuLib.hpp>
+#include <curl/curl.h>
 #include "nlohmann/json.hpp"
 
 #define EMOTE_SIZE 32
@@ -17,12 +19,18 @@
 
 class LobbyData {
 private:
+	struct MemoryStruct {
+		char *memory;
+		size_t size;
+	};
+
 	void _loadStats();
 	void _loadAvatars();
 	void _loadBackgrounds();
 	void _loadEmotes();
 	void _loadArcades();
 	void _loadAchievements();
+	void _loadFlags();
 
 	unsigned _getExpectedMagic();
 	void _loadCharacterStats(std::istream &stream);
@@ -35,6 +43,12 @@ private:
 	void _loadFont(SokuLib::SWRFont &font, unsigned size);
 	void _grantStatsAchievements();
 
+	static size_t LobbyData::writeMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp);
+
+	std::mutex _requestMutex;
+	CURL *_request_handle;
+	struct MemoryStruct _request_chunk;
+	curl_slist *_headers = nullptr;
 	std::map<unsigned, SokuLib::SWRFont> _fonts;
 	unsigned _achTimer = 0;
 	unsigned _animCtr = 0;
@@ -160,6 +174,7 @@ public:
 	std::vector<Background> backgrounds;
 	std::vector<Achievement> achievements;
 	std::map<std::string, Emote *> emotesByName;
+	std::map<std::string, std::unique_ptr<SokuLib::DrawUtils::Sprite>> flags;
 	std::map<unsigned char, CharacterStatEntry> loadedCharacterStats;
 	std::map<unsigned char, CardChrStatEntry> loadedCharacterCardUsage;
 	std::map<std::string, std::vector<Achievement *>> achievementByRequ;
@@ -168,6 +183,7 @@ public:
 
 	LobbyData();
 	~LobbyData();
+	std::string httpRequest(const std::string &url, const std::string &method = "GET", const std::string &data = "");
 	bool isLocked(const Emote &emote);
 	bool isLocked(const Avatar &avatar);
 	bool isLocked(const Background &background);

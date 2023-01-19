@@ -63,10 +63,11 @@ private:
 	std::function<void (const Player &, uint32_t id)> onArcadeEngage;
 	std::function<void (const Player &, uint32_t id)> onArcadeLeave;
 	SokuLib::Vector2i _translate{0, 0};
+	std::string _roomName;
 	LobbyMenu *_menu;
 	ArcadeMachine *_currentMachine = nullptr;
-	Connection &connection;
-	SokuLib::MenuConnect *parent;
+	Connection &_connection;
+	SokuLib::MenuConnect *_parent;
 	bool _wasConnected = false;
 	unsigned _chatTimer = 0;
 	unsigned _chatOffset = 0;
@@ -87,6 +88,7 @@ private:
 	SokuLib::DrawUtils::RectangleShape _textCursor;
 	SokuLib::DrawUtils::Sprite _textSprite;
 	std::mutex _textMutex;
+	std::thread _hostThread;
 	unsigned _timers[256];
 	unsigned _textTimer = 0;
 	char _lastPressed = 0;
@@ -104,6 +106,7 @@ private:
 	std::string _sanitizeInput();
 	void _unhook();
 	void _renderMachineOverlay();
+	void _startHosting();
 
 public:
 	InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connection &connection);

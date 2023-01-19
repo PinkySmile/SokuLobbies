@@ -39,7 +39,9 @@ static void (SokuLib::KeymapManager::*s_origKeymapManager_SetInputs)();
 wchar_t profilePath[MAX_PATH];
 wchar_t profileFolderPath[MAX_PATH];
 char servHost[64];
+unsigned hostPref;
 unsigned short servPort;
+unsigned short hostPort;
 bool hasSoku2 = false;
 bool counted = false;
 bool activated = true;
@@ -147,13 +149,13 @@ int __fastcall ConnectOnProcess(SokuLib::MenuConnect *This)
 	if (!menu)
 		menu = new LobbyMenu(This);
 
-	auto res = activated ? menu->onProcess() : (This->*og_ConnectOnProcess)();
+	auto res = (activated ? menu->onProcess() : (This->*og_ConnectOnProcess)()) & 0xFF;
 
 	if (*(byte*)0x0448e4a != 0x30 && SokuLib::inputMgrs.input.changeCard == 1) {
 		SokuLib::playSEWaveBuffer(0x28);
 		activated = !activated;
 	}
-	if (res != 1) {
+	if (!res) {
 		activated = true;
 		delete menu;
 		menu = nullptr;
@@ -489,7 +491,7 @@ int __stdcall Hooked_EndScene(IDirect3DDevice9* pDevice)
 }
 
 extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
-	return true;
+	return memcmp(SokuLib::targetHash, hash, 16) == 0;
 }
 
 extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule) {
@@ -511,6 +513,15 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	PathAppendW(profilePath, L"SokuLobbies.ini");
 	GetPrivateProfileStringW(L"Lobby", L"Host", L"pinkysmile.fr", servHostW, sizeof(servHost), profilePath);
 	servPort = GetPrivateProfileIntW(L"Lobby", L"Port", 5254, profilePath);
+	hostPort = GetPrivateProfileIntW(L"Lobby", L"HostPort", 10800, profilePath);
+
+	bool hostlist = GetPrivateProfileIntW(L"Lobby", L"AcceptHostlist", 0, profilePath) != 0;
+
+	// By default HOSTPREF_NO_PREF | HOSTPREF_ACCEPT_RELAY | HOSTPREF_ACCEPT_HOSTLIST
+	hostPref = GetPrivateProfileIntW(L"Lobby", L"HostPref", hostlist ? Lobbies::HOSTPREF_HOST_ONLY : Lobbies::HOSTPREF_NO_PREF, profilePath);
+	hostPref |= (GetPrivateProfileIntW(L"Lobby", L"AcceptRelay", 1, profilePath) != 0) * Lobbies::HOSTPREF_ACCEPT_RELAY;
+	hostPref |= hostlist * Lobbies::HOSTPREF_ACCEPT_HOSTLIST;
+	printf("%S %i %i\n", profilePath, hostlist, hostPref);
 	wcstombs(servHost, servHostW, sizeof(servHost));
 
 	// DWORD old;

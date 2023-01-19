@@ -19,6 +19,17 @@
 #define SCROLL_AMOUNT 20
 #define CHAT_FONT_HEIGHT 14
 
+struct CDesignSprite {
+	void *vftable; // =008576ac
+	float UNKNOWN_1[2];
+	float x;
+	float y;
+	uint8_t active;
+	uint8_t UNKNOWN_2[3];
+	int32_t UNKNOWN_3;
+};
+
+auto &messageBox = *(CDesignSprite**)0x89a390;
 InLobbyMenu *activeMenu = nullptr;
 static WNDPROC Original_WndProc = nullptr;
 static std::mutex ptrMutex;
@@ -45,8 +56,8 @@ static LRESULT __stdcall Hooked_WndProc(const HWND hWnd, UINT uMsg, WPARAM wPara
 }
 
 InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connection &connection) :
-	connection(connection),
-	parent(parent),
+	_connection(connection),
+	_parent(parent),
 	_menu(menu)
 {
 	this->_inBattle.texture.loadFromFile((std::filesystem::path(profileFolderPath) / "assets/lobby/inarcade.png").string().c_str());
@@ -144,6 +155,7 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 
 		SokuLib::Vector2i size;
 
+		this->_roomName = std::string(r.name, strnlen(r.name, sizeof(r.name)));
 		this->_extraPlayerData[r.id].name.texture.createFromText(std::string(r.realName, strnlen(r.realName, sizeof(r.realName))).c_str(), lobbyData->getFont(16), {200, 20}, &size);
 		this->_extraPlayerData[r.id].name.setSize(size.to<unsigned>());
 		this->_extraPlayerData[r.id].name.rect.width = size.x;
@@ -153,8 +165,8 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 	};
 	connection.onConnectRequest = [this](const std::string &ip, unsigned short port, bool spectate){
 		SokuLib::playSEWaveBuffer(57);
-		this->connection.getMe()->battleStatus = 2;
-		this->parent->joinHost(ip.c_str(), port, spectate);
+		this->_connection.getMe()->battleStatus = 2;
+		this->_parent->joinHost(ip.c_str(), port, spectate);
 	};
 	connection.onError = [this](const std::string &msg){
 		SokuLib::playSEWaveBuffer(38);
@@ -171,10 +183,10 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 	};
 	connection.onHostRequest = [this]{
 		SokuLib::playSEWaveBuffer(57);
-		//TODO: Allow to change port
-		this->connection.getMe()->battleStatus = 2;
-		this->parent->setupHost(10800, true);
-		return 10800;
+		this->_connection.getMe()->battleStatus = 2;
+		if (this->_parent->choice == 0)
+			this->_parent->setupHost(hostPort, true);
+		return hostPort;
 	};
 	connection.onArcadeEngage = [this](const Player &, uint32_t id){
 		if (id >= this->_machines.size() - 1)
@@ -228,64 +240,84 @@ InLobbyMenu::~InLobbyMenu()
 {
 	activeMenu = nullptr;
 	this->_unhook();
-	this->connection.disconnect();
+	this->_connection.disconnect();
 	this->_menu->setActive();
 	if (!this->_music.empty())
 		SokuLib::playBGM("data/bgm/op2.ogg");
+	if (this->_hostThread.joinable())
+		this->_hostThread.join();
 }
 
 void InLobbyMenu::_()
 {
 	Lobbies::PacketArcadeLeave leave{0};
 
-	this->connection.send(&leave, sizeof(leave));
+	this->_connection.send(&leave, sizeof(leave));
 	*(*(char **)0x89a390 + 20) = false;
-	this->parent->choice = 0;
-	this->parent->subchoice = 0;
+	this->_parent->choice = 0;
+	this->_parent->subchoice = 0;
+	messageBox->active = false;
 	*(int *)0x882a94 = 0x16;
 	SokuLib::playBGM(this->_music.c_str());
 }
 
 int InLobbyMenu::onProcess()
 {
-	if (!this->connection.isInit() && !this->_wasConnected) {
+	if (!this->_connection.isInit() && !this->_wasConnected) {
 		this->_loadingGear.setRotation(this->_loadingGear.getRotation() + 0.1);
-		return this->connection.isConnected();
+		return this->_connection.isConnected();
 	}
-	if (!this->connection.isInit())
+	if (!this->_connection.isInit())
 		return false;
 
-	this->connection.meMutex.lock();
+	this->_connection.meMutex.lock();
 	auto inputs = SokuLib::inputMgrs.input;
-	auto me = this->connection.getMe();
+	auto me = this->_connection.getMe();
 
-	if (this->_hostlist)
-		this->_hostlist->update();
-	this->updateChat();
 	memset(&SokuLib::inputMgrs.input, 0, sizeof(SokuLib::inputMgrs.input));
 	// We call MenuConnect::onProcess directly because we don't want to trigger any hook.
 	// After all, we are not technically inside the connect menu.
-	reinterpret_cast<void (__thiscall *)(SokuLib::MenuConnect *)>(0x449160)(this->parent);
+	reinterpret_cast<void (__thiscall *)(SokuLib::MenuConnect *)>(0x449160)(this->_parent);
 	SokuLib::inputMgrs.input = inputs;
-	if (this->parent->choice > 0) {
+	if (this->_hostlist && !this->_hostlist->update()) {
+		SokuLib::playBGM(this->_music.c_str());
+		this->_hostlist.reset();
+		this->_currentMachine = nullptr;
+		SokuLib::playSEWaveBuffer(0x29);
+		this->_connection.meMutex.unlock();
+		return true;
+	}
+	this->updateChat();
+	if (this->_parent->choice > 0) {
 		if (
-			this->parent->subchoice == 5 || //Already Playing
-			this->parent->subchoice == 10   //Connect Failed
+			this->_parent->subchoice == 5 || //Already Playing
+			this->_parent->subchoice == 10   //Connect Failed
 		) {
 			Lobbies::PacketArcadeLeave leave{0};
 
-			this->connection.send(&leave, sizeof(leave));
+			this->_connection.send(&leave, sizeof(leave));
 			*(*(char **)0x89a390 + 20) = false;
-			this->parent->choice = 0;
-			this->parent->subchoice = 0;
+			this->_addMessageToList(0xFF0000, 0, "Failed connecting to opponent: " + std::string(this->_parent->subchoice == 5 ? "They are already playing" : "Connection failed"));
+			this->_parent->choice = 0;
+			this->_parent->subchoice = 0;
+			messageBox->active = false;
 		}
 	}
 	if (SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
 		SokuLib::playSEWaveBuffer(0x29);
 		if (!this->_editingText) {
-			this->connection.meMutex.unlock();
+			this->_connection.meMutex.unlock();
 			this->_unhook();
-			this->connection.disconnect();
+			this->_connection.disconnect();
+			if (this->_parent->choice == SokuLib::MenuConnect::CHOICE_HOST) {
+				memset(&SokuLib::inputMgrs.input, 0, sizeof(SokuLib::inputMgrs.input));
+				SokuLib::inputMgrs.input.b = 1;
+				reinterpret_cast<void (__thiscall *)(SokuLib::MenuConnect *)>(0x449160)(this->_parent);
+				SokuLib::inputMgrs.input = inputs;
+			} else
+				SokuLib::playSEWaveBuffer(0x29);
+			this->_parent->choice = 0;
+			this->_parent->subchoice = 0;
 			return false;
 		} else
 			this->_editingText = false;
@@ -296,9 +328,9 @@ int InLobbyMenu::onProcess()
 	if (!this->_currentMachine && !this->_editingText) {
 		if (SokuLib::inputMgrs.input.b == 1) {
 			SokuLib::playSEWaveBuffer(0x29);
-			this->connection.meMutex.unlock();
+			this->_connection.meMutex.unlock();
 			this->_unhook();
-			this->connection.disconnect();
+			this->_connection.disconnect();
 			return false;
 		}
 		if (SokuLib::inputMgrs.input.a == 1) {
@@ -314,7 +346,7 @@ int InLobbyMenu::onProcess()
 				this->_currentMachine = &machine;
 				SokuLib::playSEWaveBuffer(0x28);
 				if (machine.id == UINT32_MAX) {
-					this->_hostlist.reset(new SmallHostlist(0.6, {128, 48}));
+					this->_hostlist.reset(new SmallHostlist(0.6, {128, 48}, this->_parent));
 					SokuLib::playBGM("data/bgm/op2.ogg");
 					break;
 				}
@@ -322,7 +354,10 @@ int InLobbyMenu::onProcess()
 				Lobbies::PacketGameRequest packet{machine.id};
 
 				me->battleStatus = 1;
-				this->connection.send(&packet, sizeof(packet));
+				this->_connection.send(&packet, sizeof(packet));
+				printf("%i\n", me->settings.hostPref);
+				if (me->settings.hostPref & Lobbies::HOSTPREF_ACCEPT_HOSTLIST)
+					this->_startHosting();
 				break;
 			}
 		}
@@ -334,8 +369,8 @@ int InLobbyMenu::onProcess()
 
 			if (SokuLib::inputMgrs.input.horizontalAxis < 0 && me->pos.x < PLAYER_H_SPEED) {
 				SokuLib::playSEWaveBuffer(0x29);
-				this->connection.meMutex.unlock();
-				this->connection.disconnect();
+				this->_connection.meMutex.unlock();
+				this->_connection.disconnect();
 				return false;
 			}
 			newDir &= 0b01100;
@@ -366,7 +401,7 @@ int InLobbyMenu::onProcess()
 		if (dirChanged) {
 			Lobbies::PacketMove l{0, me->dir};
 
-			this->connection.send(&l, sizeof(l));
+			this->_connection.send(&l, sizeof(l));
 		}
 	} else {
 		if (me->dir & 0b1111) {
@@ -374,20 +409,24 @@ int InLobbyMenu::onProcess()
 
 			Lobbies::PacketMove m{0, me->dir};
 
-			this->connection.send(&m, sizeof(m));
+			this->_connection.send(&m, sizeof(m));
 		}
-		if (SokuLib::inputMgrs.input.b == 1 && !this->_editingText) {
-			if (me->battleStatus) {
-				Lobbies::PacketArcadeLeave l{0};
+		if (SokuLib::inputMgrs.input.b == 1 && !this->_editingText && !this->_hostlist) {
+			Lobbies::PacketArcadeLeave l{0};
 
-				this->connection.send(&l, sizeof(l));
-				me->battleStatus = 0;
-			}
-			if (this->_currentMachine->id == UINT32_MAX)
-				SokuLib::playBGM(this->_music.c_str());
-			this->_hostlist.reset();
+			this->_connection.send(&l, sizeof(l));
+			me->battleStatus = 0;
 			this->_currentMachine = nullptr;
-			SokuLib::playSEWaveBuffer(0x29);
+			if (this->_parent->choice == SokuLib::MenuConnect::CHOICE_HOST) {
+				memset(&SokuLib::inputMgrs.input, 0, sizeof(SokuLib::inputMgrs.input));
+				SokuLib::inputMgrs.input.b = 1;
+				reinterpret_cast<void (__thiscall *)(SokuLib::MenuConnect *)>(0x449160)(this->_parent);
+				SokuLib::inputMgrs.input = inputs;
+			} else
+				SokuLib::playSEWaveBuffer(0x29);
+			this->_parent->choice = 0;
+			this->_parent->subchoice = 0;
+			messageBox->active = false;
 		}
 	}
 	for (auto &machine : this->_machines) {
@@ -420,7 +459,7 @@ int InLobbyMenu::onProcess()
 		machine.mutex.unlock();
 	}
 
-	this->connection.updatePlayers(lobbyData->avatars);
+	this->_connection.updatePlayers(lobbyData->avatars);
 	if (me->pos.x < 320)
 		this->_translate.x = 0;
 	else if (me->pos.x > bg.fg.getSize().x - 320)
@@ -431,13 +470,13 @@ int InLobbyMenu::onProcess()
 		this->_translate.y = 0;
 	else
 		this->_translate.y = me->pos.y - 140;
-	this->connection.meMutex.unlock();
+	this->_connection.meMutex.unlock();
 	return true;
 }
 
 int InLobbyMenu::onRender()
 {
-	if (!this->connection.isInit() && !this->_wasConnected) {
+	if (!this->_connection.isInit() && !this->_wasConnected) {
 		this->_messageBox.draw();
 		this->_loadingText.draw();
 		this->_loadingGear.setRotation(-this->_loadingGear.getRotation());
@@ -481,7 +520,7 @@ int InLobbyMenu::onRender()
 		machine.mutex.unlock();
 	}
 
-	auto players = this->connection.getPlayers();
+	auto players = this->_connection.getPlayers();
 	SokuLib::DrawUtils::RectangleShape rect2;
 #ifdef _DEBUG
 	SokuLib::DrawUtils::RectangleShape rect;
@@ -536,21 +575,22 @@ int InLobbyMenu::onRender()
 	}
 	if (this->_currentMachine)
 		this->_renderMachineOverlay();
-	this->renderChat();
+	if (!this->_hostlist)
+		this->renderChat();
 	return 0;
 }
 
 void InLobbyMenu::_unhook()
 {
-	this->connection.onConnectRequest = this->onConnectRequest;
-	this->connection.onError = this->onError;
-	this->connection.onImpMsg = this->onImpMsg;
-	this->connection.onMsg = this->onMsg;
-	this->connection.onHostRequest = this->onHostRequest;
-	this->connection.onConnect = this->onConnect;
-	this->connection.onPlayerJoin = this->onPlayerJoin;
-	this->connection.onArcadeEngage = this->onArcadeEngage;
-	this->connection.onArcadeLeave = this->onArcadeLeave;
+	this->_connection.onConnectRequest = this->onConnectRequest;
+	this->_connection.onError = this->onError;
+	this->_connection.onImpMsg = this->onImpMsg;
+	this->_connection.onMsg = this->onMsg;
+	this->_connection.onHostRequest = this->onHostRequest;
+	this->_connection.onConnect = this->onConnect;
+	this->_connection.onPlayerJoin = this->onPlayerJoin;
+	this->_connection.onArcadeEngage = this->onArcadeEngage;
+	this->_connection.onArcadeLeave = this->onArcadeLeave;
 }
 
 void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const std::string &msg)
@@ -924,7 +964,7 @@ void InLobbyMenu::_sendMessage(const std::string &msg)
 
 	Lobbies::PacketMessage msgPacket{0, 0, realMsg};
 
-	this->connection.send(&msgPacket, sizeof(msgPacket));
+	this->_connection.send(&msgPacket, sizeof(msgPacket));
 }
 
 void InLobbyMenu::updateChat()
@@ -1048,6 +1088,28 @@ void InLobbyMenu::_renderMachineOverlay()
 		return;
 	this->_hostlist->render();
 	this->_currentMachine->skin.overlay.draw();
+}
+
+void InLobbyMenu::_startHosting()
+{
+	this->_parent->setupHost(hostPort, true);
+	if (this->_hostThread.joinable())
+		this->_hostThread.join();
+	this->_hostThread = std::thread{[this]{
+		puts("Putting hostlist");
+
+		nlohmann::json data = {
+			{"profile_name", SokuLib::profile1.name},
+			{"message", "SokuLobbies " VERSION_STR ": Waiting in " + this->_roomName},
+			{"port", hostPort}
+		};
+
+		try {
+			puts(lobbyData->httpRequest("https://konni.delthas.fr/games", "PUT", data.dump()).c_str());
+		} catch (std::exception &e) {
+			MessageBoxA(SokuLib::window, e.what(), "Hostlist error", MB_ICONERROR);
+		}
+	}};
 }
 
 InLobbyMenu::ArcadeMachine::ArcadeMachine(unsigned id, SokuLib::Vector2i pos, LobbyData::ArcadeAnimation *currentAnim, LobbyData::ArcadeSkin &skin):

@@ -222,7 +222,7 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 		}
 		name = this->_sanitizeName(std::string(packet.name, strnlen(packet.name, sizeof(packet.name))), &connection);
 
-		Lobbies::PacketOlleh res{name, id};
+		Lobbies::PacketOlleh res{this->_infos.name, name, id};
 		Lobbies::PacketPlayerJoin join{id, name, packet.custom};
 		Lobbies::PacketMessage msgPacket{0xFFFF00, 0, connection.getName() + " has joined the lobby."};
 

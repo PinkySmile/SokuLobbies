@@ -30,11 +30,12 @@ namespace Lobbies
 		       "hostPref: " + std::to_string(this->settings.hostPref);
 	}
 
-	PacketOlleh::PacketOlleh(const std::string &realName, uint32_t id) :
+	PacketOlleh::PacketOlleh(const std::string &roomName, const std::string &realName, uint32_t id) :
 		opcode(OPCODE_OLLEH),
 		id(id)
 	{
 		strncpy(this->realName, realName.c_str(), sizeof(this->realName));
+		strncpy(this->name, roomName.c_str(), sizeof(this->name));
 	}
 
 	std::string PacketOlleh::toString() const

@@ -20,7 +20,7 @@ typedef fd_set FD_SET;
 #endif
 
 #ifdef _WIN32
-std::string getLastSocketError(int err = WSAGetLastError()) {
+std::string getLastSocketError(int err) {
 	wchar_t *s = nullptr;
 
 	FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, err,

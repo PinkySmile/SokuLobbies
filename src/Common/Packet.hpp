@@ -9,7 +9,8 @@
 #include <cstdint>
 #include <string>
 
-#define MOD_VERSION 8
+#define MOD_VERSION 9
+#define VERSION_STR "0.1.0"
 
 namespace Lobbies
 {
@@ -35,11 +36,12 @@ namespace Lobbies
 	};
 
 	enum HostPreference : uint8_t {
-		HOSTPREF_CLIENT_ONLY,
-		HOSTPREF_HOST_ONLY,
-		HOSTPREF_NO_PREF,
-		HOSTPREF_HOST_PREF_MASK,
-		HOSTPREF_ACCEPT_RELAY
+		/* 0 */ HOSTPREF_CLIENT_ONLY,
+		/* 1 */ HOSTPREF_HOST_ONLY,
+		/* 2 */ HOSTPREF_NO_PREF,
+		/* 3 */ HOSTPREF_HOST_PREF_MASK,
+		/* 4 */ HOSTPREF_ACCEPT_RELAY,
+		/* 8 */ HOSTPREF_ACCEPT_HOSTLIST = 8,
 	};
 
 	struct PlayerCustomization {
@@ -78,12 +80,13 @@ namespace Lobbies
 
 	public:
 		uint32_t id;
+		char name[32];
 		char realName[64];
 		uint32_t bg = 0;
 		char music[8] = "op";
 		char data[2048]; // This is the lobby customization
 
-		PacketOlleh(const std::string &realName, uint32_t id);
+		PacketOlleh(const std::string &roomName, const std::string &realName, uint32_t id);
 		std::string toString() const;
 	};
 

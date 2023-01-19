@@ -7,6 +7,8 @@
 
 
 #include <SokuLib.hpp>
+#include <thread>
+#include <mutex>
 
 class SmallHostlist {
 private:
@@ -56,6 +58,31 @@ private:
 		void render() override;
 	};
 
+	struct HostEntry {
+		std::string nameStr;
+		SokuLib::DrawUtils::Sprite name;
+		std::string msgStr;
+		SokuLib::DrawUtils::Sprite msg;
+		std::string country;
+		std::string ip;
+		unsigned short port;
+		bool ap;
+		bool ranked;
+		bool deleted = false;
+	};
+
+	struct PlayEntry {
+		std::string namesStr;
+		SokuLib::DrawUtils::Sprite names;
+		std::string p1chr;
+		std::string p2chr;
+		std::string country1;
+		std::string country2;
+		std::string ip;
+		unsigned short port;
+		bool deleted = false;
+	};
+
 	static constexpr const char *_spritesPaths[] = {
 		"data/menu/connect/Network.png",
 		"data/menu/door_l.png",
@@ -83,17 +110,33 @@ private:
 		"data/menu/gear/6L_pattern.png",
 		"data/menu/gear/6U_pattern.png"
 	};
-	std::array<SokuLib::DrawUtils::Sprite, sizeof(_spritesPaths) / sizeof(*_spritesPaths) + 2> _sprites;
+	SokuLib::DrawUtils::Sprite _hosting;
+	SokuLib::DrawUtils::Sprite _playing;
+	std::array<SokuLib::DrawUtils::Sprite, sizeof(_spritesPaths) / sizeof(*_spritesPaths) + 3> _sprites;
 	std::vector<std::unique_ptr<Object>> _topOverlay;
 	std::vector<std::unique_ptr<Object>> _botOverlay;
 	std::vector<std::unique_ptr<Object>> _background;
 	std::vector<std::unique_ptr<Object>> _foreground;
+	std::thread _netThread;
 	unsigned _overlayTimer = 0;
+	bool _selection = false;
+	bool _selected = false;
+	bool _spectator = false;
+	unsigned _hostSelect = 0;
+	std::vector<std::unique_ptr<HostEntry>> _hostEntries;
+	std::vector<std::unique_ptr<PlayEntry>> _playEntries;
+	std::mutex _entriesMutex;
+	SokuLib::MenuConnect *_parent;
+	SokuLib::Vector2i _pos;
 	float _ratio;
 
+	void _displaySokuCursor(SokuLib::Vector2i pos, SokuLib::Vector2u size);
+	void _refreshHostlist();
+
 public:
-	SmallHostlist(float ratio, SokuLib::Vector2i pos);
-	void update();
+	SmallHostlist(float ratio, SokuLib::Vector2i pos, SokuLib::MenuConnect *parent);
+	~SmallHostlist();
+	bool update();
 	void render();
 };
 

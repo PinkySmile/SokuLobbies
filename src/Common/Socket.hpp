@@ -16,6 +16,8 @@ typedef int SOCKET;
 #include <map>
 #include <string>
 
+std::string getLastSocketError(int err = WSAGetLastError());
+
 //! @brief Define a Socket
 class Socket {
 public:

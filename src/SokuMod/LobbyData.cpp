@@ -4,6 +4,7 @@
 
 #include <fstream>
 #include <filesystem>
+#include <Packet.hpp>
 #include "nlohmann/json.hpp"
 #include "data.hpp"
 #include "LobbyData.hpp"
@@ -309,6 +310,30 @@ void LobbyData::_loadEmotes()
 	printf("There are %zu emotes (%zu different alias)\n", this->emotes.size(), this->emotesByName.size());
 }
 
+void LobbyData::_loadFlags()
+{
+	std::filesystem::path folder = profileFolderPath;
+	auto path = folder / "assets/flags/list.json";
+	std::ifstream stream{path};
+	nlohmann::json j;
+
+	if (stream.fail())
+		throw std::runtime_error("Cannot open file " + path.string() + ": " + strerror(errno));
+	printf("Loading %s\n", path.string().c_str());
+	stream >> j;
+	stream.close();
+	for (auto &val : j.items()) {
+		auto &flag = this->flags[val.key()];
+
+		flag = std::make_unique<SokuLib::DrawUtils::Sprite>();
+		flag->texture.loadFromFile((folder / "assets/flags" / val.value().get<std::string>()).string().c_str());
+		flag->setSize({EMOTE_SIZE, EMOTE_SIZE});
+		flag->rect.width = flag->texture.getSize().x;
+		flag->rect.height = flag->texture.getSize().y;
+	}
+	printf("There are %zu flags\n", this->flags.size());
+}
+
 static void extractArcadeAnimation(LobbyData::ArcadeAnimation &animation, const nlohmann::json &j)
 {
 	animation.file = j["file"];
@@ -377,6 +402,23 @@ void LobbyData::_loadArcades()
 	}
 }
 
+size_t LobbyData::writeMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
+{
+	size_t realsize = size * nmemb;
+	auto mem = (MemoryStruct *)userp;
+	auto ptr = (char *)realloc(mem->memory, mem->size + realsize + 1);
+
+	if (ptr == nullptr) {
+		free(mem->memory);
+		throw std::runtime_error("not enough memory (realloc returned NULL)");
+	}
+	mem->memory = ptr;
+	memcpy(&(mem->memory[mem->size]), contents, realsize);
+	mem->size += realsize;
+	mem->memory[mem->size] = 0;
+	return realsize;
+}
+
 LobbyData::LobbyData()
 {
 	this->_loadStats();
@@ -385,6 +427,7 @@ LobbyData::LobbyData()
 	this->_loadEmotes();
 	this->_loadArcades();
 	this->_loadAchievements();
+	this->_loadFlags();
 	this->_grantStatsAchievements();
 
 	this->achHolder.getText.texture.createFromText("Achievement Unlocked!", this->getFont(16), {400, 20});
@@ -405,6 +448,16 @@ LobbyData::LobbyData()
 	this->achHolder.behindGear.rect.width = this->achHolder.behindGear.getSize().x;
 	this->achHolder.behindGear.rect.height = this->achHolder.behindGear.getSize().y;
 	this->achHolder.behindGear.setPosition((this->achHolder.behindGear.getSize() * -1).to<int>());
+
+	curl_global_init(CURL_GLOBAL_ALL);
+
+	this->_request_handle = curl_easy_init();
+	this->_headers = curl_slist_append(this->_headers, "Content-Type: application/json");
+	curl_easy_setopt(this->_request_handle, CURLOPT_HTTPHEADER, this->_headers);
+	curl_easy_setopt(this->_request_handle, CURLOPT_WRITEFUNCTION, &LobbyData::writeMemoryCallback);
+	curl_easy_setopt(this->_request_handle, CURLOPT_WRITEDATA, (void *)&this->_request_chunk);
+	curl_easy_setopt(this->_request_handle, CURLOPT_USERAGENT, "SokuLobbies " VERSION_STR);
+	curl_easy_setopt(this->_request_handle, CURLOPT_SSL_VERIFYPEER, false);
 }
 
 LobbyData::~LobbyData()
@@ -413,6 +466,9 @@ LobbyData::~LobbyData()
 	this->saveAchievements();
 	for (auto &font : this->_fonts)
 		font.second.destruct();
+	curl_slist_free_all(this->_headers);
+	curl_easy_cleanup(this->_request_handle);
+	curl_global_cleanup();
 }
 
 bool LobbyData::isLocked(const LobbyData::Emote &emote)
@@ -805,4 +861,36 @@ void LobbyData::_grantStatsAchievements()
 			});
 		}
 	}
+}
+
+std::string LobbyData::httpRequest(const std::string &url, const std::string &method, const std::string &data)
+{
+	std::string response;
+	int response_code;
+
+	this->_requestMutex.lock();
+	this->_request_chunk.memory = (char *)calloc(1, sizeof(char));
+	this->_request_chunk.size = 0;
+	curl_easy_setopt(this->_request_handle, CURLOPT_CUSTOMREQUEST, method.c_str());
+	curl_easy_setopt(this->_request_handle, CURLOPT_URL, url.c_str());
+	if (data.empty())
+		curl_easy_setopt(this->_request_handle, CURLOPT_POSTFIELDS, nullptr);
+	else
+		curl_easy_setopt(this->_request_handle, CURLOPT_POSTFIELDS, data.c_str());
+
+	CURLcode res = curl_easy_perform(this->_request_handle);
+
+	if (res != CURLE_OK) {
+		free(this->_request_chunk.memory);
+		this->_requestMutex.unlock();
+		throw std::runtime_error(curl_easy_strerror(res));
+	}
+
+	curl_easy_getinfo(this->_request_handle, CURLINFO_RESPONSE_CODE, &response_code);
+	response = std::string(this->_request_chunk.memory, this->_request_chunk.memory + this->_request_chunk.size);
+	free(this->_request_chunk.memory);
+	this->_requestMutex.unlock();
+	if (response_code >= 300)
+		throw std::invalid_argument(std::to_string(response_code) + response);
+	return response;
 }

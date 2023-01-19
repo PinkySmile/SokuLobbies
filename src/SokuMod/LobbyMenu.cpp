@@ -92,6 +92,8 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 		this->_loadedSettings.player.env = 0;
 		this->_loadedSettings.player.feet = 0;
 	}
+	// For now, we get the stuff from the INI
+	this->_loadedSettings.settings.hostPref = static_cast<Lobbies::HostPreference>(hostPref);
 	this->_loadedSettings.name = SokuLib::profile1.name.operator std::string();
 	this->_loadedSettings.pos.x = 20;
 
