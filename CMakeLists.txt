@@ -161,7 +161,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 		src/SokuMod/SmallHostlist.cpp
 		src/SokuMod/SmallHostlist.hpp
 		src/SokuMod/BackgroundHost.cpp
-	)
+		src/SokuMod/createUTFTexture.cpp src/SokuMod/createUTFTexture.hpp src/SokuMod/encodingConverter.cpp src/SokuMod/encodingConverter.hpp src/SokuMod/shiftJISConvTable.inl src/SokuMod/shiftJISReverseConvTable.inl)
 	target_compile_options(SokuLobbiesMod PRIVATE /Zi)
 	target_compile_definitions("SokuLobbiesMod" PRIVATE DIRECTINPUT_VERSION=0x0800 _CRT_SECURE_NO_WARNINGS)
 	target_link_libraries(

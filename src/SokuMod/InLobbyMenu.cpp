@@ -9,6 +9,8 @@
 #include "LobbyData.hpp"
 #include "data.hpp"
 #include "SmallHostlist.hpp"
+#include "encodingConverter.hpp"
+#include "createUTFTexture.hpp"
 
 #define TEXTURE_MAX_SIZE 344
 #define CURSOR_ENDX 637
@@ -614,20 +616,20 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 		m->text.emplace_back();
 
 		auto &txt = m->text.back();
-		auto text = line;
+		unsigned int texId = 0;
 
-		if (player == 0) {
-			char color[40];
-
-			sprintf(color, "<color %06x>", channel);
-			text = color + text + "</color>";
-		}
-		txt.sprite.texture.createFromText(text.c_str(), lobbyData->getFont(CHAT_FONT_HEIGHT), {350, 300}, &txt.realSize);
+		if (player == 0)
+			txt.sprite.tint = channel;
+		txt.sprite.texture.createFromText(line.c_str(), lobbyData->getFont(CHAT_FONT_HEIGHT), {350, 300}, &txt.realSize);
+		//if (!createTextTexture(texId, convertEncoding<char, wchar_t, UTF8Decode, UTF16Encode>(line).c_str(), lobbyData->getFont(CHAT_FONT_HEIGHT), {350, 300}, &txt.realSize))
+		//	puts("Error creating text texture");
+		//txt.sprite.texture.setHandle(texId, {350, 300});
 		txt.sprite.rect.width = txt.realSize.x;
 		txt.sprite.rect.height = txt.realSize.y;
 		txt.pos.x = startPos;
 		if (!m->emotes.empty())
 			txt.pos.y = (txt.realSize.y - EMOTE_SIZE) / 2;
+		printf("Created sprite %x %i,%i %ux%u (%ux%u) %08x\n", texId, txt.pos.x, txt.pos.y, txt.realSize.x, txt.realSize.y, txt.sprite.texture.getSize().x, txt.sprite.texture.getSize().y, txt.sprite.tint);
 		startPos = pos;
 		line.clear();
 	};
@@ -647,8 +649,10 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 			emoteId |= (c & 0x7F) << ((2 - emoteCtr) * 7);
 			emoteCtr--;
 			if (!emoteCtr) {
-				if (pos + EMOTE_SIZE > MAX_LINE_SIZE)
+				if (pos + EMOTE_SIZE > MAX_LINE_SIZE) {
 					nextLine();
+					startPos = 0;
+				}
 				m->emotes.emplace_back();
 				m->emotes.back().id = emoteId;
 				m->emotes.back().pos.x = startPos;
