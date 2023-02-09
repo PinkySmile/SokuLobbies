@@ -170,12 +170,10 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 		shlwapi
 		ws2_32
 		d3dx9
+		imm32
 		CURL::libcurl
 	)
 	target_link_directories(SokuLobbiesMod PRIVATE lib)
 	target_include_directories(SokuLobbiesMod PRIVATE lib/include)
-	if (CMAKE_BUILD_TYPE STREQUAL Debug)
-	else ()
-		target_compile_definitions(SokuLobbiesMod PRIVATE _LOBBYNOLOG=1)
-	endif ()
+	target_compile_definitions(SokuLobbiesMod PRIVATE _LOBBYNOLOG=1)
 endif()

@@ -50,7 +50,7 @@ std::basic_string<unsigned> UTF8Decode(const std::string &str)
 			output.push_back(bytes[i]);
 		else if (bytes[i] < 0xC0)
 			output.push_back(0xFFFD);
-		else if (bytes[i] < 0xD0) {
+		else if (bytes[i] < 0xE0) {
 			if (i + 1 >= str.size()) {
 				output.push_back(0xFFFC);
 				output.shrink_to_fit();
@@ -69,7 +69,7 @@ std::basic_string<unsigned> UTF8Decode(const std::string &str)
 			else
 				output.push_back(pt);
 			i += 1;
-		} else if (bytes[i] < 0xE0) {
+		} else if (bytes[i] < 0xF0) {
 			if (i + 2 >= str.size()) {
 				output.push_back(0xFFFC);
 				output.shrink_to_fit();

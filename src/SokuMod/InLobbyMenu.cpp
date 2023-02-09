@@ -12,6 +12,8 @@
 #include "encodingConverter.hpp"
 #include "createUTFTexture.hpp"
 
+#define CHAT_CHARACTER_LIMIT 512
+#define BOX_TEXTURE_SIZE {0x2000, 30}
 #define TEXTURE_MAX_SIZE 344
 #define CURSOR_ENDX 637
 #define CURSOR_STARTX 293
@@ -39,19 +41,133 @@ static std::mt19937 random;
 
 static LRESULT __stdcall Hooked_WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	ptrMutex.lock();
-	if (uMsg == WM_KEYDOWN && activeMenu) {
-		BYTE keyboardState[256];
+	if (
+		uMsg == WM_IME_NOTIFY &&
+		wParam == IMN_PRIVATE && (
+			lParam == 1 || lParam == 2 ||
+			lParam == 16|| lParam == 17||
+			lParam == 26|| lParam == 27|| lParam == 28
+		)
+	)
+		return 0;
 
-		GetKeyboardState(keyboardState);
-		if(!(MapVirtualKey(wParam, MAPVK_VK_TO_CHAR) >> (sizeof(UINT) * 8 - 1) & 1)) {
-			unsigned short chr = 0;
-			int nb = ToAscii((UINT)wParam, lParam, keyboardState, &chr, 0);
+	unsigned eventList[] = {
+		WM_IME_STARTCOMPOSITION,
+		WM_IME_ENDCOMPOSITION,
+		WM_INPUTLANGCHANGE,
+		WM_IME_COMPOSITION,
+		WM_IME_NOTIFY,
+		WM_KEYDOWN,
+		WM_KEYUP
+	};
+	const size_t size = sizeof(eventList) / sizeof(*eventList);
 
-			if (nb == 1)
-				activeMenu->onKeyPressed(chr);
+	if (std::find(eventList, eventList + size, uMsg) == eventList + size)
+		return CallWindowProc(Original_WndProc, hWnd, uMsg, wParam, lParam);
+	if (uMsg == WM_IME_NOTIFY) {
+		if (wParam == IMN_SETCONVERSIONMODE) {
+			ptrMutex.lock();
+			if (!activeMenu) {
+				ptrMutex.unlock();
+				return CallWindowProc(Original_WndProc, hWnd, uMsg, wParam, lParam);
+			}
+			printf("WM_IME_NOTIFY IMN_SETCONVERSIONMODE %x\n", (UINT)lParam);
+			activeMenu->immCtx = nullptr;
+			activeMenu->immComposition.clear();
+			activeMenu->compositionCursor = 0;
+			ptrMutex.unlock();
 		}
-	} else if (uMsg == WM_KEYUP && activeMenu)
+		return CallWindowProc(Original_WndProc, hWnd, uMsg, wParam, lParam);
+	}
+	ptrMutex.lock();
+	if (!activeMenu) {
+		ptrMutex.unlock();
+		return CallWindowProc(Original_WndProc, hWnd, uMsg, wParam, lParam);
+	}
+	if (uMsg == WM_INPUTLANGCHANGE) {
+		printf("WM_INPUTLANGCHANGE %x %x\n", (UINT)wParam, (UINT)lParam);
+		activeMenu->immComposition.clear();
+	} else if (uMsg == WM_IME_STARTCOMPOSITION) {
+		printf("WM_IME_STARTCOMPOSITION %x %x\n", (UINT)wParam, (UINT)lParam);
+		activeMenu->immCtx = ImmGetContext(SokuLib::window);
+		// This disables the windows builtin IME window.
+		// For now we keep it because part of its features are not properly supported.
+		//ptrMutex.unlock();
+		//return 0;
+	} else if (uMsg == WM_IME_ENDCOMPOSITION) {
+		MSG compositionMsg;
+
+		printf("WM_IME_ENDCOMPOSITION %x %x\n", (UINT)wParam, (UINT)lParam);
+		if (
+			::PeekMessage(&compositionMsg, hWnd, WM_IME_STARTCOMPOSITION, WM_IME_COMPOSITION, PM_NOREMOVE) &&
+			compositionMsg.message == WM_IME_COMPOSITION &&
+			(compositionMsg.lParam & GCS_RESULTSTR)
+		) {
+			ptrMutex.unlock();
+			return CallWindowProc(Original_WndProc, hWnd, uMsg, wParam, lParam);
+		}
+		ImmReleaseContext(SokuLib::window, activeMenu->immCtx);
+		activeMenu->immCtx = nullptr;
+		activeMenu->immComposition.clear();
+		activeMenu->compositionCursor = 0;
+		// This disables the windows builtin IME window.
+		// For now we keep it because part of its features are not properly supported.
+		//ptrMutex.unlock();
+		//return 0;
+	} else if (uMsg == WM_IME_COMPOSITION) {
+		printf("WM_IME_COMPOSITION %x %x\n", (UINT)wParam, (UINT)lParam);
+		activeMenu->onKeyReleased();
+		if (lParam & GCS_RESULTSTR) {
+			auto required = ImmGetCompositionStringW(activeMenu->immCtx, GCS_RESULTSTR, nullptr, 0);
+			auto immStr = (wchar_t *)malloc(required);
+			bool v = false;
+
+			printf("GCS_RESULTSTR Required %li\n", required);
+			assert(required % 2 == 0);
+			ImmGetCompositionStringW(activeMenu->immCtx, GCS_RESULTSTR, immStr, required);
+			activeMenu->addString(immStr, required / 2);
+			free(immStr);
+			activeMenu->onCompositionResult();
+			activeMenu->immComposition.clear();
+			activeMenu->textChanged |= 3;
+		}
+		//required = ImmGetCompositionStringW(activeMenu->immCtx, GCS_COMPATTR, nullptr, 0);
+		//printf("GCS_COMPATTR: Required %li\n", required);
+		if (lParam & GCS_COMPSTR) {
+			auto required = ImmGetCompositionStringW(activeMenu->immCtx, GCS_COMPSTR, nullptr, 0);
+
+			activeMenu->immComposition.resize(required);
+			ImmGetCompositionStringW(
+				activeMenu->immCtx,
+				GCS_COMPSTR,
+				activeMenu->immComposition.data(),
+				activeMenu->immComposition.size() * sizeof(*activeMenu->immComposition.data())
+			);
+			activeMenu->textChanged |= 2;
+		}
+		if (lParam & GCS_CURSORPOS) {
+			activeMenu->compositionCursor = ImmGetCompositionStringW(
+				activeMenu->immCtx,
+				GCS_CURSORPOS,
+				nullptr,
+				0
+			);
+			activeMenu->textChanged |= 4;
+		}
+	} else if (uMsg == WM_KEYDOWN) {
+		BYTE keyboardState[256];
+		wchar_t old[2];
+
+		memcpy(old, activeMenu->keyBuffer, sizeof(old));
+		GetKeyboardState(keyboardState);
+		activeMenu->keyBufferUsed = ToUnicode((UINT)wParam, lParam, keyboardState, activeMenu->keyBuffer, 2, 0);
+
+		auto key = MapVirtualKey(wParam, MAPVK_VK_TO_CHAR);
+
+		printf("KEYDOWN %u %x %x %i %i %i\n", key, (UINT)wParam, (UINT)lParam, activeMenu->keyBuffer[0], activeMenu->keyBuffer[1], activeMenu->keyBufferUsed);
+		if (activeMenu->keyBufferUsed > 0)
+			activeMenu->onKeyPressed(UTF16Decode(std::wstring(activeMenu->keyBuffer, activeMenu->keyBuffer + activeMenu->keyBufferUsed))[0]);
+	} else if (uMsg == WM_KEYUP)
 		activeMenu->onKeyReleased();
 	ptrMutex.unlock();
 	return CallWindowProc(Original_WndProc, hWnd, uMsg, wParam, lParam);
@@ -62,6 +178,31 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 	_parent(parent),
 	_menu(menu)
 {
+	SokuLib::FontDescription desc;
+	bool hasEnglishPatch = (*(int *)0x411c64 == 1);
+
+	desc.r1 = 255;
+	desc.r2 = 255;
+	desc.g1 = 255;
+	desc.g2 = 255;
+	desc.b1 = 255;
+	desc.b2 = 255;
+	desc.height = CHAT_FONT_HEIGHT + hasEnglishPatch * 2;
+	desc.weight = FW_NORMAL;
+	desc.italic = 0;
+	desc.shadow = 1;
+	desc.bufferSize = 1000000;
+	desc.charSpaceX = 0;
+	desc.charSpaceY = hasEnglishPatch * -2;
+	desc.offsetX = 0;
+	desc.offsetY = 0;
+	desc.useOffset = 0;
+	strcpy(desc.faceName, "Tahoma");
+	desc.weight = FW_REGULAR;
+
+	this->_chatFont.create();
+	this->_chatFont.setIndirect(desc);
+
 	this->_inBattle.texture.loadFromFile((std::filesystem::path(profileFolderPath) / "assets/lobby/inarcade.png").string().c_str());
 	this->_inBattle.setSize({
 		this->_inBattle.texture.getSize().x,
@@ -112,10 +253,13 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 	this->_textCursor.setFillColor(SokuLib::Color::White);
 	this->_textCursor.setBorderColor(SokuLib::Color::Transparent);
 
-	this->_textSprite.rect.width = 350;
-	this->_textSprite.rect.height = 18;
-	this->_textSprite.setSize({350, 18});
-	this->_textSprite.setPosition({CURSOR_STARTX - (*(int *)0x411c64 == 1) * 2, CURSOR_STARTY});
+	this->_textSprite[0].rect.width = CURSOR_ENDX - CURSOR_STARTX;
+	this->_textSprite[0].rect.height = 18;
+	this->_textSprite[0].setSize(SokuLib::Vector2i{
+		this->_textSprite[0].rect.width,
+		this->_textSprite[0].rect.height
+	}.to<unsigned>());
+	this->_textSprite[0].setPosition({CURSOR_STARTX - (*(int *)0x411c64 == 1) * 2, CURSOR_STARTY});
 
 	auto &bg = lobbyData->backgrounds.front();
 
@@ -233,14 +377,22 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 		machine.mutex.unlock();
 	};
 	connection.connect();
+	ptrMutex.lock();
 	activeMenu = this;
-	if (!Original_WndProc)
-		Original_WndProc = (WNDPROC)SetWindowLongPtr(SokuLib::window, GWL_WNDPROC, (LONG_PTR)Hooked_WndProc);
+	ptrMutex.unlock();
+	if (!Original_WndProc) {
+		Original_WndProc = (WNDPROC) SetWindowLongPtr(SokuLib::window, GWL_WNDPROC, (LONG_PTR) Hooked_WndProc);
+		//ImmDisableIME(GetCurrentThreadId());
+	}
 }
 
 InLobbyMenu::~InLobbyMenu()
 {
+	ptrMutex.lock();
 	activeMenu = nullptr;
+	ptrMutex.unlock();
+	if (this->immCtx)
+		ImmReleaseContext(SokuLib::window, this->immCtx);
 	this->_unhook();
 	this->_connection.disconnect();
 	this->_menu->setActive();
@@ -305,7 +457,7 @@ int InLobbyMenu::onProcess()
 			messageBox->active = false;
 		}
 	}
-	if (SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
+	if (!this->_editingText && SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
 		SokuLib::playSEWaveBuffer(0x29);
 		if (!this->_editingText) {
 			this->_connection.meMutex.unlock();
@@ -606,7 +758,7 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 	unsigned startPos = 0;
 	unsigned pos = 0;
 	unsigned wordPos = 0;
-	bool skip = false;
+	unsigned skip = 0;
 	unsigned short emoteId;
 	unsigned char emoteCtr = 0;
 	auto pushText = [&]{
@@ -616,14 +768,14 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 		m->text.emplace_back();
 
 		auto &txt = m->text.back();
-		unsigned int texId = 0;
+		int texId = 0;
 
 		if (player == 0)
 			txt.sprite.tint = channel;
-		txt.sprite.texture.createFromText(line.c_str(), lobbyData->getFont(CHAT_FONT_HEIGHT), {350, 300}, &txt.realSize);
-		//if (!createTextTexture(texId, convertEncoding<char, wchar_t, UTF8Decode, UTF16Encode>(line).c_str(), lobbyData->getFont(CHAT_FONT_HEIGHT), {350, 300}, &txt.realSize))
-		//	puts("Error creating text texture");
-		//txt.sprite.texture.setHandle(texId, {350, 300});
+		//txt.sprite.texture.createFromText(line.c_str(), this->_chatFont, {350, 300}, &txt.realSize);
+		if (!createTextTexture(texId, convertEncoding<char, wchar_t, UTF8Decode, UTF16Encode>(line).c_str(), this->_chatFont, {350, 300}, &txt.realSize))
+			puts("Error creating text texture");
+		txt.sprite.texture.setHandle(texId, {350, 300});
 		txt.sprite.rect.width = txt.realSize.x;
 		txt.sprite.rect.height = txt.realSize.y;
 		txt.pos.x = startPos;
@@ -642,9 +794,7 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 
 	line.reserve(msg.size());
 	word.reserve(msg.size());
-	for (auto c : msg) {
-		unsigned char arraySection = c >> 4U;
-
+	for (unsigned char c : msg) {
 		if (emoteCtr) {
 			emoteId |= (c & 0x7F) << ((2 - emoteCtr) * 7);
 			emoteCtr--;
@@ -662,8 +812,14 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 					g.pos.y = (g.realSize.y - EMOTE_SIZE) / 2;
 			}
 		} else if (skip) {
-			skip = false;
+			if ((c & 0b11000000) != 0x80) {
+				skip = 0;
+				wordPos += CURSOR_STEP;
+			} else
+				skip--;
 			word += c;
+			if (skip != 0)
+				continue;
 			wordPos += CURSOR_STEP;
 		} else if (c == 1) {
 			line += word;
@@ -682,8 +838,10 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 			nextLine();
 			startPos = 0;
 			continue;
-		} else if (arraySection == 0x8 || arraySection == 0x9 || arraySection == 0xE) {
-			skip = true;
+		} else if (c >= 0x80) {
+			skip = c >= 0xC0;
+			skip += c >= 0xE0;
+			skip += c >= 0xF0;
 			word += c;
 			continue;
 		} else if (isspace(c)) {
@@ -716,16 +874,22 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 	pushText();
 }
 
-void InLobbyMenu::onKeyPressed(int chr)
+void InLobbyMenu::onKeyPressed(unsigned chr)
 {
-	if (chr >= 0x7F || chr < 32 || !this->_editingText)
+	if (chr == 0x7F || chr < 32 || !this->_editingText)
 		return;
 	this->_textMutex.lock();
 	if (this->_lastPressed && this->_textTimer == 0) {
-		this->_buffer.insert(this->_buffer.begin() + this->_textCursorPos, this->_lastPressed);
-		this->_updateTextCursor(this->_textCursorPos + 1);
-		this->_textChanged = true;
-		SokuLib::playSEWaveBuffer(0x27);
+		std::basic_string<unsigned> s{&this->_lastPressed, &this->_lastPressed + 1};
+		auto result = UTF16Encode(s);
+
+		if (result.size() + this->_buffer.size() <= CHAT_CHARACTER_LIMIT) {
+			this->_buffer.insert(this->_buffer.begin() + this->_textCursorPosIndex, result.begin(), result.end());
+			this->_updateTextCursor(this->_textCursorPosIndex + 1);
+			this->textChanged |= 1;
+			SokuLib::playSEWaveBuffer(0x27);
+		} else
+			SokuLib::playSEWaveBuffer(0x29);
 	}
 	this->_lastPressed = chr;
 	this->_textTimer = 0;
@@ -736,9 +900,16 @@ void InLobbyMenu::onKeyReleased()
 {
 	this->_textMutex.lock();
 	if (this->_lastPressed && this->_textTimer == 0) {
-		this->_buffer.insert(this->_buffer.begin() + this->_textCursorPos, this->_lastPressed);
-		this->_updateTextCursor(this->_textCursorPos + 1);
-		SokuLib::playSEWaveBuffer(0x27);
+		std::basic_string<unsigned> s{&this->_lastPressed, &this->_lastPressed + 1};
+		auto result = UTF16Encode(s);
+
+		if (result.size() + this->_buffer.size() <= CHAT_CHARACTER_LIMIT) {
+			this->_buffer.insert(this->_buffer.begin() + this->_textCursorPosIndex, result.begin(), result.end());
+			this->_updateTextCursor(this->_textCursorPosIndex + 1);
+			SokuLib::playSEWaveBuffer(0x27);
+			this->textChanged |= 1;
+		} else
+			SokuLib::playSEWaveBuffer(0x29);
 	}
 	this->_lastPressed = 0;
 	this->_textTimer = 0;
@@ -764,7 +935,6 @@ void InLobbyMenu::_inputBoxUpdate()
 		SokuLib::playSEWaveBuffer(0x27);
 		this->_chatOffset += SCROLL_AMOUNT;
 		this->_chatTimer = max(this->_chatTimer, 180);
-		return;
 	}
 	if (this->_timers[VK_NEXT] == 1 || (this->_timers[VK_NEXT] > 36 && this->_timers[VK_NEXT] % 6 == 0)) {
 		if (this->_chatOffset < SCROLL_AMOUNT)
@@ -773,7 +943,6 @@ void InLobbyMenu::_inputBoxUpdate()
 			this->_chatOffset -= SCROLL_AMOUNT;
 		this->_chatTimer = max(this->_chatTimer, 180);
 		SokuLib::playSEWaveBuffer(0x27);
-		return;
 	}
 	if (!this->_editingText) {
 		if (this->_returnPressed && this->_timers[VK_RETURN] == 0) {
@@ -800,75 +969,81 @@ void InLobbyMenu::_inputBoxUpdate()
 	}
 	if (this->_returnPressed) {
 		if (this->_timers[VK_RETURN] == 0) {
-			if (this->_buffer.size() != 1) {
-				this->_sendMessage(std::string{this->_buffer.begin(), this->_buffer.end() - 1});
-				SokuLib::playSEWaveBuffer(0x28);
-			} else
-				SokuLib::playSEWaveBuffer(0x29);
-			this->_editingText = false;
+			if (this->immComposition.empty()) {
+				if (this->_buffer.size() != 1) {
+					this->_sendMessage(std::wstring{this->_buffer.begin(), this->_buffer.end() - 1});
+					SokuLib::playSEWaveBuffer(0x28);
+				} else
+					SokuLib::playSEWaveBuffer(0x29);
+				this->_editingText = false;
+				this->_chatOffset = 0;
+			}
 			this->_returnPressed = false;
-			this->_chatOffset = 0;
 		}
 		return;
 	}
 	this->_textMutex.lock();
-	if (this->_timers[VK_HOME] == 1) {
-		SokuLib::playSEWaveBuffer(0x27);
-		this->_updateTextCursor(0);
-	}
-	if (this->_timers[VK_END] == 1) {
-		SokuLib::playSEWaveBuffer(0x27);
-		this->_updateTextCursor(this->_buffer.size() - 1);
-	}
-	if (this->_timers[VK_RETURN] == 1) {
-		this->_returnPressed = true;
-		return;
-	}
-	if (this->_timers[VK_BACK] == 1 || (this->_timers[VK_BACK] > 36 && this->_timers[VK_BACK] % 6 == 0)) {
-		if (this->_textCursorPos != 0) {
-			this->_buffer.erase(this->_buffer.begin() + this->_textCursorPos - 1);
-			this->_updateTextCursor(this->_textCursorPos - 1);
-			this->_textChanged = true;
+	if (this->immComposition.empty()) {
+		if (this->_timers[VK_HOME] == 1) {
 			SokuLib::playSEWaveBuffer(0x27);
+			this->_updateTextCursor(0);
+		}
+		if (this->_timers[VK_END] == 1) {
+			SokuLib::playSEWaveBuffer(0x27);
+			this->_updateTextCursor(this->_buffer.size() - 1);
+		}
+		if (this->_timers[VK_BACK] == 1 || (this->_timers[VK_BACK] > 36 && this->_timers[VK_BACK] % 6 == 0)) {
+			if (this->_textCursorPosIndex != 0) {
+				this->_buffer.erase(this->_buffer.begin() + this->_textCursorPosIndex - 1);
+				this->_updateTextCursor(this->_textCursorPosIndex - 1);
+				this->textChanged |= 1;
+				SokuLib::playSEWaveBuffer(0x27);
+			}
+		}
+		if (this->_timers[VK_DELETE] == 1 || (this->_timers[VK_DELETE] > 36 && this->_timers[VK_DELETE] % 6 == 0)) {
+			if (this->_textCursorPosIndex < this->_buffer.size() - 1) {
+				this->_buffer.erase(this->_buffer.begin() + this->_textCursorPosIndex);
+				SokuLib::playSEWaveBuffer(0x27);
+				this->textChanged |= 1;
+			}
+		}
+		if (this->_timers[VK_LEFT] == 1 || (this->_timers[VK_LEFT] > 36 && this->_timers[VK_LEFT] % 3 == 0)) {
+			if (this->_textCursorPosIndex != 0) {
+				this->_updateTextCursor(this->_textCursorPosIndex - 1);
+				SokuLib::playSEWaveBuffer(0x27);
+			}
+		}
+		if (this->_timers[VK_RIGHT] == 1 || (this->_timers[VK_RIGHT] > 36 && this->_timers[VK_RIGHT] % 3 == 0)) {
+			if (this->_textCursorPosIndex != this->_buffer.size() - 1) {
+				this->_updateTextCursor(this->_textCursorPosIndex + 1);
+				SokuLib::playSEWaveBuffer(0x27);
+			}
+		}
+		if (this->_lastPressed) {
+			this->_textTimer++;
+			if (this->_textTimer == 1 || (this->_textTimer > 36 && this->_textTimer % 6 == 0)) {
+				std::basic_string<unsigned> s{&this->_lastPressed, &this->_lastPressed + 1};
+				auto result = UTF16Encode(s);
+
+				if (result.size() + this->_buffer.size() <= CHAT_CHARACTER_LIMIT) {
+					this->_buffer.insert(this->_buffer.begin() + this->_textCursorPosIndex, result.begin(), result.end());
+					this->_updateTextCursor(this->_textCursorPosIndex + 1);
+					SokuLib::playSEWaveBuffer(0x27);
+					this->textChanged |= 1;
+				} else
+					SokuLib::playSEWaveBuffer(0x29);
+			}
 		}
 	}
-	if (this->_timers[VK_DELETE] == 1 || (this->_timers[VK_DELETE] > 36 && this->_timers[VK_DELETE] % 6 == 0)) {
-		if (this->_textCursorPos < this->_buffer.size() - 1) {
-			this->_buffer.erase(this->_buffer.begin() + this->_textCursorPos);
-			SokuLib::playSEWaveBuffer(0x27);
-			this->_textChanged = true;
-			this->_textSprite.texture.createFromText(this->_sanitizeInput().c_str(), lobbyData->getFont(CHAT_FONT_HEIGHT), {8 * this->_buffer.size(), 1800});
-		}
-	}
-	if (this->_timers[VK_LEFT] == 1 || (this->_timers[VK_LEFT] > 36 && this->_timers[VK_LEFT] % 3 == 0)) {
-		if (this->_textCursorPos != 0) {
-			this->_updateTextCursor(this->_textCursorPos - 1);
-			SokuLib::playSEWaveBuffer(0x27);
-		}
-	}
-	if (this->_timers[VK_RIGHT] == 1 || (this->_timers[VK_RIGHT] > 36 && this->_timers[VK_RIGHT] % 3 == 0)) {
-		if (this->_textCursorPos != this->_buffer.size() - 1) {
-			this->_updateTextCursor(this->_textCursorPos + 1);
-			SokuLib::playSEWaveBuffer(0x27);
-		}
-	}
-	if (this->_lastPressed) {
-		this->_textTimer++;
-		if (this->_textTimer == 1 || (this->_textTimer > 36 && this->_textTimer % 6 == 0)) {
-			this->_buffer.insert(this->_buffer.begin() + this->_textCursorPos, this->_lastPressed);
-			this->_updateTextCursor(this->_textCursorPos + 1);
-			SokuLib::playSEWaveBuffer(0x27);
-			this->_textChanged = true;
-		}
-	}
-	if (this->_textChanged)
-		this->_textSprite.texture.createFromText(this->_sanitizeInput().c_str(), lobbyData->getFont(CHAT_FONT_HEIGHT), {max(TEXTURE_MAX_SIZE, 8 * this->_buffer.size()), 18});
-	this->_textChanged = false;
+	if (this->textChanged)
+		this->_updateCompositionSprite();
 	this->_textMutex.unlock();
 }
 
 void InLobbyMenu::_initInputBox()
 {
+	int ret;
+
 	SokuLib::playSEWaveBuffer(0x28);
 	memset(this->_timers, 0, sizeof(this->_timers));
 	this->_lastPressed = 0;
@@ -876,48 +1051,78 @@ void InLobbyMenu::_initInputBox()
 	this->_buffer.clear();
 	this->_buffer.push_back(0);
 
-	this->_textSprite.texture.createFromText(this->_sanitizeInput().c_str(), lobbyData->getFont(CHAT_FONT_HEIGHT), {max(TEXTURE_MAX_SIZE, 8 * this->_buffer.size()), 20});
-	this->_textSprite.rect.left = 0;
+	this->textChanged = 3;
+	this->_updateCompositionSprite();
 
-	this->_textCursorPos = 0;
 	this->_textCursor.setPosition({CURSOR_STARTX, CURSOR_STARTY});
-	this->_updateTextCursor(0);
-
+	this->_textCursorPosSize = 0;
+	this->_textCursorPosIndex = 0;
+	this->_textSprite[0].rect.left = 0;
 	this->_editingText = true;
 	this->_returnPressed = false;
+
+	CANDIDATEFORM candidate;
+	RECT rect;
+
+	GetWindowRect(SokuLib::window, &rect);
+
+	int width = rect.right - rect.left;
+	int height = rect.bottom - rect.top;
+	float xRatio = width / 640.f;
+	float yRatio = height / 480.f;
+	POINT result = {
+		static_cast<LONG>(this->_textCursor.getPosition().x * xRatio),
+		static_cast<LONG>(this->_textCursor.getPosition().y * yRatio + this->_textCursor.getSize().y)
+	};
+
+	candidate.dwIndex = 0;
+	candidate.dwStyle = CFS_CANDIDATEPOS;
+	candidate.ptCurrentPos = result;
+	ImmSetCandidateWindow(this->immCtx, &candidate);
 }
 
 void InLobbyMenu::_updateTextCursor(int pos)
 {
-	int diff = pos - this->_textCursorPos;
-	int newX = this->_textCursor.getPosition().x + diff * CURSOR_STEP;
+	int computedSize = getTextSize(this->_buffer.substr(0, pos).c_str(), this->_chatFont, BOX_TEXTURE_SIZE).x;
+	int newX = this->_textCursor.getPosition().x + computedSize - this->_textCursorPosSize;
 
 	if (newX > CURSOR_ENDX) {
-		this->_textSprite.rect.left += newX - CURSOR_ENDX;
+		//TODO
+		this->_textSprite[0].rect.left += newX - CURSOR_ENDX;
 		this->_textCursor.setPosition({CURSOR_ENDX, CURSOR_STARTY});
 	} else if (newX < CURSOR_STARTX) {
-		this->_textSprite.rect.left += newX - CURSOR_STARTX;
+		//TODO
+		this->_textSprite[0].rect.left += newX - CURSOR_STARTX;
 		this->_textCursor.setPosition({CURSOR_STARTX, CURSOR_STARTY});
 	} else
 		this->_textCursor.setPosition({newX, CURSOR_STARTY});
-	this->_textCursorPos = pos;
+	this->_textCursorPosIndex = pos;
+	this->_textCursorPosSize = computedSize;
+
+	CANDIDATEFORM candidate;
+	RECT rect;
+
+	GetWindowRect(SokuLib::window, &rect);
+
+	int width = rect.right - rect.left;
+	int height = rect.bottom - rect.top;
+	float xRatio = width / 640.f;
+	float yRatio = height / 480.f;
+	POINT result = {
+		static_cast<LONG>(this->_textCursor.getPosition().x * xRatio),
+		static_cast<LONG>(this->_textCursor.getPosition().y * yRatio + this->_textCursor.getSize().y)
+	};
+
+	candidate.dwIndex = 0;
+	candidate.dwStyle = CFS_CANDIDATEPOS;
+	candidate.ptCurrentPos = result;
+	ImmSetCandidateWindow(this->immCtx, &candidate);
 }
 
-std::string InLobbyMenu::_sanitizeInput()
+void InLobbyMenu::_sendMessage(const std::wstring &msg)
 {
-	std::string result{this->_buffer.begin(), this->_buffer.end() - 1};
-
-	for (size_t pos = result.find('<'); pos != std::string::npos; pos = result.find('<'))
-		result[pos] = '{';
-	for (size_t pos = result.find('>'); pos != std::string::npos; pos = result.find('>'))
-		result[pos] = '}';
-	return result;
-}
-
-void InLobbyMenu::_sendMessage(const std::string &msg)
-{
-	std::string realMsg;
-	std::string currentEmote;
+	std::wstring realMsg;
+	std::wstring currentEmote;
 	bool colon = false;
 	bool skip = false;
 
@@ -930,12 +1135,12 @@ void InLobbyMenu::_sendMessage(const std::string &msg)
 			if (colon)
 				continue;
 
-			auto it = lobbyData->emotesByName.find(currentEmote);
+			auto it = lobbyData->emotesByName.find(convertEncoding<wchar_t, char, UTF16Decode, UTF8Encode>(currentEmote));
 
 			if (it == lobbyData->emotesByName.end() || lobbyData->isLocked(*it->second)) {
-				realMsg += ':';
+				realMsg += L':';
 				realMsg += currentEmote;
-				realMsg += ':';
+				realMsg += L':';
 			} else {
 				auto nb = it->second->id;
 
@@ -955,7 +1160,7 @@ void InLobbyMenu::_sendMessage(const std::string &msg)
 		realMsg += currentEmote;
 	}
 
-	size_t pos = realMsg.find("bgs");
+	size_t pos = realMsg.find(L"bgs");
 
 	if (
 		pos != std::string::npos &&
@@ -963,10 +1168,10 @@ void InLobbyMenu::_sendMessage(const std::string &msg)
 		(pos + 3 == realMsg.size() - 1 || !isalpha(realMsg[pos + 3]))
 	) {
 		realMsg.erase(realMsg.begin() + pos, realMsg.begin() + pos + 3);
-		realMsg.insert(pos, "GGs, thanks for the games. It was very nice playing with you, let's play again later");
+		realMsg.insert(pos, L"GGs, thanks for the games. It was very nice playing with you, let's play again later");
 	}
 
-	Lobbies::PacketMessage msgPacket{0, 0, realMsg};
+	Lobbies::PacketMessage msgPacket{0, 0, convertEncoding<wchar_t, char, UTF16Decode, UTF8Encode>(realMsg)};
 
 	this->_connection.send(&msgPacket, sizeof(msgPacket));
 }
@@ -1035,8 +1240,29 @@ void InLobbyMenu::renderChat()
 				break;
 			if (msg.farDown)
 				continue;
-			for (auto &text : msg.text)
+			for (auto &text : msg.text) {
+				//SokuLib::SpriteEx s;
+				//auto handle = text.sprite.texture.releaseHandle();
+
+				//text.sprite.texture.setHandle(handle, text.sprite.texture.getSize());
+				//s.setTexture(
+				//	handle,
+				//	text.sprite.rect.left,
+				//	text.sprite.rect.top,
+				//	text.sprite.rect.width,
+				//	text.sprite.rect.height,
+				//	0, 0
+				//);
+				//s.loadTransform();
+				//s.translate(text.sprite.getPosition().x, text.sprite.getPosition().y, 0);
+				//s.saveTransform();
+				//for (auto &c : s.vertices)
+				//	c.color = text.sprite.tint;
+				//reinterpret_cast<void(__fastcall*)(int, int, int)>(0x404b80)(0x896b4c, 0, 2);
+				//s.render();
+				//reinterpret_cast<void(__fastcall*)(int, int, int)>(0x404b80)(0x896b4c, 0, 1);
 				text.sprite.draw();
+			}
 			for (auto &emote : msg.emotes) {
 				auto &emoteObj = lobbyData->emotes[emote.id < lobbyData->emotes.size() ? emote.id : 0];
 				auto pos = emote.pos + emote.offset;
@@ -1057,7 +1283,29 @@ void InLobbyMenu::renderChat()
 		}
 	}
 	if (this->_editingText) {
-		this->_textSprite.draw();
+		for (auto &sprite : this->_textSprite) {
+			//SokuLib::SpriteEx s;
+			//auto handle = sprite.texture.releaseHandle();
+	
+			//sprite.texture.setHandle(handle, sprite.texture.getSize());
+			//s.setTexture(
+			//	handle,
+			//	sprite.rect.left,
+			//	sprite.rect.top,
+			//	sprite.rect.width,
+			//	sprite.rect.height,
+			//	0, 0
+			//);
+			//s.loadTransform();
+			//s.translate(sprite.getPosition().x, sprite.getPosition().y, 0);
+			//s.saveTransform();
+			//for (auto &c : s.vertices)
+			//	c.color = sprite.tint;
+			//reinterpret_cast<void(__fastcall*)(int, int, int)>(0x404b80)(0x896b4c, 0, 2);
+			//s.render();
+			//reinterpret_cast<void(__fastcall*)(int, int, int)>(0x404b80)(0x896b4c, 0, 1);
+			sprite.draw();
+		}
 		this->_textCursor.draw();
 	}
 }
@@ -1114,6 +1362,40 @@ void InLobbyMenu::_startHosting()
 			MessageBoxA(SokuLib::window, e.what(), "Hostlist error", MB_ICONERROR);
 		}
 	}};
+}
+
+void InLobbyMenu::addString(wchar_t *str, size_t size)
+{
+	this->_textMutex.lock();
+
+	std::wstring result{str, str + size};
+	auto base = UTF16Decode(result);
+
+	this->_buffer.insert(this->_buffer.begin() + this->_textCursorPosIndex, str, str + size);
+	if (this->_buffer.size() > CHAT_CHARACTER_LIMIT)
+		this->_buffer.resize(CHAT_CHARACTER_LIMIT);
+	this->_updateTextCursor(this->_textCursorPosIndex + base.size());
+	this->textChanged |= 1;
+	SokuLib::playSEWaveBuffer(0x27);
+	this->_textMutex.unlock();
+}
+
+void InLobbyMenu::_updateCompositionSprite()
+{
+	int ret;
+
+	if (this->textChanged & 1) {
+		if (!createTextTexture(ret, this->_buffer.data(), this->_chatFont, BOX_TEXTURE_SIZE, nullptr))
+			puts("Error creating text texture");
+		this->_textSprite[0].texture.setHandle(ret, BOX_TEXTURE_SIZE);
+	}
+	this->textChanged = false;
+}
+
+void InLobbyMenu::onCompositionResult()
+{
+	this->_returnPressed = false;
+	this->_timers[VK_RETURN]++;
 }
 
 InLobbyMenu::ArcadeMachine::ArcadeMachine(unsigned id, SokuLib::Vector2i pos, LobbyData::ArcadeAnimation *currentAnim, LobbyData::ArcadeSkin &skin):

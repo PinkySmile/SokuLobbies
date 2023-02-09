@@ -80,43 +80,55 @@ private:
 	SokuLib::DrawUtils::Sprite _inBattle;
 	std::list<Message> _chatMessages;
 	std::map<uint32_t, PlayerData> _extraPlayerData;
-	std::vector<char> _buffer;
+	std::wstring _buffer;
 	std::vector<ArcadeMachine> _machines;
 	std::unique_ptr<class SmallHostlist> _hostlist;
 
 	// Chat input box
+	SokuLib::SWRFont _chatFont;
 	SokuLib::DrawUtils::RectangleShape _textCursor;
-	SokuLib::DrawUtils::Sprite _textSprite;
+	SokuLib::DrawUtils::Sprite _textSprite[2];
 	std::mutex _textMutex;
 	std::thread _hostThread;
 	unsigned _timers[256];
 	unsigned _textTimer = 0;
-	char _lastPressed = 0;
-	int _textCursorPos = 0;
-	bool _textChanged = false;
+	unsigned _lastPressed = 0;
+	int _textCursorPosIndex = 0;
+	int _textCursorPosSize = 0;
 	bool _editingText = false;
 	bool _returnPressed = false;
+	bool _isKorean = false;
 
 	void _updateMessageSprite(SokuLib::Vector2i pos, unsigned int remaining, SokuLib::Vector2i realSize, SokuLib::DrawUtils::Sprite &sprite, unsigned char alpha);
 	void _addMessageToList(unsigned channel, unsigned player, const std::string &msg);
 	void _inputBoxUpdate();
 	void _initInputBox();
 	void _updateTextCursor(int pos);
-	void _sendMessage(const std::string &msg);
-	std::string _sanitizeInput();
+	void _sendMessage(const std::wstring &msg);
 	void _unhook();
 	void _renderMachineOverlay();
 	void _startHosting();
+	void _updateCompositionSprite();
 
 public:
+	char textChanged = 0;
+	HIMC immCtx = nullptr;
+	std::wstring immComposition;
+	bool hasDeadkey = false;
+	int compositionCursor = 0;
+	int keyBufferUsed = 0;
+	wchar_t keyBuffer[2] = {0, 0};
+
 	InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connection &connection);
 	~InLobbyMenu();
 	void _() override;
 	int onProcess() override;
 	int onRender() override;
 
-	void onKeyPressed(int chr);
+	void onKeyPressed(unsigned chr);
 	void onKeyReleased();
+	void addString(wchar_t *str, size_t size);
+	void onCompositionResult();
 
 	void updateChat();
 	void renderChat();

@@ -7,6 +7,9 @@
 
 #include <SokuLib.hpp>
 
-bool createTextTexture(unsigned int &retId, const wchar_t* text, SokuLib::SWRFont& font, SokuLib::Vector2i texsize, SokuLib::Vector2i *size);
+bool createTextTexture(int &retId, const wchar_t* text, SokuLib::SWRFont& font, SokuLib::Vector2i texsize, SokuLib::Vector2i *size);
+SokuLib::Vector2i getTextSize(const wchar_t *text, SokuLib::SWRFont &font, SokuLib::Vector2i texsize);
+
+extern bool textureUnderline;
 
 #endif //SOKULOBBIES_CREATEUTFTEXTURE_HPP
