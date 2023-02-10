@@ -257,14 +257,6 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 			return this->_processCommands(&connection, msg);
 
 		auto realMessage = "[" + connection.getName() + "]: " + msg;
-
-		for (char &i : realMessage) {
-			if (i == '<')
-				i = '{';
-			if (i == '>')
-				i = '}';
-		}
-
 		Lobbies::PacketMessage msgPacket{channel, id, realMessage};
 
 		for (auto &word : this->_bannedWords) {
