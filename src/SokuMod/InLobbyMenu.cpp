@@ -18,7 +18,6 @@
 #define CURSOR_ENDX 637
 #define CURSOR_STARTX 293
 #define CURSOR_STARTY 184
-#define CURSOR_STEP 7
 #define MAX_LINE_SIZE 342
 #define SCROLL_AMOUNT 20
 #define CHAT_FONT_HEIGHT 14
@@ -273,6 +272,8 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 
 	int id = 0;
 
+	for (int i = ' '; i < 0x100; i++)
+		this->_getTextSize(i);
 	for (int j = 1; j < bg.platformCount + 1; j++)
 		for (int i = 200; i < bg.fg.getSize().x; i += 200)
 			this->_machines.emplace_back(
@@ -755,6 +756,7 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 	auto *m = &this->_chatMessages.front();
 	std::string line;
 	std::string word;
+	std::string token;
 	unsigned startPos = 0;
 	unsigned pos = 0;
 	unsigned wordPos = 0;
@@ -812,15 +814,15 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 					g.pos.y = (g.realSize.y - EMOTE_SIZE) / 2;
 			}
 		} else if (skip) {
-			if ((c & 0b11000000) != 0x80) {
-				skip = 0;
-				wordPos += CURSOR_STEP;
-			} else
+			if ((c & 0b11000000) == 0x80) {
 				skip--;
+				token += c;
+			} else
+				skip = 0;
 			word += c;
 			if (skip != 0)
 				continue;
-			wordPos += CURSOR_STEP;
+			wordPos += this->_getTextSize(UTF8Decode(token)[0]);
 		} else if (c == 1) {
 			line += word;
 			pos += wordPos;
@@ -842,6 +844,8 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 			skip = c >= 0xC0;
 			skip += c >= 0xE0;
 			skip += c >= 0xF0;
+			token.clear();
+			token += c;
 			word += c;
 			continue;
 		} else if (isspace(c)) {
@@ -855,16 +859,16 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 				wordPos = 0;
 			}
 			line += ' ';
-			pos += CURSOR_STEP;
+			pos += this->_getTextSize(' ');
 		} else {
 			word += c;
-			wordPos += CURSOR_STEP;
+			wordPos += this->_getTextSize(c);
 		}
 		if (pos + wordPos > MAX_LINE_SIZE) {
 			if (pos == 0) {
 				line = word.substr(0, word.size() - 1);
 				word.erase(word.begin(), word.end() - 1);
-				wordPos = CURSOR_STEP;
+				wordPos = this->_getTextSize(UTF8Decode(word)[0]);
 			}
 			nextLine();
 			startPos = 0;
@@ -1121,15 +1125,15 @@ void InLobbyMenu::_updateTextCursor(int pos)
 
 void InLobbyMenu::_sendMessage(const std::wstring &msg)
 {
-	std::wstring realMsg;
+	std::string encoded;
+	std::wstring token;
 	std::wstring currentEmote;
 	bool colon = false;
 	bool skip = false;
 
-	realMsg.reserve(msg.size());
+	encoded.reserve(msg.size());
+	token.reserve(msg.size());
 	for (auto c : msg) {
-		unsigned char arraySection = c >> 4U;
-
 		if (!skip && c == ':') {
 			colon = !colon;
 			if (colon)
@@ -1138,40 +1142,42 @@ void InLobbyMenu::_sendMessage(const std::wstring &msg)
 			auto it = lobbyData->emotesByName.find(convertEncoding<wchar_t, char, UTF16Decode, UTF8Encode>(currentEmote));
 
 			if (it == lobbyData->emotesByName.end() || lobbyData->isLocked(*it->second)) {
-				realMsg += L':';
-				realMsg += currentEmote;
-				realMsg += L':';
+				token += L':';
+				token += currentEmote;
+				token += L':';
 			} else {
 				auto nb = it->second->id;
 
-				realMsg += '\x01';
+				encoded += convertEncoding<wchar_t, char, UTF16Decode, UTF8Encode>(token);
+				encoded += '\x01';
 				for (int i = 0; i < 2; i++) {
-					realMsg += static_cast<char>(nb & 0x7F | 0x80);
+					encoded += static_cast<char>(nb & 0x7F | 0x80);
 					nb >>= 7;
 				}
+				token.clear();
 			}
 			currentEmote.clear();
 		} else
-			(colon ? currentEmote : realMsg) += c;
-		skip = !skip && (arraySection == 0x8 || arraySection == 0x9 || arraySection == 0xE);
+			(colon ? currentEmote : token) += c;
 	}
+	encoded += convertEncoding<wchar_t, char, UTF16Decode, UTF8Encode>(token);
 	if (colon) {
-		realMsg += ':';
-		realMsg += currentEmote;
+		encoded += ':';
+		encoded += convertEncoding<wchar_t, char, UTF16Decode, UTF8Encode>(currentEmote);
 	}
 
-	size_t pos = realMsg.find(L"bgs");
+	size_t pos = encoded.find("bgs");
 
 	if (
 		pos != std::string::npos &&
-		(pos == 0 || !isalpha(realMsg[pos-1])) &&
-		(pos + 3 == realMsg.size() - 1 || !isalpha(realMsg[pos + 3]))
+		(pos == 0 || !isalpha(encoded[pos-1])) &&
+		(pos + 3 == encoded.size() - 1 || !isalpha(encoded[pos + 3]))
 	) {
-		realMsg.erase(realMsg.begin() + pos, realMsg.begin() + pos + 3);
-		realMsg.insert(pos, L"GGs, thanks for the games. It was very nice playing with you, let's play again later");
+		encoded.erase(encoded.begin() + pos, encoded.begin() + pos + 3);
+		encoded.insert(pos, "GGs, thanks for the games. It was very nice playing with you, let's play again later");
 	}
 
-	Lobbies::PacketMessage msgPacket{0, 0, convertEncoding<wchar_t, char, UTF16Decode, UTF8Encode>(realMsg)};
+	Lobbies::PacketMessage msgPacket{0, 0, encoded};
 
 	this->_connection.send(&msgPacket, sizeof(msgPacket));
 }
@@ -1396,6 +1402,19 @@ void InLobbyMenu::onCompositionResult()
 {
 	this->_returnPressed = false;
 	this->_timers[VK_RETURN]++;
+}
+
+int InLobbyMenu::_getTextSize(unsigned int i)
+{
+	auto it = this->_textSize.find(i);
+
+	if (it != this->_textSize.end())
+		return it->second;
+
+	int size = getTextSize(UTF16Encode(std::basic_string<unsigned>(&i, &i + 1)).c_str(), this->_chatFont, {32, 20}).x;
+
+	this->_textSize[i] = size;
+	return size;
 }
 
 InLobbyMenu::ArcadeMachine::ArcadeMachine(unsigned id, SokuLib::Vector2i pos, LobbyData::ArcadeAnimation *currentAnim, LobbyData::ArcadeSkin &skin):

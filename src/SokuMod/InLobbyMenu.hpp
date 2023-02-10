@@ -97,7 +97,7 @@ private:
 	int _textCursorPosSize = 0;
 	bool _editingText = false;
 	bool _returnPressed = false;
-	bool _isKorean = false;
+	std::map<unsigned, int> _textSize;
 
 	void _updateMessageSprite(SokuLib::Vector2i pos, unsigned int remaining, SokuLib::Vector2i realSize, SokuLib::DrawUtils::Sprite &sprite, unsigned char alpha);
 	void _addMessageToList(unsigned channel, unsigned player, const std::string &msg);
@@ -109,6 +109,7 @@ private:
 	void _renderMachineOverlay();
 	void _startHosting();
 	void _updateCompositionSprite();
+	int _getTextSize(unsigned i);
 
 public:
 	char textChanged = 0;

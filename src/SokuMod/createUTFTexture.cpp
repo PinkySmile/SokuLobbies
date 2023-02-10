@@ -175,8 +175,10 @@ SokuLib::Vector2i getTextSize(const wchar_t *text, SokuLib::SWRFont &font, SokuL
 		return {0, 0};
 	}
 
+	DeleteObject(font.font);
 	DeleteObject(font.gdiobj);
 	surface->ReleaseDC(context);
+	surface->Release();
 	font.gdiobj = nullptr;
 	font.font = nullptr;
 	font.hdc = nullptr;
