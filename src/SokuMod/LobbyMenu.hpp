@@ -48,8 +48,9 @@ private:
 	std::thread _netThread;
 	std::thread _connectThread;
 	std::thread _masterThread;
-	SokuLib::DrawUtils::Sprite title;
-	SokuLib::DrawUtils::Sprite ui;
+	SokuLib::DrawUtils::Sprite _title;
+	SokuLib::DrawUtils::Sprite _ui;
+	SokuLib::DrawUtils::Sprite _hidden;
 	SokuLib::DrawUtils::Sprite _customizeTexts[3];
 	SokuLib::DrawUtils::Sprite _customizeSeat;
 	SokuLib::DrawUtils::Sprite _playerName;

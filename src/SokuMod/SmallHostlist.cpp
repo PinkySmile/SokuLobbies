@@ -27,7 +27,7 @@ SmallHostlist::SmallHostlist(float ratio, SokuLib::Vector2i pos, SokuLib::MenuCo
 			sprite.setSize(sprite.texture.getSize());
 		} else {
 			if (i == this->_sprites.size() - 1)
-				sprite.texture.loadFromFile((std::filesystem::path(profileFolderPath) / "assets/arcades/title.png").string().c_str());
+				sprite.texture.loadFromFile((std::filesystem::path(profileFolderPath) / "assets/arcades/_title.png").string().c_str());
 			else if (i == this->_sprites.size() - 3)
 				sprite.texture.loadFromFile((std::filesystem::path(profileFolderPath) / "assets/arcades/hostlistBg.png").string().c_str());
 			else

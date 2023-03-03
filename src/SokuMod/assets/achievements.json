@@ -2340,5 +2340,23 @@
         "name": "Mishaguji-sama Destiny",
         "description": "Play 1000 games as Suwako",
         "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "crash"
+        },
+        "rewards": [
+            {
+                "type": "avatar",
+                "id": 23
+            },
+            {
+                "type": "title",
+                "name": "Spaghetti Master"
+            }
+        ],
+        "name": "Modding at it's finest",
+        "description": "Have the game crash once",
+        "hidden": true
     }
 ]

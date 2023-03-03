@@ -182,5 +182,14 @@
         "scale": 2,
         "anim_step": 8,
         "name": "Suwako Moriya"
+    },
+    {
+        "spritesheet": "assets/avatars/7 Koishi.png",
+        "accessories": 8,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Koishi Komeiji",
+        "hidden": true
     }
 ]

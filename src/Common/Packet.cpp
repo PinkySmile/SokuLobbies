@@ -20,7 +20,7 @@ namespace Lobbies
 	{
 		return "Packet HELLO: Player '" + std::string(this->name, strnlen(this->name, sizeof(this->name))) + "' "
 		       "modVersion: " + std::to_string(this->modVersion) + " "
-		       "title: " + std::to_string(this->custom.title) + " "
+		       "_title: " + std::to_string(this->custom.title) + " "
 		       "avatar: " + std::to_string(this->custom.avatar) + " "
 		       "head: " + std::to_string(this->custom.head) + " "
 		       "body: " + std::to_string(this->custom.body) + " "
@@ -54,7 +54,7 @@ namespace Lobbies
 	std::string PacketPlayerJoin::toString() const
 	{
 		return "Packet PLAYER_JOINED: Player '" + std::string(this->name, strnlen(this->name, sizeof(this->name))) + "' (id " + std::to_string(this->id) + ")"
-		       "title: " + std::to_string(this->custom.title) + " "
+		       "_title: " + std::to_string(this->custom.title) + " "
 		       "avatar: " + std::to_string(this->custom.avatar) + " "
 		       "head: " + std::to_string(this->custom.head) + " "
 		       "body: " + std::to_string(this->custom.body) + " "
@@ -169,7 +169,7 @@ namespace Lobbies
 	std::string PacketSettingsUpdate::toString() const
 	{
 		return "Packet SETTINGS_UPDATE: Player " + std::to_string(this->id) + " "
-		       "title: " + std::to_string(this->custom.title) + " "
+		       "_title: " + std::to_string(this->custom.title) + " "
 		       "avatar: " + std::to_string(this->custom.avatar) + " "
 		       "head: " + std::to_string(this->custom.head) + " "
 		       "body: " + std::to_string(this->custom.body) + " "

@@ -41,7 +41,9 @@ private:
 	void _saveMatchupStats(std::ostream &stream);
 
 	void _loadFont(SokuLib::SWRFont &font, unsigned size);
+
 	void _grantStatsAchievements();
+	void _grantCrashAchievements();
 
 	static size_t LobbyData::writeMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp);
 
@@ -100,6 +102,7 @@ public:
 		unsigned animationsStep = 0;
 		unsigned nbAnimations = 0;
 		unsigned animationStyle = 0;
+		bool hidden = false;
 		Achievement *requirement = nullptr;
 
 		Avatar() = default;

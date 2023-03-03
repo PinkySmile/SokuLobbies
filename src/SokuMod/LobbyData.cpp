@@ -90,6 +90,8 @@ void LobbyData::_loadAvatars()
 		avatar.accessoriesPlacement = val["accessories"];
 		if (val.contains("animation_style"))
 			avatar.animationStyle = val["animation_style"];
+		if (val.contains("hidden"))
+			avatar.hidden = val["hidden"];
 		avatar.sprite.texture.loadFromFile((std::filesystem::path(profileFolderPath) / val["spritesheet"].get<std::string>()).string().c_str());
 		avatar.sprite.rect.width = avatar.sprite.texture.getSize().x / avatar.nbAnimations;
 		avatar.sprite.rect.height = avatar.sprite.texture.getSize().y / 2;
@@ -186,7 +188,7 @@ void LobbyData::_loadAchievements()
 			auto reward = achievement.rewards[0];
 			auto type = reward["type"];
 
-			if (type != "title") {
+			if (type != "_title") {
 				if (type == "avatar")
 					this->avatars[reward["id"]].requirement = &achievement;
 				else if (type == "emote")
@@ -429,6 +431,8 @@ LobbyData::LobbyData()
 	this->_loadAchievements();
 	this->_loadFlags();
 	this->_grantStatsAchievements();
+	if (GetFileAttributesW(L".crash") != INVALID_FILE_ATTRIBUTES)
+		this->_grantCrashAchievements();
 
 	this->achHolder.getText.texture.createFromText("Achievement Unlocked!", this->getFont(16), {400, 20});
 	this->achHolder.getText.setSize(this->achHolder.getText.texture.getSize());
@@ -699,7 +703,7 @@ void LobbyData::update()
 	auto reward = achievement->rewards[0];
 	auto type = reward["type"];
 
-	if (achievement->rewards.empty() || achievement->rewards[0]["type"] == "title") {
+	if (achievement->rewards.empty() || achievement->rewards[0]["type"] == "_title") {
 		this->achHolder.getText.setPosition(this->achHolder.holder.getPosition() + SokuLib::Vector2i{5, 5});
 		this->achHolder.holder.setPosition(this->achHolder.behindGear.getPosition() + SokuLib::Vector2i{
 			this->achHolder.behindGear.rect.width / 2,
@@ -754,12 +758,12 @@ void LobbyData::render()
 	SokuLib::SpriteEx sprite;
 	auto &achievement = this->achievementAwardQueue.front();
 	auto reward = achievement->rewards.empty() ? nlohmann::json{} : achievement->rewards[0];
-	auto type = achievement->rewards.empty() ? "title" : reward["type"];
+	auto type = achievement->rewards.empty() ? "_title" : reward["type"];
 	unsigned offset = 20;
 
 	sprite.render();
 	this->achHolder.holder.draw();
-	if (type != "title") {
+	if (type != "_title") {
 		this->achHolder.behindGear.setPosition(this->achHolder.behindGear.getPosition() + SokuLib::Vector2i{2, 2});
 		this->achHolder.behindGear.tint = SokuLib::Color::Black;
 		this->achHolder.behindGear.draw();
@@ -861,6 +865,16 @@ void LobbyData::_grantStatsAchievements()
 			});
 		}
 	}
+}
+
+void LobbyData::_grantCrashAchievements()
+{
+	for (auto &achievement : this->achievementByRequ["crash"])
+		if (!achievement->awarded) {
+			achievement->awarded = true;
+			this->achievementAwardQueue.push_back(achievement);
+		}
+	DeleteFileW(L".crash");
 }
 
 std::string LobbyData::httpRequest(const std::string &url, const std::string &method, const std::string &data)

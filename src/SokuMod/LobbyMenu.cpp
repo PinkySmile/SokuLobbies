@@ -58,16 +58,21 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 	std::filesystem::path folder = profileFolderPath;
 
 	inputBoxLoadAssets();
-	this->title.texture.loadFromFile((folder / "assets/menu/title.png").string().c_str());
-	this->title.setSize(this->title.texture.getSize());
-	this->title.setPosition({23, 6});
-	this->title.rect.width = this->title.getSize().x;
-	this->title.rect.height = this->title.getSize().y;
+	this->_title.texture.loadFromFile((folder / "assets/menu/_title.png").string().c_str());
+	this->_title.setSize(this->_title.texture.getSize());
+	this->_title.setPosition({23, 6});
+	this->_title.rect.width = this->_title.getSize().x;
+	this->_title.rect.height = this->_title.getSize().y;
 
-	this->ui.texture.loadFromFile((folder / "assets/menu/lobbylist.png").string().c_str());
-	this->ui.setSize(this->ui.texture.getSize());
-	this->ui.rect.width = this->ui.getSize().x;
-	this->ui.rect.height = this->ui.getSize().y;
+	this->_ui.texture.loadFromFile((folder / "assets/menu/lobbylist.png").string().c_str());
+	this->_ui.setSize(this->_ui.texture.getSize());
+	this->_ui.rect.width = this->_ui.getSize().x;
+	this->_ui.rect.height = this->_ui.getSize().y;
+
+	this->_hidden.texture.loadFromFile((folder / "assets/avatars/hidden.png").string().c_str());
+	this->_hidden.setSize(this->_hidden.texture.getSize());
+	this->_hidden.rect.width = this->_hidden.getSize().x;
+	this->_hidden.rect.height = this->_hidden.getSize().y;
 
 	this->_customizeSeat.texture.loadFromFile((folder / "assets/menu/customSeat.png").string().c_str());
 	this->_customizeSeat.setSize(this->_customizeSeat.texture.getSize());
@@ -292,8 +297,9 @@ bool LobbyMenu::_normalMenuUpdate()
 			break;
 		case MENUITEM_CUSTOMIZE_AVATAR:
 			this->_customCursor = 0;
+			this->_avatarTop = 0;
 			this->_refreshAvatarCustomText();
-			this->_showcases.resize(0);
+			this->_showcases.clear();
 			this->_showcases.resize(lobbyData->avatars.size());
 			this->_customizeTexts[0].tint = SokuLib::Color::White;
 			this->_customizeTexts[1].tint = SokuLib::Color{0x80, 0x80, 0x80, 0xFF};
@@ -442,7 +448,7 @@ bool LobbyMenu::_customizeAvatarUpdate()
 
 int LobbyMenu::onRender()
 {
-	this->title.draw();
+	this->_title.draw();
 	if (this->_mainServer.isDisconnected()) {
 		this->_messageBox.draw();
 		this->_loadingText.draw();
@@ -460,7 +466,7 @@ int LobbyMenu::onRender()
 		displaySokuCursor({50, 366}, {180, 16});
 	else
 		displaySokuCursor({50, static_cast<int>(126 + this->_menuCursor * 24)}, {180, 16});
-	this->ui.draw();
+	this->_ui.draw();
 	this->_connectionsMutex.lock();
 	if (this->_menuState == 1)
 		displaySokuCursor({312, static_cast<int>(120 + this->_lobbyCtr * 16)}, {220, 16});
@@ -520,9 +526,13 @@ void LobbyMenu::_customizeAvatarRender()
 		avatar.sprite.rect.left = avatar.sprite.rect.width * showcase.anim;
 		avatar.sprite.rect.top = (avatar.sprite.texture.getSize().y / 2) * (showcase.action / 4);
 
+		auto locked = lobbyData->isLocked(avatar);
 		auto realPos = pos;
+		auto otherSprite = locked && avatar.hidden;
+		auto &sprite = otherSprite ? this->_hidden : avatar.sprite;
 
-		if (pos.y + avatar.sprite.getSize().y <= 130);
+		if (otherSprite);
+		else if (pos.y + avatar.sprite.getSize().y <= 130);
 		else if (pos.y < 130) {
 			avatar.sprite.rect.top += 130 - pos.y;
 			avatar.sprite.rect.height -= (130 - pos.y) * 2 / avatar.scale;
@@ -532,24 +542,24 @@ void LobbyMenu::_customizeAvatarRender()
 				static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale / 2)
 			});
 		}
-		avatar.sprite.setPosition(pos);
+		sprite.setPosition(pos);
 #ifdef _DEBUG
-		rect.setSize(avatar.sprite.getSize());
+		rect.setSize(sprite.getSize());
 		rect.setPosition(pos);
-		if (avatar.sprite.getPosition().y >= 130)
+		if (sprite.getPosition().y >= 130)
 			rect.draw();
 #endif
-
-		auto locked = lobbyData->isLocked(avatar);
 
 		if (this->_customCursor == i)
 			displaySokuCursor(pos + SokuLib::Vector2i{8, 0}, avatar.sprite.getSize());
 		pos = realPos;
 		size = max(size, avatar.sprite.texture.getSize().y / 2);
-		avatar.sprite.setMirroring(showcase.side, false);
-		avatar.sprite.tint = lobbyData->isLocked(avatar) ? SokuLib::Color{0x40, 0x40, 0x40, 0xFF} : SokuLib::Color::White;
-		if (avatar.sprite.getPosition().y >= 130) {
-			avatar.sprite.draw();
+		if (!otherSprite) {
+			avatar.sprite.setMirroring(showcase.side, false);
+			avatar.sprite.tint = locked ? SokuLib::Color{0x60, 0x60, 0x60, 0xFF} : SokuLib::Color::White;
+		}
+		if (sprite.getPosition().y >= 130) {
+			sprite.draw();
 			if (locked && bottom <= maxBottom) {
 				this->_lock.setPosition(
 					pos + SokuLib::Vector2i{
@@ -771,7 +781,10 @@ void LobbyMenu::_refreshAvatarCustomText()
 {
 	auto &avatar = lobbyData->avatars[this->_customCursor];
 
-	this->_customAvatarName.texture.createFromText(avatar.name.c_str(), lobbyData->getFont(16), {600, 74});
+	if (lobbyData->isLocked(avatar) && avatar.hidden)
+		this->_customAvatarName.texture.createFromText("????????", lobbyData->getFont(16), {600, 74});
+	else
+		this->_customAvatarName.texture.createFromText(avatar.name.c_str(), lobbyData->getFont(16), {600, 74});
 	this->_customAvatarName.setSize(this->_customAvatarName.texture.getSize());
 	this->_customAvatarName.rect.width = this->_loadingText.texture.getSize().x;
 	this->_customAvatarName.rect.height = this->_loadingText.texture.getSize().y;
@@ -803,30 +816,37 @@ void LobbyMenu::_refreshAvatarCustomText()
 void LobbyMenu::_renderAvatarCustomText()
 {
 	auto &avatar = lobbyData->avatars[this->_customCursor];
+	auto locked = lobbyData->isLocked(avatar);
+	auto otherSprite = locked && avatar.hidden;
+	auto &sprite = otherSprite ? this->_hidden : avatar.sprite;
 
-	avatar.sprite.setSize({
-		static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale / 2),
-		static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale / 2)
-	});
-	avatar.sprite.setPosition({352, static_cast<int>(360 - avatar.sprite.getSize().y)});
+	if (!otherSprite)
+		avatar.sprite.setSize({
+			static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale / 2),
+			static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale / 2)
+		});
+	sprite.setPosition({352, static_cast<int>(360 - sprite.getSize().y)});
 #ifdef _DEBUG
 	SokuLib::DrawUtils::RectangleShape rect;
 
 	rect.setBorderColor(SokuLib::Color::White);
 	rect.setFillColor(SokuLib::Color{0xFF, 0xFF, 0xFF, 0xA0});
-	rect.setSize(avatar.sprite.getSize());
-	rect.setPosition({352, static_cast<int>(360 - avatar.sprite.getSize().y)});
+	rect.setSize(sprite.getSize());
+	rect.setPosition(sprite.getPosition());
 	rect.draw();
 #endif
-	avatar.sprite.setMirroring(true, false);
-	avatar.sprite.rect.left = 0;
-	avatar.sprite.rect.top = 0;
-	avatar.sprite.tint = lobbyData->isLocked(avatar) ? SokuLib::Color{0x40, 0x40, 0x40, 0xFF} : SokuLib::Color::White;
-	avatar.sprite.draw();
-	avatar.sprite.setSize({
-		static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale),
-		static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale)
-	});
+	if (!otherSprite) {
+		avatar.sprite.setMirroring(true, false);
+		avatar.sprite.rect.left = 0;
+		avatar.sprite.rect.top = 0;
+		avatar.sprite.tint = lobbyData->isLocked(avatar) ? SokuLib::Color{0x60, 0x60, 0x60, 0xFF} : SokuLib::Color::White;
+		avatar.sprite.draw();
+		avatar.sprite.setSize({
+			static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale),
+			static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale)
+		});
+	} else
+		sprite.draw();
 	this->_customAvatarName.draw();
 	this->_customAvatarRequ.draw();
 }

@@ -18,6 +18,7 @@ static EndSceneFn Original_EndScene;
 static bool wasBlocking = false;
 static void (*og_onUpdate)();
 static int (SokuLib::Logo::*og_LogoOnProcess)();
+static int (SokuLib::Title::*og_TitleOnProcess)();
 static int (SokuLib::Battle::*og_BattleOnProcess)();
 static int (SokuLib::MenuConnect::*og_ConnectOnProcess)();
 static int (SokuLib::MenuConnect::*og_ConnectOnRender)();
@@ -48,6 +49,7 @@ bool activated = true;
 auto load = std::pair(false, false);
 std::function<int ()> onGameEnd;
 LobbyMenu *menu = nullptr;
+PTOP_LEVEL_EXCEPTION_FILTER oldFilter = nullptr;
 
 std::map<unsigned int, Character> characters{
 	{ SokuLib::CHARACTER_REIMU,     {"Reimu",     "Reimu Hakurei",          "reimu"}},
@@ -73,6 +75,26 @@ std::map<unsigned int, Character> characters{
 	{ SokuLib::CHARACTER_NAMAZU,    {"Namazu",    "Giant Catfish",          "namazu"}},
 	{ SokuLib::CHARACTER_RANDOM,    {"Random",    "Random Select",          "random_select"}},
 };
+
+LONG WINAPI UnhandledExFilter(PEXCEPTION_POINTERS ExPtr)
+{
+	puts("Crash !");
+
+	auto name = L".crash";
+	std::ofstream file{name};
+
+	if (!file)
+		printf("%S: %s\n", name, strerror(errno));
+	file.close();
+
+	auto attr = GetFileAttributesW(name);
+
+	if (attr == INVALID_FILE_ATTRIBUTES)
+		puts("Fuck");
+	else if ((attr & FILE_ATTRIBUTE_HIDDEN) == 0)
+		SetFileAttributesW(name, attr | FILE_ATTRIBUTE_HIDDEN);
+	return oldFilter ? oldFilter(ExPtr) : 0;
+}
 
 void countGame()
 {
@@ -206,6 +228,19 @@ int __fastcall LogoOnProcess(SokuLib::Logo *This)
 	if (load.first)
 		return SokuLib::SCENE_LOGO;
 	return res;
+}
+
+int __fastcall TitleOnProcess(SokuLib::Title *This)
+{
+	static bool placed = false;
+	auto ret = (This->*og_TitleOnProcess)();
+
+	if (!placed) {
+		placed = true;
+		puts("Placed handler");
+		oldFilter = SetUnhandledExceptionFilter(UnhandledExFilter);
+	}
+	return ret;
 }
 
 void processCommon(bool showChat)
@@ -527,6 +562,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	// DWORD old;
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
 	og_LogoOnProcess         = SokuLib::TamperDword(&SokuLib::VTable_Logo.onProcess,         LogoOnProcess);
+	og_TitleOnProcess        = SokuLib::TamperDword(&SokuLib::VTable_Title.onProcess,        TitleOnProcess);
 	og_BattleOnProcess       = SokuLib::TamperDword(&SokuLib::VTable_Battle.onProcess,       BattleOnProcess);
 	og_ConnectOnProcess      = SokuLib::TamperDword(&SokuLib::VTable_ConnectMenu.onProcess,  ConnectOnProcess);
 	og_ConnectOnRender       = SokuLib::TamperDword(&SokuLib::VTable_ConnectMenu.onRender,   ConnectOnRender);
