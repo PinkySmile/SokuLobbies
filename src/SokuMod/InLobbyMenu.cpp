@@ -1401,7 +1401,7 @@ void InLobbyMenu::_updateCompositionSprite()
 void InLobbyMenu::onCompositionResult()
 {
 	this->_returnPressed = false;
-	this->_timers[VK_RETURN]++;
+	this->_timers[VK_RETURN] += 2;
 }
 
 int InLobbyMenu::_getTextSize(unsigned int i)
