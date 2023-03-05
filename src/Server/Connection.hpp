@@ -24,6 +24,7 @@ public:
 	};
 
 private:
+	const char *_password;
 	bool _connected = true;
 	bool _init = false;
 	uint32_t _id = 0;
@@ -72,7 +73,7 @@ public:
 	std::function<void ()> onGameRequest;
 	std::function<void ()> onArcadeLeave;
 
-	Connection(std::unique_ptr<sf::TcpSocket> &socket);
+	Connection(std::unique_ptr<sf::TcpSocket> &socket, const char *password);
 	~Connection();
 	sf::IpAddress getIp() const;
 	void kick(const std::string &msg);

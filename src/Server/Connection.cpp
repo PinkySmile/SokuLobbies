@@ -74,7 +74,8 @@ void Connection::_netLoop()
 	} while (true);
 }
 
-Connection::Connection(std::unique_ptr<sf::TcpSocket> &socket) :
+Connection::Connection(std::unique_ptr<sf::TcpSocket> &socket, const char *password) :
+	_password(password),
 	_socket(std::move(socket))
 {
 }
@@ -261,6 +262,8 @@ void Connection::_handlePacket(const Lobbies::PacketHello &packet, size_t &size)
 		return this->kick("Outdated server!");
 	if (packet.modVersion < MOD_VERSION)
 		return this->kick("You are running an old version of SokuLobbies! Please update your mod and try again.");
+	if (this->_password && strncmp(this->_password, packet.password, sizeof(packet.password)) != 0)
+		return this->kick("Incorrect password");
 	memcpy(this->_uniqueId, packet.uniqueId, sizeof(packet.uniqueId));
 
 	char buffer[sizeof(packet.name) + 1];
@@ -367,7 +370,7 @@ void Connection::_handlePacket(const Lobbies::PacketPing &packet, size_t &size)
 	size -= sizeof(packet);
 
 	auto lobby = this->onPing();
-	Lobbies::PacketPong pong{lobby.name, lobby.maxPlayers, lobby.currentPlayers};
+	Lobbies::PacketPong pong{lobby.name, lobby.maxPlayers, lobby.currentPlayers, this->_password};
 
 	this->send(&pong, sizeof(pong));
 	this->_timeoutClock.restart();

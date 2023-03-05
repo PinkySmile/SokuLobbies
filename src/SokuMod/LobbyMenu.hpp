@@ -20,10 +20,11 @@ private:
 		std::string ip;
 		unsigned short port;
 		std::string lastName;
-		bool first = true;
 		std::pair<unsigned, unsigned> lastPlayerCount = {0, 0};
 		SokuLib::DrawUtils::Sprite name;
 		SokuLib::DrawUtils::Sprite playerCount;
+		bool first = true;
+		bool passwd = false;
 	};
 	struct AvatarShowcase {
 		unsigned char action = 0;
@@ -48,8 +49,8 @@ private:
 	std::thread _netThread;
 	std::thread _connectThread;
 	std::thread _masterThread;
-	SokuLib::DrawUtils::Sprite _title;
 	SokuLib::DrawUtils::Sprite _ui;
+	SokuLib::DrawUtils::Sprite _title;
 	SokuLib::DrawUtils::Sprite _hidden;
 	SokuLib::DrawUtils::Sprite _customizeTexts[3];
 	SokuLib::DrawUtils::Sprite _customizeSeat;
@@ -59,8 +60,11 @@ private:
 	SokuLib::DrawUtils::Sprite _loadingText;
 	SokuLib::DrawUtils::Sprite _messageBox;
 	SokuLib::DrawUtils::Sprite _loadingGear;
+	SokuLib::DrawUtils::Sprite _unlock;
 	SokuLib::DrawUtils::Sprite _lock;
 	std::vector<AvatarShowcase> _showcases;
+	std::mutex _queueMutex;
+	std::vector<std::function<void ()>> _workerQueue;
 
 	void _netLoop();
 	void _masterServerLoop();

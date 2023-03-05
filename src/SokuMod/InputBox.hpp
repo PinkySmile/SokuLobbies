@@ -11,7 +11,7 @@ void inputBoxRender();
 void inputBoxUpdate();
 void inputBoxLoadAssets();
 void inputBoxUnloadAssets();
-void openInputDialog(const char *title, const char *defaultValue);
+void openInputDialog(const char *title, const char *defaultValue, char shownChar = 0);
 void setInputBoxCallbacks(const std::function<void (const std::string &value)> &onAccept);
 
 extern bool inputBoxShown;

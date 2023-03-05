@@ -18,6 +18,12 @@
 #include "AchievementsMenu.hpp"
 
 #define CRenderer_Unknown1 ((void (__thiscall *)(int, int))0x404AF0)
+#define runOnUI(fct) do {                     \
+        this->_queueMutex.lock();             \
+        this->_workerQueue.emplace_back(fct); \
+        this->_queueMutex.unlock();           \
+} while (false)
+
 
 extern bool activated;
 
@@ -58,7 +64,7 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 	std::filesystem::path folder = profileFolderPath;
 
 	inputBoxLoadAssets();
-	this->_title.texture.loadFromFile((folder / "assets/menu/_title.png").string().c_str());
+	this->_title.texture.loadFromFile((folder / "assets/menu/title.png").string().c_str());
 	this->_title.setSize(this->_title.texture.getSize());
 	this->_title.setPosition({23, 6});
 	this->_title.rect.width = this->_title.getSize().x;
@@ -110,65 +116,49 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 	this->_playerName.rect.height = size.y;
 
 	this->_customizeTexts[0].texture.createFromText("Avatar", lobbyData->getFont(20), {600, 74});
-	this->_customizeTexts[0].setSize({
-		this->_customizeTexts[0].texture.getSize().x,
-		this->_customizeTexts[0].texture.getSize().y
-	});
+	this->_customizeTexts[0].setSize(this->_customizeTexts[0].texture.getSize());
 	this->_customizeTexts[0].rect.width = this->_customizeTexts[0].texture.getSize().x;
 	this->_customizeTexts[0].rect.height = this->_customizeTexts[0].texture.getSize().y;
 	this->_customizeTexts[0].setPosition({120, 98});
 
 	this->_customizeTexts[1].texture.createFromText("Accessory", lobbyData->getFont(20), {600, 74});
-	this->_customizeTexts[1].setSize({
-		this->_customizeTexts[1].texture.getSize().x,
-		this->_customizeTexts[1].texture.getSize().y
-	});
+	this->_customizeTexts[1].setSize(this->_customizeTexts[1].texture.getSize());
 	this->_customizeTexts[1].rect.width = this->_customizeTexts[1].texture.getSize().x;
 	this->_customizeTexts[1].rect.height = this->_customizeTexts[1].texture.getSize().y;
 	this->_customizeTexts[1].setPosition({280, 98});
 
 	this->_customizeTexts[2].texture.createFromText("Title", lobbyData->getFont(20), {600, 74});
-	this->_customizeTexts[2].setSize({
-		this->_customizeTexts[2].texture.getSize().x,
-		this->_customizeTexts[2].texture.getSize().y
-	});
+	this->_customizeTexts[2].setSize(this->_customizeTexts[2].texture.getSize());
 	this->_customizeTexts[2].rect.width = this->_customizeTexts[2].texture.getSize().x;
 	this->_customizeTexts[2].rect.height = this->_customizeTexts[2].texture.getSize().y;
 	this->_customizeTexts[2].setPosition({475, 98});
 
 	this->_loadingText.texture.createFromText("Connecting to server...", lobbyData->getFont(16), {600, 74});
-	this->_loadingText.setSize({
-		this->_loadingText.texture.getSize().x,
-		this->_loadingText.texture.getSize().y
-	});
+	this->_loadingText.setSize(this->_loadingText.texture.getSize());
 	this->_loadingText.rect.width = this->_loadingText.texture.getSize().x;
 	this->_loadingText.rect.height = this->_loadingText.texture.getSize().y;
 	this->_loadingText.setPosition({164, 218});
 
 	this->_messageBox.texture.loadFromGame("data/menu/21_Base.cv2");
-	this->_messageBox.setSize({
-		this->_messageBox.texture.getSize().x,
-		this->_messageBox.texture.getSize().y
-	});
+	this->_messageBox.setSize(this->_messageBox.texture.getSize());
 	this->_messageBox.rect.width = this->_messageBox.texture.getSize().x;
 	this->_messageBox.rect.height = this->_messageBox.texture.getSize().y;
 	this->_messageBox.setPosition({155, 203});
 
 	this->_loadingGear.texture.loadFromGame("data/scene/logo/gear.bmp");
-	this->_loadingGear.setSize({
-		this->_loadingGear.texture.getSize().x,
-		this->_loadingGear.texture.getSize().y
-	});
+	this->_loadingGear.setSize(this->_loadingGear.texture.getSize());
 	this->_loadingGear.rect.width = this->_loadingGear.texture.getSize().x;
 	this->_loadingGear.rect.height = this->_loadingGear.texture.getSize().y;
 
 	this->_lock.texture.loadFromFile((folder / "assets/menu/lock.png").string().c_str());
-	this->_lock.setSize({
-		this->_lock.texture.getSize().x,
-		this->_lock.texture.getSize().y
-	});
+	this->_lock.setSize(this->_lock.texture.getSize());
 	this->_lock.rect.width = this->_lock.texture.getSize().x;
 	this->_lock.rect.height = this->_lock.texture.getSize().y;
+
+	this->_unlock.texture.loadFromFile((folder / "assets/menu/unlock.png").string().c_str());
+	this->_unlock.setSize(this->_unlock.texture.getSize());
+	this->_unlock.rect.width = this->_unlock.texture.getSize().x;
+	this->_unlock.rect.height = this->_unlock.texture.getSize().y;
 
 	this->_netThread = std::thread(&LobbyMenu::_netLoop, this);
 	this->_connectThread = std::thread(&LobbyMenu::_connectLoop, this);
@@ -239,6 +229,11 @@ void (LobbyMenu::* const LobbyMenu::_renderCallbacks[])() = {
 
 int LobbyMenu::onProcess()
 {
+	this->_queueMutex.lock();
+	for (auto &fct : this->_workerQueue)
+		fct();
+	this->_workerQueue.clear();
+	this->_queueMutex.unlock();
 	inputBoxUpdate();
 	if (inputBoxShown)
 		return true;
@@ -347,9 +342,24 @@ bool LobbyMenu::_joinLobbyUpdate()
 	}
 	if (SokuLib::inputMgrs.input.a == 1) {
 		if (this->_lobbyCtr < this->_connections.size() && this->_connections[this->_lobbyCtr]->c && this->_connections[this->_lobbyCtr]->c->isConnected()) {
-			SokuLib::activateMenu(new InLobbyMenu(this, this->_parent, *this->_connections[this->_lobbyCtr]->c));
-			this->_active = false;
-			SokuLib::playSEWaveBuffer(0x28);
+			auto c = this->_connections[this->_lobbyCtr];
+
+			if (c->passwd) {
+				setInputBoxCallbacks([this, c](const std::string &value){
+					if (c->c && c->c->isConnected()) {
+						c->c->setPassword(value);
+						SokuLib::activateMenu(new InLobbyMenu(this, this->_parent, *c->c));
+						this->_active = false;
+						SokuLib::playSEWaveBuffer(0x28);
+					} else
+						SokuLib::playSEWaveBuffer(0x29);
+				});
+				openInputDialog("Enter password", "", '*');
+			} else {
+				SokuLib::activateMenu(new InLobbyMenu(this, this->_parent, *this->_connections[this->_lobbyCtr]->c));
+				this->_active = false;
+				SokuLib::playSEWaveBuffer(0x28);
+			}
 		} else
 			SokuLib::playSEWaveBuffer(0x29);
 	}
@@ -471,10 +481,16 @@ int LobbyMenu::onRender()
 	if (this->_menuState == 1)
 		displaySokuCursor({312, static_cast<int>(120 + this->_lobbyCtr * 16)}, {220, 16});
 	for (int i = 0; i < this->_connections.size(); i++) {
-		this->_connections[i]->name.setPosition({312, 120 + i * 16});
-		this->_connections[i]->name.draw();
-		this->_connections[i]->playerCount.setPosition({static_cast<int>(619 - this->_connections[i]->playerCount.getSize().x), 120 + i * 16});
-		this->_connections[i]->playerCount.draw();
+		auto &connection = *this->_connections[i];
+
+		connection.name.setPosition({312, 120 + i * 16});
+		connection.name.draw();
+		connection.playerCount.setPosition({static_cast<int>(619 - connection.playerCount.getSize().x), 120 + i * 16});
+		connection.playerCount.draw();
+		if (!connection.first) {
+			(connection.passwd ? this->_lock : this->_unlock).setPosition({292, 120 + i * 16});
+			(connection.passwd ? this->_lock : this->_unlock).draw();
+		}
 	}
 	this->_connectionsMutex.unlock();
 	(this->*_renderCallbacks[this->_menuState])();
@@ -594,12 +610,25 @@ void LobbyMenu::_masterServerLoop()
 
 		if (this->_mainServer.isDisconnected())
 			try {
-				this->_loadingText.texture.createFromText("Connecting to server...", lobbyData->getFont(16), {600, 74});
+				auto fct = [this]{
+					this->_loadingText.texture.createFromText(
+						"Connecting to server...",
+						lobbyData->getFont(16),
+						{600, 74}
+					);
+				};
+				runOnUI(fct);
 				this->_lastError.clear();
 				this->_mainServer.connect(servHost, servPort);
 				puts("Connected!");
 			} catch (std::exception &e) {
-				this->_loadingText.texture.createFromText(("Connection failed:<br><color FF0000>" + std::string(e.what()) + "</color>").c_str(), lobbyData->getFont(16), {600, 74});
+				auto fct = [this, e]{
+					this->_loadingText.texture.createFromText(
+						("Connection failed:<br><color FF0000>" + std::string(e.what()) + "</color>").c_str(),
+						lobbyData->getFont(16),
+						{600, 74});
+				};
+				runOnUI(fct);
 				this->_lastError = e.what();
 				goto fail;
 			}
@@ -639,21 +668,31 @@ void LobbyMenu::_masterServerLoop()
 					auto c = this->_connections.back();
 
 					this->_connectionsMutex.unlock();
-					c->name.texture.createFromText("Connection to the lobby in queue...", lobbyData->getFont(16), {300, 74});
-					c->name.setSize({
-						c->name.texture.getSize().x,
-						c->name.texture.getSize().y
-					});
-					c->name.rect.width = c->name.texture.getSize().x;
-					c->name.rect.height = c->name.texture.getSize().y;
-					c->name.tint = SokuLib::Color{0xA0, 0xA0, 0xA0, 0xFF};
+					auto fct = [c]{
+						c->name.texture.createFromText("Connection to the lobby in queue...", lobbyData->getFont(16), {300, 74});
+						c->name.setSize({
+							c->name.texture.getSize().x,
+							c->name.texture.getSize().y
+						});
+						c->name.rect.width = c->name.texture.getSize().x;
+						c->name.rect.height = c->name.texture.getSize().y;
+						c->name.tint = SokuLib::Color{0xA0, 0xA0, 0xA0, 0xFF};
+					};
+					runOnUI(fct);
 				} else
 					this->_connectionsMutex.unlock();
 			}
 		} catch (std::exception &e) {
 			if (dynamic_cast<EOFException *>(&e))
 				this->_mainServer.disconnect();
-			this->_loadingText.texture.createFromText(("<color FF0000>Error when communicating with master server:</color><br>" + std::string(e.what())).c_str(), lobbyData->getFont(16), {600, 74});
+			auto fct = [this, e]{
+				this->_loadingText.texture.createFromText(
+					("<color FF0000>Error when communicating with master server:</color><br>" + std::string(e.what())).c_str(),
+					lobbyData->getFont(16),
+					{600, 74}
+				);
+			};
+			runOnUI(fct);
 			this->_lastError = e.what();
 			if (_locked)
 				this->_connectionsMutex.unlock();
@@ -686,90 +725,114 @@ void LobbyMenu::_connectLoop()
 				if (!connection->c || !connection->c->isConnected()) {
 					if (i != 0 && !connection->first)
 						continue;
-
 					connection->first = false;
-					connection->name.texture.createFromText("Connecting to lobby...", lobbyData->getFont(16), {300, 74});
-					connection->name.setSize({
-						connection->name.texture.getSize().x,
-						connection->name.texture.getSize().y
-					});
-					connection->name.rect.width = connection->name.texture.getSize().x;
-					connection->name.rect.height = connection->name.texture.getSize().y;
-					connection->name.tint = SokuLib::Color{0xFF, 0xFF, 0x00, 0xFF};
+
+					auto fct = [connection]{
+						connection->name.texture.createFromText("Connecting to lobby...", lobbyData->getFont(16), {300, 74});
+						connection->name.setSize({
+							connection->name.texture.getSize().x,
+							connection->name.texture.getSize().y
+						});
+						connection->name.rect.width = connection->name.texture.getSize().x;
+						connection->name.rect.height = connection->name.texture.getSize().y;
+						connection->name.tint = SokuLib::Color{0xFF, 0xFF, 0x00, 0xFF};
+					};
+					runOnUI(fct);
 
 					connection->c = std::make_shared<Connection>(connection->ip, connection->port, this->_loadedSettings);
 					connection->c->onError = [weak, this](const std::string &msg) {
-						auto c = weak.lock();
+						auto fct = [weak, msg]{
+							auto c = weak.lock();
 
-						c->lastName = msg;
-						c->name.texture.createFromText(c->lastName.c_str(), lobbyData->getFont(16), {300, 74});
-						c->name.setSize({
-							c->name.texture.getSize().x,
-							c->name.texture.getSize().y
-						});
-						c->name.rect.width = c->name.texture.getSize().x;
-						c->name.rect.height = c->name.texture.getSize().y;
-						c->name.tint = SokuLib::Color::Red;
-						SokuLib::playSEWaveBuffer(38);
-						std::cerr << "Error:" << msg << std::endl;
+							std::cerr << "Error:" << msg << std::endl;
+							if (!c)
+								return;
+							c->lastName = msg;
+							c->name.texture.createFromText(c->lastName.c_str(), lobbyData->getFont(16), {300, 74});
+							c->name.setSize({
+								c->name.texture.getSize().x,
+								c->name.texture.getSize().y
+							});
+							c->name.rect.width = c->name.texture.getSize().x;
+							c->name.rect.height = c->name.texture.getSize().y;
+							c->name.tint = SokuLib::Color::Red;
+							SokuLib::playSEWaveBuffer(38);
+						};
+						runOnUI(fct);
 					};
 					connection->c->onImpMsg = [weak, this](const std::string &msg) {
-						auto c = weak.lock();
+						auto fct = [weak, msg]{
+							auto c = weak.lock();
 
-						c->lastName = msg;
-						c->name.texture.createFromText(c->lastName.c_str(), lobbyData->getFont(16), {300, 74});
-						c->name.setSize({
-							c->name.texture.getSize().x,
-							c->name.texture.getSize().y
-						});
-						c->name.rect.width = c->name.texture.getSize().x;
-						c->name.rect.height = c->name.texture.getSize().y;
-						c->name.tint = SokuLib::Color{0xFF, 0x80, 0x00};
-						SokuLib::playSEWaveBuffer(23);
-						std::cerr << "Broadcast: " << msg << std::endl;
+							std::cerr << "Broadcast: " << msg << std::endl;
+							if (!c)
+								return;
+							c->lastName = msg;
+							c->name.texture.createFromText(c->lastName.c_str(), lobbyData->getFont(16), {300, 74});
+							c->name.setSize({
+								c->name.texture.getSize().x,
+								c->name.texture.getSize().y
+							});
+							c->name.rect.width = c->name.texture.getSize().x;
+							c->name.rect.height = c->name.texture.getSize().y;
+							c->name.tint = SokuLib::Color{0xFF, 0x80, 0x00};
+							SokuLib::playSEWaveBuffer(23);
+						};
+						runOnUI(fct);
 					};
 					connection->c->startThread();
 				}
 
 				auto info = connection->c->getLobbyInfo();
 
+				connection->passwd = info.hasPwd;
 				if (connection->lastName != info.name) {
-					connection->lastName = info.name;
-					connection->name.texture.createFromText(connection->lastName.c_str(), lobbyData->getFont(16), {300, 74});
+					auto fct = [info, connection]{
+						connection->lastName = info.name;
+						connection->name.texture.createFromText(connection->lastName.c_str(), lobbyData->getFont(16), {300, 74});
+						connection->name.setSize({
+							connection->name.texture.getSize().x,
+							connection->name.texture.getSize().y
+						});
+						connection->name.rect.width = connection->name.texture.getSize().x;
+						connection->name.rect.height = connection->name.texture.getSize().y;
+						connection->name.tint = SokuLib::Color::White;
+					};
+					runOnUI(fct);
+				}
+				if (
+					connection->lastPlayerCount.first != info.currentPlayers ||
+					connection->lastPlayerCount.second != info.maxPlayers
+				) {
+					auto fct = [info, connection]{
+						SokuLib::Vector2i size;
+
+						connection->lastPlayerCount = {info.currentPlayers, info.maxPlayers};
+						connection->playerCount.texture.createFromText((std::to_string(info.currentPlayers) + "/" + std::to_string(info.maxPlayers)).c_str(), lobbyData->getFont(16), {300, 74}, &size);
+						connection->playerCount.setSize(size.to<unsigned>());
+						connection->playerCount.rect.width = connection->playerCount.getSize().x;
+						connection->playerCount.rect.height = connection->playerCount.getSize().y;
+						connection->playerCount.tint = SokuLib::Color::White;
+					};
+					runOnUI(fct);
+				}
+			} catch (std::exception &e) {
+				auto fct = [e, connection]{
+					connection->lastName.clear();
+					connection->lastPlayerCount = {0, 0};
+					connection->name.texture.createFromText(e.what(), lobbyData->getFont(16), {300, 74});
 					connection->name.setSize({
 						connection->name.texture.getSize().x,
 						connection->name.texture.getSize().y
 					});
 					connection->name.rect.width = connection->name.texture.getSize().x;
 					connection->name.rect.height = connection->name.texture.getSize().y;
-					connection->name.tint = SokuLib::Color::White;
-				}
-				if (
-					connection->lastPlayerCount.first != info.currentPlayers ||
-					connection->lastPlayerCount.second != info.maxPlayers
-				) {
-					SokuLib::Vector2i size;
+					connection->name.tint = SokuLib::Color::Red;
+					connection->playerCount.texture.destroy();
+					connection->playerCount.setSize({0, 0});
+				};
 
-					connection->lastPlayerCount = {info.currentPlayers, info.maxPlayers};
-					connection->playerCount.texture.createFromText((std::to_string(info.currentPlayers) + "/" + std::to_string(info.maxPlayers)).c_str(), lobbyData->getFont(16), {300, 74}, &size);
-					connection->playerCount.setSize(size.to<unsigned>());
-					connection->playerCount.rect.width = connection->playerCount.getSize().x;
-					connection->playerCount.rect.height = connection->playerCount.getSize().y;
-					connection->playerCount.tint = SokuLib::Color::White;
-				}
-			} catch (std::exception &e) {
-				connection->lastName.clear();
-				connection->lastPlayerCount = {0, 0};
-				connection->name.texture.createFromText(e.what(), lobbyData->getFont(16), {300, 74});
-				connection->name.setSize({
-					connection->name.texture.getSize().x,
-					connection->name.texture.getSize().y
-				});
-				connection->name.rect.width = connection->name.texture.getSize().x;
-				connection->name.rect.height = connection->name.texture.getSize().y;
-				connection->name.tint = SokuLib::Color::Red;
-				connection->playerCount.texture.destroy();
-				connection->playerCount.setSize({0, 0});
+				runOnUI(fct);
 			}
 		}
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));

@@ -8,6 +8,7 @@
 
 #include <thread>
 #include <mutex>
+#include <optional>
 #include <functional>
 #include <Packet.hpp>
 #include <Vector2.hpp> //From SokuLib
@@ -24,6 +25,7 @@ public:
 		std::string name;
 		uint8_t maxPlayers = 0;
 		uint8_t currentPlayers = 0;
+		bool hasPwd = false;
 	};
 
 private:
@@ -39,6 +41,7 @@ private:
 	LobbyInfo _info;
 	const Player &_initParams;
 	Player *_me = nullptr;
+	std::optional<std::string> _pwd;
 	std::map<uint32_t, uint32_t> _machines;
 	std::map<uint32_t, Player> _players;
 	std::vector<std::string> _messages; //TODO: properly handle channels
@@ -80,6 +83,7 @@ public:
 	Connection(const std::string &host, unsigned short port, const Player &initParams);
 	~Connection();
 	void startThread();
+	void setPassword(const std::string &pwd);
 	void error(const std::string &msg);
 	void connect();
 	void disconnect();

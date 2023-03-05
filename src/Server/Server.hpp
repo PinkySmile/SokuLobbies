@@ -22,6 +22,7 @@ class Server {
 private:
 	bool _opened = true;
 	unsigned short _port;
+	const char *_password;
 	Connection::LobbyInfo _infos;
 	sf::TcpListener _listener;
 	std::vector<std::shared_ptr<Connection>> _connections;
@@ -72,7 +73,7 @@ private:
 public:
 	Server();
 	~Server();
-	void run(unsigned short port, unsigned maxPlayers, const std::string &name);
+	void run(unsigned short port, unsigned maxPlayers, const std::string &name, const char *password);
 	void close();
 };
 

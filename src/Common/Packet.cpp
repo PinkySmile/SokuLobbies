@@ -16,6 +16,12 @@ namespace Lobbies
 		strncpy(this->name, name.c_str(), sizeof(this->name));
 	}
 
+	PacketHello::PacketHello(char uniqueId[16], const std::string &name, const PlayerCustomization &custom, const LobbySettings &settings, const std::string &pwd) :
+		PacketHello(uniqueId, name, custom, settings)
+	{
+		strncpy(this->password, pwd.c_str(), sizeof(this->password));
+	}
+
 	std::string PacketHello::toString() const
 	{
 		return "Packet HELLO: Player '" + std::string(this->name, strnlen(this->name, sizeof(this->name))) + "' "
@@ -145,10 +151,11 @@ namespace Lobbies
 		return "Packet PING";
 	}
 
-	PacketPong::PacketPong(const std::string &roomName, uint8_t maxPlayers, uint8_t currentPlayers) :
+	PacketPong::PacketPong(const std::string &roomName, uint8_t maxPlayers, uint8_t currentPlayers, const char *password) :
 		opcode(OPCODE_PONG),
 		maxPlayers(maxPlayers),
-		currentPlayers(currentPlayers)
+		currentPlayers(currentPlayers),
+		requiresPwd(password != nullptr)
 	{
 		strncpy(this->name, roomName.c_str(), sizeof(this->name));
 	}

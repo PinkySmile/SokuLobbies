@@ -34,6 +34,7 @@ static std::vector<char> buffer;
 static BYTE current[256];
 static unsigned timers[256];
 static std::mutex mutex;
+static char shownChr;
 static SokuLib::SWRFont defaultFont12;
 
 static void updateCursor(int newVal)
@@ -66,6 +67,13 @@ void inputBoxRender()
 
 static std::string sanitizeInput()
 {
+	if (shownChr) {
+		std::string result;
+
+		result.resize(buffer.size() - 1, shownChr);
+		return result;
+	}
+
 	std::string result{buffer.begin(), buffer.end() - 1};
 
 	for (size_t pos = result.find('<'); pos != std::string::npos; pos = result.find('<'))
@@ -272,10 +280,11 @@ void inputBoxUnloadAssets()
 	defaultFont12.destruct();
 }
 
-void openInputDialog(const char *title, const char *defaultValue)
+void openInputDialog(const char *title, const char *defaultValue, char shownChar)
 {
 	SokuLib::playSEWaveBuffer(0x28);
 
+	shownChr = shownChar;
 	memset(current, 0, sizeof(current));
 	memset(timers, 0, sizeof(timers));
 	lastPressed = 0;

@@ -10,6 +10,7 @@
 #include "LobbyMenu.hpp"
 #include "InLobbyMenu.hpp"
 #include "LobbyData.hpp"
+#include "InputBox.hpp"
 #include "dinput.h"
 
 typedef HRESULT(__stdcall* EndSceneFn)(IDirect3DDevice9*);
@@ -173,7 +174,7 @@ int __fastcall ConnectOnProcess(SokuLib::MenuConnect *This)
 
 	auto res = (activated ? menu->onProcess() : (This->*og_ConnectOnProcess)()) & 0xFF;
 
-	if (*(byte*)0x0448e4a != 0x30 && SokuLib::inputMgrs.input.changeCard == 1) {
+	if (*(byte*)0x0448e4a != 0x30 && SokuLib::inputMgrs.input.changeCard == 1 && !inputBoxShown) {
 		SokuLib::playSEWaveBuffer(0x28);
 		activated = !activated;
 	}

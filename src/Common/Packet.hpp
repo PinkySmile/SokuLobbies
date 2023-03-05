@@ -10,7 +10,7 @@
 #include <string>
 
 #define MOD_VERSION 9
-#define VERSION_STR "0.1.2"
+#define VERSION_STR "0.2.0"
 
 namespace Lobbies
 {
@@ -71,6 +71,7 @@ namespace Lobbies
 		LobbySettings settings;
 
 		PacketHello(char uniqueId[16], const std::string &name, const PlayerCustomization &custom, const LobbySettings &settings);
+		PacketHello(char uniqueId[16], const std::string &name, const PlayerCustomization &custom, const LobbySettings &settings, const std::string &pwd);
 		std::string toString() const;
 	};
 
@@ -193,7 +194,7 @@ namespace Lobbies
 		uint8_t currentPlayers;
 		bool requiresPwd = false;
 
-		PacketPong(const std::string &roomName, uint8_t maxPlayers, uint8_t currentPlayers);
+		PacketPong(const std::string &roomName, uint8_t maxPlayers, uint8_t currentPlayers, const char *password);
 		std::string toString() const;
 	};
 

@@ -13,11 +13,11 @@ extern std::mutex logMutex;
 #include <fstream>
 #ifdef _WIN32
 #include <shlwapi.h>
-#include <future>
-
 #endif
+#include <future>
 #include "Server.hpp"
 #include "Utils.hpp"
+
 
 Server::Server()
 {
@@ -55,7 +55,7 @@ static std::future<std::string> readLine()
 	return future;
 }
 
-void Server::run(unsigned short port, unsigned maxPlayers, const std::string &name)
+void Server::run(unsigned short port, unsigned maxPlayers, const std::string &name, const char *password)
 {
 #ifndef _DEBUG
 	try {
@@ -63,6 +63,7 @@ void Server::run(unsigned short port, unsigned maxPlayers, const std::string &na
 		auto socket = std::make_unique<sf::TcpSocket>();
 		auto future = readLine();
 
+		this->_password = password;
 		this->_port = port;
 		this->_infos.maxPlayers = maxPlayers;
 		this->_infos.currentPlayers = 0;
@@ -84,7 +85,7 @@ void Server::run(unsigned short port, unsigned maxPlayers, const std::string &na
 				std::cout << "New connection from " << socket->getRemoteAddress().toString() << ":" << socket->getRemotePort() << std::endl;
 				logMutex.unlock();
 			#endif
-				this->_connections.emplace_back(new Connection(socket));
+				this->_connections.emplace_back(new Connection(socket, this->_password));
 				this->_prepareConnectionHandlers(*this->_connections.back());
 				this->_connectionsMutex.unlock();
 				socket = std::make_unique<sf::TcpSocket>();

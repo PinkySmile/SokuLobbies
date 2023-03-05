@@ -301,6 +301,7 @@ void Connection::_handlePacket(const Lobbies::PacketPong &packet, size_t &size)
 	this->_info.name = std::string(packet.name, strnlen(packet.name, sizeof(packet.name)));
 	this->_info.maxPlayers = packet.maxPlayers;
 	this->_info.currentPlayers = packet.currentPlayers;
+	this->_info.hasPwd = packet.requiresPwd;
 }
 
 void Connection::_handlePacket(const Lobbies::PacketSettingsUpdate &packet, size_t &size)
@@ -370,9 +371,15 @@ void Connection::connect()
 		return;
 
 	char uniqueId[16] = {0};
-	Lobbies::PacketHello hello{uniqueId, this->_initParams.name, this->_initParams.player, this->_initParams.settings};
+	if (this->_pwd) {
+		Lobbies::PacketHello hello{uniqueId, this->_initParams.name, this->_initParams.player, this->_initParams.settings, *this->_pwd};
 
-	this->send(&hello, sizeof(hello));
+		this->send(&hello, sizeof(hello));
+	} else {
+		Lobbies::PacketHello hello{uniqueId, this->_initParams.name, this->_initParams.player, this->_initParams.settings};
+
+		this->send(&hello, sizeof(hello));
+	}
 }
 
 void Connection::disconnect()
@@ -495,4 +502,9 @@ void Connection::_posLoop()
 		for (int i = 0; i < 10 && this->_init; i++)
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
+}
+
+void Connection::setPassword(const std::string &pwd)
+{
+	this->_pwd = pwd;
 }
