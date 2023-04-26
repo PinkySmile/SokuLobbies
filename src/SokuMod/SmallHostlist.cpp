@@ -27,7 +27,7 @@ SmallHostlist::SmallHostlist(float ratio, SokuLib::Vector2i pos, SokuLib::MenuCo
 			sprite.setSize(sprite.texture.getSize());
 		} else {
 			if (i == this->_sprites.size() - 1)
-				sprite.texture.loadFromFile((std::filesystem::path(profileFolderPath) / "assets/arcades/_title.png").string().c_str());
+				sprite.texture.loadFromFile((std::filesystem::path(profileFolderPath) / "assets/arcades/title.png").string().c_str());
 			else if (i == this->_sprites.size() - 3)
 				sprite.texture.loadFromFile((std::filesystem::path(profileFolderPath) / "assets/arcades/hostlistBg.png").string().c_str());
 			else
@@ -142,6 +142,12 @@ void SmallHostlist::_displaySokuCursor(SokuLib::Vector2i pos, SokuLib::Vector2u 
 	CursorSprites[2].rotation = -*(float *)0x89A450 * 4.f;
 	CursorSprites[2].render(this->_pos.x + (pos.x - 14.f) * this->_ratio, this->_pos.y + (pos.y - 1.f) * this->_ratio);
 	CRenderer_Unknown1(0x896B4C, 1);
+	CursorSprites[0].scale.x = 1;
+	CursorSprites[0].scale.y = 1;
+	CursorSprites[1].scale.x = 1;
+	CursorSprites[1].scale.y = 1;
+	CursorSprites[2].scale.x = 1;
+	CursorSprites[2].scale.y = 1;
 }
 
 bool SmallHostlist::update()
@@ -157,6 +163,22 @@ bool SmallHostlist::update()
 			elem->translate.y = 1 - translate;
 		this->_overlayTimer++;
 	}
+	this->_errorMutex.lock();
+	if (this->_errorMsg) {
+		auto errorMsg = this->_errorMsg;
+		SokuLib::Vector2i size;
+
+		this->_errorMsg = nullptr;
+		this->_errorMutex.unlock();
+		this->_error.texture.createFromText(("Refresh error: " + std::string(errorMsg)).c_str(), lobbyData->getFont(12), {540, 20}, &size);
+		free(errorMsg);
+		this->_error.setSize(size.to<unsigned>());
+		this->_error.rect.width = size.x;
+		this->_error.rect.height = size.y;
+		this->_error.tint = SokuLib::Color::Red;
+		this->_error.setPosition(modifyPos(320, 480) + SokuLib::Vector2i{-size.x / 2, -16});
+	} else
+		this->_errorMutex.unlock();
 	if (this->_parent->choice > 0) {
 		if (
 			this->_parent->subchoice == 5 || //Already Playing
@@ -337,6 +359,7 @@ void SmallHostlist::render()
 			}
 		}
 	this->_entriesMutex.unlock();
+	this->_error.draw();
 }
 
 static std::string limitStr(const std::string &str, unsigned limit)
@@ -426,9 +449,19 @@ void SmallHostlist::_refreshHostlist()
 		locked = false;
 		if (newHost)
 			SokuLib::playSEWaveBuffer(49);
+		this->_errorMutex.lock();
+		if (this->_errorMsg)
+			free(this->_errorMsg);
+		this->_errorMsg = strdup("");
+		this->_errorMutex.unlock();
 	} catch (std::exception &e) {
 		if (locked)
 			this->_entriesMutex.unlock();
+		this->_errorMutex.lock();
+		if (this->_errorMsg)
+			free(this->_errorMsg);
+		this->_errorMsg = strdup(e.what());
+		this->_errorMutex.unlock();
 		printf("Failed to refresh hostlist: %s\n", e.what());
 	}
 }

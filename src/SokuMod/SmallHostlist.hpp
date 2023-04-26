@@ -112,6 +112,9 @@ private:
 	};
 	SokuLib::DrawUtils::Sprite _hosting;
 	SokuLib::DrawUtils::Sprite _playing;
+	SokuLib::DrawUtils::Sprite _error;
+	char *_errorMsg = nullptr;
+	std::mutex _errorMutex;
 	std::array<SokuLib::DrawUtils::Sprite, sizeof(_spritesPaths) / sizeof(*_spritesPaths) + 3> _sprites;
 	std::vector<std::unique_ptr<Object>> _topOverlay;
 	std::vector<std::unique_ptr<Object>> _botOverlay;

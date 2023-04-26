@@ -454,14 +454,6 @@ LobbyData::LobbyData()
 	this->achHolder.behindGear.setPosition((this->achHolder.behindGear.getSize() * -1).to<int>());
 
 	curl_global_init(CURL_GLOBAL_ALL);
-
-	this->_request_handle = curl_easy_init();
-	this->_headers = curl_slist_append(this->_headers, "Content-Type: application/json");
-	curl_easy_setopt(this->_request_handle, CURLOPT_HTTPHEADER, this->_headers);
-	curl_easy_setopt(this->_request_handle, CURLOPT_WRITEFUNCTION, &LobbyData::writeMemoryCallback);
-	curl_easy_setopt(this->_request_handle, CURLOPT_WRITEDATA, (void *)&this->_request_chunk);
-	curl_easy_setopt(this->_request_handle, CURLOPT_USERAGENT, "SokuLobbies " VERSION_STR);
-	curl_easy_setopt(this->_request_handle, CURLOPT_SSL_VERIFYPEER, false);
 }
 
 LobbyData::~LobbyData()
@@ -470,8 +462,6 @@ LobbyData::~LobbyData()
 	this->saveAchievements();
 	for (auto &font : this->_fonts)
 		font.second.destruct();
-	curl_slist_free_all(this->_headers);
-	curl_easy_cleanup(this->_request_handle);
 	curl_global_cleanup();
 }
 
@@ -881,30 +871,42 @@ std::string LobbyData::httpRequest(const std::string &url, const std::string &me
 {
 	std::string response;
 	int response_code;
+	CURL *request_handle;
+	MemoryStruct request_chunk;
+	curl_slist *headers = nullptr;
 
-	this->_requestMutex.lock();
-	this->_request_chunk.memory = (char *)calloc(1, sizeof(char));
-	this->_request_chunk.size = 0;
-	curl_easy_setopt(this->_request_handle, CURLOPT_CUSTOMREQUEST, method.c_str());
-	curl_easy_setopt(this->_request_handle, CURLOPT_URL, url.c_str());
+	request_handle = curl_easy_init();
+	headers = curl_slist_append(headers, "Content-Type: application/json");
+	curl_easy_setopt(request_handle, CURLOPT_HTTPHEADER, headers);
+	curl_easy_setopt(request_handle, CURLOPT_WRITEFUNCTION, &LobbyData::writeMemoryCallback);
+	curl_easy_setopt(request_handle, CURLOPT_WRITEDATA, (void *)&request_chunk);
+	curl_easy_setopt(request_handle, CURLOPT_USERAGENT, "SokuLobbies " VERSION_STR);
+	curl_easy_setopt(request_handle, CURLOPT_SSL_VERIFYPEER, false);
+
+	request_chunk.memory = (char *)calloc(1, sizeof(char));
+	request_chunk.size = 0;
+	curl_easy_setopt(request_handle, CURLOPT_CUSTOMREQUEST, method.c_str());
+	curl_easy_setopt(request_handle, CURLOPT_URL, url.c_str());
 	if (data.empty())
-		curl_easy_setopt(this->_request_handle, CURLOPT_POSTFIELDS, nullptr);
+		curl_easy_setopt(request_handle, CURLOPT_POSTFIELDS, nullptr);
 	else
-		curl_easy_setopt(this->_request_handle, CURLOPT_POSTFIELDS, data.c_str());
+		curl_easy_setopt(request_handle, CURLOPT_POSTFIELDS, data.c_str());
 
-	CURLcode res = curl_easy_perform(this->_request_handle);
+	CURLcode res = curl_easy_perform(request_handle);
 
 	if (res != CURLE_OK) {
-		free(this->_request_chunk.memory);
-		this->_requestMutex.unlock();
+		free(request_chunk.memory);
+		curl_slist_free_all(headers);
+		curl_easy_cleanup(request_handle);
 		throw std::runtime_error(curl_easy_strerror(res));
 	}
 
-	curl_easy_getinfo(this->_request_handle, CURLINFO_RESPONSE_CODE, &response_code);
-	response = std::string(this->_request_chunk.memory, this->_request_chunk.memory + this->_request_chunk.size);
-	free(this->_request_chunk.memory);
-	this->_requestMutex.unlock();
+	curl_easy_getinfo(request_handle, CURLINFO_RESPONSE_CODE, &response_code);
+	response = std::string(request_chunk.memory, request_chunk.memory + request_chunk.size);
+	free(request_chunk.memory);
+	curl_slist_free_all(headers);
+	curl_easy_cleanup(request_handle);
 	if (response_code >= 300)
-		throw std::invalid_argument(std::to_string(response_code) + response);
+		throw std::invalid_argument("HTTP " + std::to_string(response_code) + ": " + response);
 	return response;
 }

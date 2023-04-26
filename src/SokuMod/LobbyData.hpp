@@ -47,10 +47,6 @@ private:
 
 	static size_t LobbyData::writeMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp);
 
-	std::mutex _requestMutex;
-	CURL *_request_handle;
-	struct MemoryStruct _request_chunk;
-	curl_slist *_headers = nullptr;
 	std::map<unsigned, SokuLib::SWRFont> _fonts;
 	unsigned _achTimer = 0;
 	unsigned _animCtr = 0;

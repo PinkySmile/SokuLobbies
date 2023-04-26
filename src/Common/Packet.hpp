@@ -10,7 +10,7 @@
 #include <string>
 
 #define MOD_VERSION 9
-#define VERSION_STR "0.2.0"
+#define VERSION_STR "0.2.1"
 
 namespace Lobbies
 {
@@ -36,12 +36,13 @@ namespace Lobbies
 	};
 
 	enum HostPreference : uint8_t {
-		/* 0 */ HOSTPREF_CLIENT_ONLY,
-		/* 1 */ HOSTPREF_HOST_ONLY,
-		/* 2 */ HOSTPREF_NO_PREF,
-		/* 3 */ HOSTPREF_HOST_PREF_MASK,
-		/* 4 */ HOSTPREF_ACCEPT_RELAY,
-		/* 8 */ HOSTPREF_ACCEPT_HOSTLIST = 8,
+		/*  0 */ HOSTPREF_CLIENT_ONLY,
+		/*  1 */ HOSTPREF_HOST_ONLY,
+		/*  2 */ HOSTPREF_NO_PREF,
+		/*  3 */ HOSTPREF_HOST_PREF_MASK,
+		/*  4 */ HOSTPREF_ACCEPT_RELAY,
+		/*  8 */ HOSTPREF_ACCEPT_HOSTLIST = 8,
+		/* 10 */ HOSTPREF_PREFER_RANKED = 0x10,
 	};
 
 	struct PlayerCustomization {

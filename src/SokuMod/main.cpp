@@ -556,6 +556,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	// By default HOSTPREF_NO_PREF | HOSTPREF_ACCEPT_RELAY | HOSTPREF_ACCEPT_HOSTLIST
 	hostPref = GetPrivateProfileIntW(L"Lobby", L"HostPref", hostlist ? Lobbies::HOSTPREF_HOST_ONLY : Lobbies::HOSTPREF_NO_PREF, profilePath);
 	hostPref |= (GetPrivateProfileIntW(L"Lobby", L"AcceptRelay", 1, profilePath) != 0) * Lobbies::HOSTPREF_ACCEPT_RELAY;
+	hostPref |= (GetPrivateProfileIntW(L"Lobby", L"IsRanked", 1, profilePath) != 0) * Lobbies::HOSTPREF_PREFER_RANKED;
 	hostPref |= hostlist * Lobbies::HOSTPREF_ACCEPT_HOSTLIST;
 	printf("%S %i %i\n", profilePath, hostlist, hostPref);
 	wcstombs(servHost, servHostW, sizeof(servHost));

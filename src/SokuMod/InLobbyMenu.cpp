@@ -70,7 +70,6 @@ static LRESULT __stdcall Hooked_WndProc(const HWND hWnd, UINT uMsg, WPARAM wPara
 				ptrMutex.unlock();
 				return CallWindowProc(Original_WndProc, hWnd, uMsg, wParam, lParam);
 			}
-			printf("WM_IME_NOTIFY IMN_SETCONVERSIONMODE %x\n", (UINT)lParam);
 			activeMenu->immCtx = nullptr;
 			activeMenu->immComposition.clear();
 			activeMenu->compositionCursor = 0;
@@ -84,10 +83,8 @@ static LRESULT __stdcall Hooked_WndProc(const HWND hWnd, UINT uMsg, WPARAM wPara
 		return CallWindowProc(Original_WndProc, hWnd, uMsg, wParam, lParam);
 	}
 	if (uMsg == WM_INPUTLANGCHANGE) {
-		printf("WM_INPUTLANGCHANGE %x %x\n", (UINT)wParam, (UINT)lParam);
 		activeMenu->immComposition.clear();
 	} else if (uMsg == WM_IME_STARTCOMPOSITION) {
-		printf("WM_IME_STARTCOMPOSITION %x %x\n", (UINT)wParam, (UINT)lParam);
 		activeMenu->immCtx = ImmGetContext(SokuLib::window);
 		// This disables the windows builtin IME window.
 		// For now we keep it because part of its features are not properly supported.
@@ -96,7 +93,6 @@ static LRESULT __stdcall Hooked_WndProc(const HWND hWnd, UINT uMsg, WPARAM wPara
 	} else if (uMsg == WM_IME_ENDCOMPOSITION) {
 		MSG compositionMsg;
 
-		printf("WM_IME_ENDCOMPOSITION %x %x\n", (UINT)wParam, (UINT)lParam);
 		if (
 			::PeekMessage(&compositionMsg, hWnd, WM_IME_STARTCOMPOSITION, WM_IME_COMPOSITION, PM_NOREMOVE) &&
 			compositionMsg.message == WM_IME_COMPOSITION &&
@@ -114,14 +110,12 @@ static LRESULT __stdcall Hooked_WndProc(const HWND hWnd, UINT uMsg, WPARAM wPara
 		//ptrMutex.unlock();
 		//return 0;
 	} else if (uMsg == WM_IME_COMPOSITION) {
-		printf("WM_IME_COMPOSITION %x %x\n", (UINT)wParam, (UINT)lParam);
 		activeMenu->onKeyReleased();
 		if (lParam & GCS_RESULTSTR) {
 			auto required = ImmGetCompositionStringW(activeMenu->immCtx, GCS_RESULTSTR, nullptr, 0);
 			auto immStr = (wchar_t *)malloc(required);
 			bool v = false;
 
-			printf("GCS_RESULTSTR Required %li\n", required);
 			assert(required % 2 == 0);
 			ImmGetCompositionStringW(activeMenu->immCtx, GCS_RESULTSTR, immStr, required);
 			activeMenu->addString(immStr, required / 2);
@@ -163,7 +157,6 @@ static LRESULT __stdcall Hooked_WndProc(const HWND hWnd, UINT uMsg, WPARAM wPara
 
 		auto key = MapVirtualKey(wParam, MAPVK_VK_TO_CHAR);
 
-		printf("KEYDOWN %u %x %x %i %i %i\n", key, (UINT)wParam, (UINT)lParam, activeMenu->keyBuffer[0], activeMenu->keyBuffer[1], activeMenu->keyBufferUsed);
 		if (activeMenu->keyBufferUsed > 0)
 			activeMenu->onKeyPressed(UTF16Decode(std::wstring(activeMenu->keyBuffer, activeMenu->keyBuffer + activeMenu->keyBufferUsed))[0]);
 	} else if (uMsg == WM_KEYUP)
@@ -332,7 +325,7 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 		SokuLib::playSEWaveBuffer(57);
 		this->_connection.getMe()->battleStatus = 2;
 		if (this->_parent->choice == 0)
-			this->_parent->setupHost(hostPort, true);
+			this->_startHosting();
 		return hostPort;
 	};
 	connection.onArcadeEngage = [this](const Player &, uint32_t id){
@@ -444,10 +437,10 @@ int InLobbyMenu::onProcess()
 	}
 	this->updateChat();
 	if (this->_parent->choice > 0) {
-		if (
-			this->_parent->subchoice == 5 || //Already Playing
-			this->_parent->subchoice == 10   //Connect Failed
-		) {
+		if (this->_parent->subchoice == 5) { //Already Playing
+			this->_parent->notSpectateFlag = !this->_parent->notSpectateFlag;
+			this->_parent->join();
+		} else if (this->_parent->subchoice == 10) { //Connect Failed
 			Lobbies::PacketArcadeLeave leave{0};
 
 			this->_connection.send(&leave, sizeof(leave));
@@ -1350,22 +1343,25 @@ void InLobbyMenu::_renderMachineOverlay()
 
 void InLobbyMenu::_startHosting()
 {
+	auto ranked = this->_connection.getMe()->settings.hostPref & Lobbies::HOSTPREF_PREFER_RANKED;
+
 	this->_parent->setupHost(hostPort, true);
 	if (this->_hostThread.joinable())
 		this->_hostThread.join();
-	this->_hostThread = std::thread{[this]{
+	this->_hostThread = std::thread{[this, ranked]{
 		puts("Putting hostlist");
 
 		nlohmann::json data = {
 			{"profile_name", SokuLib::profile1.name},
-			{"message", "SokuLobbies " VERSION_STR ": Waiting in " + this->_roomName},
+			{"message", "SokuLobbies " VERSION_STR ": Waiting in " + this->_roomName + " | " + (ranked ? "ranked" : "casual")},
 			{"port", hostPort}
 		};
 
 		try {
-			puts(lobbyData->httpRequest("https://konni.delthas.fr/games", "PUT", data.dump()).c_str());
+			lobbyData->httpRequest("https://konni.delthas.fr/games", "PUT", data.dump());
+			this->_addMessageToList(0x00FF00, 0, "Broadcast to hostlist successful");
 		} catch (std::exception &e) {
-			MessageBoxA(SokuLib::window, e.what(), "Hostlist error", MB_ICONERROR);
+			this->_addMessageToList(0xFF0000, 0, "Hostlist error: " + std::string(e.what()));
 		}
 	}};
 }
