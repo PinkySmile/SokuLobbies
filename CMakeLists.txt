@@ -130,6 +130,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 	add_library(
 		"SokuLobbiesMod"
 		MODULE
+		src/SokuMod/version.rc
 		src/SokuMod/main.cpp
 		src/Common/Packet.hpp
 		src/Common/Packet.cpp
