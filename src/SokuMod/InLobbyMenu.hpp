@@ -131,7 +131,7 @@ public:
 	void addString(wchar_t *str, size_t size);
 	void onCompositionResult();
 
-	void updateChat();
+	void updateChat(bool inGame);
 	void renderChat();
 	bool isInputing();
 };

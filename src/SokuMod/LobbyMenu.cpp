@@ -229,30 +229,46 @@ void (LobbyMenu::* const LobbyMenu::_renderCallbacks[])() = {
 
 int LobbyMenu::onProcess()
 {
-	this->_queueMutex.lock();
-	for (auto &fct : this->_workerQueue)
-		fct();
-	this->_workerQueue.clear();
-	this->_queueMutex.unlock();
-	inputBoxUpdate();
-	if (inputBoxShown)
-		return true;
-	if (SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
-		SokuLib::playSEWaveBuffer(0x29);
-		this->_open = false;
+	try {
+		this->_queueMutex.lock();
+		for (auto &fct : this->_workerQueue)
+			fct();
+		this->_workerQueue.clear();
+		this->_queueMutex.unlock();
+		inputBoxUpdate();
+		if (inputBoxShown)
+			return true;
+		if (SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
+			playSound(0x29);
+			this->_open = false;
+			return false;
+		}
+		if (this->_mainServer.isDisconnected()) {
+			this->_loadingGear.setRotation(this->_loadingGear.getRotation() + 0.1);
+			return true;
+		}
+		return (this->*_updateCallbacks[this->_menuState])();
+	} catch (std::exception &e) {
+		MessageBoxA(
+			SokuLib::window,
+			(
+				"Error updating lobby menu.\n"
+				"Please, report this error.\n"
+				"\n"
+				"Error:\n" +
+				std::string(e.what())
+			).c_str(),
+			"SokuLobby error",
+			MB_ICONERROR
+		);
 		return false;
 	}
-	if (this->_mainServer.isDisconnected()) {
-		this->_loadingGear.setRotation(this->_loadingGear.getRotation() + 0.1);
-		return true;
-	}
-	return (this->*_updateCallbacks[this->_menuState])();
 }
 
 bool LobbyMenu::_normalMenuUpdate()
 {
 	if (SokuLib::inputMgrs.input.b == 1) {
-		SokuLib::playSEWaveBuffer(0x29);
+		playSound(0x29);
 		this->_open = false;
 		return false;
 	}
@@ -263,7 +279,7 @@ bool LobbyMenu::_normalMenuUpdate()
 		} else
 			this->_menuCursor++;
 		this->_menuCursor %= 8;
-		SokuLib::playSEWaveBuffer(0x27);
+		playSound(0x27);
 	}
 	if (SokuLib::inputMgrs.input.spellcard == 1) {
 		setInputBoxCallbacks([this](const std::string &value){
@@ -276,16 +292,16 @@ bool LobbyMenu::_normalMenuUpdate()
 
 				m.lock();
 				this->_connections.emplace_back(new Entry{std::shared_ptr<Connection>(), ip, port});
-				SokuLib::playSEWaveBuffer(0x28);
+				playSound(0x28);
 			} catch (std::exception &e) {
 				puts(e.what());
-				SokuLib::playSEWaveBuffer(0x29);
+				playSound(0x29);
 			}
 		});
 		openInputDialog("Enter lobby ip", "localhost:10800");
 	}
 	if (SokuLib::inputMgrs.input.a == 1) {
-		SokuLib::playSEWaveBuffer(0x28);
+		playSound(0x28);
 		switch (this->_menuCursor) {
 		case MENUITEM_JOIN_LOBBY:
 			this->_menuState = 1;
@@ -325,7 +341,7 @@ bool LobbyMenu::_normalMenuUpdate()
 bool LobbyMenu::_joinLobbyUpdate()
 {
 	if (SokuLib::inputMgrs.input.b == 1) {
-		SokuLib::playSEWaveBuffer(0x29);
+		playSound(0x29);
 		this->_menuState = 0;
 		return true;
 	}
@@ -338,7 +354,7 @@ bool LobbyMenu::_joinLobbyUpdate()
 			this->_lobbyCtr++;
 		if (!this->_connections.empty())
 			this->_lobbyCtr %= this->_connections.size();
-		SokuLib::playSEWaveBuffer(0x27);
+		playSound(0x27);
 	}
 	if (SokuLib::inputMgrs.input.a == 1) {
 		if (this->_lobbyCtr < this->_connections.size() && this->_connections[this->_lobbyCtr]->c && this->_connections[this->_lobbyCtr]->c->isConnected()) {
@@ -350,18 +366,18 @@ bool LobbyMenu::_joinLobbyUpdate()
 						c->c->setPassword(value);
 						SokuLib::activateMenu(new InLobbyMenu(this, this->_parent, *c->c));
 						this->_active = false;
-						SokuLib::playSEWaveBuffer(0x28);
+						playSound(0x28);
 					} else
-						SokuLib::playSEWaveBuffer(0x29);
+						playSound(0x29);
 				});
 				openInputDialog("Enter password", "", '*');
 			} else {
 				SokuLib::activateMenu(new InLobbyMenu(this, this->_parent, *this->_connections[this->_lobbyCtr]->c));
 				this->_active = false;
-				SokuLib::playSEWaveBuffer(0x28);
+				playSound(0x28);
 			}
 		} else
-			SokuLib::playSEWaveBuffer(0x29);
+			playSound(0x29);
 	}
 	this->_connectionsMutex.unlock();
 	return true;
@@ -404,19 +420,19 @@ bool LobbyMenu::_customizeAvatarUpdate()
 {
 	if (SokuLib::inputMgrs.input.a == 1 && this->_customCursor >= 0) {
 		if (!lobbyData->isLocked(lobbyData->avatars[this->_customCursor])) {
-			SokuLib::playSEWaveBuffer(0x28);
+			playSound(0x28);
 			this->_loadedSettings.player.avatar = this->_customCursor;
 		} else
-			SokuLib::playSEWaveBuffer(0x29);
+			playSound(0x29);
 		return true;
 	}
 	if (SokuLib::inputMgrs.input.b == 1) {
-		SokuLib::playSEWaveBuffer(0x29);
+		playSound(0x29);
 		this->_menuState = 0;
 		return true;
 	}
 	if (std::abs(SokuLib::inputMgrs.input.horizontalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.horizontalAxis) > 36 && std::abs(SokuLib::inputMgrs.input.horizontalAxis) % 6 == 0)) {
-		SokuLib::playSEWaveBuffer(0x27);
+		playSound(0x27);
 		if (this->_customCursor == 0 && SokuLib::inputMgrs.input.horizontalAxis < 0)
 			this->_customCursor += lobbyData->avatars.size() - 1;
 		else
@@ -425,7 +441,7 @@ bool LobbyMenu::_customizeAvatarUpdate()
 		this->_refreshAvatarCustomText();
 	}
 	if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.verticalAxis) > 36 && std::abs(SokuLib::inputMgrs.input.verticalAxis) % 6 == 0)) {
-		SokuLib::playSEWaveBuffer(0x27);
+		playSound(0x27);
 		if (this->_customCursor < 4 && SokuLib::inputMgrs.input.verticalAxis < 0)
 			this->_customCursor = 0;
 		else if (this->_customCursor + 4 >= lobbyData->avatars.size() && SokuLib::inputMgrs.input.verticalAxis > 0)
@@ -458,43 +474,58 @@ bool LobbyMenu::_customizeAvatarUpdate()
 
 int LobbyMenu::onRender()
 {
-	this->_title.draw();
-	if (this->_mainServer.isDisconnected()) {
-		this->_messageBox.draw();
-		this->_loadingText.draw();
-		if (this->_lastError.empty()) {
-			this->_loadingGear.setRotation(-this->_loadingGear.getRotation());
-			this->_loadingGear.setPosition({412, 227});
-			this->_loadingGear.draw();
-			this->_loadingGear.setRotation(-this->_loadingGear.getRotation());
-			this->_loadingGear.setPosition({412 + 23, 227 - 18});
-			this->_loadingGear.draw();
+	try {
+		this->_title.draw();
+		if (this->_mainServer.isDisconnected()) {
+			this->_messageBox.draw();
+			this->_loadingText.draw();
+			if (this->_lastError.empty()) {
+				this->_loadingGear.setRotation(-this->_loadingGear.getRotation());
+				this->_loadingGear.setPosition({412, 227});
+				this->_loadingGear.draw();
+				this->_loadingGear.setRotation(-this->_loadingGear.getRotation());
+				this->_loadingGear.setPosition({412 + 23, 227 - 18});
+				this->_loadingGear.draw();
+			}
+			return 0;
 		}
-		return 0;
-	}
-	if (this->_menuCursor == 7)
-		displaySokuCursor({50, 366}, {180, 16});
-	else
-		displaySokuCursor({50, static_cast<int>(126 + this->_menuCursor * 24)}, {180, 16});
-	this->_ui.draw();
-	this->_connectionsMutex.lock();
-	if (this->_menuState == 1)
-		displaySokuCursor({312, static_cast<int>(120 + this->_lobbyCtr * 16)}, {220, 16});
-	for (int i = 0; i < this->_connections.size(); i++) {
-		auto &connection = *this->_connections[i];
+		if (this->_menuCursor == 7)
+			displaySokuCursor({50, 366}, {180, 16});
+		else
+			displaySokuCursor({50, static_cast<int>(126 + this->_menuCursor * 24)}, {180, 16});
+		this->_ui.draw();
+		this->_connectionsMutex.lock();
+		if (this->_menuState == 1)
+			displaySokuCursor({312, static_cast<int>(120 + this->_lobbyCtr * 16)}, {220, 16});
+		for (int i = 0; i < this->_connections.size(); i++) {
+			auto &connection = *this->_connections[i];
 
-		connection.name.setPosition({312, 120 + i * 16});
-		connection.name.draw();
-		connection.playerCount.setPosition({static_cast<int>(619 - connection.playerCount.getSize().x), 120 + i * 16});
-		connection.playerCount.draw();
-		if (!connection.first) {
-			(connection.passwd ? this->_lock : this->_unlock).setPosition({292, 120 + i * 16});
-			(connection.passwd ? this->_lock : this->_unlock).draw();
+			connection.name.setPosition({312, 120 + i * 16});
+			connection.name.draw();
+			connection.playerCount.setPosition({static_cast<int>(619 - connection.playerCount.getSize().x), 120 + i * 16});
+			connection.playerCount.draw();
+			if (!connection.first) {
+				(connection.passwd ? this->_lock : this->_unlock).setPosition({292, 120 + i * 16});
+				(connection.passwd ? this->_lock : this->_unlock).draw();
+			}
 		}
+		this->_connectionsMutex.unlock();
+		(this->*_renderCallbacks[this->_menuState])();
+		inputBoxRender();
+	} catch (std::exception &e) {
+		MessageBoxA(
+			SokuLib::window,
+			(
+				"Error updating lobby menu.\n"
+				"Please, report this error.\n"
+				"\n"
+				"Error:\n" +
+				std::string(e.what())
+			).c_str(),
+			"SokuLobby error",
+			MB_ICONERROR
+		);
 	}
-	this->_connectionsMutex.unlock();
-	(this->*_renderCallbacks[this->_menuState])();
-	inputBoxRender();
 	return 0;
 }
 
@@ -756,7 +787,7 @@ void LobbyMenu::_connectLoop()
 							c->name.rect.width = c->name.texture.getSize().x;
 							c->name.rect.height = c->name.texture.getSize().y;
 							c->name.tint = SokuLib::Color::Red;
-							SokuLib::playSEWaveBuffer(38);
+							playSound(38);
 						};
 						runOnUI(fct);
 					};
@@ -776,7 +807,7 @@ void LobbyMenu::_connectLoop()
 							c->name.rect.width = c->name.texture.getSize().x;
 							c->name.rect.height = c->name.texture.getSize().y;
 							c->name.tint = SokuLib::Color{0xFF, 0x80, 0x00};
-							SokuLib::playSEWaveBuffer(23);
+							playSound(23);
 						};
 						runOnUI(fct);
 					};

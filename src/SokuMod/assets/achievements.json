@@ -1,240 +1,7 @@
 [
-    {
-        "comment1": "THIS FILE CONTAINS SPOILERS!!",
-        "comment2": "IF YOU WISH TO FIND ACHIEVEMENTS BY YOURSELF CLOSE IT!",
-        "requirement": {
-            "type": "win",
-            "count": 10,
-            "chr": 5
-        },
-        "rewards": [
-            {
-                "type": "avatar",
-                "id": 8
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Phantom Gardener",
-        "description": "Win 10 games as Youmu",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "lose",
-            "count": 10,
-            "chr": 5
-        },
-        "rewards": [
-            {
-                "type": "emote",
-                "name": "youmu4"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Half-Baked",
-        "description": "Lose 10 games as Youmu",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 10,
-            "chr": 5
-        },
-        "rewards": [
-            {
-                "type": "prop",
-                "id": 5
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Youki's Disciple",
-        "description": "Play 10 games as Youmu",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "cards",
-            "chr": 5
-        },
-        "rewards": [
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Konpaku's Kenjutsu Master",
-        "description": "Use each Youmu's skill and spell at<br>least once",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 100,
-            "chr": 5
-        },
-        "rewards": [
-            {
-                "type": "accessory",
-                "id": 5,
-                "comment": "Roukanken & Hakurouken Display"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Phantom Samurai",
-        "description": "Play 100 games as Youmu",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 1000,
-            "chr": 5
-        },
-        "rewards": [
-            {
-                "type": "background",
-                "id": 5,
-                "comment": "UnBloomed Ayakashi (Yuyuko should have the blooming one) / The Nether Soku Stage"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Saigyouji's Ronin",
-        "description": "Play 1000 games as Youmu",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "win",
-            "count": 10,
-            "chr": 6
-        },
-        "rewards": [
-            {
-                "type": "avatar",
-                "id": 9
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Young Scarlet Moon",
-        "description": "Win 10 games as Remilia",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "lose",
-            "count": 10,
-            "chr": 6
-        },
-        "rewards": [
-            {
-                "type": "emote",
-                "name": "remilia4"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Devil May Whine",
-        "description": "Lose 10 games as Remilia",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 10,
-            "chr": 6
-        },
-        "rewards": [
-            {
-                "type": "prop",
-                "id": 6
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Dracul's Descendant",
-        "description": "Play 10 games as Remilia",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "cards",
-            "chr": 6
-        },
-        "rewards": [
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Lady of The Mansion",
-        "description": "Use each Remilia's skill and spell at<br>least once",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 100,
-            "chr": 6
-        },
-        "rewards": [
-            {
-                "type": "accessory",
-                "id": 6,
-                "comment": "Hanger with a parasol on it Prop"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Skerlet Vampir",
-        "description": "Play 100 games as Remilia",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 1000,
-            "chr": 6
-        },
-        "rewards": [
-            {
-                "type": "background",
-                "id": 6,
-                "comment": "Scarlet devil mansion"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Soaked in Red",
-        "description": "Play 1000 games as Remilia",
-        "hidden": false
-    },
+    "THIS FILE CONTAINS SPOILERS!!",
+    "IF YOU WISH TO FIND ACHIEVEMENTS BY YOURSELF CLOSE IT!",
+    "Reimu",
     {
         "requirement": {
             "type": "win",
@@ -352,6 +119,10 @@
         "description": "Play 1000 games as Reimu",
         "hidden": false
     },
+
+
+
+    "Marisa",
     {
         "requirement": {
             "type": "win",
@@ -469,123 +240,10 @@
         "description": "Play 1000 games as Marisa",
         "hidden": false
     },
-    {
-        "requirement": {
-            "type": "win",
-            "count": 10,
-            "chr": 15
-        },
-        "rewards": [
-            {
-                "type": "avatar",
-                "id": 18
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Deified Shrine Maiden",
-        "description": "Win 10 games as Sanae",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "lose",
-            "count": 10,
-            "chr": 15
-        },
-        "rewards": [
-            {
-                "type": "emote",
-                "name": "sanae6"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "2nd Class Shrine Maiden",
-        "description": "Lose 10 games as Sanae",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 10,
-            "chr": 15
-        },
-        "rewards": [
-            {
-                "type": "prop",
-                "id": 15
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Actually 3 Adversaries",
-        "description": "Play 10 games as Sanae",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "cards",
-            "chr": 15
-        },
-        "rewards": [
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Master of Wind-Fu",
-        "description": "Use each Sanae's skill and spell at<br>least once",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 100,
-            "chr": 15
-        },
-        "rewards": [
-            {
-                "type": "accessory",
-                "id": 15,
-                "comment": "Mini-Suwako & Kanako"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Moriya's Conspiracy",
-        "description": "Play 100 games as Sanae",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 1000,
-            "chr": 15
-        },
-        "rewards": [
-            {
-                "type": "background",
-                "id": 15,
-                "comment": "Moriya Shrine"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Everyday Miracle",
-        "description": "Play 1000 games as Sanae",
-        "hidden": false
-    },
+
+
+
+    "Sakuya",
     {
         "requirement": {
             "type": "win",
@@ -703,6 +361,10 @@
         "description": "Play 1000 games as Sakuya",
         "hidden": false
     },
+
+
+
+    "Alice",
     {
         "requirement": {
             "type": "win",
@@ -820,6 +482,10 @@
         "description": "Play 1000 games as Alice",
         "hidden": false
     },
+
+
+
+    "Patchouli",
     {
         "requirement": {
             "type": "win",
@@ -937,6 +603,252 @@
         "description": "Play 1000 games as Patchouli",
         "hidden": false
     },
+
+
+
+    "Youmu",
+    {
+        "requirement": {
+            "type": "win",
+            "count": 10,
+            "chr": 5
+        },
+        "rewards": [
+            {
+                "type": "avatar",
+                "id": 8
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Phantom Gardener",
+        "description": "Win 10 games as Youmu",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "lose",
+            "count": 10,
+            "chr": 5
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "youmu4"
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Half-Baked",
+        "description": "Lose 10 games as Youmu",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "play",
+            "count": 10,
+            "chr": 5
+        },
+        "rewards": [
+            {
+                "type": "prop",
+                "id": 5
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Youki's Disciple",
+        "description": "Play 10 games as Youmu",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "cards",
+            "chr": 5
+        },
+        "rewards": [
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Konpaku's Kenjutsu Master",
+        "description": "Use each Youmu's skill and spell at<br>least once",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "play",
+            "count": 100,
+            "chr": 5
+        },
+        "rewards": [
+            {
+                "type": "accessory",
+                "id": 5,
+                "comment": "Roukanken & Hakurouken Display"
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Phantom Samurai",
+        "description": "Play 100 games as Youmu",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "play",
+            "count": 1000,
+            "chr": 5
+        },
+        "rewards": [
+            {
+                "type": "background",
+                "id": 5,
+                "comment": "UnBloomed Ayakashi (Yuyuko should have the blooming one) / The Nether Soku Stage"
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Saigyouji's Ronin",
+        "description": "Play 1000 games as Youmu",
+        "hidden": false
+    },
+
+
+
+    "Remilia",
+    {
+        "requirement": {
+            "type": "win",
+            "count": 10,
+            "chr": 6
+        },
+        "rewards": [
+            {
+                "type": "avatar",
+                "id": 9
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Young Scarlet Moon",
+        "description": "Win 10 games as Remilia",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "lose",
+            "count": 10,
+            "chr": 6
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "remilia4"
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Devil May Whine",
+        "description": "Lose 10 games as Remilia",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "play",
+            "count": 10,
+            "chr": 6
+        },
+        "rewards": [
+            {
+                "type": "prop",
+                "id": 6
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Dracul's Descendant",
+        "description": "Play 10 games as Remilia",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "cards",
+            "chr": 6
+        },
+        "rewards": [
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Lady of The Mansion",
+        "description": "Use each Remilia's skill and spell at<br>least once",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "play",
+            "count": 100,
+            "chr": 6
+        },
+        "rewards": [
+            {
+                "type": "accessory",
+                "id": 6,
+                "comment": "Hanger with a parasol on it Prop"
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Skerlet Vampir",
+        "description": "Play 100 games as Remilia",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "play",
+            "count": 1000,
+            "chr": 6
+        },
+        "rewards": [
+            {
+                "type": "background",
+                "id": 6,
+                "comment": "Scarlet devil mansion"
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Soaked in Red",
+        "description": "Play 1000 games as Remilia",
+        "hidden": false
+    },
+
+
+
+    "Yuyuko",
     {
         "requirement": {
             "type": "win",
@@ -1054,6 +966,10 @@
         "description": "Play 1000 games as Yuyuko",
         "hidden": false
     },
+
+
+
+    "Yukari",
     {
         "requirement": {
             "type": "win",
@@ -1171,357 +1087,10 @@
         "description": "Play 1000 games as Yukari",
         "hidden": false
     },
-    {
-        "requirement": {
-            "type": "win",
-            "count": 10,
-            "chr": 16
-        },
-        "rewards": [
-            {
-                "type": "avatar",
-                "id": 19
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Ice Fairy",
-        "description": "Win 10 games as Cirno",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "lose",
-            "count": 10,
-            "chr": 16
-        },
-        "rewards": [
-            {
-                "type": "emote",
-                "name": "cirno6"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Cold Shoulders",
-        "description": "Lose 10 games as Cirno",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 10,
-            "chr": 16
-        },
-        "rewards": [
-            {
-                "type": "prop",
-                "id": 16
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Genius Fairy",
-        "description": "Play 10 games as Cirno",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "cards",
-            "chr": 16
-        },
-        "rewards": [
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Stronger Than a Grown Human",
-        "description": "Use each Cirno's skill and spell at<br>least once",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 100,
-            "chr": 16
-        },
-        "rewards": [
-            {
-                "type": "accessory",
-                "id": 16,
-                "comment": "Snowman"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Naiad of The Lake",
-        "description": "Play 100 games as Cirno",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 1000,
-            "chr": 16
-        },
-        "rewards": [
-            {
-                "type": "background",
-                "id": 16,
-                "comment": "The Lake"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Absolute Zero",
-        "description": "Play 1000 games as Cirno",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "win",
-            "count": 10,
-            "chr": 13
-        },
-        "rewards": [
-            {
-                "type": "avatar",
-                "id": 16
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Messenger From the Dragon Palace",
-        "description": "Win 10 games as Iku",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "lose",
-            "count": 10,
-            "chr": 13
-        },
-        "rewards": [
-            {
-                "type": "emote",
-                "name": "iku6"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Malfunctioning Spark",
-        "description": "Lose 10 games as Iku",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 10,
-            "chr": 13
-        },
-        "rewards": [
-            {
-                "type": "prop",
-                "id": 13
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Oarfish Covered In Scarlet Cloth",
-        "description": "Play 10 games as Iku",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "cards",
-            "chr": 13
-        },
-        "rewards": [
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Swimming in The Sky",
-        "description": "Use each Iku's skill and spell at<br>least once",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 100,
-            "chr": 13
-        },
-        "rewards": [
-            {
-                "type": "accessory",
-                "id": 13,
-                "comment": "Thunder Cloud / Catfish"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "The Will of The Great Spiral",
-        "description": "Play 100 games as Iku",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 1000,
-            "chr": 13
-        },
-        "rewards": [
-            {
-                "type": "background",
-                "id": 13,
-                "comment": "Sky / Top of Youkai Mountain"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "The Dragon's Veil",
-        "description": "Play 1000 games as Iku",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "win",
-            "count": 10,
-            "chr": 10
-        },
-        "rewards": [
-            {
-                "type": "avatar",
-                "id": 13
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Moon Rabbit on Earth",
-        "description": "Win 10 games as Reisen",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "lose",
-            "count": 10,
-            "chr": 10
-        },
-        "rewards": [
-            {
-                "type": "emote",
-                "name": "reisen4"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Rabbit Stew",
-        "description": "Lose 10 games as Reisen",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 10,
-            "chr": 10
-        },
-        "rewards": [
-            {
-                "type": "prop",
-                "id": 10
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Insanity Overdrive",
-        "description": "Play 10 games as Reisen",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "cards",
-            "chr": 10
-        },
-        "rewards": [
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Lunar Soldier",
-        "description": "Use each Reisen's skill and spell at<br>least once",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 100,
-            "chr": 10
-        },
-        "rewards": [
-            {
-                "type": "accessory",
-                "id": 10,
-                "comment": "Carrot / AoCF Reisen Gun / Box of meds"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Disciple of the God of Wisdom",
-        "description": "Play 100 games as Reisen",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 1000,
-            "chr": 10
-        },
-        "rewards": [
-            {
-                "type": "background",
-                "id": 10,
-                "comment": "Red full Moon"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "Lunatic Red Eyes",
-        "description": "Play 1000 games as Reisen",
-        "hidden": false
-    },
+
+
+
+    "Suika",
     {
         "requirement": {
             "type": "win",
@@ -1639,70 +1208,74 @@
         "description": "Play 1000 games as Suika",
         "hidden": false
     },
+
+
+
+    "Reisen",
     {
         "requirement": {
             "type": "win",
             "count": 10,
-            "chr": 14
+            "chr": 10
         },
         "rewards": [
             {
                 "type": "avatar",
-                "id": 17
+                "id": 13
             },
             {
                 "type": "title",
                 "name": null
             }
         ],
-        "name": "Fallen Celestial",
-        "description": "Win 10 games as Tenshi",
+        "name": "Moon Rabbit on Earth",
+        "description": "Win 10 games as Reisen",
         "hidden": false
     },
     {
         "requirement": {
             "type": "lose",
             "count": 10,
-            "chr": 14
+            "chr": 10
         },
         "rewards": [
             {
                 "type": "emote",
-                "name": "tenshi4"
+                "name": "reisen4"
             },
             {
                 "type": "title",
                 "name": null
             }
         ],
-        "name": "Catastrophe of Bhavaagra",
-        "description": "Lose 10 games as Tenshi",
+        "name": "Rabbit Stew",
+        "description": "Lose 10 games as Reisen",
         "hidden": false
     },
     {
         "requirement": {
             "type": "play",
             "count": 10,
-            "chr": 14
+            "chr": 10
         },
         "rewards": [
             {
                 "type": "prop",
-                "id": 14
+                "id": 10
             },
             {
                 "type": "title",
                 "name": null
             }
         ],
-        "name": "Eldest Daughter of the Hinanawi",
-        "description": "Play 10 games as Tenshi",
+        "name": "Insanity Overdrive",
+        "description": "Play 10 games as Reisen",
         "hidden": false
     },
     {
         "requirement": {
             "type": "cards",
-            "chr": 14
+            "chr": 10
         },
         "rewards": [
             {
@@ -1710,52 +1283,56 @@
                 "name": null
             }
         ],
-        "name": "Wielder of \"The Sword of Hisou\"",
-        "description": "Use each Tenshi's skill and spell at<br>least once",
+        "name": "Lunar Soldier",
+        "description": "Use each Reisen's skill and spell at<br>least once",
         "hidden": false
     },
     {
         "requirement": {
             "type": "play",
             "count": 100,
-            "chr": 14
+            "chr": 10
         },
         "rewards": [
             {
                 "type": "accessory",
-                "id": 14,
-                "comment": "Keystone / Route 66 sign"
+                "id": 10,
+                "comment": "Carrot / AoCF Reisen Gun / Box of meds"
             },
             {
                 "type": "title",
                 "name": null
             }
         ],
-        "name": "Manipulator of \"Earth\" and \"Spirit\"",
-        "description": "Play 100 games as Tenshi",
+        "name": "Disciple of the God of Wisdom",
+        "description": "Play 100 games as Reisen",
         "hidden": false
     },
     {
         "requirement": {
             "type": "play",
             "count": 1000,
-            "chr": 14
+            "chr": 10
         },
         "rewards": [
             {
                 "type": "background",
-                "id": 14,
-                "comment": "Heavens"
+                "id": 10,
+                "comment": "Red full Moon"
             },
             {
                 "type": "title",
                 "name": null
             }
         ],
-        "name": "Sky of Scarlet Perception",
-        "description": "Play 1000 games as Tenshi",
+        "name": "Lunatic Red Eyes",
+        "description": "Play 1000 games as Reisen",
         "hidden": false
     },
+
+
+
+    "Aya",
     {
         "requirement": {
             "type": "win",
@@ -1873,6 +1450,10 @@
         "description": "Play 1000 games as Aya",
         "hidden": false
     },
+
+
+
+    "Komachi",
     {
         "requirement": {
             "type": "win",
@@ -1990,6 +1571,494 @@
         "description": "Play 1000 games as Komachi",
         "hidden": false
     },
+
+
+
+    "Iku",
+    {
+        "requirement": {
+            "type": "win",
+            "count": 10,
+            "chr": 13
+        },
+        "rewards": [
+            {
+                "type": "avatar",
+                "id": 16
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Messenger From the Dragon Palace",
+        "description": "Win 10 games as Iku",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "lose",
+            "count": 10,
+            "chr": 13
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "iku6"
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Malfunctioning Spark",
+        "description": "Lose 10 games as Iku",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "play",
+            "count": 10,
+            "chr": 13
+        },
+        "rewards": [
+            {
+                "type": "prop",
+                "id": 13
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Oarfish Covered In Scarlet Cloth",
+        "description": "Play 10 games as Iku",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "cards",
+            "chr": 13
+        },
+        "rewards": [
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Swimming in The Sky",
+        "description": "Use each Iku's skill and spell at<br>least once",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "play",
+            "count": 100,
+            "chr": 13
+        },
+        "rewards": [
+            {
+                "type": "accessory",
+                "id": 13,
+                "comment": "Thunder Cloud / Catfish"
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "The Will of The Great Spiral",
+        "description": "Play 100 games as Iku",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "play",
+            "count": 1000,
+            "chr": 13
+        },
+        "rewards": [
+            {
+                "type": "background",
+                "id": 13,
+                "comment": "Sky / Top of Youkai Mountain"
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "The Dragon's Veil",
+        "description": "Play 1000 games as Iku",
+        "hidden": false
+    },
+
+
+
+    "Tenshi",
+    {
+        "requirement": {
+            "type": "win",
+            "count": 10,
+            "chr": 14
+        },
+        "rewards": [
+            {
+                "type": "avatar",
+                "id": 17
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Fallen Celestial",
+        "description": "Win 10 games as Tenshi",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "lose",
+            "count": 10,
+            "chr": 14
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "tenshi4"
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Catastrophe of Bhavaagra",
+        "description": "Lose 10 games as Tenshi",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "play",
+            "count": 10,
+            "chr": 14
+        },
+        "rewards": [
+            {
+                "type": "prop",
+                "id": 14
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Eldest Daughter of the Hinanawi",
+        "description": "Play 10 games as Tenshi",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "cards",
+            "chr": 14
+        },
+        "rewards": [
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Wielder of \"The Sword of Hisou\"",
+        "description": "Use each Tenshi's skill and spell at<br>least once",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "play",
+            "count": 100,
+            "chr": 14
+        },
+        "rewards": [
+            {
+                "type": "accessory",
+                "id": 14,
+                "comment": "Keystone / Route 66 sign"
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Manipulator of \"Earth\" and \"Spirit\"",
+        "description": "Play 100 games as Tenshi",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "play",
+            "count": 1000,
+            "chr": 14
+        },
+        "rewards": [
+            {
+                "type": "background",
+                "id": 14,
+                "comment": "Heavens"
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Sky of Scarlet Perception",
+        "description": "Play 1000 games as Tenshi",
+        "hidden": false
+    },
+
+
+
+    "Sanae",
+    {
+        "requirement": {
+            "type": "win",
+            "count": 10,
+            "chr": 15
+        },
+        "rewards": [
+            {
+                "type": "avatar",
+                "id": 18
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Deified Shrine Maiden",
+        "description": "Win 10 games as Sanae",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "lose",
+            "count": 10,
+            "chr": 15
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "sanae6"
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "2nd Class Shrine Maiden",
+        "description": "Lose 10 games as Sanae",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "play",
+            "count": 10,
+            "chr": 15
+        },
+        "rewards": [
+            {
+                "type": "prop",
+                "id": 15
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Actually 3 Adversaries",
+        "description": "Play 10 games as Sanae",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "cards",
+            "chr": 15
+        },
+        "rewards": [
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Master of Wind-Fu",
+        "description": "Use each Sanae's skill and spell at<br>least once",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "play",
+            "count": 100,
+            "chr": 15
+        },
+        "rewards": [
+            {
+                "type": "accessory",
+                "id": 15,
+                "comment": "Mini-Suwako & Kanako"
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Moriya's Conspiracy",
+        "description": "Play 100 games as Sanae",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "play",
+            "count": 1000,
+            "chr": 15
+        },
+        "rewards": [
+            {
+                "type": "background",
+                "id": 15,
+                "comment": "Moriya Shrine"
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Everyday Miracle",
+        "description": "Play 1000 games as Sanae",
+        "hidden": false
+    },
+
+
+
+    "Cirno",
+    {
+        "requirement": {
+            "type": "win",
+            "count": 10,
+            "chr": 16
+        },
+        "rewards": [
+            {
+                "type": "avatar",
+                "id": 19
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Ice Fairy",
+        "description": "Win 10 games as Cirno",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "lose",
+            "count": 10,
+            "chr": 16
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "cirno6"
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Cold Shoulders",
+        "description": "Lose 10 games as Cirno",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "play",
+            "count": 10,
+            "chr": 16
+        },
+        "rewards": [
+            {
+                "type": "prop",
+                "id": 16
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Genius Fairy",
+        "description": "Play 10 games as Cirno",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "cards",
+            "chr": 16
+        },
+        "rewards": [
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Stronger Than a Grown Human",
+        "description": "Use each Cirno's skill and spell at<br>least once",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "play",
+            "count": 100,
+            "chr": 16
+        },
+        "rewards": [
+            {
+                "type": "accessory",
+                "id": 16,
+                "comment": "Snowman"
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Naiad of The Lake",
+        "description": "Play 100 games as Cirno",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "play",
+            "count": 1000,
+            "chr": 16
+        },
+        "rewards": [
+            {
+                "type": "background",
+                "id": 16,
+                "comment": "The Lake"
+            },
+            {
+                "type": "title",
+                "name": null
+            }
+        ],
+        "name": "Absolute Zero",
+        "description": "Play 1000 games as Cirno",
+        "hidden": false
+    },
+
+
+
+    "Meiling",
     {
         "requirement": {
             "type": "win",
@@ -2107,6 +2176,10 @@
         "description": "Play 1000 games as Meiling",
         "hidden": false
     },
+
+
+
+    "Utsuho",
     {
         "requirement": {
             "type": "win",
@@ -2224,6 +2297,10 @@
         "description": "Play 1000 games as Utsuho",
         "hidden": false
     },
+
+
+
+    "Suwako",
     {
         "requirement": {
             "type": "win",
@@ -2341,6 +2418,9 @@
         "description": "Play 1000 games as Suwako",
         "hidden": false
     },
+
+
+    "Meta",
     {
         "requirement": {
             "type": "crash"

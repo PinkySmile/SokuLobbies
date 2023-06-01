@@ -32,10 +32,14 @@ static int (SokuLib::BattleClient::*og_BattleClientOnProcess)();
 static int (SokuLib::BattleClient::*og_BattleClientOnRender)();
 static int (SokuLib::SelectClient::*og_SelectClientOnProcess)();
 static int (SokuLib::SelectClient::*og_SelectClientOnRender)();
+static int (SokuLib::LoadingClient::*og_LoadingClientOnProcess)();
+static int (SokuLib::LoadingClient::*og_LoadingClientOnRender)();
 static int (SokuLib::BattleServer::*og_BattleServerOnProcess)();
 static int (SokuLib::BattleServer::*og_BattleServerOnRender)();
 static int (SokuLib::SelectServer::*og_SelectServerOnProcess)();
 static int (SokuLib::SelectServer::*og_SelectServerOnRender)();
+static int (SokuLib::LoadingServer::*og_LoadingServerOnProcess)();
+static int (SokuLib::LoadingServer::*og_LoadingServerOnRender)();
 static void (SokuLib::KeymapManager::*s_origKeymapManager_SetInputs)();
 
 wchar_t profilePath[MAX_PATH];
@@ -76,6 +80,23 @@ std::map<unsigned int, Character> characters{
 	{ SokuLib::CHARACTER_NAMAZU,    {"Namazu",    "Giant Catfish",          "namazu"}},
 	{ SokuLib::CHARACTER_RANDOM,    {"Random",    "Random Select",          "random_select"}},
 };
+
+void playSound(int se)
+{
+	if (
+		(SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER || SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT) &&
+		(
+			SokuLib::sceneId == SokuLib::SCENE_BATTLE ||
+			SokuLib::sceneId == SokuLib::SCENE_BATTLECL ||
+			SokuLib::sceneId == SokuLib::SCENE_BATTLESV ||
+			SokuLib::newSceneId == SokuLib::SCENE_BATTLE ||
+			SokuLib::newSceneId == SokuLib::SCENE_BATTLECL ||
+			SokuLib::newSceneId == SokuLib::SCENE_BATTLESV
+		)
+	)
+		return;
+	SokuLib::playSEWaveBuffer(se);
+}
 
 LONG WINAPI UnhandledExFilter(PEXCEPTION_POINTERS ExPtr)
 {
@@ -170,12 +191,30 @@ void countGame()
 int __fastcall ConnectOnProcess(SokuLib::MenuConnect *This)
 {
 	if (!menu)
-		menu = new LobbyMenu(This);
+		try {
+			menu = new LobbyMenu(This);
+		} catch (std::exception &e) {
+			MessageBoxA(
+				SokuLib::window,
+				(
+					"Error while loading lobby data.\n"
+					"Please make sure the assets are properly placed near the mod dll.\n"
+					"If they are, please try reinstalling the mod to fix it (save the .dat files in the folder which contains your progression).\n"
+					"If reinstalling doesn't fix the issue, contact the mod author and provide this error.\n"
+					"\n"
+					"Error:\n" +
+					std::string(e.what())
+				).c_str(),
+				"SokuLobby error",
+				MB_ICONERROR
+			);
+			return false;
+		}
 
 	auto res = (activated ? menu->onProcess() : (This->*og_ConnectOnProcess)()) & 0xFF;
 
 	if (*(byte*)0x0448e4a != 0x30 && SokuLib::inputMgrs.input.changeCard == 1 && !inputBoxShown) {
-		SokuLib::playSEWaveBuffer(0x28);
+		playSound(0x28);
 		activated = !activated;
 	}
 	if (!res) {
@@ -248,15 +287,47 @@ void processCommon(bool showChat)
 {
 	if (!activeMenu)
 		return;
-	if (showChat)
-		activeMenu->updateChat();
+	try {
+		activeMenu->updateChat(!showChat);
+	} catch (std::exception &e) {
+		MessageBoxA(
+			SokuLib::window,
+			(
+				"Error updating chat. You have been kicked from the lobby.\n"
+				"Please, report this error.\n"
+				"\n"
+				"Error:\n" +
+				std::string(e.what())
+			).c_str(),
+			"SokuLobby error",
+			MB_ICONERROR
+		);
+		delete activeMenu;
+		activeMenu = nullptr;
+	}
 }
-void renderCommon(bool showChat)
+void renderCommon()
 {
 	if (!activeMenu)
 		return;
-	if (showChat)
+	try {
 		activeMenu->renderChat();
+	} catch (std::exception &e) {
+		MessageBoxA(
+			SokuLib::window,
+			(
+				"Error rendering chat. You have been kicked from the lobby.\n"
+				"Please, report this error.\n"
+				"\n"
+				"Error:\n" +
+				std::string(e.what())
+			).c_str(),
+			"SokuLobby error",
+			MB_ICONERROR
+		);
+		delete activeMenu;
+		activeMenu = nullptr;
+	}
 }
 
 int __fastcall BattleOnProcess(SokuLib::Battle *This)
@@ -277,7 +348,7 @@ int __fastcall BattleOnProcess(SokuLib::Battle *This)
 }
 int __fastcall BattleWatchOnProcess(SokuLib::BattleWatch *This)
 {
-	processCommon(true);
+	processCommon(false);
 	return (This->*og_BattleWatchOnProcess)();
 }
 int __fastcall LoadingWatchOnProcess(SokuLib::LoadingWatch *This)
@@ -308,6 +379,11 @@ int __fastcall SelectClientOnProcess(SokuLib::SelectClient *This)
 	processCommon(true);
 	return (This->*og_SelectClientOnProcess)();
 }
+int __fastcall LoadingClientOnProcess(SokuLib::LoadingClient *This)
+{
+	processCommon(true);
+	return (This->*og_LoadingClientOnProcess)();
+}
 int __fastcall BattleServerOnProcess(SokuLib::BattleServer *This)
 {
 	processCommon(false);
@@ -331,48 +407,67 @@ int __fastcall SelectServerOnProcess(SokuLib::SelectServer *This)
 	processCommon(true);
 	return (This->*og_SelectServerOnProcess)();
 }
+int __fastcall LoadingServerOnProcess(SokuLib::LoadingServer *This)
+{
+	processCommon(true);
+	return (This->*og_LoadingServerOnProcess)();
+}
 
 
 int __fastcall BattleWatchOnRender(SokuLib::BattleWatch *This)
 {
 	auto ret = (This->*og_BattleWatchOnRender)();
 
-	renderCommon(true);
+	renderCommon();
 	return ret;
 }
 int __fastcall LoadingWatchOnRender(SokuLib::LoadingWatch *This)
 {
 	auto ret = (This->*og_LoadingWatchOnRender)();
 
-	renderCommon(true);
+	renderCommon();
 	return ret;
 }
 int __fastcall BattleClientOnRender(SokuLib::BattleClient *This)
 {
 	auto ret = (This->*og_BattleClientOnRender)();
 
-	renderCommon(false);
+	renderCommon();
 	return ret;
 }
 int __fastcall SelectClientOnRender(SokuLib::SelectClient *This)
 {
 	auto ret = (This->*og_SelectClientOnRender)();
 
-	renderCommon(true);
+	renderCommon();
+	return ret;
+}
+int __fastcall LoadingClientOnRender(SokuLib::LoadingClient *This)
+{
+	auto ret = (This->*og_LoadingClientOnRender)();
+
+	renderCommon();
 	return ret;
 }
 int __fastcall BattleServerOnRender(SokuLib::BattleServer *This)
 {
 	auto ret = (This->*og_BattleServerOnRender)();
 
-	renderCommon(false);
+	renderCommon();
 	return ret;
 }
 int __fastcall SelectServerOnRender(SokuLib::SelectServer *This)
 {
 	auto ret = (This->*og_SelectServerOnRender)();
 
-	renderCommon(true);
+	renderCommon();
+	return ret;
+}
+int __fastcall LoadingServerOnRender(SokuLib::LoadingServer *This)
+{
+	auto ret = (This->*og_LoadingServerOnRender)();
+
+	renderCommon();
 	return ret;
 }
 
@@ -506,7 +601,7 @@ int __stdcall Hooked_EndScene(IDirect3DDevice9* pDevice)
 {
 	if (SokuLib::sceneId != SokuLib::SCENE_LOGO && lobbyData) {
 #ifdef _DEBUG
-		if (SokuLib::checkKeyOneshot(DIK_F4, false, false, false)) {
+		if (SokuLib::checkKeyOneshot(DIK_F4, false, false, false) && !activeMenu) {
 			try {
 				lobbyData = std::make_unique<LobbyData>();
 			} catch (std::exception &e) {
@@ -575,10 +670,14 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	og_LoadingWatchOnRender  = SokuLib::TamperDword(&SokuLib::VTable_LoadingWatch.onRender,  LoadingWatchOnRender);
 	og_BattleClientOnProcess = SokuLib::TamperDword(&SokuLib::VTable_BattleClient.onProcess, BattleClientOnProcess);
 	og_BattleClientOnRender  = SokuLib::TamperDword(&SokuLib::VTable_BattleClient.onRender,  BattleClientOnRender);
+	og_LoadingClientOnProcess= SokuLib::TamperDword(&SokuLib::VTable_LoadingClient.onProcess,LoadingClientOnProcess);
+	og_LoadingClientOnRender = SokuLib::TamperDword(&SokuLib::VTable_LoadingClient.onRender, LoadingClientOnRender);
 	og_SelectClientOnProcess = SokuLib::TamperDword(&SokuLib::VTable_SelectClient.onProcess, SelectClientOnProcess);
 	og_SelectClientOnRender  = SokuLib::TamperDword(&SokuLib::VTable_SelectClient.onRender,  SelectClientOnRender);
 	og_BattleServerOnProcess = SokuLib::TamperDword(&SokuLib::VTable_BattleServer.onProcess, BattleServerOnProcess);
 	og_BattleServerOnRender  = SokuLib::TamperDword(&SokuLib::VTable_BattleServer.onRender,  BattleServerOnRender);
+	og_LoadingServerOnProcess= SokuLib::TamperDword(&SokuLib::VTable_LoadingServer.onProcess,LoadingServerOnProcess);
+	og_LoadingServerOnRender = SokuLib::TamperDword(&SokuLib::VTable_LoadingServer.onRender, LoadingServerOnRender);
 	og_SelectServerOnProcess = SokuLib::TamperDword(&SokuLib::VTable_SelectServer.onProcess, SelectServerOnProcess);
 	og_SelectServerOnRender  = SokuLib::TamperDword(&SokuLib::VTable_SelectServer.onRender,  SelectServerOnRender);
 	//ogBattleMgrOnRender  = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onRender,  CBattleManager_OnRender);

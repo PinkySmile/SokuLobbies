@@ -78,6 +78,9 @@ void LobbyData::_loadAvatars()
 	stream.close();
 	this->avatars.reserve(j.size());
 	for (auto &val : j) {
+		// Strings in the array are used as comments
+		if (val.is_string())
+			continue;
 		this->avatars.emplace_back();
 
 		auto &avatar = this->avatars.back();
@@ -136,6 +139,10 @@ void LobbyData::_loadAchievements()
 			break;
 		}
 	for (auto &val : j) {
+		// Strings in the array are used as comments
+		if (val.is_string())
+			continue;
+
 		this->achievements.emplace_back();
 
 		auto &achievement = this->achievements.back();
@@ -671,7 +678,7 @@ void LobbyData::update()
 	if (this->achievementAwardQueue.empty())
 		return;
 	if (this->_achTimer == 0)
-		SokuLib::playSEWaveBuffer(33);
+		playSound(33);
 	this->_achTimer++;
 	if (this->_achTimer < ACH_GET_FADE_IN_ANIM)
 		this->achHolder.behindGear.setPosition({

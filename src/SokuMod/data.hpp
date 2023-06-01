@@ -26,5 +26,7 @@ extern bool hasSoku2;
 extern std::map<unsigned int, Character> characters;
 extern std::function<int ()> onGameEnd;
 
+void playSound(int se);
+
 
 #endif //SOKULOBBIES_DATA_HPP

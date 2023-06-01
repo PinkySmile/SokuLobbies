@@ -156,7 +156,7 @@ bool SmallHostlist::update()
 		int translate = (200 * this->_ratio) * std::pow((float)this->_overlayTimer / MAX_OVERLAY_ANIMATION, 2);
 
 		if (this->_overlayTimer == 5)
-			SokuLib::playSEWaveBuffer(61);
+			playSound(61);
 		for (auto &elem : this->_topOverlay)
 			elem->translate.y = translate;
 		for (auto &elem : this->_botOverlay)
@@ -166,11 +166,14 @@ bool SmallHostlist::update()
 	this->_errorMutex.lock();
 	if (this->_errorMsg) {
 		auto errorMsg = this->_errorMsg;
-		SokuLib::Vector2i size;
+		SokuLib::Vector2i size{0, 0};
 
 		this->_errorMsg = nullptr;
 		this->_errorMutex.unlock();
-		this->_error.texture.createFromText(("Refresh error: " + std::string(errorMsg)).c_str(), lobbyData->getFont(12), {540, 20}, &size);
+		if (*errorMsg)
+			this->_error.texture.createFromText(("Refresh error: " + std::string(errorMsg)).c_str(), lobbyData->getFont(12), {540, 20}, &size);
+		else
+			this->_error.texture.destroy();
 		free(errorMsg);
 		this->_error.setSize(size.to<unsigned>());
 		this->_error.rect.width = size.x;
@@ -187,7 +190,7 @@ bool SmallHostlist::update()
 			*(*(char **)0x89a390 + 20) = false;
 			this->_parent->choice = 0;
 			this->_parent->subchoice = 0;
-			SokuLib::playSEWaveBuffer(0x29);
+			playSound(0x29);
 		}
 	}
 	for (auto &elem : this->_background)
@@ -203,7 +206,7 @@ bool SmallHostlist::update()
 	if (std::abs(SokuLib::inputMgrs.input.horizontalAxis) == 1) {
 		this->_spectator = !this->_spectator;
 		this->_hostSelect = 0;
-		SokuLib::playSEWaveBuffer(0x27);
+		playSound(0x27);
 		return true;
 	}
 	if (!this->_selected) {
@@ -214,19 +217,19 @@ bool SmallHostlist::update()
 				return false;
 			else {
 				this->_selected = true;
-				SokuLib::playSEWaveBuffer(0x28);
+				playSound(0x28);
 				return true;
 			}
 		}
 		if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1) {
 			this->_selection = !this->_selection;
-			SokuLib::playSEWaveBuffer(0x27);
+			playSound(0x27);
 			return true;
 		}
 	} else if (!this->_parent->choice) {
 		if (SokuLib::inputMgrs.input.b == 1) {
 			this->_selected = false;
-			SokuLib::playSEWaveBuffer(0x29);
+			playSound(0x29);
 			return true;
 		}
 		if (this->_spectator ? this->_playEntries.empty() : this->_hostEntries.empty())
@@ -237,7 +240,7 @@ bool SmallHostlist::update()
 				this->_spectator ? this->_playEntries[this->_hostSelect]->port : this->_hostEntries[this->_hostSelect]->port,
 				this->_spectator
 			);
-			SokuLib::playSEWaveBuffer(0x28);
+			playSound(0x28);
 			return true;
 		}
 
@@ -250,7 +253,7 @@ bool SmallHostlist::update()
 				this->_hostSelect = (this->_spectator ? this->_playEntries.size() : this->_hostEntries.size()) - 1;
 			else
 				this->_hostSelect--;
-			SokuLib::playSEWaveBuffer(0x27);
+			playSound(0x27);
 			return true;
 		}
 	}
@@ -448,7 +451,7 @@ void SmallHostlist::_refreshHostlist()
 		this->_entriesMutex.unlock();
 		locked = false;
 		if (newHost)
-			SokuLib::playSEWaveBuffer(49);
+			playSound(49);
 		this->_errorMutex.lock();
 		if (this->_errorMsg)
 			free(this->_errorMsg);

@@ -12,6 +12,8 @@
 #define CURSOR_STARTY 233
 #define CURSOR_STEP 6
 
+void playSound(int se);
+
 bool inputBoxShown = false;
 static bool hasEnglishPatch;
 static bool changed = false;
@@ -111,17 +113,17 @@ void inputBoxUpdate()
 		return;
 	}
 	if (timers[VK_ESCAPE] == 1) {
-		SokuLib::playSEWaveBuffer(0x29);
+		playSound(0x29);
 		escPressed = true;
 		return;
 	}
 	mutex.lock();
 	if (timers[VK_HOME] == 1) {
-		SokuLib::playSEWaveBuffer(0x27);
+		playSound(0x27);
 		updateCursor(0);
 	}
 	if (timers[VK_END] == 1) {
-		SokuLib::playSEWaveBuffer(0x27);
+		playSound(0x27);
 		updateCursor(buffer.size() - 1);
 	}
 	if (timers[VK_RETURN] == 1) {
@@ -134,13 +136,13 @@ void inputBoxUpdate()
 			buffer.erase(buffer.begin() + cursorPos - 1);
 			updateCursor(cursorPos - 1);
 			changes = true;
-			SokuLib::playSEWaveBuffer(0x27);
+			playSound(0x27);
 		}
 	}
 	if (timers[VK_DELETE] == 1 || (timers[VK_DELETE] > 36 && timers[VK_DELETE] % 6 == 0)) {
 		if (cursorPos < buffer.size() - 1) {
 			buffer.erase(buffer.begin() + cursorPos);
-			SokuLib::playSEWaveBuffer(0x27);
+			playSound(0x27);
 			changes = true;
 			textSprite.texture.createFromText(sanitizeInput().c_str(), defaultFont12, {8 * buffer.size(), 1800});
 		}
@@ -148,13 +150,13 @@ void inputBoxUpdate()
 	if (timers[VK_LEFT] == 1 || (timers[VK_LEFT] > 36 && timers[VK_LEFT] % 3 == 0)) {
 		if (cursorPos != 0) {
 			updateCursor(cursorPos - 1);
-			SokuLib::playSEWaveBuffer(0x27);
+			playSound(0x27);
 		}
 	}
 	if (timers[VK_RIGHT] == 1 || (timers[VK_RIGHT] > 36 && timers[VK_RIGHT] % 3 == 0)) {
 		if (cursorPos != buffer.size() - 1) {
 			updateCursor(cursorPos + 1);
-			SokuLib::playSEWaveBuffer(0x27);
+			playSound(0x27);
 		}
 	}
 	if (lastPressed) {
@@ -162,9 +164,23 @@ void inputBoxUpdate()
 		if (t == 1 || (t > 36 && t % 6 == 0)) {
 			buffer.insert(buffer.begin() + cursorPos, lastPressed);
 			updateCursor(cursorPos + 1);
-			SokuLib::playSEWaveBuffer(0x27);
+			playSound(0x27);
 			changes = true;
 		}
+	}
+	if (
+		(SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER || SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT) &&
+		(
+			SokuLib::sceneId == SokuLib::SCENE_BATTLE ||
+			SokuLib::sceneId == SokuLib::SCENE_BATTLECL ||
+			SokuLib::sceneId == SokuLib::SCENE_BATTLESV ||
+			SokuLib::newSceneId == SokuLib::SCENE_BATTLE ||
+			SokuLib::newSceneId == SokuLib::SCENE_BATTLECL ||
+			SokuLib::newSceneId == SokuLib::SCENE_BATTLESV
+		)
+	) {
+		mutex.unlock();
+		return;
 	}
 	if (changes)
 		textSprite.texture.createFromText(sanitizeInput().c_str(), defaultFont12, {max(292, 8 * buffer.size()), 1800});
@@ -188,7 +204,7 @@ LRESULT __stdcall Hooked_WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
 					buffer.insert(buffer.begin() + cursorPos, lastPressed);
 					updateCursor(cursorPos + 1);
 					changes = true;
-					SokuLib::playSEWaveBuffer(0x27);
+					playSound(0x27);
 				}
 				lastPressed = chr;
 				t = 0;
@@ -200,7 +216,7 @@ LRESULT __stdcall Hooked_WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
 		if (lastPressed && t == 0) {
 			buffer.insert(buffer.begin() + cursorPos, lastPressed);
 			updateCursor(cursorPos + 1);
-			SokuLib::playSEWaveBuffer(0x27);
+			playSound(0x27);
 		}
 		lastPressed = 0;
 		t = 0;
@@ -282,7 +298,7 @@ void inputBoxUnloadAssets()
 
 void openInputDialog(const char *title, const char *defaultValue, char shownChar)
 {
-	SokuLib::playSEWaveBuffer(0x28);
+	playSound(0x28);
 
 	shownChr = shownChar;
 	memset(current, 0, sizeof(current));

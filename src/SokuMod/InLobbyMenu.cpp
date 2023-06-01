@@ -277,7 +277,7 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 			);
 	this->_machines.emplace_back(
 		UINT32_MAX,
-		SokuLib::Vector2i{static_cast<int>(bg.fg.getSize().x - 50), static_cast<int>(bg.fg.getSize().y - bg.groundPos)},
+		SokuLib::Vector2i{150, static_cast<int>(bg.fg.getSize().y - bg.groundPos)},
 		&lobbyData->arcades.hostlist,
 		lobbyData->arcades.skins[0]
 	);
@@ -304,25 +304,25 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 		SokuLib::playBGM(this->_music.c_str());
 	};
 	connection.onConnectRequest = [this](const std::string &ip, unsigned short port, bool spectate){
-		SokuLib::playSEWaveBuffer(57);
+		playSound(57);
 		this->_connection.getMe()->battleStatus = 2;
 		this->_parent->joinHost(ip.c_str(), port, spectate);
 	};
 	connection.onError = [this](const std::string &msg){
-		SokuLib::playSEWaveBuffer(38);
+		playSound(38);
 		this->_wasConnected = true;
 		MessageBox(SokuLib::window, msg.c_str(), "Internal Error", MB_ICONERROR);
 	};
 	connection.onImpMsg = [this](const std::string &msg){
-		SokuLib::playSEWaveBuffer(23);
+		playSound(23);
 		MessageBox(SokuLib::window, msg.c_str(), "Notification from server", MB_ICONINFORMATION);
 	};
 	connection.onMsg = [this](int32_t channel, int32_t player, const std::string &msg){
-		SokuLib::playSEWaveBuffer(49);
+		playSound(49);
 		this->_addMessageToList(channel, player, msg);
 	};
 	connection.onHostRequest = [this]{
-		SokuLib::playSEWaveBuffer(57);
+		playSound(57);
 		this->_connection.getMe()->battleStatus = 2;
 		if (this->_parent->choice == 0)
 			this->_startHosting();
@@ -411,320 +411,351 @@ void InLobbyMenu::_()
 
 int InLobbyMenu::onProcess()
 {
-	if (!this->_connection.isInit() && !this->_wasConnected) {
-		this->_loadingGear.setRotation(this->_loadingGear.getRotation() + 0.1);
-		return this->_connection.isConnected();
-	}
-	if (!this->_connection.isInit())
-		return false;
-
-	this->_connection.meMutex.lock();
-	auto inputs = SokuLib::inputMgrs.input;
-	auto me = this->_connection.getMe();
-
-	memset(&SokuLib::inputMgrs.input, 0, sizeof(SokuLib::inputMgrs.input));
-	// We call MenuConnect::onProcess directly because we don't want to trigger any hook.
-	// After all, we are not technically inside the connect menu.
-	reinterpret_cast<void (__thiscall *)(SokuLib::MenuConnect *)>(0x449160)(this->_parent);
-	SokuLib::inputMgrs.input = inputs;
-	if (this->_hostlist && !this->_hostlist->update()) {
-		SokuLib::playBGM(this->_music.c_str());
-		this->_hostlist.reset();
-		this->_currentMachine = nullptr;
-		SokuLib::playSEWaveBuffer(0x29);
-		this->_connection.meMutex.unlock();
-		return true;
-	}
-	this->updateChat();
-	if (this->_parent->choice > 0) {
-		if (this->_parent->subchoice == 5) { //Already Playing
-			this->_parent->notSpectateFlag = !this->_parent->notSpectateFlag;
-			this->_parent->join();
-		} else if (this->_parent->subchoice == 10) { //Connect Failed
-			Lobbies::PacketArcadeLeave leave{0};
-
-			this->_connection.send(&leave, sizeof(leave));
-			*(*(char **)0x89a390 + 20) = false;
-			this->_addMessageToList(0xFF0000, 0, "Failed connecting to opponent: " + std::string(this->_parent->subchoice == 5 ? "They are already playing" : "Connection failed"));
-			this->_parent->choice = 0;
-			this->_parent->subchoice = 0;
-			messageBox->active = false;
+	try {
+		if (!this->_connection.isInit() && !this->_wasConnected) {
+			this->_loadingGear.setRotation(this->_loadingGear.getRotation() + 0.1);
+			return this->_connection.isConnected();
 		}
-	}
-	if (!this->_editingText && SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
-		SokuLib::playSEWaveBuffer(0x29);
-		if (!this->_editingText) {
-			this->_connection.meMutex.unlock();
-			this->_unhook();
-			this->_connection.disconnect();
-			if (this->_parent->choice == SokuLib::MenuConnect::CHOICE_HOST) {
-				memset(&SokuLib::inputMgrs.input, 0, sizeof(SokuLib::inputMgrs.input));
-				SokuLib::inputMgrs.input.b = 1;
-				reinterpret_cast<void (__thiscall *)(SokuLib::MenuConnect *)>(0x449160)(this->_parent);
-				SokuLib::inputMgrs.input = inputs;
-			} else
-				SokuLib::playSEWaveBuffer(0x29);
-			this->_parent->choice = 0;
-			this->_parent->subchoice = 0;
+		if (!this->_connection.isInit())
 			return false;
-		} else
-			this->_editingText = false;
-	}
 
-	auto &bg = lobbyData->backgrounds[this->_background];
+		this->_connection.meMutex.lock();
+		auto inputs = SokuLib::inputMgrs.input;
+		auto me = this->_connection.getMe();
 
-	if (!this->_currentMachine && !this->_editingText) {
-		if (SokuLib::inputMgrs.input.b == 1) {
-			SokuLib::playSEWaveBuffer(0x29);
+		memset(&SokuLib::inputMgrs.input, 0, sizeof(SokuLib::inputMgrs.input));
+		// We call MenuConnect::onProcess directly because we don't want to trigger any hook.
+		// After all, we are not technically inside the connect menu.
+		reinterpret_cast<void (__thiscall *)(SokuLib::MenuConnect *)>(0x449160)(this->_parent);
+		SokuLib::inputMgrs.input = inputs;
+		if (this->_hostlist && !this->_hostlist->update()) {
+			SokuLib::playBGM(this->_music.c_str());
+			this->_hostlist.reset();
+			this->_currentMachine = nullptr;
+			playSound(0x29);
 			this->_connection.meMutex.unlock();
-			this->_unhook();
-			this->_connection.disconnect();
-			return false;
+			return true;
 		}
-		if (SokuLib::inputMgrs.input.a == 1) {
-			for (auto &machine : this->_machines) {
-				if (me->pos.x < machine.pos.x - machine.skin.sprite.getSize().x / 2)
-					continue;
-				if (me->pos.y < machine.pos.y)
-					continue;
-				if (me->pos.x > machine.pos.x + machine.skin.sprite.getSize().x / 2)
-					continue;
-				if (me->pos.y > machine.pos.y + machine.skin.sprite.getSize().y)
-					continue;
-				this->_currentMachine = &machine;
-				SokuLib::playSEWaveBuffer(0x28);
-				if (machine.id == UINT32_MAX) {
-					this->_hostlist.reset(new SmallHostlist(0.6, {128, 48}, this->_parent));
-					SokuLib::playBGM("data/bgm/op2.ogg");
-					break;
-				}
+		this->updateChat(false);
+		if (this->_parent->choice > 0) {
+			if (this->_parent->subchoice == 5) { //Already Playing
+				this->_parent->notSpectateFlag = !this->_parent->notSpectateFlag;
+				this->_parent->join();
+			} else if (this->_parent->subchoice == 10) { //Connect Failed
+				Lobbies::PacketArcadeLeave leave{0};
 
-				Lobbies::PacketGameRequest packet{machine.id};
-
-				me->battleStatus = 1;
-				this->_connection.send(&packet, sizeof(packet));
-				printf("%i\n", me->settings.hostPref);
-				if (me->settings.hostPref & Lobbies::HOSTPREF_ACCEPT_HOSTLIST)
-					this->_startHosting();
-				break;
+				this->_connection.send(&leave, sizeof(leave));
+				*(*(char **)0x89a390 + 20) = false;
+				this->_addMessageToList(0xFF0000, 0, "Failed connecting to opponent: " + std::string(this->_parent->subchoice == 5 ? "They are already playing" : "Connection failed"));
+				this->_parent->choice = 0;
+				this->_parent->subchoice = 0;
+				messageBox->active = false;
 			}
 		}
-
-		bool dirChanged;
-
-		if (SokuLib::inputMgrs.input.horizontalAxis) {
-			auto newDir = me->dir;
-
-			if (SokuLib::inputMgrs.input.horizontalAxis < 0 && me->pos.x < PLAYER_H_SPEED) {
-				SokuLib::playSEWaveBuffer(0x29);
+		if (!this->_editingText && SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
+			playSound(0x29);
+			if (!this->_editingText) {
 				this->_connection.meMutex.unlock();
+				this->_unhook();
+				this->_connection.disconnect();
+				if (this->_parent->choice == SokuLib::MenuConnect::CHOICE_HOST) {
+					memset(&SokuLib::inputMgrs.input, 0, sizeof(SokuLib::inputMgrs.input));
+					SokuLib::inputMgrs.input.b = 1;
+					reinterpret_cast<void (__thiscall *)(SokuLib::MenuConnect *)>(0x449160)(this->_parent);
+					SokuLib::inputMgrs.input = inputs;
+				} else
+					playSound(0x29);
+				this->_parent->choice = 0;
+				this->_parent->subchoice = 0;
+				return false;
+			} else
+				this->_editingText = false;
+		}
+
+		auto &bg = lobbyData->backgrounds[this->_background];
+
+		if (!this->_currentMachine && !this->_editingText) {
+			if (SokuLib::inputMgrs.input.b == 1) {
+				playSound(0x29);
+				this->_connection.meMutex.unlock();
+				this->_unhook();
 				this->_connection.disconnect();
 				return false;
 			}
-			newDir &= 0b01100;
-			newDir |= 0b00001 << (SokuLib::inputMgrs.input.horizontalAxis < 0);
-			if (SokuLib::inputMgrs.input.horizontalAxis < 0)
-				newDir |= 0b10000;
-			if (me->pos.x >= bg.fg.getSize().x - 20)
-				newDir &= 0b11110;
-			dirChanged = newDir != me->dir;
-			me->dir = newDir;
+			if (SokuLib::inputMgrs.input.a == 1) {
+				for (auto &machine : this->_machines) {
+					if (me->pos.x < machine.pos.x - machine.skin.sprite.getSize().x / 2)
+						continue;
+					if (me->pos.y < machine.pos.y)
+						continue;
+					if (me->pos.x > machine.pos.x + machine.skin.sprite.getSize().x / 2)
+						continue;
+					if (me->pos.y > machine.pos.y + machine.skin.sprite.getSize().y)
+						continue;
+					this->_currentMachine = &machine;
+					playSound(0x28);
+					if (machine.id == UINT32_MAX) {
+						this->_hostlist.reset(new SmallHostlist(0.6, {128, 48}, this->_parent));
+						SokuLib::playBGM("data/bgm/op2.ogg");
+						break;
+					}
+
+					Lobbies::PacketGameRequest packet{machine.id};
+
+					me->battleStatus = 1;
+					this->_connection.send(&packet, sizeof(packet));
+					printf("%i\n", me->settings.hostPref);
+					if (me->settings.hostPref & Lobbies::HOSTPREF_ACCEPT_HOSTLIST)
+						this->_startHosting();
+					break;
+				}
+			}
+
+			bool dirChanged;
+
+			if (SokuLib::inputMgrs.input.horizontalAxis) {
+				auto newDir = me->dir;
+
+				if (SokuLib::inputMgrs.input.horizontalAxis < 0 && me->pos.x < PLAYER_H_SPEED) {
+					playSound(0x29);
+					this->_connection.meMutex.unlock();
+					this->_connection.disconnect();
+					return false;
+				}
+				newDir &= 0b01100;
+				newDir |= 0b00001 << (SokuLib::inputMgrs.input.horizontalAxis < 0);
+				if (SokuLib::inputMgrs.input.horizontalAxis < 0)
+					newDir |= 0b10000;
+				if (me->pos.x >= bg.fg.getSize().x - 20)
+					newDir &= 0b11110;
+				dirChanged = newDir != me->dir;
+				me->dir = newDir;
+			} else {
+				dirChanged = (me->dir & 0b00011) != 0;
+				me->dir &= 0b11100;
+			}
+			if (SokuLib::inputMgrs.input.verticalAxis) {
+				auto newDir = me->dir;
+
+				newDir &= 0b10011;
+				newDir |= 0b00100 << (SokuLib::inputMgrs.input.verticalAxis > 0);
+				if (me->pos.y <= bg.fg.getSize().y - bg.groundPos)
+					newDir &= 0b10111;
+				dirChanged = newDir != me->dir;
+				me->dir = newDir;
+			} else {
+				dirChanged |= (me->dir & 0b01100) != 0;
+				me->dir &= 0b10011;
+			}
+			if (dirChanged) {
+				Lobbies::PacketMove l{0, me->dir};
+
+				this->_connection.send(&l, sizeof(l));
+			}
 		} else {
-			dirChanged = (me->dir & 0b00011) != 0;
-			me->dir &= 0b11100;
-		}
-		if (SokuLib::inputMgrs.input.verticalAxis) {
-			auto newDir = me->dir;
+			if (me->dir & 0b1111) {
+				me->dir &= 0b10000;
 
-			newDir &= 0b10011;
-			newDir |= 0b00100 << (SokuLib::inputMgrs.input.verticalAxis > 0);
-			if (me->pos.y <= bg.fg.getSize().y - bg.groundPos)
-				newDir &= 0b10111;
-			dirChanged = newDir != me->dir;
-			me->dir = newDir;
-		} else {
-			dirChanged |= (me->dir & 0b01100) != 0;
-			me->dir &= 0b10011;
-		}
-		if (dirChanged) {
-			Lobbies::PacketMove l{0, me->dir};
+				Lobbies::PacketMove m{0, me->dir};
 
-			this->_connection.send(&l, sizeof(l));
-		}
-	} else {
-		if (me->dir & 0b1111) {
-			me->dir &= 0b10000;
+				this->_connection.send(&m, sizeof(m));
+			}
+			if (SokuLib::inputMgrs.input.b == 1 && !this->_editingText && !this->_hostlist) {
+				Lobbies::PacketArcadeLeave l{0};
 
-			Lobbies::PacketMove m{0, me->dir};
-
-			this->_connection.send(&m, sizeof(m));
+				this->_connection.send(&l, sizeof(l));
+				me->battleStatus = 0;
+				this->_currentMachine = nullptr;
+				if (this->_parent->choice == SokuLib::MenuConnect::CHOICE_HOST) {
+					memset(&SokuLib::inputMgrs.input, 0, sizeof(SokuLib::inputMgrs.input));
+					SokuLib::inputMgrs.input.b = 1;
+					reinterpret_cast<void (__thiscall *)(SokuLib::MenuConnect *)>(0x449160)(this->_parent);
+					SokuLib::inputMgrs.input = inputs;
+				} else
+					playSound(0x29);
+				this->_parent->choice = 0;
+				this->_parent->subchoice = 0;
+				messageBox->active = false;
+			}
 		}
-		if (SokuLib::inputMgrs.input.b == 1 && !this->_editingText && !this->_hostlist) {
-			Lobbies::PacketArcadeLeave l{0};
-
-			this->_connection.send(&l, sizeof(l));
-			me->battleStatus = 0;
-			this->_currentMachine = nullptr;
-			if (this->_parent->choice == SokuLib::MenuConnect::CHOICE_HOST) {
-				memset(&SokuLib::inputMgrs.input, 0, sizeof(SokuLib::inputMgrs.input));
-				SokuLib::inputMgrs.input.b = 1;
-				reinterpret_cast<void (__thiscall *)(SokuLib::MenuConnect *)>(0x449160)(this->_parent);
-				SokuLib::inputMgrs.input = inputs;
-			} else
-				SokuLib::playSEWaveBuffer(0x29);
-			this->_parent->choice = 0;
-			this->_parent->subchoice = 0;
-			messageBox->active = false;
+		for (auto &machine : this->_machines) {
+			machine.mutex.lock();
+			if (machine.animIdle)
+				goto checkSkinAnim;
+			machine.animationCtr++;
+			if (machine.animationCtr < 60 / machine.currentAnim->frameRate)
+				goto checkSkinAnim;
+			machine.animationCtr = 0;
+			machine.animation++;
+			if (machine.animation < machine.currentAnim->frameCount)
+				goto checkSkinAnim;
+			if (machine.currentAnim->loop)
+				machine.animation = 0;
+			else {
+				machine.animIdle = true;
+				machine.animation--;
+			}
+		checkSkinAnim:
+			machine.skinAnimationCtr++;
+			if (machine.skinAnimationCtr < 60 / machine.skin.frameRate)
+				goto done;
+			machine.skinAnimationCtr = 0;
+			machine.skinAnimation++;
+			if (machine.skinAnimation < machine.skin.frameCount)
+				goto done;
+			machine.skinAnimation = 0;
+		done:
+			machine.mutex.unlock();
 		}
+
+		this->_connection.updatePlayers(lobbyData->avatars);
+		if (me->pos.x < 320)
+			this->_translate.x = 0;
+		else if (me->pos.x > bg.fg.getSize().x - 320)
+			this->_translate.x = 640 - bg.fg.getSize().x;
+		else
+			this->_translate.x = 320 - me->pos.x;
+		if (me->pos.y < 140)
+			this->_translate.y = 0;
+		else
+			this->_translate.y = me->pos.y - 140;
+		this->_connection.meMutex.unlock();
+		return true;
+	} catch (std::exception &e) {
+		MessageBoxA(
+			SokuLib::window,
+			(
+				"Error updating in game lobby. You have been kicked from the lobby.\n"
+				"Please, report this error.\n"
+				"\n"
+				"Error:\n" +
+				std::string(e.what())
+			).c_str(),
+			"SokuLobby error",
+			MB_ICONERROR
+		);
+		return false;
 	}
-	for (auto &machine : this->_machines) {
-		machine.mutex.lock();
-		if (machine.animIdle)
-			goto checkSkinAnim;
-		machine.animationCtr++;
-		if (machine.animationCtr < 60 / machine.currentAnim->frameRate)
-			goto checkSkinAnim;
-		machine.animationCtr = 0;
-		machine.animation++;
-		if (machine.animation < machine.currentAnim->frameCount)
-			goto checkSkinAnim;
-		if (machine.currentAnim->loop)
-			machine.animation = 0;
-		else {
-			machine.animIdle = true;
-			machine.animation--;
-		}
-	checkSkinAnim:
-		machine.skinAnimationCtr++;
-		if (machine.skinAnimationCtr < 60 / machine.skin.frameRate)
-			goto done;
-		machine.skinAnimationCtr = 0;
-		machine.skinAnimation++;
-		if (machine.skinAnimation < machine.skin.frameCount)
-			goto done;
-		machine.skinAnimation = 0;
-	done:
-		machine.mutex.unlock();
-	}
-
-	this->_connection.updatePlayers(lobbyData->avatars);
-	if (me->pos.x < 320)
-		this->_translate.x = 0;
-	else if (me->pos.x > bg.fg.getSize().x - 320)
-		this->_translate.x = 640 - bg.fg.getSize().x;
-	else
-		this->_translate.x = 320 - me->pos.x;
-	if (me->pos.y < 140)
-		this->_translate.y = 0;
-	else
-		this->_translate.y = me->pos.y - 140;
-	this->_connection.meMutex.unlock();
-	return true;
 }
 
 int InLobbyMenu::onRender()
 {
-	if (!this->_connection.isInit() && !this->_wasConnected) {
-		this->_messageBox.draw();
-		this->_loadingText.draw();
-		this->_loadingGear.setRotation(-this->_loadingGear.getRotation());
-		this->_loadingGear.setPosition({412, 227});
-		this->_loadingGear.draw();
-		this->_loadingGear.setRotation(-this->_loadingGear.getRotation());
-		this->_loadingGear.setPosition({412 + 23, 227 - 18});
-		this->_loadingGear.draw();
-		return 0;
-	}
-
-	auto &bg = lobbyData->backgrounds[this->_background];
-
-	bg.bg.setPosition({
-		static_cast<int>(this->_translate.x / bg.parallaxFactor),
-		static_cast<int>(this->_translate.y / bg.parallaxFactor) - static_cast<int>(bg.bg.getSize().y) + 480
-	});
-	bg.bg.draw();
-	bg.fg.setPosition({
-		this->_translate.x,
-		this->_translate.y - static_cast<int>(bg.fg.getSize().y) + 480
-	});
-	bg.fg.draw();
-	for (auto &machine : this->_machines) {
-		SokuLib::Vector2i pos{
-			static_cast<int>(machine.pos.x) - static_cast<int>(machine.skin.sprite.getSize().x / 2) + this->_translate.x,
-			480 - static_cast<int>(machine.pos.y + machine.skin.sprite.getSize().y) + this->_translate.y
-		};
-
-		machine.mutex.lock();
-		machine.skin.sprite.setPosition(pos);
-		machine.skin.sprite.rect.left = machine.skinAnimation * machine.skin.sprite.rect.width;
-		machine.skin.sprite.draw();
-		pos += machine.skin.animationOffsets;
-		machine.currentAnim->sprite.setPosition(pos);
-		if (machine.currentAnim->tilePerLine) {
-			machine.currentAnim->sprite.rect.left = machine.animation % machine.currentAnim->tilePerLine * machine.currentAnim->size.x;
-			machine.currentAnim->sprite.rect.top = machine.animation / machine.currentAnim->tilePerLine * machine.currentAnim->size.y;
+	try {
+		if (!this->_connection.isInit() && !this->_wasConnected) {
+			this->_messageBox.draw();
+			this->_loadingText.draw();
+			this->_loadingGear.setRotation(-this->_loadingGear.getRotation());
+			this->_loadingGear.setPosition({412, 227});
+			this->_loadingGear.draw();
+			this->_loadingGear.setRotation(-this->_loadingGear.getRotation());
+			this->_loadingGear.setPosition({412 + 23, 227 - 18});
+			this->_loadingGear.draw();
+			return 0;
 		}
-		machine.currentAnim->sprite.draw();
-		machine.mutex.unlock();
-	}
 
-	auto players = this->_connection.getPlayers();
-	SokuLib::DrawUtils::RectangleShape rect2;
+		auto &bg = lobbyData->backgrounds[this->_background];
+
+		bg.bg.setPosition({
+			static_cast<int>(this->_translate.x / bg.parallaxFactor),
+			static_cast<int>(this->_translate.y / bg.parallaxFactor) - static_cast<int>(bg.bg.getSize().y) + 480
+		});
+		bg.bg.draw();
+		bg.fg.setPosition({
+			this->_translate.x,
+			this->_translate.y - static_cast<int>(bg.fg.getSize().y) + 480
+		});
+		bg.fg.draw();
+		for (auto &machine : this->_machines) {
+			SokuLib::Vector2i pos{
+				static_cast<int>(machine.pos.x) - static_cast<int>(machine.skin.sprite.getSize().x / 2) + this->_translate.x,
+				480 - static_cast<int>(machine.pos.y + machine.skin.sprite.getSize().y) + this->_translate.y
+			};
+
+			machine.mutex.lock();
+			machine.skin.sprite.setPosition(pos);
+			machine.skin.sprite.rect.left = machine.skinAnimation * machine.skin.sprite.rect.width;
+			machine.skin.sprite.draw();
+			pos += machine.skin.animationOffsets;
+			machine.currentAnim->sprite.setPosition(pos);
+			if (machine.currentAnim->tilePerLine) {
+				machine.currentAnim->sprite.rect.left = machine.animation % machine.currentAnim->tilePerLine * machine.currentAnim->size.x;
+				machine.currentAnim->sprite.rect.top = machine.animation / machine.currentAnim->tilePerLine * machine.currentAnim->size.y;
+			}
+			machine.currentAnim->sprite.draw();
+			machine.mutex.unlock();
+		}
+
+		auto players = this->_connection.getPlayers();
+		SokuLib::DrawUtils::RectangleShape rect2;
 #ifdef _DEBUG
-	SokuLib::DrawUtils::RectangleShape rect;
+		SokuLib::DrawUtils::RectangleShape rect;
 
-	rect.setBorderColor(SokuLib::Color::White);
-	rect.setFillColor(SokuLib::Color{0xFF, 0xFF, 0xFF, 0xA0});
+		rect.setBorderColor(SokuLib::Color::White);
+		rect.setFillColor(SokuLib::Color{0xFF, 0xFF, 0xFF, 0xA0});
 #endif
-	rect2.setBorderColor(SokuLib::Color::Black);
-	rect2.setFillColor(SokuLib::Color{0x00, 0x00, 0x00, 0xA0});
-	for (auto &player : players) {
-		if (player.player.avatar < lobbyData->avatars.size()) {
+		rect2.setBorderColor(SokuLib::Color::Black);
+		rect2.setFillColor(SokuLib::Color{0x00, 0x00, 0x00, 0xA0});
+		for (auto &player : players) {
+			if (player.player.avatar < lobbyData->avatars.size()) {
+				auto &avatar = lobbyData->avatars[player.player.avatar];
+
+				avatar.sprite.setPosition({
+					static_cast<int>(player.pos.x) - static_cast<int>(avatar.sprite.getSize().x / 2) + this->_translate.x,
+					480 - static_cast<int>(player.pos.y + avatar.sprite.getSize().y) + this->_translate.y
+				});
+				avatar.sprite.rect.top = avatar.sprite.rect.height * player.animation;
+				avatar.sprite.rect.left = player.currentAnimation * avatar.sprite.rect.width;
+				avatar.sprite.setMirroring((player.dir & 0b10000) == 0, false);
+			#ifdef _DEBUG
+				rect.setSize(avatar.sprite.getSize());
+				rect.setPosition(avatar.sprite.getPosition());
+				rect.draw();
+			#endif
+				avatar.sprite.draw();
+			} else {
+				rect2.setSize({64, 64});
+				rect2.setPosition({
+					static_cast<int>(player.pos.x) - 32 + this->_translate.x,
+					480 - static_cast<int>(player.pos.y + 64) + this->_translate.y
+				});
+				rect2.draw();
+			}
+		}
+		for (auto &player : players) {
 			auto &avatar = lobbyData->avatars[player.player.avatar];
 
-			avatar.sprite.setPosition({
-				static_cast<int>(player.pos.x) - static_cast<int>(avatar.sprite.getSize().x / 2) + this->_translate.x,
-				480 - static_cast<int>(player.pos.y + avatar.sprite.getSize().y) + this->_translate.y
+			this->_extraPlayerData[player.id].name.setPosition({
+				static_cast<int>(player.pos.x) - static_cast<int>(this->_extraPlayerData[player.id].name.getSize().x / 2) + this->_translate.x,
+				500 - static_cast<int>(player.pos.y + avatar.sprite.getSize().y) + this->_translate.y
 			});
-			avatar.sprite.rect.top = avatar.sprite.rect.height * player.animation;
-			avatar.sprite.rect.left = player.currentAnimation * avatar.sprite.rect.width;
-			avatar.sprite.setMirroring((player.dir & 0b10000) == 0, false);
-		#ifdef _DEBUG
-			rect.setSize(avatar.sprite.getSize());
-			rect.setPosition(avatar.sprite.getPosition());
-			rect.draw();
-		#endif
-			avatar.sprite.draw();
-		} else {
-			rect2.setSize({64, 64});
-			rect2.setPosition({
-				static_cast<int>(player.pos.x) - 32 + this->_translate.x,
-				480 - static_cast<int>(player.pos.y + 64) + this->_translate.y
-			});
-			rect2.draw();
-		}
-	}
-	for (auto &player : players) {
-		auto &avatar = lobbyData->avatars[player.player.avatar];
+			this->_extraPlayerData[player.id].name.draw();
 
-		this->_extraPlayerData[player.id].name.setPosition({
-			static_cast<int>(player.pos.x) - static_cast<int>(this->_extraPlayerData[player.id].name.getSize().x / 2) + this->_translate.x,
-			500 - static_cast<int>(player.pos.y + avatar.sprite.getSize().y) + this->_translate.y
-		});
-		this->_extraPlayerData[player.id].name.draw();
-
-		if (player.battleStatus) {
-			this->_inBattle.setPosition({
-				static_cast<int>(player.pos.x) - static_cast<int>(this->_inBattle.getSize().x / 2) + this->_translate.x,
-				480 - static_cast<int>(player.pos.y + avatar.sprite.getSize().y + this->_inBattle.getSize().y) + this->_translate.y
-			});
-			this->_inBattle.draw();
+			if (player.battleStatus) {
+				this->_inBattle.setPosition({
+					static_cast<int>(player.pos.x) - static_cast<int>(this->_inBattle.getSize().x / 2) + this->_translate.x,
+					480 - static_cast<int>(player.pos.y + avatar.sprite.getSize().y + this->_inBattle.getSize().y) + this->_translate.y
+				});
+				this->_inBattle.draw();
+			}
 		}
+		if (this->_currentMachine)
+			this->_renderMachineOverlay();
+		if (!this->_hostlist)
+			this->renderChat();
+	} catch (std::exception &e) {
+		MessageBoxA(
+			SokuLib::window,
+			(
+				"Error rendering in game lobby. You have been kicked from the lobby.\n"
+				"Please, report this error.\n"
+				"\n"
+				"Error:\n" +
+				std::string(e.what())
+			).c_str(),
+			"SokuLobby error",
+			MB_ICONERROR
+		);
 	}
-	if (this->_currentMachine)
-		this->_renderMachineOverlay();
-	if (!this->_hostlist)
-		this->renderChat();
 	return 0;
 }
 
@@ -884,9 +915,9 @@ void InLobbyMenu::onKeyPressed(unsigned chr)
 			this->_buffer.insert(this->_buffer.begin() + this->_textCursorPosIndex, result.begin(), result.end());
 			this->_updateTextCursor(this->_textCursorPosIndex + 1);
 			this->textChanged |= 1;
-			SokuLib::playSEWaveBuffer(0x27);
+			playSound(0x27);
 		} else
-			SokuLib::playSEWaveBuffer(0x29);
+			playSound(0x29);
 	}
 	this->_lastPressed = chr;
 	this->_textTimer = 0;
@@ -903,10 +934,10 @@ void InLobbyMenu::onKeyReleased()
 		if (result.size() + this->_buffer.size() <= CHAT_CHARACTER_LIMIT) {
 			this->_buffer.insert(this->_buffer.begin() + this->_textCursorPosIndex, result.begin(), result.end());
 			this->_updateTextCursor(this->_textCursorPosIndex + 1);
-			SokuLib::playSEWaveBuffer(0x27);
+			playSound(0x27);
 			this->textChanged |= 1;
 		} else
-			SokuLib::playSEWaveBuffer(0x29);
+			playSound(0x29);
 	}
 	this->_lastPressed = 0;
 	this->_textTimer = 0;
@@ -929,7 +960,7 @@ void InLobbyMenu::_inputBoxUpdate()
 	if (this->_timers[VK_RETURN] == 1)
 		this->_returnPressed = true;
 	if (this->_timers[VK_PRIOR] == 1 || (this->_timers[VK_PRIOR] > 36 && this->_timers[VK_PRIOR] % 6 == 0)) {
-		SokuLib::playSEWaveBuffer(0x27);
+		playSound(0x27);
 		this->_chatOffset += SCROLL_AMOUNT;
 		this->_chatTimer = max(this->_chatTimer, 180);
 	}
@@ -939,18 +970,18 @@ void InLobbyMenu::_inputBoxUpdate()
 		else
 			this->_chatOffset -= SCROLL_AMOUNT;
 		this->_chatTimer = max(this->_chatTimer, 180);
-		SokuLib::playSEWaveBuffer(0x27);
+		playSound(0x27);
 	}
 	if (!this->_editingText) {
 		if (this->_returnPressed && this->_timers[VK_RETURN] == 0) {
 			this->_editingText = true;
 			this->_initInputBox();
-			SokuLib::playSEWaveBuffer(0x28);
+			playSound(0x28);
 		}
 		return;
 	}
 	if (this->_timers[VK_UP] == 1 || (this->_timers[VK_UP] > 36 && this->_timers[VK_UP] % 6 == 0)) {
-		SokuLib::playSEWaveBuffer(0x27);
+		playSound(0x27);
 		this->_chatOffset += SCROLL_AMOUNT;
 		this->_chatTimer = max(this->_chatTimer, 180);
 		return;
@@ -961,7 +992,7 @@ void InLobbyMenu::_inputBoxUpdate()
 		else
 			this->_chatOffset -= SCROLL_AMOUNT;
 		this->_chatTimer = max(this->_chatTimer, 180);
-		SokuLib::playSEWaveBuffer(0x27);
+		playSound(0x27);
 		return;
 	}
 	if (this->_returnPressed) {
@@ -969,9 +1000,9 @@ void InLobbyMenu::_inputBoxUpdate()
 			if (this->immComposition.empty()) {
 				if (this->_buffer.size() != 1) {
 					this->_sendMessage(std::wstring{this->_buffer.begin(), this->_buffer.end() - 1});
-					SokuLib::playSEWaveBuffer(0x28);
+					playSound(0x28);
 				} else
-					SokuLib::playSEWaveBuffer(0x29);
+					playSound(0x29);
 				this->_editingText = false;
 				this->_chatOffset = 0;
 			}
@@ -982,11 +1013,11 @@ void InLobbyMenu::_inputBoxUpdate()
 	this->_textMutex.lock();
 	if (this->immComposition.empty()) {
 		if (this->_timers[VK_HOME] == 1) {
-			SokuLib::playSEWaveBuffer(0x27);
+			playSound(0x27);
 			this->_updateTextCursor(0);
 		}
 		if (this->_timers[VK_END] == 1) {
-			SokuLib::playSEWaveBuffer(0x27);
+			playSound(0x27);
 			this->_updateTextCursor(this->_buffer.size() - 1);
 		}
 		if (this->_timers[VK_BACK] == 1 || (this->_timers[VK_BACK] > 36 && this->_timers[VK_BACK] % 6 == 0)) {
@@ -994,26 +1025,26 @@ void InLobbyMenu::_inputBoxUpdate()
 				this->_buffer.erase(this->_buffer.begin() + this->_textCursorPosIndex - 1);
 				this->_updateTextCursor(this->_textCursorPosIndex - 1);
 				this->textChanged |= 1;
-				SokuLib::playSEWaveBuffer(0x27);
+				playSound(0x27);
 			}
 		}
 		if (this->_timers[VK_DELETE] == 1 || (this->_timers[VK_DELETE] > 36 && this->_timers[VK_DELETE] % 6 == 0)) {
 			if (this->_textCursorPosIndex < this->_buffer.size() - 1) {
 				this->_buffer.erase(this->_buffer.begin() + this->_textCursorPosIndex);
-				SokuLib::playSEWaveBuffer(0x27);
+				playSound(0x27);
 				this->textChanged |= 1;
 			}
 		}
 		if (this->_timers[VK_LEFT] == 1 || (this->_timers[VK_LEFT] > 36 && this->_timers[VK_LEFT] % 3 == 0)) {
 			if (this->_textCursorPosIndex != 0) {
 				this->_updateTextCursor(this->_textCursorPosIndex - 1);
-				SokuLib::playSEWaveBuffer(0x27);
+				playSound(0x27);
 			}
 		}
 		if (this->_timers[VK_RIGHT] == 1 || (this->_timers[VK_RIGHT] > 36 && this->_timers[VK_RIGHT] % 3 == 0)) {
 			if (this->_textCursorPosIndex != this->_buffer.size() - 1) {
 				this->_updateTextCursor(this->_textCursorPosIndex + 1);
-				SokuLib::playSEWaveBuffer(0x27);
+				playSound(0x27);
 			}
 		}
 		if (this->_lastPressed) {
@@ -1025,10 +1056,10 @@ void InLobbyMenu::_inputBoxUpdate()
 				if (result.size() + this->_buffer.size() <= CHAT_CHARACTER_LIMIT) {
 					this->_buffer.insert(this->_buffer.begin() + this->_textCursorPosIndex, result.begin(), result.end());
 					this->_updateTextCursor(this->_textCursorPosIndex + 1);
-					SokuLib::playSEWaveBuffer(0x27);
+					playSound(0x27);
 					this->textChanged |= 1;
 				} else
-					SokuLib::playSEWaveBuffer(0x29);
+					playSound(0x29);
 			}
 		}
 	}
@@ -1041,7 +1072,7 @@ void InLobbyMenu::_initInputBox()
 {
 	int ret;
 
-	SokuLib::playSEWaveBuffer(0x28);
+	playSound(0x28);
 	memset(this->_timers, 0, sizeof(this->_timers));
 	this->_lastPressed = 0;
 	this->_textTimer = 0;
@@ -1175,11 +1206,13 @@ void InLobbyMenu::_sendMessage(const std::wstring &msg)
 	this->_connection.send(&msgPacket, sizeof(msgPacket));
 }
 
-void InLobbyMenu::updateChat()
+void InLobbyMenu::updateChat(bool inGame)
 {
 	this->_inputBoxUpdate();
 	if (this->_editingText)
 		this->_chatTimer = 300;
+	else if (inGame)
+		this->_chatTimer = this->_chatSeat.tint.a != 0;
 	if (this->_chatTimer) {
 		this->_chatTimer--;
 
@@ -1378,7 +1411,7 @@ void InLobbyMenu::addString(wchar_t *str, size_t size)
 		this->_buffer.resize(CHAT_CHARACTER_LIMIT);
 	this->_updateTextCursor(this->_textCursorPosIndex + base.size());
 	this->textChanged |= 1;
-	SokuLib::playSEWaveBuffer(0x27);
+	playSound(0x27);
 	this->_textMutex.unlock();
 }
 
@@ -1386,6 +1419,18 @@ void InLobbyMenu::_updateCompositionSprite()
 {
 	int ret;
 
+	if (
+		(SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER || SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT) &&
+		(
+			SokuLib::sceneId == SokuLib::SCENE_BATTLE ||
+			SokuLib::sceneId == SokuLib::SCENE_BATTLECL ||
+			SokuLib::sceneId == SokuLib::SCENE_BATTLESV ||
+			SokuLib::newSceneId == SokuLib::SCENE_BATTLE ||
+			SokuLib::newSceneId == SokuLib::SCENE_BATTLECL ||
+			SokuLib::newSceneId == SokuLib::SCENE_BATTLESV
+		)
+	)
+		return;
 	if (this->textChanged & 1) {
 		if (!createTextTexture(ret, this->_buffer.data(), this->_chatFont, BOX_TEXTURE_SIZE, nullptr))
 			puts("Error creating text texture");

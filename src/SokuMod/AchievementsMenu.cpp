@@ -80,20 +80,20 @@ void AchievementsMenu::_()
 int AchievementsMenu::onProcess()
 {
 	if (SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
-		SokuLib::playSEWaveBuffer(0x29);
+		playSound(0x29);
 		return false;
 	}
 #ifndef _DEBUG
 	if (lobbyData->achievementsLocked) {
 		if (SokuLib::inputMgrs.input.a == 1 || SokuLib::inputMgrs.input.b == 1) {
-			SokuLib::playSEWaveBuffer(0x29);
+			playSound(0x29);
 			return false;
 		}
 		return true;
 	}
 #endif
 	if (SokuLib::inputMgrs.input.b == 1) {
-		SokuLib::playSEWaveBuffer(0x29);
+		playSound(0x29);
 		return false;
 	}
 #ifdef _DEBUG
@@ -117,12 +117,12 @@ int AchievementsMenu::onProcess()
 		else if (result >= lobbyData->achievements.size())
 			result = lobbyData->achievements.size() - 1;
 		if (result != this->_selected)
-			SokuLib::playSEWaveBuffer(0x27);
+			playSound(0x27);
 		this->_selected = result;
 		this->_updateAchRightPanel();
 	}
 	if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.verticalAxis) > 36 && std::abs(SokuLib::inputMgrs.input.verticalAxis) % 6 == 0)) {
-		SokuLib::playSEWaveBuffer(0x27);
+		playSound(0x27);
 		this->_selected = static_cast<unsigned>(this->_selected + std::copysign(1, SokuLib::inputMgrs.input.verticalAxis) + lobbyData->achievements.size()) % lobbyData->achievements.size();
 		this->_updateAchRightPanel();
 	}

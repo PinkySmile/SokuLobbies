@@ -134,15 +134,15 @@ void StatsMenu::_()
 int StatsMenu::onProcess()
 {
 	if (SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0) || SokuLib::inputMgrs.input.b == 1) {
-		SokuLib::playSEWaveBuffer(0x29);
+		playSound(0x29);
 		return false;
 	}
 	if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.verticalAxis) >= 36 && std::abs(SokuLib::inputMgrs.input.verticalAxis) % 6 == 0)) {
 		if (this->_start && SokuLib::inputMgrs.input.verticalAxis < 0) {
-			SokuLib::playSEWaveBuffer(0x27);
+			playSound(0x27);
 			this->_start--;
 		} else if (this->_start < this->_stats.size() - 11 && SokuLib::inputMgrs.input.verticalAxis > 0) {
-			SokuLib::playSEWaveBuffer(0x27);
+			playSound(0x27);
 			this->_start++;
 		}
 	}

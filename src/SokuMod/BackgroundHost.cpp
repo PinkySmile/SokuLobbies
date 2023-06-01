@@ -372,7 +372,7 @@ unsigned __stdcall hostLoop(void *)
 					continue;
 				DWORD old;
 
-				SokuLib::playSEWaveBuffer(0x39);
+				playSound(0x39);
 				name = std::string{packet.initRequest.name, packet.initRequest.name + packet.initRequest.nameLength};
 				boxText.texture.createFromText(
 					(name + " joined. Accept?<br>Calulating ping...").c_str(),
@@ -770,19 +770,19 @@ void onUpdate()
 				((char *)0x407f43)[i] = hook[i];
 			VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 			if (yesSelected) {
-				SokuLib::playSEWaveBuffer(40);
+				playSound(40);
 				fakeHost();
 				someoneConnected = false;
 				*retAddr = 0x446A46 - (int)(retAddr) - 4;
 				_beginthread(acceptHost, 0, nullptr);
 			} else {
-				SokuLib::playSEWaveBuffer(41);
+				playSound(41);
 				someoneConnected = false;
 				queues.clear();
 			}
 		}
 		if (std::abs(SokuLib::inputMgrs.input.horizontalAxis) == 1) {
-			SokuLib::playSEWaveBuffer(39);
+			playSound(39);
 			yesSelected = !yesSelected;
 		}
 	}
@@ -810,12 +810,12 @@ int __fastcall ConnectMenu_OnProcess(SokuLib::MenuConnect *This)
 		if (someoneConnected)
 			return false;
 		if (SokuLib::inputMgrs.input.b == 1 || SokuLib::checkKeyOneshot(1, false, false, false)) {
-			SokuLib::playSEWaveBuffer(0x29);
+			playSound(0x29);
 			return false;
 		}
 		if (SokuLib::inputMgrs.input.a == 1) {
 			puts("Cancel host");
-			SokuLib::playSEWaveBuffer(0x29);
+			playSound(0x29);
 			fakeHost();
 		}
 		return true;
