@@ -658,19 +658,13 @@ int InLobbyMenu::onProcess()
 				dirChanged = (me->dir & 0b00011) != 0;
 				me->dir &= 0b11100;
 			}
-			/*if (SokuLib::inputMgrs.input.verticalAxis) {
-				auto newDir = me->dir;
-
-				newDir &= 0b10011;
-				newDir |= 0b00100 << (SokuLib::inputMgrs.input.verticalAxis > 0 ? 1 : 0);
-				if (me->pos.y >= bg.platforms.front().pos.y)
-					newDir &= 0b10111;
-				dirChanged = newDir != me->dir;
-				me->dir = newDir;
+			if (SokuLib::inputMgrs.input.d == 0) {
+				dirChanged |= (me->dir & 0b100000) != 0;
+				me->dir &= ~0b100000;
 			} else {
-				dirChanged |= (me->dir & 0b01100) != 0;
-				me->dir &= 0b10011;
-			}*/
+				dirChanged |= (me->dir & 0b100000) == 0;
+				me->dir |= 0b100000;
+			}
 			me->pos.y = bg.platforms[this->_currentPlatform].pos.y;
 			if (dirChanged) {
 				Lobbies::PacketMove l{0, me->dir};
@@ -1033,6 +1027,12 @@ int InLobbyMenu::onRender()
 				if (player.player.avatar < lobbyData->avatars.size()) {
 					auto &avatar = lobbyData->avatars[player.player.avatar];
 
+					avatar.sprite.rect.width = avatar.sprite.texture.getSize().x / avatar.nbAnimations;
+					avatar.sprite.rect.height = avatar.sprite.texture.getSize().y / 2;
+					avatar.sprite.setSize({
+						static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale),
+						static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale)
+					});
 					avatar.sprite.setPosition({
 						static_cast<int>(this->_translate.x + player.pos.x - avatar.sprite.getSize().x / 2),
 						static_cast<int>(this->_translate.y + player.pos.y - avatar.sprite.getSize().y)

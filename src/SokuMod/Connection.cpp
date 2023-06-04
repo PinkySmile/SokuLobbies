@@ -437,14 +437,12 @@ std::vector<std::string> Connection::getMessages() const
 
 static void playerBasicAnimation(Player &player, const LobbyData::Avatar &avatar)
 {
+	char scale = 1 + ((player.dir & 0b100000) != 0);
+
 	if (player.dir & 1)
-		player.pos.x += PLAYER_H_SPEED;
+		player.pos.x += PLAYER_H_SPEED * scale;
 	if (player.dir & 2)
-		player.pos.x -= PLAYER_H_SPEED;
-	if (player.dir & 4)
-		player.pos.y -= PLAYER_V_SPEED;
-	if (player.dir & 8)
-		player.pos.y += PLAYER_V_SPEED;
+		player.pos.x -= PLAYER_H_SPEED * scale;
 	player.animationCtr++;
 	if (player.animationCtr > avatar.animationsStep) {
 		player.currentAnimation++;
@@ -456,14 +454,12 @@ static void playerBasicAnimation(Player &player, const LobbyData::Avatar &avatar
 
 static void playerSuwakoAnimation(Player &player, const LobbyData::Avatar &avatar)
 {
+	char scale = 1 + ((player.dir & 0b100000) != 0);
+
 	if (player.dir & 1)
-		player.pos.x += PLAYER_H_SPEED;
+		player.pos.x += PLAYER_H_SPEED * scale;
 	if (player.dir & 2)
-		player.pos.x -= PLAYER_H_SPEED;
-	if (player.dir & 4)
-		player.pos.y -= PLAYER_V_SPEED;
-	if (player.dir & 8)
-		player.pos.y += PLAYER_V_SPEED;
+		player.pos.x -= PLAYER_H_SPEED * scale;
 	player.animationCtr++;
 	if (player.animationCtr > avatar.animationsStep) {
 		player.currentAnimation++;
