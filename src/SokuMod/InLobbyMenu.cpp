@@ -1049,6 +1049,13 @@ int InLobbyMenu::onRender()
 					}
 				#endif
 					avatar.sprite.draw();
+					if (player.battleStatus) {
+						this->_inBattle.setPosition({
+							static_cast<int>(this->_translate.x + player.pos.x - this->_inBattle.getSize().x / 2),
+							static_cast<int>(this->_translate.y + player.pos.y - avatar.sprite.getSize().y - this->_inBattle.getSize().y)
+						});
+						this->_inBattle.draw();
+					}
 				} else {
 					rect2.setSize({64, 64});
 					rect2.setPosition({
@@ -1067,14 +1074,6 @@ int InLobbyMenu::onRender()
 				static_cast<int>(this->_translate.y + player.pos.y - avatar.sprite.getSize().y - 20)
 			});
 			this->_extraPlayerData[player.id].name.draw();
-
-			if (player.battleStatus) {
-				this->_inBattle.setPosition({
-					static_cast<int>(this->_translate.x + player.pos.x - this->_inBattle.getSize().x / 2),
-					static_cast<int>(this->_translate.y + player.pos.y + this->_inBattle.getSize().y + avatar.sprite.getSize().y)
-				});
-				this->_inBattle.draw();
-			}
 		}
 		if (this->_currentMachine)
 			this->_renderMachineOverlay();
