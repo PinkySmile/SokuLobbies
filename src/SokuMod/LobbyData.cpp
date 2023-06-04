@@ -266,19 +266,94 @@ void LobbyData::_loadBackgrounds()
 		auto &bg = this->backgrounds.back();
 
 		bg.id = this->backgrounds.size() - 1;
-		bg.groundPos = val["ground"];
-		bg.parallaxFactor = val["parallax_factor"];
-		bg.platformInterval = val["platform_interval"];
-		bg.platformWidth = val["platform_width"];
-		bg.platformCount = val["platform_count"];
-		bg.fg.texture.loadFromFile((folder / val["fg"].get<std::string>()).string().c_str());
-		bg.fg.setSize(bg.fg.texture.getSize());
-		bg.fg.rect.width = bg.fg.getSize().x;
-		bg.fg.rect.height = bg.fg.getSize().y;
-		bg.bg.texture.loadFromFile((folder / val["bg"].get<std::string>()).string().c_str());
-		bg.bg.setSize(bg.bg.texture.getSize());
-		bg.bg.rect.width = bg.bg.getSize().x;
-		bg.bg.rect.height = bg.bg.getSize().y;
+		bg.size.x = val["width"];
+		bg.size.y = val["height"];
+		bg.layers.reserve(val["layers"].size());
+		for (auto &layer_j : val["layers"]) {
+			bg.layers.emplace_back();
+
+			auto &layer = bg.layers.back();
+			std::string img = layer_j;
+
+			if (img == "system") {
+				layer.image = nullptr;
+				continue;
+			}
+			bg.images.emplace_back();
+			layer.image = &bg.images.back();
+			layer.image->texture.loadFromFile((folder / img).string().c_str());
+			layer.image->setSize(layer.image->texture.getSize());
+			layer.image->rect.width = layer.image->getSize().x;
+			layer.image->rect.height = layer.image->getSize().y;
+		}
+		bg.platforms.reserve(val["platforms"].size());
+		for (auto &platform_j : val["platforms"]) {
+			bg.platforms.emplace_back();
+
+			auto &platform = bg.platforms.back();
+
+			platform.pos.x = platform_j["left"];
+			platform.pos.y = platform_j["top"];
+			platform.width = platform_j["width"];
+		}
+		bg.arcades.reserve(val["arcades"].size());
+		for (auto &arcade_j : val["arcades"]) {
+			bg.arcades.emplace_back();
+
+			auto &arcade = bg.arcades.back();
+
+			arcade.pos.x = arcade_j["x"];
+			arcade.pos.y = arcade_j["y"];
+			arcade.old = arcade_j.contains("old") && arcade_j["old"];
+			arcade.special = arcade_j.contains("special") && arcade_j["special"];
+		}
+		bg.elevators.reserve(val["elevators"].size());
+		for (auto &elevator_j : val["elevators"]) {
+			bg.elevators.emplace_back();
+
+			auto &elevator = bg.elevators.back();
+
+			elevator.pos.x = elevator_j["x"];
+			elevator.pos.y = elevator_j["y"];
+			elevator.noIndicator = elevator_j.contains("no_indicator") && elevator_j["no_indicator"];
+			elevator.hidden = elevator_j.contains("hidden") && elevator_j["hidden"];
+			if (!elevator_j["left_link"].is_null())
+				elevator.leftLink = {elevator_j["left_link"], 0};
+			if (!elevator_j["right_link"].is_null())
+				elevator.rightLink = {elevator_j["right_link"], 0};
+			if (!elevator_j["up_link"].is_null())
+				elevator.upLink = {elevator_j["up_link"], 0};
+			if (!elevator_j["down_link"].is_null())
+				elevator.downLink = {elevator_j["down_link"], 0};
+		}
+		for (auto &elevator : bg.elevators) {
+			for (int j = 0; j < 4; j++) {
+				auto &link = (&elevator.leftLink)[j];
+
+				if (!link)
+					continue;
+				if (link->elevator >= bg.elevators.size())
+					throw std::invalid_argument("Invalid link ID: " + std::to_string(link->elevator));
+
+				auto &other = bg.elevators[link->elevator];
+
+				for (unsigned i = 0; i < bg.platforms.size(); i++) {
+					auto &platform = bg.platforms[i];
+
+					if (platform.pos.y != other.pos.y)
+						continue;
+					if (platform.pos.x > other.pos.x)
+						continue;
+					if (platform.pos.x + platform.width < other.pos.x)
+						continue;
+					link->platform = i;
+					goto OK;
+				}
+				throw std::invalid_argument("Elevator " + std::to_string(link->elevator) + " is not on any platform");
+			OK:
+				continue;
+			}
+		}
 	}
 	printf("There are %zu backgrounds\n", this->avatars.size());
 }
@@ -341,6 +416,51 @@ void LobbyData::_loadFlags()
 		flag->rect.height = flag->texture.getSize().y;
 	}
 	printf("There are %zu flags\n", this->flags.size());
+}
+
+SokuLib::DrawUtils::TextureRect parseTextureRect(nlohmann::json &val)
+{
+	SokuLib::DrawUtils::TextureRect rect;
+
+	rect.left = val["left"];
+	rect.top = val["top"];
+	rect.width = val["width"];
+	rect.height = val["height"];
+	return rect;
+}
+
+void LobbyData::_loadElevators()
+{
+	std::filesystem::path folder = profileFolderPath;
+	auto path = folder / "assets/elevators/list.json";
+	std::ifstream stream{path};
+	nlohmann::json j;
+
+	if (stream.fail())
+		throw std::runtime_error("Cannot open file " + path.string());
+	printf("Loading %s\n", path.string().c_str());
+	stream >> j;
+	stream.close();
+	this->elevators.reserve(j.size());
+	for (auto &val : j) {
+		this->elevators.emplace_back();
+
+		auto &skin = this->elevators.back();
+
+		skin.file = val["sprite"];
+
+		auto file = std::filesystem::path(profileFolderPath) / skin.file;
+
+		skin.doorOffset.x = val["door_offset"]["x"];
+		skin.doorOffset.y = val["door_offset"]["y"];
+		skin.cage = parseTextureRect(val["cage"]);
+		skin.indicator = parseTextureRect(val["indicator"]);
+		skin.arrow = parseTextureRect(val["arrow"]);
+		skin.doorLeft = parseTextureRect(val["doors"][0]);
+		skin.doorRight = parseTextureRect(val["doors"][1]);
+
+		skin.sprite.texture.loadFromFile(file.string().c_str());
+	}
 }
 
 static void extractArcadeAnimation(LobbyData::ArcadeAnimation &animation, const nlohmann::json &j)
@@ -431,12 +551,13 @@ size_t LobbyData::writeMemoryCallback(void *contents, size_t size, size_t nmemb,
 LobbyData::LobbyData()
 {
 	this->_loadStats();
+	this->_loadFlags();
 	this->_loadAvatars();
 	this->_loadBackgrounds();
 	this->_loadEmotes();
 	this->_loadArcades();
+	this->_loadElevators();
 	this->_loadAchievements();
-	this->_loadFlags();
 	this->_grantStatsAchievements();
 	if (GetFileAttributesW(L".crash") != INVALID_FILE_ATTRIBUTES)
 		this->_grantCrashAchievements();

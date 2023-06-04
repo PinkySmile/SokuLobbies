@@ -10,6 +10,7 @@
 #include <mutex>
 #include <vector>
 #include <string>
+#include <optional>
 #include <SokuLib.hpp>
 #include <curl/curl.h>
 #include "nlohmann/json.hpp"
@@ -29,6 +30,7 @@ private:
 	void _loadBackgrounds();
 	void _loadEmotes();
 	void _loadArcades();
+	void _loadElevators();
 	void _loadAchievements();
 	void _loadFlags();
 
@@ -104,15 +106,39 @@ public:
 		Avatar() = default;
 		Avatar(const Avatar &) { assert(false); }
 	};
+	struct Platform {
+		SokuLib::Vector2i pos;
+		unsigned width;
+	};
+	struct Layer {
+		SokuLib::DrawUtils::Sprite *image;
+	};
+	struct ArcadePlacement {
+		SokuLib::Vector2i pos;
+		bool old;
+		bool special;
+	};
+	struct ElevatorLink {
+		unsigned elevator;
+		unsigned platform;
+	};
+	struct ElevatorPlacement {
+		SokuLib::Vector2i pos;
+		std::optional<ElevatorLink> leftLink;
+		std::optional<ElevatorLink> rightLink;
+		std::optional<ElevatorLink> upLink;
+		std::optional<ElevatorLink> downLink;
+		bool noIndicator;
+		bool hidden;
+	};
 	struct Background {
 		unsigned short id = 0;
-		SokuLib::DrawUtils::Sprite bg;
-		SokuLib::DrawUtils::Sprite fg;
-		unsigned groundPos = 0;
-		float parallaxFactor = 0;
-		unsigned platformInterval = 0;
-		unsigned platformWidth = 0;
-		unsigned platformCount = 0;
+		SokuLib::Vector2u size;
+		std::list<SokuLib::DrawUtils::Sprite> images;
+		std::vector<Layer> layers;
+		std::vector<Platform> platforms;
+		std::vector<ArcadePlacement> arcades;
+		std::vector<ElevatorPlacement> elevators;
 		Achievement *requirement = nullptr;
 
 		Background() = default;
@@ -159,6 +185,22 @@ public:
 		std::vector<ArcadeAnimation> game;
 		std::vector<ArcadeSkin> skins;
 	};
+	struct ElevatorSkin {
+		std::string file;
+		SokuLib::Vector2i doorOffset;
+		SokuLib::DrawUtils::Sprite sprite;
+		SokuLib::DrawUtils::TextureRect cage;
+		SokuLib::DrawUtils::TextureRect indicator;
+		SokuLib::DrawUtils::TextureRect arrow;
+		SokuLib::DrawUtils::TextureRect doorLeft;
+		SokuLib::DrawUtils::TextureRect doorRight;
+		unsigned frameRate;
+		unsigned frameCount;
+		Achievement *requirement = nullptr;
+
+		ElevatorSkin() = default;
+		ElevatorSkin(const ElevatorSkin &) { assert(false); }
+	};
 	struct AchievementHolder {
 		SokuLib::DrawUtils::Sprite getText;
 		SokuLib::DrawUtils::Sprite holder;
@@ -170,6 +212,7 @@ public:
 	AchievementHolder achHolder;
 	std::vector<Emote> emotes;
 	std::vector<Avatar> avatars;
+	std::vector<ElevatorSkin> elevators;
 	std::vector<Background> backgrounds;
 	std::vector<Achievement> achievements;
 	std::map<std::string, Emote *> emotesByName;

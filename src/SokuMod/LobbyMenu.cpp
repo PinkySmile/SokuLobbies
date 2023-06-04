@@ -227,6 +227,15 @@ void (LobbyMenu::* const LobbyMenu::_renderCallbacks[])() = {
 	&LobbyMenu::_customizeAvatarRender
 };
 
+void LobbyMenu::execUiCallbacks()
+{
+	this->_queueMutex.lock();
+	for (auto &fct : this->_workerQueue)
+		fct();
+	this->_workerQueue.clear();
+	this->_queueMutex.unlock();
+}
+
 int LobbyMenu::onProcess()
 {
 	try {

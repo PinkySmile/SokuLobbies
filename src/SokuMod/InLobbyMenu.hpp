@@ -52,6 +52,20 @@ private:
 		ArcadeMachine(unsigned id, SokuLib::Vector2i pos, LobbyData::ArcadeAnimation *currentAnim, LobbyData::ArcadeSkin &skin);
 		ArcadeMachine(const ArcadeMachine &);
 	};
+	struct ElevatorMachine {
+		unsigned id;
+		SokuLib::Vector2i pos;
+		LobbyData::ElevatorSkin &skin;
+		LobbyData::ElevatorPlacement &links;
+		std::mutex mutex;
+		unsigned char skinAnimationCtr = 0;
+		char skinAnimation = 0;
+		char animation = 0;
+		unsigned char state = 0;
+
+		ElevatorMachine(unsigned id, SokuLib::Vector2i pos, LobbyData::ElevatorPlacement &links, LobbyData::ElevatorSkin &skin);
+		ElevatorMachine(const ElevatorMachine &);
+	};
 
 	std::function<void (const std::string &ip, unsigned short port, bool spectate)> onConnectRequest;
 	std::function<void (const std::string &msg)> onError;
@@ -66,6 +80,7 @@ private:
 	std::string _roomName;
 	LobbyMenu *_menu;
 	ArcadeMachine *_currentMachine = nullptr;
+	ElevatorMachine *_currentElevator = nullptr;
 	Connection &_connection;
 	SokuLib::MenuConnect *_parent;
 	bool _wasConnected = false;
@@ -82,7 +97,11 @@ private:
 	std::map<uint32_t, PlayerData> _extraPlayerData;
 	std::wstring _buffer;
 	std::vector<ArcadeMachine> _machines;
+	std::vector<ElevatorMachine> _elevators;
 	std::unique_ptr<class SmallHostlist> _hostlist;
+	std::vector<uint32_t> _insideElevator;
+	unsigned char _elevatorCtr = 0;
+	bool _elevatorOut = false;
 
 	// Chat input box
 	SokuLib::SWRFont _chatFont;
@@ -93,6 +112,7 @@ private:
 	unsigned _timers[256];
 	unsigned _textTimer = 0;
 	unsigned _lastPressed = 0;
+	unsigned _currentPlatform = 0;
 	int _textCursorPosIndex = 0;
 	int _textCursorPosSize = 0;
 	bool _editingText = false;

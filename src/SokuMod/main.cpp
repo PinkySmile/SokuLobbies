@@ -52,6 +52,9 @@ bool hasSoku2 = false;
 bool counted = false;
 bool activated = true;
 auto load = std::pair(false, false);
+#ifdef _DEBUG
+bool debug = true;
+#endif
 std::function<int ()> onGameEnd;
 LobbyMenu *menu = nullptr;
 PTOP_LEVEL_EXCEPTION_FILTER oldFilter = nullptr;
@@ -599,7 +602,10 @@ static void __fastcall KeymapManagerSetInputs(SokuLib::KeymapManager *This)
 
 int __stdcall Hooked_EndScene(IDirect3DDevice9* pDevice)
 {
-	if (SokuLib::sceneId != SokuLib::SCENE_LOGO && lobbyData) {
+	static bool b = false;
+	
+	b = !b;
+	if (SokuLib::sceneId != SokuLib::SCENE_LOGO && lobbyData && b) {
 #ifdef _DEBUG
 		if (SokuLib::checkKeyOneshot(DIK_F4, false, false, false) && !activeMenu) {
 			try {
@@ -608,6 +614,8 @@ int __stdcall Hooked_EndScene(IDirect3DDevice9* pDevice)
 				MessageBoxA(SokuLib::window, e.what(), "SokuLobby error", MB_ICONERROR);
 			}
 		}
+		if (SokuLib::checkKeyOneshot(DIK_F9, false, false, false))
+			debug = !debug;
 #endif
 		lobbyData->render();
 	}

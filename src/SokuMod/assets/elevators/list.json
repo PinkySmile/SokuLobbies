@@ -1,0 +1,43 @@
+[
+	{
+		"sprite": "assets/elevators/elevator.png",
+		"door_offset": {
+			"x": 6,
+			"y": 6
+		},
+		"cage": {
+			"left": 62,
+			"top": 32,
+			"width": 74,
+			"height": 112
+		},
+		"indicator": {
+			"left": 10,
+			"top": 0,
+			"width": 52,
+			"height": 28
+		},
+		"arrow": {
+			"left": 84,
+			"top": 4,
+			"width": 18,
+			"height": 20
+		},
+		"doors": [
+			{
+				"left": 0,
+				"top": 38,
+				"width": 31,
+				"height": 106
+			},
+			{
+				"left": 31,
+				"top": 38,
+				"width": 31,
+				"height": 106
+			}
+		],
+		"frameRate": 0,
+		"frames": 1
+	}
+]

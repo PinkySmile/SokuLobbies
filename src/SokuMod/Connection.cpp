@@ -442,9 +442,9 @@ static void playerBasicAnimation(Player &player, const LobbyData::Avatar &avatar
 	if (player.dir & 2)
 		player.pos.x -= PLAYER_H_SPEED;
 	if (player.dir & 4)
-		player.pos.y += PLAYER_V_SPEED;
-	if (player.dir & 8)
 		player.pos.y -= PLAYER_V_SPEED;
+	if (player.dir & 8)
+		player.pos.y += PLAYER_V_SPEED;
 	player.animationCtr++;
 	if (player.animationCtr > avatar.animationsStep) {
 		player.currentAnimation++;
@@ -461,9 +461,9 @@ static void playerSuwakoAnimation(Player &player, const LobbyData::Avatar &avata
 	if (player.dir & 2)
 		player.pos.x -= PLAYER_H_SPEED;
 	if (player.dir & 4)
-		player.pos.y += PLAYER_V_SPEED;
-	if (player.dir & 8)
 		player.pos.y -= PLAYER_V_SPEED;
+	if (player.dir & 8)
+		player.pos.y += PLAYER_V_SPEED;
 	player.animationCtr++;
 	if (player.animationCtr > avatar.animationsStep) {
 		player.currentAnimation++;

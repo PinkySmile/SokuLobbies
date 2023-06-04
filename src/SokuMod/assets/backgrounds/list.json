@@ -1,11 +1,302 @@
 [
-    {
-        "bg": "assets/backgrounds/14670.png",
-        "fg": "assets/backgrounds/Sans titre 1.png",
-        "ground": 1917,
-        "parallax_factor": 3,
-        "platform_interval": 300,
-        "platform_width": 2500,
-        "platform_count": 4
-    }
+	{
+		"width": 2800,
+		"height": 2240,
+		"layers": [
+			"assets/backgrounds/mansion_hall/background.png",
+			"system",
+			"assets/backgrounds/mansion_hall/foreground.png"
+		],
+		"elevators": [
+			{
+				"comment": "0: To VIP",
+				"x": 155,
+				"y": 1544,
+				"down_link": null,
+				"up_link": null,
+				"left_link": null,
+				"right_link": 1
+			},
+			{
+				"comment": "1: VIP",
+				"x": 1460,
+				"y": 1588,
+				"down_link": 0,
+				"up_link": 0,
+				"left_link": 0,
+				"right_link": 0,
+				"no_indicator": true
+			},
+
+			{
+				"comment": "2: Roof",
+				"x": 1649,
+				"y": 1060,
+				"down_link": 3,
+				"up_link": null,
+				"left_link": 3,
+				"right_link": 7
+			},
+
+			{
+				"comment": "3: Left floor 4",
+				"x": 459,
+				"y": 1362,
+				"down_link": 4,
+				"up_link": 2,
+				"left_link": null,
+				"right_link": 7
+			},
+			{
+				"comment": "4: Left floor 3",
+				"x": 643,
+				"y": 1544,
+				"down_link": 5,
+				"up_link": 3,
+				"left_link": null,
+				"right_link": 8
+			},
+			{
+				"comment": "5: Left floor 2",
+				"x": 931,
+				"y": 1736,
+				"down_link": 6,
+				"up_link": 4,
+				"left_link": null,
+				"right_link": 9
+			},
+			{
+				"comment": "6: Left floor 1",
+				"x": 1087,
+				"y": 1920,
+				"down_link": null,
+				"up_link": 5,
+				"left_link": null,
+				"right_link": 10
+			},
+
+			{
+				"comment": "7: Right floor 4",
+				"x": 2243,
+				"y": 1362,
+				"down_link": 8,
+				"up_link": 2,
+				"left_link": 3,
+				"right_link": null
+			},
+			{
+				"comment": "8: Right floor 3",
+				"x": 2067,
+				"y": 1544,
+				"down_link": 9,
+				"up_link": 7,
+				"left_link": 4,
+				"right_link": null
+			},
+			{
+				"comment": "9: Right floor 2",
+				"x": 1805,
+				"y": 1736,
+				"down_link": 10,
+				"up_link": 8,
+				"left_link": 5,
+				"right_link": null
+			},
+			{
+				"comment": "10: Right floor 1",
+				"x": 1681,
+				"y": 1920,
+				"down_link": null,
+				"up_link": 9,
+				"left_link": 6,
+				"right_link": null
+			}
+		],
+		"arcades": [
+			{
+				"x": 334,
+				"y": 1920
+			},
+			{
+				"x": 528,
+				"y": 1920
+			},
+			{
+				"x": 722,
+				"y": 1920
+			},
+			{
+				"x": 916,
+				"y": 1920
+			},
+			{
+				"x": 1588,
+				"y": 1920,
+				"old": true
+			},
+			{
+				"x": 1838,
+				"y": 1920
+			},
+			{
+				"x": 2032,
+				"y": 1920
+			},
+			{
+				"x": 2226,
+				"y": 1920
+			},
+			{
+				"x": 2420,
+				"y": 1920
+			},
+			{
+				"x": 408,
+				"y": 1736
+			},
+			{
+				"x": 574,
+				"y": 1736
+			},
+			{
+				"x": 796,
+				"y": 1736
+			},
+			{
+				"x": 1048,
+				"y": 1736
+			},
+			{
+				"x": 1692,
+				"y": 1736
+			},
+			{
+				"x": 1936,
+				"y": 1736
+			},
+			{
+				"x": 2130,
+				"y": 1736
+			},
+			{
+				"x": 2324,
+				"y": 1736
+			},
+
+			{
+				"x": 1368,
+				"y": 1588,
+				"special": true
+			},
+
+			{
+				"x": 320,
+				"y": 1544
+			},
+			{
+				"x": 514,
+				"y": 1544
+			},
+			{
+				"x": 776,
+				"y": 1544
+			},
+			{
+				"x": 970,
+				"y": 1544
+			},
+			{
+				"x": 1744,
+				"y": 1544
+			},
+			{
+				"x": 1938,
+				"y": 1544
+			},
+			{
+				"x": 2200,
+				"y": 1544
+			},
+			{
+				"x": 2394,
+				"y": 1544
+			},
+
+			{
+				"x": 336,
+				"y": 1362
+			},
+			{
+				"x": 566,
+				"y": 1362
+			},
+			{
+				"x": 1110,
+				"y": 1362
+			},
+			{
+				"x": 1368,
+				"y": 1362
+			},
+			{
+				"x": 1626,
+				"y": 1362
+			},
+			{
+				"x": 2114,
+				"y": 1362
+			},
+			{
+				"x": 2372,
+				"y": 1362
+			}
+		],
+		"platforms": [
+			{
+				"left": 0,
+				"top": 1920,
+				"width": 2570
+			},
+
+			{
+				"left": 20,
+				"top": 1736,
+				"width": 1100
+			},
+			{
+				"left": 1612,
+				"top": 1736,
+				"width": 950
+			},
+
+			{
+				"left": 1260,
+				"top": 1588,
+				"width": 220
+			},
+
+			{
+				"left": 20,
+				"top": 1544,
+				"width": 1100
+			},
+			{
+				"left": 1612,
+				"top": 1544,
+				"width": 950
+			},
+
+			{
+				"left": 220,
+				"top": 1362,
+				"width": 2288
+			},
+
+			{
+				"left": 454,
+				"top": 1060,
+				"width": 2042
+			}
+		]
+	}
 ]

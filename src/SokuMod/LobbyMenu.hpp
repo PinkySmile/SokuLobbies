@@ -87,6 +87,7 @@ private:
 public:
 	LobbyMenu(SokuLib::MenuConnect *parent);
 	~LobbyMenu();
+	void execUiCallbacks();
 	void _() override;
 	int onProcess() override;
 	int onRender() override;

@@ -252,35 +252,14 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 		this->_textSprite[0].rect.height
 	}.to<unsigned>());
 	this->_textSprite[0].setPosition({CURSOR_STARTX - (*(int *)0x411c64 == 1) * 2, CURSOR_STARTY});
-
-	auto &bg = lobbyData->backgrounds.front();
-
 	this->onConnectRequest = connection.onConnectRequest;
 	this->onError = connection.onError;
 	this->onImpMsg = connection.onImpMsg;
 	this->onMsg = connection.onMsg;
 	this->onHostRequest = connection.onHostRequest;
 	this->onConnect = connection.onConnect;
-	this->_machines.reserve((bg.fg.getSize().x / 200 - 1) * bg.platformCount + 1);
-
-	int id = 0;
-
 	for (int i = ' '; i < 0x100; i++)
 		this->_getTextSize(i);
-	for (int j = 1; j < bg.platformCount + 1; j++)
-		for (int i = 200; i < bg.fg.getSize().x; i += 200)
-			this->_machines.emplace_back(
-				id++,
-				SokuLib::Vector2i{i, static_cast<int>(bg.fg.getSize().y - bg.groundPos + j * bg.platformInterval)},
-				&lobbyData->arcades.intro,
-				lobbyData->arcades.skins[1]
-			);
-	this->_machines.emplace_back(
-		UINT32_MAX,
-		SokuLib::Vector2i{150, static_cast<int>(bg.fg.getSize().y - bg.groundPos)},
-		&lobbyData->arcades.hostlist,
-		lobbyData->arcades.skins[0]
-	);
 	connection.onPlayerJoin = [this](const Player &r){
 		SokuLib::Vector2i size;
 
@@ -290,8 +269,39 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 		this->_extraPlayerData[r.id].name.rect.height = size.y;
 	};
 	connection.onConnect = [this, &connection](const Lobbies::PacketOlleh &r){
+		auto &bg = lobbyData->backgrounds[r.bg];
+		int id = 0;
+
+		this->_machines.reserve(bg.arcades.size());
+		for (auto &arcade : bg.arcades) {
+			if (arcade.old)
+				this->_machines.emplace_back(
+					UINT32_MAX,
+					arcade.pos,
+					&lobbyData->arcades.hostlist,
+					lobbyData->arcades.skins[0]
+				);
+			else
+				this->_machines.emplace_back(
+					id,
+					arcade.pos,
+					&lobbyData->arcades.intro,
+					lobbyData->arcades.skins[1]
+				);
+			id++;
+		}
+		id = 0;
+		this->_elevators.reserve(bg.elevators.size());
+		for (auto &elevator : bg.elevators)
+			this->_elevators.emplace_back(
+				id++,
+				elevator.pos,
+				elevator,
+				lobbyData->elevators[0]
+			);
 		this->_background = r.bg;
-		connection.getMe()->pos.y = lobbyData->backgrounds[r.bg].fg.getSize().y - lobbyData->backgrounds[r.bg].groundPos;
+		connection.getMe()->pos.x = bg.platforms.front().pos.x + 20;
+		connection.getMe()->pos.y = bg.platforms.front().pos.y;
 
 		SokuLib::Vector2i size;
 
@@ -412,6 +422,7 @@ void InLobbyMenu::_()
 int InLobbyMenu::onProcess()
 {
 	try {
+		this->_menu->execUiCallbacks();
 		if (!this->_connection.isInit() && !this->_wasConnected) {
 			this->_loadingGear.setRotation(this->_loadingGear.getRotation() + 0.1);
 			return this->_connection.isConnected();
@@ -474,7 +485,96 @@ int InLobbyMenu::onProcess()
 
 		auto &bg = lobbyData->backgrounds[this->_background];
 
-		if (!this->_currentMachine && !this->_editingText) {
+		if (this->_currentElevator) {
+			if (
+				this->_currentElevator->pos.x != me->pos.x ||
+				(this->_elevatorCtr != (this->_elevatorOut ? 0 : 30) && this->_currentElevator->state == 2)
+			) {
+				int diff = me->pos.x - this->_currentElevator->pos.x;
+
+				if (std::abs(diff) <= PLAYER_H_SPEED)
+					me->pos.x = this->_currentElevator->pos.x;
+				else
+					me->pos.x -= std::copysign(PLAYER_H_SPEED, diff);
+				if ((me->dir & 0b1111) != 0b0011) {
+					me->dir &= 0b10000;
+					me->dir |= 0b00011;
+
+					Lobbies::PacketMove m{0, me->dir};
+
+					this->_connection.send(&m, sizeof(m));
+				}
+				if (diff == 0);
+				else if (diff < 0)
+					me->dir |= 0b10000;
+				else
+					me->dir &= 0b01111;
+			} else if (me->dir & 0b1111) {
+				me->dir &= 0b10000;
+
+				Lobbies::PacketMove m{0, me->dir};
+
+				this->_connection.send(&m, sizeof(m));
+			}
+			switch (this->_currentElevator->state) {
+			case 0:
+				if (SokuLib::inputMgrs.input.b == 1 || SokuLib::inputMgrs.input.a == 1) {
+					this->_elevatorOut = true;
+					this->_currentElevator->state = 1;
+					break;
+				}
+				if (SokuLib::inputMgrs.input.horizontalAxis == 1) {
+					if (this->_currentElevator->links.rightLink) {
+						this->_currentPlatform = this->_currentElevator->links.rightLink->platform;
+						this->_currentElevator = &this->_elevators[this->_currentElevator->links.rightLink->elevator];
+						playSound(0x27);
+					}
+				} else if (SokuLib::inputMgrs.input.horizontalAxis == -1) {
+					if (this->_currentElevator->links.leftLink) {
+						this->_currentPlatform = this->_currentElevator->links.leftLink->platform;
+						this->_currentElevator = &this->_elevators[this->_currentElevator->links.leftLink->elevator];
+						playSound(0x27);
+					}
+				} else if (SokuLib::inputMgrs.input.verticalAxis == -1) {
+					if (this->_currentElevator->links.upLink) {
+						this->_currentPlatform = this->_currentElevator->links.upLink->platform;
+						this->_currentElevator = &this->_elevators[this->_currentElevator->links.upLink->elevator];
+						playSound(0x27);
+					}
+				} else if (SokuLib::inputMgrs.input.verticalAxis == 1) {
+					if (this->_currentElevator->links.downLink) {
+						this->_currentPlatform = this->_currentElevator->links.downLink->platform;
+						this->_currentElevator = &this->_elevators[this->_currentElevator->links.downLink->elevator];
+						playSound(0x27);
+					}
+				}
+				me->pos.x = this->_currentElevator->pos.x;
+				me->pos.y = this->_currentElevator->pos.y;
+				break;
+			case 2:
+				if (!this->_elevatorOut) {
+					if (std::find(this->_insideElevator.begin(), this->_insideElevator.end(), me->id) == this->_insideElevator.end())
+						this->_insideElevator.push_back(me->id);
+					if (this->_elevatorCtr < 30) {
+						this->_elevatorCtr++;
+						break;
+					}
+					this->_currentElevator->state = 3;
+				} else {
+					if (this->_elevatorCtr > 0) {
+						this->_elevatorCtr--;
+						break;
+					}
+					this->_insideElevator.erase(std::find(this->_insideElevator.begin(), this->_insideElevator.end(), me->id));
+					this->_currentElevator->state = 3;
+					this->_currentElevator = nullptr;
+					this->_elevatorOut = false;
+				}
+				break;
+			default:
+				break;
+			}
+		} else if (!this->_currentMachine && !this->_editingText) {
 			if (SokuLib::inputMgrs.input.b == 1) {
 				playSound(0x29);
 				this->_connection.meMutex.unlock();
@@ -497,7 +597,7 @@ int InLobbyMenu::onProcess()
 					if (machine.id == UINT32_MAX) {
 						this->_hostlist.reset(new SmallHostlist(0.6, {128, 48}, this->_parent));
 						SokuLib::playBGM("data/bgm/op2.ogg");
-						break;
+						goto touched;
 					}
 
 					Lobbies::PacketGameRequest packet{machine.id};
@@ -507,6 +607,21 @@ int InLobbyMenu::onProcess()
 					printf("%i\n", me->settings.hostPref);
 					if (me->settings.hostPref & Lobbies::HOSTPREF_ACCEPT_HOSTLIST)
 						this->_startHosting();
+					goto touched;
+				}
+			touched:
+				for (auto &elevator : this->_elevators) {
+					if (me->pos.x < elevator.pos.x - elevator.skin.sprite.getSize().x / 2)
+						continue;
+					if (me->pos.y < elevator.pos.y)
+						continue;
+					if (me->pos.x > elevator.pos.x + elevator.skin.cage.width / 2)
+						continue;
+					if (me->pos.y > elevator.pos.y + elevator.skin.cage.height)
+						continue;
+					this->_currentElevator = &elevator;
+					this->_currentElevator->state = 1;
+					playSound(0x28);
 					break;
 				}
 			}
@@ -523,30 +638,40 @@ int InLobbyMenu::onProcess()
 					return false;
 				}
 				newDir &= 0b01100;
-				newDir |= 0b00001 << (SokuLib::inputMgrs.input.horizontalAxis < 0);
+				newDir |= 0b00001 << (SokuLib::inputMgrs.input.horizontalAxis < 0 ? 1 : 0);
 				if (SokuLib::inputMgrs.input.horizontalAxis < 0)
 					newDir |= 0b10000;
-				if (me->pos.x >= bg.fg.getSize().x - 20)
+
+				auto &platform = bg.platforms[this->_currentPlatform];
+
+				if (me->pos.x <= platform.pos.x) {
+					newDir &= 0b11101;
+					me->pos.x = platform.pos.x;
+				}
+				if (me->pos.x >= platform.pos.x + platform.width) {
 					newDir &= 0b11110;
+					me->pos.x = platform.pos.x + platform.width;
+				}
 				dirChanged = newDir != me->dir;
 				me->dir = newDir;
 			} else {
 				dirChanged = (me->dir & 0b00011) != 0;
 				me->dir &= 0b11100;
 			}
-			if (SokuLib::inputMgrs.input.verticalAxis) {
+			/*if (SokuLib::inputMgrs.input.verticalAxis) {
 				auto newDir = me->dir;
 
 				newDir &= 0b10011;
-				newDir |= 0b00100 << (SokuLib::inputMgrs.input.verticalAxis > 0);
-				if (me->pos.y <= bg.fg.getSize().y - bg.groundPos)
+				newDir |= 0b00100 << (SokuLib::inputMgrs.input.verticalAxis > 0 ? 1 : 0);
+				if (me->pos.y >= bg.platforms.front().pos.y)
 					newDir &= 0b10111;
 				dirChanged = newDir != me->dir;
 				me->dir = newDir;
 			} else {
 				dirChanged |= (me->dir & 0b01100) != 0;
 				me->dir &= 0b10011;
-			}
+			}*/
+			me->pos.y = bg.platforms[this->_currentPlatform].pos.y;
 			if (dirChanged) {
 				Lobbies::PacketMove l{0, me->dir};
 
@@ -607,18 +732,42 @@ int InLobbyMenu::onProcess()
 		done:
 			machine.mutex.unlock();
 		}
+		for (auto &elevator : this->_elevators) {
+			elevator.skinAnimationCtr += elevator.skin.frameRate;
+			if (elevator.skinAnimationCtr < 60)
+				goto checkAnim;
+			while (elevator.skinAnimationCtr >= 60) {
+				elevator.skinAnimationCtr -= 60;
+				elevator.skinAnimation++;
+				if (elevator.skinAnimation < elevator.skin.frameCount)
+					continue;
+				elevator.skinAnimation = 0;
+			}
+		checkAnim:
+			if (elevator.state == 1) {
+				elevator.animation++;
+				if (elevator.animation >= 30) {
+					elevator.animation = 30;
+					elevator.state = 2;
+				}
+			}
+			if (elevator.state == 3) {
+				elevator.animation--;
+				if (elevator.animation <= 0) {
+					elevator.animation = 0;
+					elevator.state = 0;
+				}
+			}
+		}
 
 		this->_connection.updatePlayers(lobbyData->avatars);
 		if (me->pos.x < 320)
 			this->_translate.x = 0;
-		else if (me->pos.x > bg.fg.getSize().x - 320)
-			this->_translate.x = 640 - bg.fg.getSize().x;
+		else if (me->pos.x > bg.size.x - 320)
+			this->_translate.x = 640 - bg.size.x;
 		else
 			this->_translate.x = 320 - me->pos.x;
-		if (me->pos.y < 140)
-			this->_translate.y = 0;
-		else
-			this->_translate.y = me->pos.y - 140;
+		this->_translate.y = 340 - me->pos.y;
 		this->_connection.meMutex.unlock();
 		return true;
 	} catch (std::exception &e) {
@@ -654,37 +803,6 @@ int InLobbyMenu::onRender()
 		}
 
 		auto &bg = lobbyData->backgrounds[this->_background];
-
-		bg.bg.setPosition({
-			static_cast<int>(this->_translate.x / bg.parallaxFactor),
-			static_cast<int>(this->_translate.y / bg.parallaxFactor) - static_cast<int>(bg.bg.getSize().y) + 480
-		});
-		bg.bg.draw();
-		bg.fg.setPosition({
-			this->_translate.x,
-			this->_translate.y - static_cast<int>(bg.fg.getSize().y) + 480
-		});
-		bg.fg.draw();
-		for (auto &machine : this->_machines) {
-			SokuLib::Vector2i pos{
-				static_cast<int>(machine.pos.x) - static_cast<int>(machine.skin.sprite.getSize().x / 2) + this->_translate.x,
-				480 - static_cast<int>(machine.pos.y + machine.skin.sprite.getSize().y) + this->_translate.y
-			};
-
-			machine.mutex.lock();
-			machine.skin.sprite.setPosition(pos);
-			machine.skin.sprite.rect.left = machine.skinAnimation * machine.skin.sprite.rect.width;
-			machine.skin.sprite.draw();
-			pos += machine.skin.animationOffsets;
-			machine.currentAnim->sprite.setPosition(pos);
-			if (machine.currentAnim->tilePerLine) {
-				machine.currentAnim->sprite.rect.left = machine.animation % machine.currentAnim->tilePerLine * machine.currentAnim->size.x;
-				machine.currentAnim->sprite.rect.top = machine.animation / machine.currentAnim->tilePerLine * machine.currentAnim->size.y;
-			}
-			machine.currentAnim->sprite.draw();
-			machine.mutex.unlock();
-		}
-
 		auto players = this->_connection.getPlayers();
 		SokuLib::DrawUtils::RectangleShape rect2;
 #ifdef _DEBUG
@@ -695,51 +813,271 @@ int InLobbyMenu::onRender()
 #endif
 		rect2.setBorderColor(SokuLib::Color::Black);
 		rect2.setFillColor(SokuLib::Color{0x00, 0x00, 0x00, 0xA0});
-		for (auto &player : players) {
-			if (player.player.avatar < lobbyData->avatars.size()) {
-				auto &avatar = lobbyData->avatars[player.player.avatar];
 
-				avatar.sprite.setPosition({
-					static_cast<int>(player.pos.x) - static_cast<int>(avatar.sprite.getSize().x / 2) + this->_translate.x,
-					480 - static_cast<int>(player.pos.y + avatar.sprite.getSize().y) + this->_translate.y
-				});
-				avatar.sprite.rect.top = avatar.sprite.rect.height * player.animation;
-				avatar.sprite.rect.left = player.currentAnimation * avatar.sprite.rect.width;
-				avatar.sprite.setMirroring((player.dir & 0b10000) == 0, false);
-			#ifdef _DEBUG
-				rect.setSize(avatar.sprite.getSize());
-				rect.setPosition(avatar.sprite.getPosition());
-				rect.draw();
-			#endif
-				avatar.sprite.draw();
-			} else {
-				rect2.setSize({64, 64});
-				rect2.setPosition({
-					static_cast<int>(player.pos.x) - 32 + this->_translate.x,
-					480 - static_cast<int>(player.pos.y + 64) + this->_translate.y
-				});
-				rect2.draw();
+		for (auto &layer : bg.layers) {
+			if (layer.image) {
+				int tsize = layer.image->getSize().x - 640;
+				int bsize = bg.size.x - 640;
+				auto translate = this->_translate;
+
+				translate.x = translate.x * tsize / bsize;
+				layer.image->setPosition(translate);
+				layer.image->draw();
+				continue;
 			}
+			for (auto &machine : this->_machines) {
+				SokuLib::Vector2i pos{
+					static_cast<int>(this->_translate.x + machine.pos.x - machine.skin.sprite.getSize().x / 2),
+					static_cast<int>(this->_translate.y + machine.pos.y - machine.skin.sprite.getSize().y)
+				};
+
+				machine.mutex.lock();
+				machine.skin.sprite.setPosition(pos);
+				machine.skin.sprite.rect.left = machine.skinAnimation * machine.skin.sprite.rect.width;
+				machine.skin.sprite.draw();
+				pos += machine.skin.animationOffsets;
+				machine.currentAnim->sprite.setPosition(pos);
+				if (machine.currentAnim->tilePerLine) {
+					machine.currentAnim->sprite.rect.left = machine.animation % machine.currentAnim->tilePerLine * machine.currentAnim->size.x;
+					machine.currentAnim->sprite.rect.top = machine.animation / machine.currentAnim->tilePerLine * machine.currentAnim->size.y;
+				}
+				machine.currentAnim->sprite.draw();
+				machine.mutex.unlock();
+			}
+			for (auto &elevator : this->_elevators) {
+				if (elevator.links.hidden)
+					continue;
+
+				SokuLib::Vector2i pos{
+					static_cast<int>(this->_translate.x + elevator.pos.x - elevator.skin.cage.width / 2),
+					static_cast<int>(this->_translate.y + elevator.pos.y - elevator.skin.cage.height)
+				};
+
+				elevator.skin.sprite.rect = elevator.skin.cage;
+				elevator.skin.sprite.setPosition(pos);
+				elevator.skin.sprite.setSize({
+					static_cast<unsigned>(elevator.skin.cage.width),
+					static_cast<unsigned>(elevator.skin.cage.height)
+				});
+				elevator.skin.sprite.rect.left += elevator.skinAnimation * elevator.skin.sprite.rect.width;
+				elevator.skin.sprite.draw();
+
+				if (elevator.links.noIndicator)
+					continue;
+				
+				auto posBase = pos;
+				
+				posBase.x += elevator.skin.cage.width / 2;
+				posBase.y -= elevator.skin.indicator.height / 2 + 8;
+				pos = posBase;
+				pos.x -= elevator.skin.indicator.width / 2;
+				pos.y -= elevator.skin.indicator.height / 2;
+				elevator.skin.sprite.rect = elevator.skin.indicator;
+				elevator.skin.sprite.setPosition(pos);
+				elevator.skin.sprite.setSize({
+					static_cast<unsigned>(elevator.skin.sprite.rect.width),
+					static_cast<unsigned>(elevator.skin.sprite.rect.height)
+				});
+				elevator.skin.sprite.draw();
+
+				pos = posBase;
+				pos.y -= elevator.skin.arrow.height / 2;
+				if (elevator.links.upLink && elevator.links.downLink) {
+					pos.x -= elevator.skin.arrow.width + 2;
+					elevator.skin.sprite.rect = elevator.skin.arrow;
+					elevator.skin.sprite.setPosition(pos);
+					elevator.skin.sprite.setSize({
+						static_cast<unsigned>(elevator.skin.sprite.rect.width),
+						static_cast<unsigned>(elevator.skin.sprite.rect.height)
+					});
+					elevator.skin.sprite.draw();
+
+					pos.x += elevator.skin.arrow.width + 4;
+					elevator.skin.sprite.rect.left += elevator.skin.arrow.width;
+					elevator.skin.sprite.setPosition(pos);
+					elevator.skin.sprite.setSize({
+						static_cast<unsigned>(elevator.skin.sprite.rect.width),
+						static_cast<unsigned>(elevator.skin.sprite.rect.height)
+					});
+					elevator.skin.sprite.draw();
+				} else if (elevator.links.upLink || elevator.links.downLink) {
+					pos.x -= elevator.skin.arrow.width / 2;
+					elevator.skin.sprite.rect = elevator.skin.arrow;
+					if (elevator.links.upLink)
+						elevator.skin.sprite.rect.left += elevator.skin.arrow.width;
+					elevator.skin.sprite.setPosition(pos);
+					elevator.skin.sprite.setSize({
+						static_cast<unsigned>(elevator.skin.sprite.rect.width),
+						static_cast<unsigned>(elevator.skin.sprite.rect.height)
+					});
+					elevator.skin.sprite.draw();
+				}
+			}
+			for (auto &player : players) {
+				if (std::find(this->_insideElevator.begin(), this->_insideElevator.end(), player.id) == this->_insideElevator.end())
+					continue;
+				if (player.player.avatar < lobbyData->avatars.size()) {
+					auto &avatar = lobbyData->avatars[player.player.avatar];
+
+					avatar.sprite.rect.width = avatar.sprite.texture.getSize().x / avatar.nbAnimations;
+					avatar.sprite.rect.height = avatar.sprite.texture.getSize().y / 2;
+					avatar.sprite.setSize({
+						static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale / (this->_elevatorCtr / 45.f + 1)),
+						static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale / (this->_elevatorCtr / 45.f + 1))
+					});
+					avatar.sprite.setPosition({
+						static_cast<int>(this->_translate.x + player.pos.x - avatar.sprite.getSize().x / 2),
+						static_cast<int>(this->_translate.y + player.pos.y - avatar.sprite.getSize().y - this->_elevatorCtr / 3)
+					});
+					avatar.sprite.rect.top = avatar.sprite.rect.height * player.animation;
+					avatar.sprite.rect.left = player.currentAnimation * avatar.sprite.rect.width;
+					if (this->_elevatorCtr >= 15) {
+						SokuLib::Vector2i pos{
+							static_cast<int>(this->_translate.x + this->_currentElevator->pos.x - this->_currentElevator->skin.cage.width / 2),
+							static_cast<int>(this->_translate.y + this->_currentElevator->pos.y - this->_currentElevator->skin.cage.height)
+						};
+						SokuLib::Vector2i size{
+							this->_currentElevator->skin.doorLeft.width + this->_currentElevator->skin.doorRight.width,
+							min(this->_currentElevator->skin.doorLeft.height, this->_currentElevator->skin.doorRight.height)
+						};
+						auto oldPos = avatar.sprite.getPosition();
+						auto oldSize = avatar.sprite.getSize();
+						auto newPos = avatar.sprite.getPosition();
+						auto newSize = avatar.sprite.getSize();
+						bool changed = false;
+
+						pos += this->_currentElevator->skin.doorOffset;
+						if (avatar.sprite.getPosition().x < pos.x) {
+							newPos.x = pos.x;
+							avatar.sprite.rect.left += (pos.x - oldPos.x) * (this->_elevatorCtr / 45.f + 1) / avatar.scale;
+							newSize.x -= pos.x - oldPos.x;
+							changed = true;
+						}
+						if (avatar.sprite.getPosition().y < pos.y) {
+							newPos.y = pos.y;
+							avatar.sprite.rect.top += (pos.y - oldPos.y) * (this->_elevatorCtr / 45.f + 1) / avatar.scale;
+							newSize.y -= pos.y - oldPos.y;
+							changed = true;
+						}
+						if (newSize.x > size.x) {
+							newSize.x = size.x;
+							changed = true;
+						}
+						if (newSize.y > size.y) {
+							newSize.y = size.y;
+							changed = true;
+						}
+						if (changed) {
+							avatar.sprite.setPosition(newPos);
+							avatar.sprite.setSize(newSize);
+							avatar.sprite.rect.width = newSize.x * (this->_elevatorCtr / 45.f + 1) / avatar.scale;
+							avatar.sprite.rect.height = newSize.y * (this->_elevatorCtr / 45.f + 1) / avatar.scale;
+						}
+					}
+					avatar.sprite.setMirroring(false, false);
+				#ifdef _DEBUG
+					extern bool debug;
+					if (debug) {
+						rect.setSize(avatar.sprite.getSize());
+						rect.setPosition(avatar.sprite.getPosition());
+						rect.draw();
+					}
+				#endif
+					avatar.sprite.draw();
+				} else {
+					rect2.setSize({64, 64});
+					rect2.setPosition({
+						static_cast<int>(this->_translate.x + player.pos.x - 32),
+						static_cast<int>(this->_translate.y + player.pos.y + 64)
+					});
+					rect2.draw();
+				}
+			}
+			for (auto &elevator : this->_elevators) {
+				if (elevator.links.hidden)
+					continue;
+				if (elevator.animation >= 30)
+					continue;
+
+				SokuLib::Vector2i pos{
+					static_cast<int>(this->_translate.x + elevator.pos.x - elevator.skin.cage.width / 2),
+					static_cast<int>(this->_translate.y + elevator.pos.y - elevator.skin.cage.height)
+				};
+
+				pos += elevator.skin.doorOffset;
+				elevator.skin.sprite.rect = elevator.skin.doorLeft;
+				elevator.skin.sprite.rect.width = elevator.skin.sprite.rect.width * (30 - elevator.animation) / 30;
+				elevator.skin.sprite.rect.left += elevator.skin.doorRight.width - elevator.skin.sprite.rect.width;
+				elevator.skin.sprite.setPosition(pos);
+				elevator.skin.sprite.setSize({
+					static_cast<unsigned>(elevator.skin.sprite.rect.width),
+					static_cast<unsigned>(elevator.skin.sprite.rect.height)
+				});
+				elevator.skin.sprite.draw();
+
+				pos.x += elevator.skin.doorLeft.width;
+				elevator.skin.sprite.rect = elevator.skin.doorRight;
+				elevator.skin.sprite.rect.width = elevator.skin.sprite.rect.width * (30 - elevator.animation) / 30;
+				pos.x += elevator.skin.doorRight.width - elevator.skin.sprite.rect.width;
+				elevator.skin.sprite.setPosition(pos);
+				elevator.skin.sprite.setSize({
+					static_cast<unsigned>(elevator.skin.sprite.rect.width),
+					static_cast<unsigned>(elevator.skin.sprite.rect.height)
+				});
+				elevator.skin.sprite.draw();
+			}
+
+			for (auto &player : players) {
+				if (std::find(this->_insideElevator.begin(), this->_insideElevator.end(), player.id) != this->_insideElevator.end())
+					continue;
+				if (player.player.avatar < lobbyData->avatars.size()) {
+					auto &avatar = lobbyData->avatars[player.player.avatar];
+
+					avatar.sprite.setPosition({
+						static_cast<int>(this->_translate.x + player.pos.x - avatar.sprite.getSize().x / 2),
+						static_cast<int>(this->_translate.y + player.pos.y - avatar.sprite.getSize().y)
+					});
+					avatar.sprite.rect.top = avatar.sprite.rect.height * player.animation;
+					avatar.sprite.rect.left = player.currentAnimation * avatar.sprite.rect.width;
+					avatar.sprite.setMirroring((player.dir & 0b10000) == 0, false);
+				#ifdef _DEBUG
+					extern bool debug;
+					if (debug) {
+						rect.setSize(avatar.sprite.getSize());
+						rect.setPosition(avatar.sprite.getPosition());
+						rect.draw();
+					}
+				#endif
+					avatar.sprite.draw();
+				} else {
+					rect2.setSize({64, 64});
+					rect2.setPosition({
+						static_cast<int>(this->_translate.x + player.pos.x - 32),
+						static_cast<int>(this->_translate.y + player.pos.y + 64)
+					});
+					rect2.draw();
+				}
+			}
+			if (this->_currentMachine)
+				this->_renderMachineOverlay();
 		}
 		for (auto &player : players) {
 			auto &avatar = lobbyData->avatars[player.player.avatar];
 
 			this->_extraPlayerData[player.id].name.setPosition({
-				static_cast<int>(player.pos.x) - static_cast<int>(this->_extraPlayerData[player.id].name.getSize().x / 2) + this->_translate.x,
-				500 - static_cast<int>(player.pos.y + avatar.sprite.getSize().y) + this->_translate.y
+				static_cast<int>(this->_translate.x + player.pos.x - this->_extraPlayerData[player.id].name.getSize().x / 2),
+				static_cast<int>(this->_translate.y + player.pos.y - avatar.sprite.getSize().y - 20)
 			});
 			this->_extraPlayerData[player.id].name.draw();
 
 			if (player.battleStatus) {
 				this->_inBattle.setPosition({
-					static_cast<int>(player.pos.x) - static_cast<int>(this->_inBattle.getSize().x / 2) + this->_translate.x,
-					480 - static_cast<int>(player.pos.y + avatar.sprite.getSize().y + this->_inBattle.getSize().y) + this->_translate.y
+					static_cast<int>(this->_translate.x + player.pos.x - this->_inBattle.getSize().x / 2),
+					static_cast<int>(this->_translate.y + player.pos.y + this->_inBattle.getSize().y + avatar.sprite.getSize().y)
 				});
 				this->_inBattle.draw();
 			}
 		}
-		if (this->_currentMachine)
-			this->_renderMachineOverlay();
 		if (!this->_hostlist)
 			this->renderChat();
 	} catch (std::exception &e) {
@@ -807,7 +1145,7 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 		txt.pos.x = startPos;
 		if (!m->emotes.empty())
 			txt.pos.y = (txt.realSize.y - EMOTE_SIZE) / 2;
-		printf("Created sprite %x %i,%i %ux%u (%ux%u) %08x\n", texId, txt.pos.x, txt.pos.y, txt.realSize.x, txt.realSize.y, txt.sprite.texture.getSize().x, txt.sprite.texture.getSize().y, txt.sprite.tint);
+		printf("Created sprite %x %i,%i %ux%u (%ux%u) %08x\n", texId, txt.pos.x, txt.pos.y, txt.realSize.x, txt.realSize.y, txt.sprite.texture.getSize().x, txt.sprite.texture.getSize().y, txt.sprite.tint.operator unsigned());
 		startPos = pos;
 		line.clear();
 	};
@@ -1469,5 +1807,22 @@ InLobbyMenu::ArcadeMachine::ArcadeMachine(unsigned id, SokuLib::Vector2i pos, Lo
 InLobbyMenu::ArcadeMachine::ArcadeMachine(const InLobbyMenu::ArcadeMachine &):
 	skin(*(LobbyData::ArcadeSkin*)nullptr)
 {
+	puts("ArcadeMachine(const InLobbyMenu::ArcadeMachine &)");
+	assert(false);
+}
+
+InLobbyMenu::ElevatorMachine::ElevatorMachine(unsigned id, SokuLib::Vector2i pos, LobbyData::ElevatorPlacement &links, LobbyData::ElevatorSkin &skin):
+	id(id),
+	pos(pos),
+	skin(skin),
+	links(links)
+{
+}
+
+InLobbyMenu::ElevatorMachine::ElevatorMachine(const InLobbyMenu::ElevatorMachine &):
+	skin(*(LobbyData::ElevatorSkin*)nullptr),
+	links(*(LobbyData::ElevatorPlacement *)nullptr)
+{
+	puts("ElevatorMachine(const InLobbyMenu::ElevatorMachine &)");
 	assert(false);
 }
