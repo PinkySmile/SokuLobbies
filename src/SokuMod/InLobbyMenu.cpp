@@ -1058,8 +1058,6 @@ int InLobbyMenu::onRender()
 					rect2.draw();
 				}
 			}
-			if (this->_currentMachine)
-				this->_renderMachineOverlay();
 		}
 		for (auto &player : players) {
 			auto &avatar = lobbyData->avatars[player.player.avatar];
@@ -1078,6 +1076,8 @@ int InLobbyMenu::onRender()
 				this->_inBattle.draw();
 			}
 		}
+		if (this->_currentMachine)
+			this->_renderMachineOverlay();
 		if (!this->_hostlist)
 			this->renderChat();
 	} catch (std::exception &e) {

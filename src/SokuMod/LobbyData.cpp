@@ -542,7 +542,7 @@ size_t LobbyData::writeMemoryCallback(void *contents, size_t size, size_t nmemb,
 		throw std::runtime_error("not enough memory (realloc returned NULL)");
 	}
 	mem->memory = ptr;
-	memcpy(&(mem->memory[mem->size]), contents, realsize);
+	memcpy(&mem->memory[mem->size], contents, realsize);
 	mem->size += realsize;
 	mem->memory[mem->size] = 0;
 	return realsize;
@@ -1004,20 +1004,22 @@ std::string LobbyData::httpRequest(const std::string &url, const std::string &me
 	curl_slist *headers = nullptr;
 
 	request_handle = curl_easy_init();
-	headers = curl_slist_append(headers, "Content-Type: application/json");
-	curl_easy_setopt(request_handle, CURLOPT_HTTPHEADER, headers);
+	if (method != "GET") {
+		curl_easy_setopt(request_handle, CURLOPT_CUSTOMREQUEST, method.c_str());
+		headers = curl_slist_append(headers, "Content-Type: application/json");
+		curl_easy_setopt(request_handle, CURLOPT_HTTPHEADER, headers);
+	}
 	curl_easy_setopt(request_handle, CURLOPT_WRITEFUNCTION, &LobbyData::writeMemoryCallback);
 	curl_easy_setopt(request_handle, CURLOPT_WRITEDATA, (void *)&request_chunk);
 	curl_easy_setopt(request_handle, CURLOPT_USERAGENT, "SokuLobbies " VERSION_STR);
 	curl_easy_setopt(request_handle, CURLOPT_SSL_VERIFYPEER, false);
+	curl_easy_setopt(request_handle, CURLOPT_AUTOREFERER, 1L);
+	curl_easy_setopt(request_handle, CURLOPT_FOLLOWLOCATION, 1L);
 
 	request_chunk.memory = (char *)calloc(1, sizeof(char));
 	request_chunk.size = 0;
-	curl_easy_setopt(request_handle, CURLOPT_CUSTOMREQUEST, method.c_str());
 	curl_easy_setopt(request_handle, CURLOPT_URL, url.c_str());
-	if (data.empty())
-		curl_easy_setopt(request_handle, CURLOPT_POSTFIELDS, nullptr);
-	else
+	if (!data.empty())
 		curl_easy_setopt(request_handle, CURLOPT_POSTFIELDS, data.c_str());
 
 	CURLcode res = curl_easy_perform(request_handle);

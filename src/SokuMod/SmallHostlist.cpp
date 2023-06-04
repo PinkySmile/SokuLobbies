@@ -436,10 +436,10 @@ void SmallHostlist::_refreshHostlist()
 		}
 
 		if (!this->_spectator && !this->_hostEntries.empty())
-			for (unsigned i = 0; i <= this->_hostSelect; i++)
+			for (unsigned i = 0; i <= this->_hostSelect && i < this->_hostEntries.size(); i++)
 				this->_hostSelect -= this->_hostEntries[i]->deleted;
 		if (this->_spectator && !this->_playEntries.empty())
-			for (unsigned i = 0; i <= this->_hostSelect; i++)
+			for (unsigned i = 0; i <= this->_hostSelect && i < this->_playEntries.size(); i++)
 				this->_hostSelect -= this->_playEntries[i]->deleted;
 
 		this->_hostEntries.erase(std::remove_if(this->_hostEntries.begin(), this->_hostEntries.end(), [](const std::unique_ptr<HostEntry> &a){
