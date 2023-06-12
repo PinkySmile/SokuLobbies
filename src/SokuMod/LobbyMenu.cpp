@@ -559,7 +559,7 @@ void LobbyMenu::_customizeAvatarRender()
 	for (int i = 0; i < lobbyData->avatars.size(); i++) {
 		auto &avatar = lobbyData->avatars[i];
 		auto &showcase = this->_showcases[i];
-		constexpr unsigned maxBottom = 362;
+		constexpr int maxBottom = 362;
 
 		if (pos.x + avatar.sprite.rect.width > 347) {
 			pos.x = 78;
@@ -588,7 +588,7 @@ void LobbyMenu::_customizeAvatarRender()
 		auto &sprite = otherSprite ? this->_hidden : avatar.sprite;
 
 		if (otherSprite);
-		else if (pos.y + avatar.sprite.getSize().y <= 130);
+		else if (pos.y + (int)avatar.sprite.getSize().y <= 130);
 		else if (pos.y < 130) {
 			avatar.sprite.rect.top += 130 - pos.y;
 			avatar.sprite.rect.height -= (130 - pos.y) * 2 / avatar.scale;
