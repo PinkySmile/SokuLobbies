@@ -192,18 +192,19 @@ void LobbyData::_loadAchievements()
 
 		this->achievementByRequ[achievement.requirement["type"]].push_back(&achievement);
 		if (!achievement.rewards.empty()) {
-			auto reward = achievement.rewards[0];
-			auto type = reward["type"];
+			for (auto &reward : achievement.rewards) {
+				auto type = reward["type"];
 
-			if (type != "_title") {
-				if (type == "avatar")
-					this->avatars[reward["id"]].requirement = &achievement;
-				else if (type == "emote")
-					this->emotesByName[reward["name"]]->requirement = &achievement;
-				else if (type == "prop") {
+				if (type != "title") {
+					if (type == "avatar")
+						this->avatars[reward["id"]].requirement = &achievement;
+					else if (type == "emote")
+						this->emotesByName[reward["name"]]->requirement = &achievement;
+					else if (type == "prop") {
 
-				} else if (type == "accessory") {
+					} else if (type == "accessory") {
 
+					}
 				}
 			}
 		}
@@ -818,16 +819,22 @@ void LobbyData::update()
 		});
 
 	auto &achievement = this->achievementAwardQueue.front();
-	auto reward = achievement->rewards[0];
-	auto type = reward["type"];
 
-	if (achievement->rewards.empty() || achievement->rewards[0]["type"] == "_title") {
+	if (achievement->rewards.empty() || achievement->rewards[this->_reward]["type"] == "title") {
 		this->achHolder.getText.setPosition(this->achHolder.holder.getPosition() + SokuLib::Vector2i{5, 5});
 		this->achHolder.holder.setPosition(this->achHolder.behindGear.getPosition() + SokuLib::Vector2i{
 			this->achHolder.behindGear.rect.width / 2,
 			(this->achHolder.behindGear.rect.height - this->achHolder.holder.rect.height) / 2
 		});
 	} else {
+		auto reward = achievement->rewards[this->_reward];
+		auto type = reward["type"];
+
+		if (this->_achTimer % 60 == 0) {
+			this->_reward++;
+			if (this->_reward >= achievement->rewards.size() || achievement->rewards[this->_reward]["type"] == "title")
+				this->_reward = 0;
+		}
 		this->achHolder.holder.setPosition(this->achHolder.behindGear.getPosition() + SokuLib::Vector2i{
 			this->achHolder.behindGear.rect.width * 3 / 4,
 			(this->achHolder.behindGear.rect.height - this->achHolder.holder.rect.height) / 2
@@ -864,6 +871,9 @@ void LobbyData::update()
 	this->achHolder.behindGear.setRotation(this->achHolder.behindGear.getRotation() + 0.015);
 	if (this->_achTimer >= ACH_GET_TOTAL_TIME) {
 		this->_achTimer = 0;
+		this->_animCtr = 0;
+		this->_anim = 0;
+		this->_reward = 0;
 		this->achievementAwardQueue.pop_front();
 	}
 }
@@ -875,13 +885,13 @@ void LobbyData::render()
 
 	SokuLib::SpriteEx sprite;
 	auto &achievement = this->achievementAwardQueue.front();
-	auto reward = achievement->rewards.empty() ? nlohmann::json{} : achievement->rewards[0];
-	auto type = achievement->rewards.empty() ? "_title" : reward["type"];
+	auto reward = achievement->rewards.empty() ? nlohmann::json{} : achievement->rewards[this->_reward];
+	auto type = achievement->rewards.empty() ? "title" : reward["type"];
 	unsigned offset = 20;
 
 	sprite.render();
 	this->achHolder.holder.draw();
-	if (type != "_title") {
+	if (type != "title") {
 		this->achHolder.behindGear.setPosition(this->achHolder.behindGear.getPosition() + SokuLib::Vector2i{2, 2});
 		this->achHolder.behindGear.tint = SokuLib::Color::Black;
 		this->achHolder.behindGear.draw();

@@ -53,6 +53,7 @@ private:
 	unsigned _achTimer = 0;
 	unsigned _animCtr = 0;
 	unsigned _anim = 0;
+	unsigned _reward = 0;
 
 public:
 	//Stats

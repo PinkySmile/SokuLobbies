@@ -11,7 +11,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 3
+                "id": 4
             },
             {
                 "type": "title",
@@ -69,6 +69,18 @@
         },
         "rewards": [
             {
+                "type": "avatar",
+                "id": 5
+            },
+            {
+                "type": "avatar",
+                "id": 6
+            },
+            {
+                "type": "avatar",
+                "id": 7
+            },
+            {
                 "type": "title",
                 "name": null
             }
@@ -119,9 +131,6 @@
         "description": "Play 1000 games as Reimu",
         "hidden": false
     },
-
-
-
     "Marisa",
     {
         "requirement": {
@@ -132,7 +141,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 4
+                "id": 8
             },
             {
                 "type": "title",
@@ -190,6 +199,18 @@
         },
         "rewards": [
             {
+                "type": "avatar",
+                "id": 9
+            },
+            {
+                "type": "avatar",
+                "id": 10
+            },
+            {
+                "type": "avatar",
+                "id": 11
+            },
+            {
                 "type": "title",
                 "name": null
             }
@@ -240,9 +261,6 @@
         "description": "Play 1000 games as Marisa",
         "hidden": false
     },
-
-
-
     "Sakuya",
     {
         "requirement": {
@@ -253,7 +271,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 5
+                "id": 12
             },
             {
                 "type": "title",
@@ -311,6 +329,18 @@
         },
         "rewards": [
             {
+                "type": "avatar",
+                "id": 13
+            },
+            {
+                "type": "avatar",
+                "id": 14
+            },
+            {
+                "type": "avatar",
+                "id": 15
+            },
+            {
                 "type": "title",
                 "name": null
             }
@@ -361,9 +391,6 @@
         "description": "Play 1000 games as Sakuya",
         "hidden": false
     },
-
-
-
     "Alice",
     {
         "requirement": {
@@ -374,7 +401,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 6
+                "id": 16
             },
             {
                 "type": "title",
@@ -432,6 +459,18 @@
         },
         "rewards": [
             {
+                "type": "avatar",
+                "id": 17
+            },
+            {
+                "type": "avatar",
+                "id": 18
+            },
+            {
+                "type": "avatar",
+                "id": 19
+            },
+            {
                 "type": "title",
                 "name": null
             }
@@ -482,9 +521,6 @@
         "description": "Play 1000 games as Alice",
         "hidden": false
     },
-
-
-
     "Patchouli",
     {
         "requirement": {
@@ -495,7 +531,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 7
+                "id": 20
             },
             {
                 "type": "title",
@@ -553,6 +589,18 @@
         },
         "rewards": [
             {
+                "type": "avatar",
+                "id": 21
+            },
+            {
+                "type": "avatar",
+                "id": 22
+            },
+            {
+                "type": "avatar",
+                "id": 23
+            },
+            {
                 "type": "title",
                 "name": null
             }
@@ -603,9 +651,6 @@
         "description": "Play 1000 games as Patchouli",
         "hidden": false
     },
-
-
-
     "Youmu",
     {
         "requirement": {
@@ -616,7 +661,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 8
+                "id": 24
             },
             {
                 "type": "title",
@@ -674,6 +719,18 @@
         },
         "rewards": [
             {
+                "type": "avatar",
+                "id": 25
+            },
+            {
+                "type": "avatar",
+                "id": 26
+            },
+            {
+                "type": "avatar",
+                "id": 27
+            },
+            {
                 "type": "title",
                 "name": null
             }
@@ -724,9 +781,6 @@
         "description": "Play 1000 games as Youmu",
         "hidden": false
     },
-
-
-
     "Remilia",
     {
         "requirement": {
@@ -737,7 +791,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 9
+                "id": 28
             },
             {
                 "type": "title",
@@ -795,6 +849,18 @@
         },
         "rewards": [
             {
+                "type": "avatar",
+                "id": 29
+            },
+            {
+                "type": "avatar",
+                "id": 30
+            },
+            {
+                "type": "avatar",
+                "id": 31
+            },
+            {
                 "type": "title",
                 "name": null
             }
@@ -845,9 +911,6 @@
         "description": "Play 1000 games as Remilia",
         "hidden": false
     },
-
-
-
     "Yuyuko",
     {
         "requirement": {
@@ -858,7 +921,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 10
+                "id": 32
             },
             {
                 "type": "title",
@@ -916,6 +979,18 @@
         },
         "rewards": [
             {
+                "type": "avatar",
+                "id": 33
+            },
+            {
+                "type": "avatar",
+                "id": 34
+            },
+            {
+                "type": "avatar",
+                "id": 35
+            },
+            {
                 "type": "title",
                 "name": null
             }
@@ -966,9 +1041,6 @@
         "description": "Play 1000 games as Yuyuko",
         "hidden": false
     },
-
-
-
     "Yukari",
     {
         "requirement": {
@@ -979,7 +1051,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 11
+                "id": 36
             },
             {
                 "type": "title",
@@ -1037,6 +1109,18 @@
         },
         "rewards": [
             {
+                "type": "avatar",
+                "id": 37
+            },
+            {
+                "type": "avatar",
+                "id": 38
+            },
+            {
+                "type": "avatar",
+                "id": 39
+            },
+            {
                 "type": "title",
                 "name": null
             }
@@ -1087,9 +1171,6 @@
         "description": "Play 1000 games as Yukari",
         "hidden": false
     },
-
-
-
     "Suika",
     {
         "requirement": {
@@ -1100,7 +1181,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 12
+                "id": 40
             },
             {
                 "type": "title",
@@ -1158,6 +1239,18 @@
         },
         "rewards": [
             {
+                "type": "avatar",
+                "id": 41
+            },
+            {
+                "type": "avatar",
+                "id": 42
+            },
+            {
+                "type": "avatar",
+                "id": 43
+            },
+            {
                 "type": "title",
                 "name": null
             }
@@ -1208,9 +1301,6 @@
         "description": "Play 1000 games as Suika",
         "hidden": false
     },
-
-
-
     "Reisen",
     {
         "requirement": {
@@ -1221,7 +1311,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 13
+                "id": 44
             },
             {
                 "type": "title",
@@ -1279,6 +1369,18 @@
         },
         "rewards": [
             {
+                "type": "avatar",
+                "id": 45
+            },
+            {
+                "type": "avatar",
+                "id": 46
+            },
+            {
+                "type": "avatar",
+                "id": 47
+            },
+            {
                 "type": "title",
                 "name": null
             }
@@ -1329,9 +1431,6 @@
         "description": "Play 1000 games as Reisen",
         "hidden": false
     },
-
-
-
     "Aya",
     {
         "requirement": {
@@ -1342,7 +1441,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 14
+                "id": 48
             },
             {
                 "type": "title",
@@ -1400,6 +1499,18 @@
         },
         "rewards": [
             {
+                "type": "avatar",
+                "id": 49
+            },
+            {
+                "type": "avatar",
+                "id": 50
+            },
+            {
+                "type": "avatar",
+                "id": 51
+            },
+            {
                 "type": "title",
                 "name": null
             }
@@ -1450,9 +1561,6 @@
         "description": "Play 1000 games as Aya",
         "hidden": false
     },
-
-
-
     "Komachi",
     {
         "requirement": {
@@ -1463,7 +1571,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 15
+                "id": 52
             },
             {
                 "type": "title",
@@ -1521,6 +1629,18 @@
         },
         "rewards": [
             {
+                "type": "avatar",
+                "id": 53
+            },
+            {
+                "type": "avatar",
+                "id": 54
+            },
+            {
+                "type": "avatar",
+                "id": 55
+            },
+            {
                 "type": "title",
                 "name": null
             }
@@ -1571,9 +1691,6 @@
         "description": "Play 1000 games as Komachi",
         "hidden": false
     },
-
-
-
     "Iku",
     {
         "requirement": {
@@ -1584,7 +1701,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 16
+                "id": 56
             },
             {
                 "type": "title",
@@ -1642,6 +1759,18 @@
         },
         "rewards": [
             {
+                "type": "avatar",
+                "id": 57
+            },
+            {
+                "type": "avatar",
+                "id": 58
+            },
+            {
+                "type": "avatar",
+                "id": 59
+            },
+            {
                 "type": "title",
                 "name": null
             }
@@ -1692,9 +1821,6 @@
         "description": "Play 1000 games as Iku",
         "hidden": false
     },
-
-
-
     "Tenshi",
     {
         "requirement": {
@@ -1705,7 +1831,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 17
+                "id": 60
             },
             {
                 "type": "title",
@@ -1763,6 +1889,18 @@
         },
         "rewards": [
             {
+                "type": "avatar",
+                "id": 61
+            },
+            {
+                "type": "avatar",
+                "id": 62
+            },
+            {
+                "type": "avatar",
+                "id": 63
+            },
+            {
                 "type": "title",
                 "name": null
             }
@@ -1813,9 +1951,6 @@
         "description": "Play 1000 games as Tenshi",
         "hidden": false
     },
-
-
-
     "Sanae",
     {
         "requirement": {
@@ -1826,7 +1961,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 18
+                "id": 64
             },
             {
                 "type": "title",
@@ -1884,6 +2019,18 @@
         },
         "rewards": [
             {
+                "type": "avatar",
+                "id": 65
+            },
+            {
+                "type": "avatar",
+                "id": 66
+            },
+            {
+                "type": "avatar",
+                "id": 67
+            },
+            {
                 "type": "title",
                 "name": null
             }
@@ -1934,9 +2081,6 @@
         "description": "Play 1000 games as Sanae",
         "hidden": false
     },
-
-
-
     "Cirno",
     {
         "requirement": {
@@ -1947,7 +2091,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 19
+                "id": 68
             },
             {
                 "type": "title",
@@ -2005,6 +2149,18 @@
         },
         "rewards": [
             {
+                "type": "avatar",
+                "id": 69
+            },
+            {
+                "type": "avatar",
+                "id": 70
+            },
+            {
+                "type": "avatar",
+                "id": 71
+            },
+            {
                 "type": "title",
                 "name": null
             }
@@ -2055,9 +2211,6 @@
         "description": "Play 1000 games as Cirno",
         "hidden": false
     },
-
-
-
     "Meiling",
     {
         "requirement": {
@@ -2068,7 +2221,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 20
+                "id": 72
             },
             {
                 "type": "title",
@@ -2126,6 +2279,18 @@
         },
         "rewards": [
             {
+                "type": "avatar",
+                "id": 73
+            },
+            {
+                "type": "avatar",
+                "id": 74
+            },
+            {
+                "type": "avatar",
+                "id": 75
+            },
+            {
                 "type": "title",
                 "name": null
             }
@@ -2176,9 +2341,6 @@
         "description": "Play 1000 games as Meiling",
         "hidden": false
     },
-
-
-
     "Utsuho",
     {
         "requirement": {
@@ -2189,7 +2351,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 21
+                "id": 76
             },
             {
                 "type": "title",
@@ -2247,6 +2409,18 @@
         },
         "rewards": [
             {
+                "type": "avatar",
+                "id": 77
+            },
+            {
+                "type": "avatar",
+                "id": 78
+            },
+            {
+                "type": "avatar",
+                "id": 79
+            },
+            {
                 "type": "title",
                 "name": null
             }
@@ -2297,9 +2471,6 @@
         "description": "Play 1000 games as Utsuho",
         "hidden": false
     },
-
-
-
     "Suwako",
     {
         "requirement": {
@@ -2310,7 +2481,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 22
+                "id": 80
             },
             {
                 "type": "title",
@@ -2368,6 +2539,18 @@
         },
         "rewards": [
             {
+                "type": "avatar",
+                "id": 81
+            },
+            {
+                "type": "avatar",
+                "id": 82
+            },
+            {
+                "type": "avatar",
+                "id": 83
+            },
+            {
                 "type": "title",
                 "name": null
             }
@@ -2418,8 +2601,6 @@
         "description": "Play 1000 games as Suwako",
         "hidden": false
     },
-
-
     "Meta",
     {
         "requirement": {
@@ -2428,7 +2609,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 23
+                "id": 84
             },
             {
                 "type": "title",
