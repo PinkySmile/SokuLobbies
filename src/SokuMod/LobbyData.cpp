@@ -797,6 +797,8 @@ SokuLib::SWRFont &LobbyData::getFont(unsigned int size)
 
 void LobbyData::update()
 {
+	if (this->achievementsLocked)
+		this->achievementAwardQueue.clear();
 	if (this->achievementAwardQueue.empty())
 		return;
 	if (this->_achTimer == 0)

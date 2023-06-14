@@ -21,6 +21,7 @@ static void (*og_onUpdate)();
 static int (SokuLib::Logo::*og_LogoOnProcess)();
 static int (SokuLib::Title::*og_TitleOnProcess)();
 static int (SokuLib::Battle::*og_BattleOnProcess)();
+static int (SokuLib::Select::*og_SelectOnProcess)();
 static int (SokuLib::MenuConnect::*og_ConnectOnProcess)();
 static int (SokuLib::MenuConnect::*og_ConnectOnRender)();
 static int (SokuLib::MenuConnect::*og_ConnectOnUnknown)();
@@ -58,6 +59,7 @@ bool debug = true;
 std::function<int ()> onGameEnd;
 LobbyMenu *menu = nullptr;
 PTOP_LEVEL_EXCEPTION_FILTER oldFilter = nullptr;
+std::pair<bool, bool> selectedRandom{false, false};
 
 std::map<unsigned int, Character> characters{
 	{ SokuLib::CHARACTER_REIMU,     {"Reimu",     "Reimu Hakurei",          "reimu"}},
@@ -135,21 +137,11 @@ void countGame()
 	auto mid = SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER ? SokuLib::rightChar : SokuLib::leftChar;
 	auto oid = SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER ? SokuLib::leftChar : SokuLib::rightChar;
 	auto &chr = SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER ? battle.rightCharacterManager : battle.leftCharacterManager;
-	auto &opp = SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER ? battle.leftCharacterManager : battle.rightCharacterManager;
 	auto data = lobbyData->loadedCharacterStats.find(mid);
-
-	if (data == lobbyData->loadedCharacterStats.end()) {
-		LobbyData::CharacterStatEntry entry{0, 0, 0, 0};
-
-		lobbyData->loadedCharacterStats[mid] = entry;
-		data = lobbyData->loadedCharacterStats.find(mid);
-	}
-	data->second.wins += chr.score >= 2;
-	data->second.losses += chr.score < 2;
-
 	auto &wins = lobbyData->achievementByRequ["win"];
 	auto &loss = lobbyData->achievementByRequ["lose"];
 	auto &play = lobbyData->achievementByRequ["play"];
+	// Wins achievements
 	auto it = std::find_if(wins.begin(), wins.end(), [mid, &data](LobbyData::Achievement *achievement){
 		return !achievement->awarded && achievement->requirement["chr"] == mid && achievement->requirement["count"] <= data->second.wins;
 	});
@@ -159,6 +151,7 @@ void countGame()
 		lobbyData->achievementAwardQueue.push_back(*it);
 	}
 
+	// Losses achievements
 	it = std::find_if(loss.begin(), loss.end(), [mid, &data](LobbyData::Achievement *achievement){
 		return !achievement->awarded && achievement->requirement["chr"] == mid && achievement->requirement["count"] <= data->second.losses;
 	});
@@ -167,6 +160,7 @@ void countGame()
 		lobbyData->achievementAwardQueue.push_back(*it);
 	}
 
+	// Play achievements
 	it = std::find_if(play.begin(), play.end(), [mid, &data](LobbyData::Achievement *achievement){
 		return !achievement->awarded && achievement->requirement["chr"] == mid && achievement->requirement["count"] <= data->second.losses + data->second.wins;
 	});
@@ -174,9 +168,31 @@ void countGame()
 		(*it)->awarded = true;
 		lobbyData->achievementAwardQueue.push_back(*it);
 	}
-
 	lobbyData->saveAchievements();
 
+	// My stats achievements
+	if (data == lobbyData->loadedCharacterStats.end()) {
+		LobbyData::CharacterStatEntry entry{0, 0, 0, 0};
+
+		lobbyData->loadedCharacterStats[mid] = entry;
+		data = lobbyData->loadedCharacterStats.find(mid);
+	}
+	data->second.wins += chr.score >= 2;
+	data->second.losses += chr.score < 2;
+	// Random select achievements
+	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER ? selectedRandom.second : selectedRandom.first) {
+		data = lobbyData->loadedCharacterStats.find(SokuLib::CHARACTER_RANDOM);
+		if (data == lobbyData->loadedCharacterStats.end()) {
+			LobbyData::CharacterStatEntry entry{0, 0, 0, 0};
+
+			lobbyData->loadedCharacterStats[SokuLib::CHARACTER_RANDOM] = entry;
+			data = lobbyData->loadedCharacterStats.find(SokuLib::CHARACTER_RANDOM);
+		}
+		data->second.wins += chr.score >= 2;
+		data->second.losses += chr.score < 2;
+	}
+
+	// Against stats achievements
 	data = lobbyData->loadedCharacterStats.find(oid);
 	if (data == lobbyData->loadedCharacterStats.end()) {
 		LobbyData::CharacterStatEntry entry{0, 0, 0, 0};
@@ -186,9 +202,31 @@ void countGame()
 	}
 	data->second.againstWins += chr.score >= 2;
 	data->second.againstLosses += chr.score < 2;
+	// Random select achievements
+	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER ? selectedRandom.first : selectedRandom.second) {
+		data = lobbyData->loadedCharacterStats.find(SokuLib::CHARACTER_RANDOM);
+		if (data == lobbyData->loadedCharacterStats.end()) {
+			LobbyData::CharacterStatEntry entry{0, 0, 0, 0};
+
+			lobbyData->loadedCharacterStats[SokuLib::CHARACTER_RANDOM] = entry;
+			data = lobbyData->loadedCharacterStats.find(SokuLib::CHARACTER_RANDOM);
+		}
+		data->second.againstWins += chr.score >= 2;
+		data->second.againstLosses += chr.score < 2;
+	}
+
+	// Matchup stats achievements
+	auto muIt = lobbyData->loadedMatchupStats.find({mid, oid});
+
+	if (muIt == lobbyData->loadedMatchupStats.end()) {
+		LobbyData::MatchupStatEntry entry{0, 0};
+
+		lobbyData->loadedMatchupStats[{mid, oid}] = entry;
+		muIt = lobbyData->loadedMatchupStats.find({mid, oid});
+	}
+	muIt->second.wins += chr.score >= 2;
+	muIt->second.losses += chr.score < 2;
 	lobbyData->saveStats();
-	if (lobbyData->achievementsLocked)
-		return;
 }
 
 int __fastcall ConnectOnProcess(SokuLib::MenuConnect *This)
@@ -332,6 +370,27 @@ void renderCommon()
 		activeMenu = nullptr;
 	}
 }
+void selectCommon()
+{
+	static bool a = false;
+	auto &scene = SokuLib::currentScene->to<SokuLib::Select>();
+
+	if (scene.leftSelectionStage == 3 && scene.rightSelectionStage == 3) {
+		if (!a)
+			selectedRandom = {
+				SokuLib::leftChar == SokuLib::CHARACTER_RANDOM,
+				SokuLib::rightChar == SokuLib::CHARACTER_RANDOM
+			};
+		a = true;
+	} else
+		a = false;
+}
+
+int __fastcall SelectOnProcess(SokuLib::Select *This)
+{
+	selectCommon();
+	return (This->*og_SelectOnProcess)();
+}
 
 int __fastcall BattleOnProcess(SokuLib::Battle *This)
 {
@@ -380,6 +439,7 @@ int __fastcall BattleClientOnProcess(SokuLib::BattleClient *This)
 int __fastcall SelectClientOnProcess(SokuLib::SelectClient *This)
 {
 	processCommon(true);
+	selectCommon();
 	return (This->*og_SelectClientOnProcess)();
 }
 int __fastcall LoadingClientOnProcess(SokuLib::LoadingClient *This)
@@ -408,6 +468,7 @@ int __fastcall BattleServerOnProcess(SokuLib::BattleServer *This)
 int __fastcall SelectServerOnProcess(SokuLib::SelectServer *This)
 {
 	processCommon(true);
+	selectCommon();
 	return (This->*og_SelectServerOnProcess)();
 }
 int __fastcall LoadingServerOnProcess(SokuLib::LoadingServer *This)
@@ -668,6 +729,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
 	og_LogoOnProcess         = SokuLib::TamperDword(&SokuLib::VTable_Logo.onProcess,         LogoOnProcess);
 	og_TitleOnProcess        = SokuLib::TamperDword(&SokuLib::VTable_Title.onProcess,        TitleOnProcess);
+	og_SelectOnProcess       = SokuLib::TamperDword(&SokuLib::VTable_Select.onProcess,       SelectOnProcess);
 	og_BattleOnProcess       = SokuLib::TamperDword(&SokuLib::VTable_Battle.onProcess,       BattleOnProcess);
 	og_ConnectOnProcess      = SokuLib::TamperDword(&SokuLib::VTable_ConnectMenu.onProcess,  ConnectOnProcess);
 	og_ConnectOnRender       = SokuLib::TamperDword(&SokuLib::VTable_ConnectMenu.onRender,   ConnectOnRender);
