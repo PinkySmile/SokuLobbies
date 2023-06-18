@@ -16,6 +16,8 @@
 
 std::unique_ptr<LobbyData> lobbyData;
 
+extern std::map<unsigned int, Character> characters;
+
 void LobbyData::saveStats()
 {
 	auto path = std::filesystem::path(profileFolderPath) / "stats.dat";
@@ -47,6 +49,8 @@ void LobbyData::_loadStats()
 	std::ifstream stream{std::filesystem::path(profileFolderPath) / "stats.dat", std::fstream::binary};
 	unsigned magic;
 
+	this->loadedMatchupStats.clear();
+	this->loadedCharacterCardUsage.clear();
 	this->loadedCharacterStats.clear();
 	if (stream.fail())
 		return;
@@ -62,6 +66,74 @@ void LobbyData::_loadStats()
 #else
 		MessageBox(SokuLib::window, "Warning: Invalid magic", "Warning", MB_ICONWARNING);
 #endif
+}
+
+static void loadTexture(SokuLib::DrawUtils::Texture &container, const char *path)
+{
+	int text = 0;
+	SokuLib::Vector2u size;
+	int *ret = SokuLib::textureMgr.loadTexture(&text, path, &size.x, &size.y);
+
+	printf("Loading texture %s\n", path);
+	if (!ret || !text) {
+		puts("Couldn't load texture...");
+		MessageBoxA(SokuLib::window, ("Cannot load game asset " + std::string(path)).c_str(), "Game texture loading failed", MB_ICONWARNING);
+	}
+	container.setHandle(text, size);
+}
+
+static inline void loadTexture(SokuLib::DrawUtils::Sprite &container, const char *path)
+{
+	loadTexture(container.texture, path);
+	container.rect.width = container.texture.getSize().x;
+	container.rect.height = container.texture.getSize().y;
+	container.setSize(container.texture.getSize());
+}
+
+void LobbyData::_loadGameCards()
+{
+	char buffer[] = "data/csv/000000000000/spellcard.csv";
+
+	for (auto [id, chr] : characters) {
+		if (id == SokuLib::CHARACTER_RANDOM)
+			continue;
+		sprintf(buffer, "data/csv/%s/spellcard.csv", chr.codeName.c_str());
+		printf("Loading cards from %s\n", buffer);
+
+		SokuLib::CSVParser parser{buffer};
+		int i = 0;
+
+		do {
+			auto str = parser.getNextCell();
+			unsigned short cid;
+
+			if (str.empty())
+				continue;
+			i++;
+			try {
+				cid = std::stoul(str);
+			} catch (std::exception &e) {
+				MessageBoxA(
+					SokuLib::window,
+					(
+						"Fatal error: Cannot load cards list for " + chr.codeName + ":\n" +
+						"In file " + buffer + ": Cannot parse cell #1 at line #" + std::to_string(i) +
+						" \"" + str + "\": " + e.what()
+					).c_str(),
+					"Loading default deck failed",
+					MB_ICONERROR
+				);
+				abort();
+			}
+			sprintf(buffer, "data/card/%s/card%03i.bmp", chr.codeName.c_str(), cid);
+			loadTexture(this->cardsTextures[id][cid], buffer);
+		} while (parser.goToNextLine());
+	}
+	for (int i = 0; i <= 20; i++) {
+		sprintf(buffer, "data/card/common/card%03i.bmp", i);
+		loadTexture(this->cardsTextures[SokuLib::CHARACTER_RANDOM][i], buffer);
+	}
+	loadTexture(cardsTextures[SokuLib::CHARACTER_RANDOM][21], "data/battle/cardFaceDown.bmp");
 }
 
 void LobbyData::_loadAvatars()
@@ -559,6 +631,7 @@ LobbyData::LobbyData()
 	this->_loadArcades();
 	this->_loadElevators();
 	this->_loadAchievements();
+	this->_loadGameCards();
 	this->_grantStatsAchievements();
 	if (GetFileAttributesW(L".crash") != INVALID_FILE_ATTRIBUTES)
 		this->_grantCrashAchievements();
@@ -624,11 +697,12 @@ unsigned LobbyData::_getExpectedMagic()
 
 	for (auto &entry : this->loadedCharacterCardUsage) {
 		magic -= entry.first;
-		magic -= entry.second.totalCards;
+		magic -= entry.second.nbGames;
 		for (auto &card : entry.second.cards) {
-			magic -= card.burnt;
-			magic -= card.inDeck;
-			magic -= card.used;
+			magic -= card.first;
+			magic -= card.second.burnt;
+			magic -= card.second.inDeck;
+			magic -= card.second.used;
 		}
 	}
 	magic -= this->loadedCharacterCardUsage.size();
@@ -670,16 +744,28 @@ void LobbyData::_loadCharacterCardUsage(std::istream &stream)
 	unsigned len;
 
 	stream.read((char *)&len, sizeof(len));
+	printf("Loading %u entrie(s)\n", len);
 	while (len--) {
 		CardChrStatEntry entry;
+		unsigned nb;
 		unsigned char id;
 
 		stream.read((char *)&id, sizeof(id));
-		stream.read((char *)&entry.totalCards, sizeof(entry.totalCards));
-		for (auto &card : entry.cards) {
+		stream.read((char *)&nb, sizeof(nb));
+		stream.read((char *)&entry.nbGames, sizeof(entry.nbGames));
+		printf("%u: %u games for %u cards\n", id, entry.nbGames, nb);
+		for (unsigned i = 0; i < nb; i++) {
+			unsigned cardId;
+			CardStatEntry card;
+
+			stream.read((char *)&cardId, sizeof(cardId));
 			stream.read((char *)&card.inDeck, sizeof(card.inDeck));
 			stream.read((char *)&card.used, sizeof(card.used));
 			stream.read((char *)&card.burnt, sizeof(card.burnt));
+			printf("%u: %u|%u|%u\n", cardId, card.inDeck, card.used, card.burnt);
+			if (entry.cards.find(cardId) != entry.cards.end())
+				throw std::invalid_argument("Cannot load stats.dat: Reading CardChrStats Duplicated entry " + std::to_string(id) + "|" + std::to_string(cardId));
+			entry.cards[cardId] = card;
 		}
 		if (stream.fail())
 			throw std::invalid_argument("Cannot load stats.dat: Reading CardChrStats Unexpected end of file");
@@ -730,12 +816,16 @@ void LobbyData::_saveCharacterCardUsage(std::ostream &stream)
 
 	stream.write((char *)&size, sizeof(size));
 	for (auto &entry : this->loadedCharacterCardUsage) {
+		unsigned nb = entry.second.cards.size();
+
 		stream.write((char *)&entry.first, sizeof(entry.first));
-		stream.write((char *)&entry.second.totalCards, sizeof(entry.second.totalCards));
+		stream.write((char *)&nb, sizeof(nb));
+		stream.write((char *)&entry.second.nbGames, sizeof(entry.second.nbGames));
 		for (auto &card : entry.second.cards) {
-			stream.write((char *)&card.inDeck, sizeof(card.inDeck));
-			stream.write((char *)&card.used, sizeof(card.used));
-			stream.write((char *)&card.burnt, sizeof(card.burnt));
+			stream.write((char *)&card.first, sizeof(card.first));
+			stream.write((char *)&card.second.inDeck, sizeof(card.second.inDeck));
+			stream.write((char *)&card.second.used, sizeof(card.second.used));
+			stream.write((char *)&card.second.burnt, sizeof(card.second.burnt));
 		}
 	}
 }
@@ -994,6 +1084,36 @@ void LobbyData::_grantStatsAchievements()
 				return !achievement->awarded && achievement->requirement["chr"] == mid && achievement->requirement["count"] <= data.second.losses + data.second.wins;
 			});
 		}
+
+		auto cardsIt = this->loadedCharacterCardUsage.find(mid);
+
+		if (cardsIt == this->loadedCharacterCardUsage.end())
+			continue;
+
+		auto textures = this->cardsTextures.find(mid);
+
+		for (auto &elem : textures->second) {
+			auto cardIt = cardsIt->second.cards.find(elem.first);
+
+			if (cardIt == cardsIt->second.cards.end() || cardIt->second.used == 0) {
+				printf("Not for %i: %i: %s %u\n", mid, elem.first, cardIt == cardsIt->second.cards.end() ? "true" : "false", cardIt == cardsIt->second.cards.end() ? 0 : cardIt->second.used);
+				goto endOfLoop;
+			}
+		}
+
+		if (true) {
+			auto &cards = this->achievementByRequ["cards"];
+			auto itCardsAch = std::find_if(cards.begin(), cards.end(), [mid, &data](LobbyData::Achievement *achievement){
+				return !achievement->awarded && achievement->requirement["chr"] == mid;
+			});
+
+			if (itCardsAch != cards.end()) {
+				(*itCardsAch)->awarded = true;
+				this->achievementAwardQueue.push_back(*itCardsAch);
+			}
+		}
+	endOfLoop:
+		continue;
 	}
 }
 

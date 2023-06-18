@@ -33,6 +33,7 @@ private:
 	void _loadElevators();
 	void _loadAchievements();
 	void _loadFlags();
+	void _loadGameCards();
 
 	unsigned _getExpectedMagic();
 	void _loadCharacterStats(std::istream &stream);
@@ -73,8 +74,8 @@ public:
 		unsigned burnt;
 	};
 	struct CardChrStatEntry {
-		unsigned totalCards;
-		CardStatEntry cards[35];
+		unsigned nbGames;
+		std::map<unsigned, CardStatEntry> cards;
 	};
 
 	struct Achievement {
@@ -222,6 +223,7 @@ public:
 	std::map<unsigned char, CardChrStatEntry> loadedCharacterCardUsage;
 	std::map<std::string, std::vector<Achievement *>> achievementByRequ;
 	std::map<std::pair<unsigned char, unsigned char>, MatchupStatEntry> loadedMatchupStats;
+	std::map<unsigned char, std::map<unsigned short, SokuLib::DrawUtils::Sprite>> cardsTextures;
 	std::list<Achievement *> achievementAwardQueue;
 
 	LobbyData();

@@ -86,7 +86,7 @@
             }
         ],
         "name": "Hand to Gohei Style",
-        "description": "Use each Reimu's skill and spell at<br>least once",
+        "description": "Use each Reimu's skill and spell<br>card at least once",
         "hidden": false
     },
     {
@@ -216,7 +216,7 @@
             }
         ],
         "name": "Powerhouse in Black",
-        "description": "Use each Marisa's skill and spell at<br>least once",
+        "description": "Use each Marisa's skill and spell<br>card at least once",
         "hidden": false
     },
     {
@@ -346,7 +346,7 @@
             }
         ],
         "name": "Commando Pro",
-        "description": "Use each Sakuya's skill and spell at<br>least once",
+        "description": "Use each Sakuya's skill and spell<br>card at least once",
         "hidden": false
     },
     {
@@ -476,7 +476,7 @@
             }
         ],
         "name": "Army of One",
-        "description": "Use each Alice's skill and spell at<br>least once",
+        "description": "Use each Alice's skill and spell<br>card at least once",
         "hidden": false
     },
     {
@@ -606,7 +606,7 @@
             }
         ],
         "name": "Never Ending Knowledge",
-        "description": "Use each Patchouli's skill and spell at<br>least once",
+        "description": "Use each Patchouli's skill and spell<br>card at least once",
         "hidden": false
     },
     {
@@ -736,7 +736,7 @@
             }
         ],
         "name": "Konpaku's Kenjutsu Master",
-        "description": "Use each Youmu's skill and spell at<br>least once",
+        "description": "Use each Youmu's skill and spell<br>card at least once",
         "hidden": false
     },
     {
@@ -866,7 +866,7 @@
             }
         ],
         "name": "Lady of The Mansion",
-        "description": "Use each Remilia's skill and spell at<br>least once",
+        "description": "Use each Remilia's skill and spell<br>card at least once",
         "hidden": false
     },
     {
@@ -996,7 +996,7 @@
             }
         ],
         "name": "Ageless Dream",
-        "description": "Use each Yuyuko's skill and spell at<br>least once",
+        "description": "Use each Yuyuko's skill and spell<br>card at least once",
         "hidden": false
     },
     {
@@ -1126,7 +1126,7 @@
             }
         ],
         "name": "Ancient \"Programmer\"",
-        "description": "Use each Yukari's skill and spell at<br>least once",
+        "description": "Use each Yukari's skill and spell<br>card at least once",
         "hidden": false
     },
     {
@@ -1256,7 +1256,7 @@
             }
         ],
         "name": "Material and Present Power",
-        "description": "Use each Suika's skill and spell at<br>least once",
+        "description": "Use each Suika's skill and spell<br>card at least once",
         "hidden": false
     },
     {
@@ -1386,7 +1386,7 @@
             }
         ],
         "name": "Lunar Soldier",
-        "description": "Use each Reisen's skill and spell at<br>least once",
+        "description": "Use each Reisen's skill and spell<br>card at least once",
         "hidden": false
     },
     {
@@ -1516,7 +1516,7 @@
             }
         ],
         "name": "Infinite Nightmare",
-        "description": "Use each Aya's skill and spell at<br>least once",
+        "description": "Use each Aya's skill and spell<br>card at least once",
         "hidden": false
     },
     {
@@ -1646,7 +1646,7 @@
             }
         ],
         "name": "Divine Comedy of Errors",
-        "description": "Use each Komachi's skill and spell at<br>least once",
+        "description": "Use each Komachi's skill and spell<br>card at least once",
         "hidden": false
     },
     {
@@ -1776,7 +1776,7 @@
             }
         ],
         "name": "Swimming in The Sky",
-        "description": "Use each Iku's skill and spell at<br>least once",
+        "description": "Use each Iku's skill and spell<br>card at least once",
         "hidden": false
     },
     {
@@ -1906,7 +1906,7 @@
             }
         ],
         "name": "Wielder of \"The Sword of Hisou\"",
-        "description": "Use each Tenshi's skill and spell at<br>least once",
+        "description": "Use each Tenshi's skill and spell<br>card at least once",
         "hidden": false
     },
     {
@@ -2036,7 +2036,7 @@
             }
         ],
         "name": "Master of Wind-Fu",
-        "description": "Use each Sanae's skill and spell at<br>least once",
+        "description": "Use each Sanae's skill and spell<br>card at least once",
         "hidden": false
     },
     {
@@ -2166,7 +2166,7 @@
             }
         ],
         "name": "Stronger Than a Grown Human",
-        "description": "Use each Cirno's skill and spell at<br>least once",
+        "description": "Use each Cirno's skill and spell<br>card at least once",
         "hidden": false
     },
     {
@@ -2296,7 +2296,7 @@
             }
         ],
         "name": "Yi Er Fanclub",
-        "description": "Use each Meiling's skill and spell at<br>least once",
+        "description": "Use each Meiling's skill and spell<br>card at least once",
         "hidden": false
     },
     {
@@ -2426,7 +2426,7 @@
             }
         ],
         "name": "Sector 7G's Finest Employee",
-        "description": "Use each Utsuho's skill and spell at<br>least once",
+        "description": "Use each Utsuho's skill and spell<br>card at least once",
         "hidden": false
     },
     {
@@ -2556,7 +2556,7 @@
             }
         ],
         "name": "Snake God in Frog Skin",
-        "description": "Use each Suwako's skill and spell at<br>least once",
+        "description": "Use each Suwako's skill and spell<br>card at least once",
         "hidden": false
     },
     {

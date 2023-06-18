@@ -14,6 +14,7 @@ struct Character {
 	std::string firstName;
 	std::string fullName;
 	std::string codeName;
+	unsigned nbSkills;
 };
 
 extern wchar_t profilePath[MAX_PATH];

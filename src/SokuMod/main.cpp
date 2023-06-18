@@ -52,38 +52,42 @@ unsigned short hostPort;
 bool hasSoku2 = false;
 bool counted = false;
 bool activated = true;
+bool init = false;
 auto load = std::pair(false, false);
 #ifdef _DEBUG
 bool debug = true;
 #endif
 std::function<int ()> onGameEnd;
+std::vector<unsigned short> deck;
+std::vector<unsigned short> cardsUsed;
+std::vector<unsigned short> cardsBurnt;
 LobbyMenu *menu = nullptr;
 PTOP_LEVEL_EXCEPTION_FILTER oldFilter = nullptr;
 std::pair<bool, bool> selectedRandom{false, false};
 
 std::map<unsigned int, Character> characters{
-	{ SokuLib::CHARACTER_REIMU,     {"Reimu",     "Reimu Hakurei",          "reimu"}},
-	{ SokuLib::CHARACTER_MARISA,    {"Marisa",    "Marisa Kirisame",        "marisa"}},
-	{ SokuLib::CHARACTER_SAKUYA,    {"Sakuya",    "Sakuya Izayoi",          "sakuya"}},
-	{ SokuLib::CHARACTER_ALICE,     {"Alice",     "Alice Margatroid",       "alice"}},
-	{ SokuLib::CHARACTER_PATCHOULI, {"Patchouli", "Patchouli Knowledge",    "patchouli"}},
-	{ SokuLib::CHARACTER_YOUMU,     {"Youmu",     "Youmu Konpaku",          "youmu"}},
-	{ SokuLib::CHARACTER_REMILIA,   {"Remilia",   "Remilia Scarlet",        "remilia"}},
-	{ SokuLib::CHARACTER_YUYUKO,    {"Yuyuko",    "Yuyuko Saigyouji",       "yuyuko"}},
-	{ SokuLib::CHARACTER_YUKARI,    {"Yukari",    "Yukari Yakumo",          "yukari"}},
-	{ SokuLib::CHARACTER_SUIKA,     {"Suika",     "Suika Ibuki",            "suika"}},
-	{ SokuLib::CHARACTER_REISEN,    {"Reisen",    "Reisen Undongein Inaba", "udonge"}},
-	{ SokuLib::CHARACTER_AYA,       {"Aya",       "Aya Shameimaru",         "aya"}},
-	{ SokuLib::CHARACTER_KOMACHI,   {"Komachi",   "Komachi Onozuka",        "komachi"}},
-	{ SokuLib::CHARACTER_IKU,       {"Iku",       "Iku Nagae",              "iku"}},
-	{ SokuLib::CHARACTER_TENSHI,    {"Tenshi",    "Tenshi Hinanawi",        "tenshi"}},
-	{ SokuLib::CHARACTER_SANAE,     {"Sanae",     "Sanae Kochiya",          "sanae"}},
-	{ SokuLib::CHARACTER_CIRNO,     {"Cirno",     "Cirno",                  "chirno"}},
-	{ SokuLib::CHARACTER_MEILING,   {"Meiling",   "Hong Meiling",           "meirin"}},
-	{ SokuLib::CHARACTER_UTSUHO,    {"Utsuho",    "Utsuho Reiuji",          "utsuho"}},
-	{ SokuLib::CHARACTER_SUWAKO,    {"Suwako",    "Suwako Moriya",          "suwako"}},
-	{ SokuLib::CHARACTER_NAMAZU,    {"Namazu",    "Giant Catfish",          "namazu"}},
-	{ SokuLib::CHARACTER_RANDOM,    {"Random",    "Random Select",          "random_select"}},
+	{ SokuLib::CHARACTER_REIMU,     {"Reimu",     "Reimu Hakurei",          "reimu",         12}},
+	{ SokuLib::CHARACTER_MARISA,    {"Marisa",    "Marisa Kirisame",        "marisa",        12}},
+	{ SokuLib::CHARACTER_SAKUYA,    {"Sakuya",    "Sakuya Izayoi",          "sakuya",        12}},
+	{ SokuLib::CHARACTER_ALICE,     {"Alice",     "Alice Margatroid",       "alice",         12}},
+	{ SokuLib::CHARACTER_PATCHOULI, {"Patchouli", "Patchouli Knowledge",    "patchouli",     15}},
+	{ SokuLib::CHARACTER_YOUMU,     {"Youmu",     "Youmu Konpaku",          "youmu",         12}},
+	{ SokuLib::CHARACTER_REMILIA,   {"Remilia",   "Remilia Scarlet",        "remilia",       12}},
+	{ SokuLib::CHARACTER_YUYUKO,    {"Yuyuko",    "Yuyuko Saigyouji",       "yuyuko",        12}},
+	{ SokuLib::CHARACTER_YUKARI,    {"Yukari",    "Yukari Yakumo",          "yukari",        12}},
+	{ SokuLib::CHARACTER_SUIKA,     {"Suika",     "Suika Ibuki",            "suika",         12}},
+	{ SokuLib::CHARACTER_REISEN,    {"Reisen",    "Reisen Undongein Inaba", "udonge",        12}},
+	{ SokuLib::CHARACTER_AYA,       {"Aya",       "Aya Shameimaru",         "aya",           12}},
+	{ SokuLib::CHARACTER_KOMACHI,   {"Komachi",   "Komachi Onozuka",        "komachi",       12}},
+	{ SokuLib::CHARACTER_IKU,       {"Iku",       "Iku Nagae",              "iku",           12}},
+	{ SokuLib::CHARACTER_TENSHI,    {"Tenshi",    "Tenshi Hinanawi",        "tenshi",        12}},
+	{ SokuLib::CHARACTER_SANAE,     {"Sanae",     "Sanae Kochiya",          "sanae",         12}},
+	{ SokuLib::CHARACTER_CIRNO,     {"Cirno",     "Cirno",                  "chirno",        12}},
+	{ SokuLib::CHARACTER_MEILING,   {"Meiling",   "Hong Meiling",           "meirin",        12}},
+	{ SokuLib::CHARACTER_UTSUHO,    {"Utsuho",    "Utsuho Reiuji",          "utsuho",        12}},
+	{ SokuLib::CHARACTER_SUWAKO,    {"Suwako",    "Suwako Moriya",          "suwako",        12}},
+	{ SokuLib::CHARACTER_NAMAZU,    {"Namazu",    "Giant Catfish",          "namazu",        0}},
+	{ SokuLib::CHARACTER_RANDOM,    {"Random",    "Random Select",          "random_select", 0}},
 };
 
 void playSound(int se)
@@ -121,6 +125,31 @@ LONG WINAPI UnhandledExFilter(PEXCEPTION_POINTERS ExPtr)
 	else if ((attr & FILE_ATTRIBUTE_HIDDEN) == 0)
 		SetFileAttributesW(name, attr | FILE_ATTRIBUTE_HIDDEN);
 	return oldFilter ? oldFilter(ExPtr) : 0;
+}
+
+static void __fastcall onCardUsed(SokuLib::CharacterManager *This)
+{
+	auto &battlemgr = SokuLib::getBattleMgr();
+
+	puts("Card used");
+	if (!lobbyData)
+		return;
+	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER && This == &battlemgr.rightCharacterManager)
+		goto ok;
+	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT && This == &battlemgr.leftCharacterManager)
+		goto ok;
+#ifdef _DEBUG
+	if (This == &battlemgr.leftCharacterManager)
+		goto ok;
+#endif
+	return;
+
+ok:
+	auto charId = SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER ? SokuLib::rightChar : SokuLib::leftChar;
+	auto cost = This->hand[0].cost;
+
+	for (unsigned i = 0; !i || i < cost; i++)
+		(i == 0 ? cardsUsed : cardsBurnt).push_back(This->hand[i].id);
 }
 
 void countGame()
@@ -168,9 +197,8 @@ void countGame()
 		(*it)->awarded = true;
 		lobbyData->achievementAwardQueue.push_back(*it);
 	}
-	lobbyData->saveAchievements();
 
-	// My stats achievements
+	// My stats
 	if (data == lobbyData->loadedCharacterStats.end()) {
 		LobbyData::CharacterStatEntry entry{0, 0, 0, 0};
 
@@ -179,7 +207,7 @@ void countGame()
 	}
 	data->second.wins += chr.score >= 2;
 	data->second.losses += chr.score < 2;
-	// Random select achievements
+	// Random select
 	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER ? selectedRandom.second : selectedRandom.first) {
 		data = lobbyData->loadedCharacterStats.find(SokuLib::CHARACTER_RANDOM);
 		if (data == lobbyData->loadedCharacterStats.end()) {
@@ -192,7 +220,7 @@ void countGame()
 		data->second.losses += chr.score < 2;
 	}
 
-	// Against stats achievements
+	// Against stats
 	data = lobbyData->loadedCharacterStats.find(oid);
 	if (data == lobbyData->loadedCharacterStats.end()) {
 		LobbyData::CharacterStatEntry entry{0, 0, 0, 0};
@@ -202,7 +230,7 @@ void countGame()
 	}
 	data->second.againstWins += chr.score >= 2;
 	data->second.againstLosses += chr.score < 2;
-	// Random select achievements
+	// Random select
 	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER ? selectedRandom.first : selectedRandom.second) {
 		data = lobbyData->loadedCharacterStats.find(SokuLib::CHARACTER_RANDOM);
 		if (data == lobbyData->loadedCharacterStats.end()) {
@@ -215,7 +243,7 @@ void countGame()
 		data->second.againstLosses += chr.score < 2;
 	}
 
-	// Matchup stats achievements
+	// Matchup stats
 	auto muIt = lobbyData->loadedMatchupStats.find({mid, oid});
 
 	if (muIt == lobbyData->loadedMatchupStats.end()) {
@@ -226,7 +254,63 @@ void countGame()
 	}
 	muIt->second.wins += chr.score >= 2;
 	muIt->second.losses += chr.score < 2;
+	
+	// Cards stats
+	auto cardsIt = lobbyData->loadedCharacterCardUsage.find(mid);
+	bool usedAll = true;
+	auto textures = lobbyData->cardsTextures.find(mid);
+
+	if (cardsIt == lobbyData->loadedCharacterCardUsage.end()) {
+		lobbyData->loadedCharacterCardUsage[mid] = {0};
+		cardsIt = lobbyData->loadedCharacterCardUsage.find(mid);
+	}
+	cardsIt->second.nbGames++;
+	for (auto card : cardsBurnt) {
+		auto cardIt = cardsIt->second.cards.find(card);
+
+		if (cardIt == cardsIt->second.cards.end()) {
+			cardsIt->second.cards[card] = {0, 0, 0};
+			cardIt = cardsIt->second.cards.find(card);
+		}
+		cardIt->second.burnt++;
+	}
+	for (auto card : cardsUsed) {
+		auto cardIt = cardsIt->second.cards.find(card);
+
+		if (cardIt == cardsIt->second.cards.end()) {
+			cardsIt->second.cards[card] = {0, 0, 0};
+			cardIt = cardsIt->second.cards.find(card);
+		}
+		cardIt->second.used++;
+	}
+	for (auto card : deck) {
+		auto cardIt = cardsIt->second.cards.find(card);
+
+		if (cardIt == cardsIt->second.cards.end()) {
+			cardsIt->second.cards[card] = {0, 0, 0};
+			cardIt = cardsIt->second.cards.find(card);
+		}
+		cardIt->second.inDeck++;
+	}
 	lobbyData->saveStats();
+
+	for (auto &elem : textures->second) {
+		auto cardIt = cardsIt->second.cards.find(elem.first);
+
+		if (cardIt == cardsIt->second.cards.end() || cardIt->second.used == 0)
+			return lobbyData->saveAchievements();
+	}
+
+	auto &cards = lobbyData->achievementByRequ["cards"];
+	auto itCardsAch = std::find_if(cards.begin(), cards.end(), [mid, &data](LobbyData::Achievement *achievement){
+		return !achievement->awarded && achievement->requirement["chr"] == mid;
+	});
+
+	if (itCardsAch != cards.end()) {
+		(*itCardsAch)->awarded = true;
+		lobbyData->achievementAwardQueue.push_back(*itCardsAch);
+	}
+	lobbyData->saveAchievements();
 }
 
 int __fastcall ConnectOnProcess(SokuLib::MenuConnect *This)
@@ -397,6 +481,16 @@ int __fastcall BattleOnProcess(SokuLib::Battle *This)
 	auto ret = (This->*og_BattleOnProcess)();
 	auto &mgr = SokuLib::getBattleMgr();
 
+	if (!init) {
+		auto &chr = mgr.leftCharacterManager;
+
+		deck.clear();
+		cardsUsed.clear();
+		cardsBurnt.clear();
+		for (unsigned i = 0; i < chr.deckInfo.deck.size; i++)
+			deck.push_back(chr.deckInfo.deck[i]);
+		init = true;
+	}
 	if (mgr.matchState > 3 && !counted) {
 		counted = true;
 		if (onGameEnd)
@@ -404,8 +498,10 @@ int __fastcall BattleOnProcess(SokuLib::Battle *This)
 		else
 			countGame();
 	}
-	if (ret != SokuLib::SCENE_BATTLE)
+	if (ret != SokuLib::SCENE_BATTLE) {
 		counted = false;
+		init = false;
+	}
 	return ret;
 }
 int __fastcall BattleWatchOnProcess(SokuLib::BattleWatch *This)
@@ -424,7 +520,17 @@ int __fastcall BattleClientOnProcess(SokuLib::BattleClient *This)
 
 	auto ret = (This->*og_BattleClientOnProcess)();
 	auto &mgr = SokuLib::getBattleMgr();
+	
+	if (!init) {
+		auto &chr = mgr.leftCharacterManager;
 
+		deck.clear();
+		cardsUsed.clear();
+		cardsBurnt.clear();
+		for (unsigned i = 0; i < chr.deckInfo.deck.size; i++)
+			deck.push_back(chr.deckInfo.deck[i]);
+		init = true;
+	}
 	if (mgr.matchState > 4 && !counted) {
 		counted = true;
 		if (onGameEnd)
@@ -432,8 +538,10 @@ int __fastcall BattleClientOnProcess(SokuLib::BattleClient *This)
 		else
 			countGame();
 	}
-	if (ret != SokuLib::SCENE_BATTLECL)
+	if (ret != SokuLib::SCENE_BATTLECL) {
 		counted = false;
+		init = false;
+	}
 	return ret;
 }
 int __fastcall SelectClientOnProcess(SokuLib::SelectClient *This)
@@ -453,7 +561,17 @@ int __fastcall BattleServerOnProcess(SokuLib::BattleServer *This)
 
 	auto ret = (This->*og_BattleServerOnProcess)();
 	auto &mgr = SokuLib::getBattleMgr();
+	
+	if (!init) {
+		auto &chr = mgr.leftCharacterManager;
 
+		deck.clear();
+		cardsUsed.clear();
+		cardsBurnt.clear();
+		for (unsigned i = 0; i < chr.deckInfo.deck.size; i++)
+			deck.push_back(chr.deckInfo.deck[i]);
+		init = true;
+	}
 	if (mgr.matchState > 4 && !counted) {
 		counted = true;
 		if (onGameEnd)
@@ -461,8 +579,10 @@ int __fastcall BattleServerOnProcess(SokuLib::BattleServer *This)
 		else
 			countGame();
 	}
-	if (ret != SokuLib::SCENE_BATTLESV)
+	if (ret != SokuLib::SCENE_BATTLESV) {
 		counted = false;
+		init = false;
+	}
 	return ret;
 }
 int __fastcall SelectServerOnProcess(SokuLib::SelectServer *This)
@@ -552,11 +672,13 @@ void loadSoku2CSV(LPWSTR path)
 		std::string codeName;
 		std::string shortName;
 		std::string fullName;
+		std::string skills;
 
 		std::getline(str, idStr, ';');
 		std::getline(str, codeName, ';');
 		std::getline(str, shortName, ';');
 		std::getline(str, fullName, ';');
+		std::getline(str, skills, '\n');
 		if (str.fail()) {
 			printf("Skipping line %s: Stream failed\n", line.c_str());
 			continue;
@@ -570,11 +692,23 @@ void loadSoku2CSV(LPWSTR path)
 		characters[id].firstName = shortName;
 		characters[id].fullName = fullName;
 		characters[id].codeName = codeName;
+		characters[id].nbSkills = (std::count(skills.begin(), skills.end(), ',') + 1 - skills.empty()) * 3;
 	}
 }
 
 void onUpdate()
 {
+#ifdef _DEBUG
+	if (SokuLib::checkKeyOneshot(DIK_F4, false, false, false) && !activeMenu) {
+		try {
+			lobbyData = std::make_unique<LobbyData>();
+		} catch (std::exception &e) {
+			MessageBoxA(SokuLib::window, e.what(), "SokuLobby error", MB_ICONERROR);
+		}
+	}
+	if (SokuLib::checkKeyOneshot(DIK_F9, false, false, false))
+		debug = !debug;
+#endif
 	if (SokuLib::sceneId != SokuLib::SCENE_LOGO && lobbyData)
 		lobbyData->update();
 	if (og_onUpdate)
@@ -663,23 +797,8 @@ static void __fastcall KeymapManagerSetInputs(SokuLib::KeymapManager *This)
 
 int __stdcall Hooked_EndScene(IDirect3DDevice9* pDevice)
 {
-	static bool b = false;
-	
-	b = !b;
-	if (SokuLib::sceneId != SokuLib::SCENE_LOGO && lobbyData && b) {
-#ifdef _DEBUG
-		if (SokuLib::checkKeyOneshot(DIK_F4, false, false, false) && !activeMenu) {
-			try {
-				lobbyData = std::make_unique<LobbyData>();
-			} catch (std::exception &e) {
-				MessageBoxA(SokuLib::window, e.what(), "SokuLobby error", MB_ICONERROR);
-			}
-		}
-		if (SokuLib::checkKeyOneshot(DIK_F9, false, false, false))
-			debug = !debug;
-#endif
+	if (SokuLib::sceneId != SokuLib::SCENE_LOGO && lobbyData)
 		lobbyData->render();
-	}
 
 	//This is necessary, so we can fit in the hook...
 	//That said, the return value is never even checked in soku.
@@ -770,6 +889,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 		og_onUpdate = nullptr;
 	} else
 		og_onUpdate = SokuLib::TamperNearJmpOpr(0x407E6B, onUpdate);
+	new SokuLib::Trampoline(0x469C77, (void (*)())onCardUsed, 7);
 	VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 
 	FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
