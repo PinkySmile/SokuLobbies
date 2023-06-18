@@ -208,6 +208,9 @@ public:
 		SokuLib::DrawUtils::Sprite holder;
 		SokuLib::DrawUtils::Sprite behindGear;
 	};
+	struct CardInfos : public SokuLib::DrawUtils::Sprite {
+		std::string cardName;
+	};
 
 	bool achievementsLocked = false;
 	ArcadeData arcades;
@@ -223,7 +226,7 @@ public:
 	std::map<unsigned char, CardChrStatEntry> loadedCharacterCardUsage;
 	std::map<std::string, std::vector<Achievement *>> achievementByRequ;
 	std::map<std::pair<unsigned char, unsigned char>, MatchupStatEntry> loadedMatchupStats;
-	std::map<unsigned char, std::map<unsigned short, SokuLib::DrawUtils::Sprite>> cardsTextures;
+	std::map<unsigned char, std::map<unsigned short, CardInfos>> cardsTextures;
 	std::list<Achievement *> achievementAwardQueue;
 
 	LobbyData();

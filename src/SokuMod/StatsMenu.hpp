@@ -12,7 +12,9 @@
 class StatsMenu : public SokuLib::IMenu {
 private:
 	struct ChrEntry {
+		SokuLib::DrawUtils::Sprite portraitTitle;
 		SokuLib::DrawUtils::Sprite portrait;
+		SokuLib::DrawUtils::Sprite title;
 		SokuLib::DrawUtils::Sprite name;
 		SokuLib::DrawUtils::Sprite wins;
 		SokuLib::DrawUtils::Sprite losses;
@@ -21,9 +23,21 @@ private:
 	};
 
 	SokuLib::DrawUtils::Sprite title;
-	std::vector<std::shared_ptr<ChrEntry>> _stats;
-	SokuLib::SWRFont _defaultFont12;
+	std::vector<std::shared_ptr<ChrEntry>> _globalStats;
+	std::vector<std::shared_ptr<ChrEntry>> _againstStats;
+	std::vector<std::vector<std::shared_ptr<ChrEntry>>> _matchupStats;
+	std::vector<std::vector<std::shared_ptr<ChrEntry>>> _cardsStats;
 	unsigned _start = 0;
+	unsigned _currentMenu = 0;
+	unsigned _nbMenus = 0;
+
+	std::vector<std::shared_ptr<ChrEntry>> *_getCurrentList(unsigned *maxLine, unsigned *lineSize);
+	void _createGlobalStats();
+	void _createAgainstStats();
+	void _createMUStats(std::vector<std::shared_ptr<ChrEntry>> &list, const std::pair<unsigned, struct Character> &chr);
+	void _createCardsStats(std::vector<std::shared_ptr<ChrEntry>> &list, const std::pair<unsigned, struct Character> &chr);
+	void _updateNormalStats(const std::vector<std::shared_ptr<ChrEntry>> &list, unsigned maxLine, unsigned lineSize);
+	void _renderNormalStats(const std::vector<std::shared_ptr<ChrEntry>> &list, unsigned maxLine);
 
 public:
 	StatsMenu();

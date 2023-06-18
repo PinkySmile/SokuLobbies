@@ -127,6 +127,7 @@ void LobbyData::_loadGameCards()
 			}
 			sprintf(buffer, "data/card/%s/card%03i.bmp", chr.codeName.c_str(), cid);
 			loadTexture(this->cardsTextures[id][cid], buffer);
+			this->cardsTextures[id][cid].cardName = parser.getNextCell();
 		} while (parser.goToNextLine());
 	}
 	for (int i = 0; i <= 20; i++) {

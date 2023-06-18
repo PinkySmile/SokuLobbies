@@ -913,6 +913,7 @@ int InLobbyMenu::onRender()
 				if (player.player.avatar < lobbyData->avatars.size()) {
 					auto &avatar = lobbyData->avatars[player.player.avatar];
 
+					avatar.sprite.tint = SokuLib::Color::White;
 					avatar.sprite.rect.width = avatar.sprite.texture.getSize().x / avatar.nbAnimations;
 					avatar.sprite.rect.height = avatar.sprite.texture.getSize().y / 2;
 					avatar.sprite.setSize({
@@ -1027,6 +1028,7 @@ int InLobbyMenu::onRender()
 				if (player.player.avatar < lobbyData->avatars.size()) {
 					auto &avatar = lobbyData->avatars[player.player.avatar];
 
+					avatar.sprite.tint = SokuLib::Color::White;
 					avatar.sprite.rect.width = avatar.sprite.texture.getSize().x / avatar.nbAnimations;
 					avatar.sprite.rect.height = avatar.sprite.texture.getSize().y / 2;
 					avatar.sprite.setSize({

@@ -229,9 +229,15 @@ void (LobbyMenu::* const LobbyMenu::_renderCallbacks[])() = {
 
 void LobbyMenu::execUiCallbacks()
 {
+	int i = 0;
+
 	this->_queueMutex.lock();
-	for (auto &fct : this->_workerQueue)
+	for (auto &fct : this->_workerQueue) {
 		fct();
+		if (i >= 10)
+			break;
+		i++;
+	}
 	this->_workerQueue.clear();
 	this->_queueMutex.unlock();
 }
@@ -239,9 +245,15 @@ void LobbyMenu::execUiCallbacks()
 int LobbyMenu::onProcess()
 {
 	try {
+		int i = 0;
+
 		this->_queueMutex.lock();
-		for (auto &fct : this->_workerQueue)
+		for (auto &fct : this->_workerQueue) {
 			fct();
+			if (i >= 10)
+				break;
+			i++;
+		}
 		this->_workerQueue.clear();
 		this->_queueMutex.unlock();
 		inputBoxUpdate();
