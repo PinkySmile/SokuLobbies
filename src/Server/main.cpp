@@ -1,6 +1,7 @@
 #include <iostream>
 #include <mutex>
 #include <csignal>
+#include <cstring>
 #include "Server.hpp"
 
 std::mutex logMutex;
@@ -30,6 +31,7 @@ int main(int argc, const char *argv[])
 			std::cout << "Your password must be shorter than " << sizeof(Lobbies::PacketHello::password) << " characters." << std::endl;
 			return EXIT_FAILURE;
 		}
+		std::cout << "Password is '" << argv[4] << "'" << std::endl;
 	} else if (argc != 4) {
 		displayHelp(argv[0]);
 		return EXIT_FAILURE;

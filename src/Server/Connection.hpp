@@ -43,23 +43,23 @@ private:
 	Room _room;
 
 	void _netLoop();
-	void _handlePacket(const Lobbies::Packet &packet, size_t &size);
-	void _handlePacket(const Lobbies::PacketHello &packet, size_t &size);
-	void _handlePacket(const Lobbies::PacketOlleh &packet, size_t &size);
-	void _handlePacket(const Lobbies::PacketPlayerJoin &packet, size_t &size);
-	void _handlePacket(const Lobbies::PacketPlayerLeave &packet, size_t &size);
-	void _handlePacket(const Lobbies::PacketKicked &packet, size_t &size);
-	void _handlePacket(const Lobbies::PacketMove &packet, size_t &size);
-	void _handlePacket(const Lobbies::PacketPosition &packet, size_t &size);
-	void _handlePacket(const Lobbies::PacketGameRequest &packet, size_t &size);
-	void _handlePacket(const Lobbies::PacketGameStart &packet, size_t &size);
-	void _handlePacket(const Lobbies::PacketPing &packet, size_t &size);
-	void _handlePacket(const Lobbies::PacketPong &packet, size_t &size);
-	void _handlePacket(const Lobbies::PacketSettingsUpdate &packet, size_t &size);
-	void _handlePacket(const Lobbies::PacketArcadeEngage &packet, size_t &size);
-	void _handlePacket(const Lobbies::PacketArcadeLeave &packet, size_t &size);
-	void _handlePacket(const Lobbies::PacketMessage &packet, size_t &size);
-	void _handlePacket(const Lobbies::PacketImportantMessage &packet, size_t &size);
+	bool _handlePacket(const Lobbies::Packet &packet, size_t &size);
+	bool _handlePacket(const Lobbies::PacketHello &packet, size_t &size);
+	bool _handlePacket(const Lobbies::PacketOlleh &packet, size_t &size);
+	bool _handlePacket(const Lobbies::PacketPlayerJoin &packet, size_t &size);
+	bool _handlePacket(const Lobbies::PacketPlayerLeave &packet, size_t &size);
+	bool _handlePacket(const Lobbies::PacketKicked &packet, size_t &size);
+	bool _handlePacket(const Lobbies::PacketMove &packet, size_t &size);
+	bool _handlePacket(const Lobbies::PacketPosition &packet, size_t &size);
+	bool _handlePacket(const Lobbies::PacketGameRequest &packet, size_t &size);
+	bool _handlePacket(const Lobbies::PacketGameStart &packet, size_t &size);
+	bool _handlePacket(const Lobbies::PacketPing &packet, size_t &size);
+	bool _handlePacket(const Lobbies::PacketPong &packet, size_t &size);
+	bool _handlePacket(const Lobbies::PacketSettingsUpdate &packet, size_t &size);
+	bool _handlePacket(const Lobbies::PacketArcadeEngage &packet, size_t &size);
+	bool _handlePacket(const Lobbies::PacketArcadeLeave &packet, size_t &size);
+	bool _handlePacket(const Lobbies::PacketMessage &packet, size_t &size);
+	bool _handlePacket(const Lobbies::PacketImportantMessage &packet, size_t &size);
 
 public:
 	std::function<LobbyInfo ()> onPing;

@@ -580,7 +580,6 @@ const std::map<std::string, Server::Cmd> Server::_commands{
 	{"join",    {"(player_name)", "Join an arcade machine. The id must be in the range 0 to 4294967295\nExample:\n/join 1\n/join @PinkySmile", &Server::_joinCmd}},
 	{"list",    {"", "Displays the list of connected players.", &Server::_listCmd}},
 	{"locate",  {"(player_name)", "Locate a player in the field.\nExample:\n/locate 1\n/locate @PinkySmile", &Server::_locateCmd}},
-	{"teleport",{"(player_name)", "Teleports to a player or a location\nExample:\n/teleport 10\n/teleport @PinkySmile", &Server::_teleportCmd}},
 	{"msg",     {"(player_name) (message)", "Sends a message privately\nExample:\n/msg @PinkySmile Hello!", &Server::_msgCmd}},
 };
 
