@@ -383,7 +383,7 @@ bool Connection::_handlePacket(const Lobbies::PacketPing &packet, size_t &size)
 
 bool Connection::_handlePacket(const Lobbies::PacketPong &, size_t &)
 {
-	this->kick("Protocol error: OPCODE_PONG unexpected");
+	return this->kick("Protocol error: OPCODE_PONG unexpected"), false;
 }
 
 bool Connection::_handlePacket(const Lobbies::PacketSettingsUpdate &packet, size_t &size)
