@@ -424,7 +424,7 @@
         "name": "Komachi Onozuka"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/3 Komachi 2.png",
         "accessories": 2,
         "animations": 4,
         "scale": 2,
@@ -432,7 +432,7 @@
         "name": "Komachi Onozuka Alt 1"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/3 Komachi 3.png",
         "accessories": 2,
         "animations": 4,
         "scale": 2,
@@ -440,7 +440,7 @@
         "name": "Komachi Onozuka Alt 2"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/3 Komachi 4.png",
         "accessories": 2,
         "animations": 4,
         "scale": 2,
@@ -584,7 +584,7 @@
         "name": "Hong Meiling"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/1 Meiling 2.png",
         "accessories": 0,
         "animations": 4,
         "scale": 2,
@@ -592,7 +592,7 @@
         "name": "Hong Meiling Alt 1"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/1 Meiling 3.png",
         "accessories": 0,
         "animations": 4,
         "scale": 2,
@@ -600,7 +600,7 @@
         "name": "Hong Meiling Alt 2"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/1 Meiling 4.png",
         "accessories": 0,
         "animations": 4,
         "scale": 2,
@@ -616,7 +616,7 @@
         "name": "Utsuho Reiuji"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/4 Okuu 2.png",
         "accessories": 3,
         "animations": 4,
         "scale": 2,
@@ -624,7 +624,7 @@
         "name": "Utsuho Reiuji Alt 1"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/4 Okuu 3.png",
         "accessories": 3,
         "animations": 4,
         "scale": 2,
@@ -632,7 +632,7 @@
         "name": "Utsuho Reiuji Alt 2"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/4 Okuu 4.png",
         "accessories": 3,
         "animations": 4,
         "scale": 2,
