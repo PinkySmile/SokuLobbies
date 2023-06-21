@@ -132,6 +132,7 @@ static void __fastcall onCardUsed(SokuLib::CharacterManager *This)
 	auto &battlemgr = SokuLib::getBattleMgr();
 
 	puts("Card used");
+	return;
 	if (!lobbyData)
 		return;
 	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER && This == &battlemgr.rightCharacterManager)
@@ -148,7 +149,7 @@ ok:
 	auto charId = SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER ? SokuLib::rightChar : SokuLib::leftChar;
 	auto cost = This->hand[0].cost;
 
-	for (unsigned i = 0; !i || i < cost; i++)
+	for (unsigned i = 0; (!i || i < cost) && i < This->hand.size; i++)
 		(i == 0 ? cardsUsed : cardsBurnt).push_back(This->hand[i].id);
 }
 
