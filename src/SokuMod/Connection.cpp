@@ -478,7 +478,17 @@ void Connection::updatePlayers(const std::vector<LobbyData::Avatar> &avatars)
 {
 	this->_playerMutex.lock();
 	for (auto &p : this->_players) {
-		// TODO: Check if avatar is valid or not
+		if (p.second.player.avatar >= avatars.size()) {
+			char scale = 1 + ((p.second.dir & 0b100000) != 0);
+
+			if (p.second.dir & 1)
+				p.second.pos.x += PLAYER_H_SPEED * scale;
+			if (p.second.dir & 2)
+				p.second.pos.x -= PLAYER_H_SPEED * scale;
+			p.second.animation = (p.second.dir & 0b00011) != 0;
+			continue;
+		}
+
 		auto &avatar = avatars[p.second.player.avatar];
 
 		Connection::_playerUpdateHandles[avatar.animationStyle](p.second, avatar);

@@ -434,6 +434,11 @@ int InLobbyMenu::onProcess()
 		auto inputs = SokuLib::inputMgrs.input;
 		auto me = this->_connection.getMe();
 
+		if (this->_translateAnimation) {
+			if (this->_translateAnimation)
+				this->_translate += this->_translateStep;
+			this->_translateAnimation--;
+		}
 		memset(&SokuLib::inputMgrs.input, 0, sizeof(SokuLib::inputMgrs.input));
 		// We call MenuConnect::onProcess directly because we don't want to trigger any hook.
 		// After all, we are not technically inside the connect menu.
@@ -486,6 +491,8 @@ int InLobbyMenu::onProcess()
 		auto &bg = lobbyData->backgrounds[this->_background];
 
 		if (this->_currentElevator) {
+			bool elevatorChanged = false;
+
 			if (
 				this->_currentElevator->pos.x != me->pos.x ||
 				(this->_elevatorCtr != (this->_elevatorOut ? 0 : 30) && this->_currentElevator->state == 2)
@@ -528,25 +535,46 @@ int InLobbyMenu::onProcess()
 						this->_currentPlatform = this->_currentElevator->links.rightLink->platform;
 						this->_currentElevator = &this->_elevators[this->_currentElevator->links.rightLink->elevator];
 						playSound(0x27);
+						elevatorChanged = true;
 					}
 				} else if (SokuLib::inputMgrs.input.horizontalAxis == -1) {
 					if (this->_currentElevator->links.leftLink) {
 						this->_currentPlatform = this->_currentElevator->links.leftLink->platform;
 						this->_currentElevator = &this->_elevators[this->_currentElevator->links.leftLink->elevator];
 						playSound(0x27);
+						elevatorChanged = true;
 					}
 				} else if (SokuLib::inputMgrs.input.verticalAxis == -1) {
 					if (this->_currentElevator->links.upLink) {
 						this->_currentPlatform = this->_currentElevator->links.upLink->platform;
 						this->_currentElevator = &this->_elevators[this->_currentElevator->links.upLink->elevator];
 						playSound(0x27);
+						elevatorChanged = true;
 					}
 				} else if (SokuLib::inputMgrs.input.verticalAxis == 1) {
 					if (this->_currentElevator->links.downLink) {
 						this->_currentPlatform = this->_currentElevator->links.downLink->platform;
 						this->_currentElevator = &this->_elevators[this->_currentElevator->links.downLink->elevator];
 						playSound(0x27);
+						elevatorChanged = true;
 					}
+				}
+				if (elevatorChanged) {
+					SokuLib::Vector2i afterTranslate;
+	
+					if (this->_currentElevator->pos.x < 320)
+						afterTranslate.x = 0;
+					else if (this->_currentElevator->pos.x > bg.size.x - 320)
+						afterTranslate.x = 640 - bg.size.x;
+					else
+						afterTranslate.x = 320 - this->_currentElevator->pos.x;
+					afterTranslate.y = 340 - this->_currentElevator->pos.y;
+					this->_translateAnimation = 15;
+					this->_translateTarget = afterTranslate;
+					this->_translateStep = {
+						(int)(this->_translateTarget.x - this->_translate.x) / (int)this->_translateAnimation,
+						(int)(this->_translateTarget.y - this->_translate.y) / (int)this->_translateAnimation
+					};
 				}
 				me->pos.x = this->_currentElevator->pos.x;
 				me->pos.y = this->_currentElevator->pos.y;
@@ -755,13 +783,15 @@ int InLobbyMenu::onProcess()
 		}
 
 		this->_connection.updatePlayers(lobbyData->avatars);
-		if (me->pos.x < 320)
-			this->_translate.x = 0;
-		else if (me->pos.x > bg.size.x - 320)
-			this->_translate.x = 640 - bg.size.x;
-		else
-			this->_translate.x = 320 - me->pos.x;
-		this->_translate.y = 340 - me->pos.y;
+		if (!this->_translateAnimation) {
+			if (me->pos.x < 320)
+				this->_translate.x = 0;
+			else if (me->pos.x > bg.size.x - 320)
+				this->_translate.x = 640 - bg.size.x;
+			else
+				this->_translate.x = 320 - me->pos.x;
+			this->_translate.y = 340 - me->pos.y;
+		}
 		this->_connection.meMutex.unlock();
 		return true;
 	} catch (std::exception &e) {
@@ -1061,19 +1091,21 @@ int InLobbyMenu::onRender()
 				} else {
 					rect2.setSize({64, 64});
 					rect2.setPosition({
-						static_cast<int>(this->_translate.x + player.pos.x - 32),
-						static_cast<int>(this->_translate.y + player.pos.y + 64)
+						static_cast<int>(this->_translate.x + player.pos.x - 64 / 2),
+						static_cast<int>(this->_translate.y + player.pos.y - 64)
 					});
 					rect2.draw();
 				}
 			}
 		}
 		for (auto &player : players) {
-			auto &avatar = lobbyData->avatars[player.player.avatar];
+			size_t size = 64;
 
+			if (player.player.avatar < lobbyData->avatars.size())
+				size = lobbyData->avatars[player.player.avatar].sprite.getSize().y;
 			this->_extraPlayerData[player.id].name.setPosition({
 				static_cast<int>(this->_translate.x + player.pos.x - this->_extraPlayerData[player.id].name.getSize().x / 2),
-				static_cast<int>(this->_translate.y + player.pos.y - avatar.sprite.getSize().y - 20)
+				static_cast<int>(this->_translate.y + player.pos.y - size - 20)
 			});
 			this->_extraPlayerData[player.id].name.draw();
 		}
@@ -1756,7 +1788,16 @@ void InLobbyMenu::addString(wchar_t *str, size_t size)
 
 void InLobbyMenu::_updateCompositionSprite()
 {
-	int ret;
+	auto cb = [this]{
+		int ret;
+
+		if (this->textChanged & 1) {
+			if (!createTextTexture(ret, this->_buffer.data(), this->_chatFont, BOX_TEXTURE_SIZE, nullptr))
+				puts("Error creating text texture");
+			this->_textSprite[0].texture.setHandle(ret, BOX_TEXTURE_SIZE);
+		}
+		this->textChanged = false;	
+	};
 
 	if (
 		(SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER || SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT) &&
@@ -1769,13 +1810,9 @@ void InLobbyMenu::_updateCompositionSprite()
 			SokuLib::newSceneId == SokuLib::SCENE_BATTLESV
 		)
 	)
-		return;
-	if (this->textChanged & 1) {
-		if (!createTextTexture(ret, this->_buffer.data(), this->_chatFont, BOX_TEXTURE_SIZE, nullptr))
-			puts("Error creating text texture");
-		this->_textSprite[0].texture.setHandle(ret, BOX_TEXTURE_SIZE);
-	}
-	this->textChanged = false;
+		std::thread{cb}.join();
+	else
+		cb();
 }
 
 void InLobbyMenu::onCompositionResult()

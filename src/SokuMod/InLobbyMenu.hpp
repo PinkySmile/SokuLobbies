@@ -77,6 +77,9 @@ private:
 	std::function<void (const Player &, uint32_t id)> onArcadeEngage;
 	std::function<void (const Player &, uint32_t id)> onArcadeLeave;
 	SokuLib::Vector2i _translate{0, 0};
+	SokuLib::Vector2i _translateStep{0, 0};
+	SokuLib::Vector2i _translateTarget{0, 0};
+	unsigned char _translateAnimation = 0;
 	std::string _roomName;
 	LobbyMenu *_menu;
 	ArcadeMachine *_currentMachine = nullptr;
