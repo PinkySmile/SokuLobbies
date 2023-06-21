@@ -869,10 +869,11 @@ void LobbyMenu::_connectLoop()
 					runOnUI(fct);
 				}
 			} catch (std::exception &e) {
-				auto fct = [e, connection]{
+				auto ptr = strdup(e.what());
+				auto fct = [ptr, connection]{
 					connection->lastName.clear();
 					connection->lastPlayerCount = {0, 0};
-					connection->name.texture.createFromText(e.what(), lobbyData->getFont(16), {300, 74});
+					connection->name.texture.createFromText(ptr, lobbyData->getFont(16), {300, 74});
 					connection->name.setSize({
 						connection->name.texture.getSize().x,
 						connection->name.texture.getSize().y
@@ -882,6 +883,7 @@ void LobbyMenu::_connectLoop()
 					connection->name.tint = SokuLib::Color::Red;
 					connection->playerCount.texture.destroy();
 					connection->playerCount.setSize({0, 0});
+					free(ptr);
 				};
 
 				runOnUI(fct);
