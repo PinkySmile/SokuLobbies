@@ -55,7 +55,7 @@ struct Entry {
 			if (buffer[0] == 0) {
 				if (!this->port)
 					std::cout << "New lobby registered" << std::endl;
-				this->port = buffer[1] | (buffer[2] << 8);
+				this->port = (buffer[1] & 0xFF) | (buffer[2] << 8);
 				return;
 			}
 
