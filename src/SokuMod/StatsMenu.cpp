@@ -3,6 +3,7 @@
 //
 
 #include <filesystem>
+#include <set>
 #include <../directx/dinput.h>
 #include "StatsMenu.hpp"
 #include "LobbyData.hpp"
@@ -275,6 +276,7 @@ void StatsMenu::_createCardsStats(std::vector<std::shared_ptr<ChrEntry>> &list, 
 
 	auto ptr = list.front();
 	SokuLib::Vector2i size;
+	std::set<unsigned short> cards;
 
 	ptr->portraitTitle.texture.loadFromGame(("data/character/" + chr.second.codeName + "/face/face000.png").c_str());
 	ptr->portraitTitle.setSize({ptr->portraitTitle.texture.getSize().x / 2, ptr->portraitTitle.texture.getSize().y / 2});
@@ -312,26 +314,34 @@ void StatsMenu::_createCardsStats(std::vector<std::shared_ptr<ChrEntry>> &list, 
 	ptr->total.rect.width = size.x;
 	ptr->total.rect.height = size.y;
 
-	for (auto &card : lobbyData->cardsTextures[chr.first]) {
-		if (chr.first == SokuLib::CHARACTER_RANDOM)
-			continue;
+	auto entry = lobbyData->loadedCharacterCardUsage.find(chr.first);
+	auto val1 = entry == lobbyData->loadedCharacterCardUsage.end() ? LobbyData::CardChrStatEntry{0} : entry->second;
 
+	for (unsigned i = 0; i <= 20; i++)
+		cards.insert(i);
+	for (auto &card : lobbyData->cardsTextures[chr.first])
+		cards.insert(card.first);
+	for (auto &card : val1.cards)
+		cards.insert(card.first);
+
+	for (auto &card : cards) {
 		char buffer[] = "data/csv/000000000000/spellcard.csv";
-		auto entry = lobbyData->loadedCharacterCardUsage.find(chr.first);
-		auto val1 = entry == lobbyData->loadedCharacterCardUsage.end() ? LobbyData::CardChrStatEntry{0} : entry->second;
-		auto stat = val1.cards.find(card.first);
+		auto stat = val1.cards.find(card);
 		auto val2 = stat == val1.cards.end() ? LobbyData::CardStatEntry{0, 0, 0} : stat->second;
+		auto &map = lobbyData->cardsTextures[card < 100 ? SokuLib::CHARACTER_RANDOM : chr.first];
+		auto nameIt = map.find(card);
 
 		list.emplace_back(new ChrEntry());
 		ptr = list.back();
 
-		sprintf(buffer, "data/card/%s/card%03i.bmp", chr.second.codeName.c_str(), card.first);
-		ptr->portrait.texture.loadFromGame(buffer);
+		sprintf(buffer, "data/card/%s/card%03i.bmp", card < 100 ? "common" : chr.second.codeName.c_str(), card);
+		if (!ptr->portrait.texture.loadFromGame(buffer))
+			ptr->portrait.texture.loadFromGame("data/battle/cardFaceDown.bmp");
 		ptr->portrait.setSize({ptr->portrait.texture.getSize().x / 2, ptr->portrait.texture.getSize().y / 2});
 		ptr->portrait.rect.width = ptr->portrait.texture.getSize().x;
 		ptr->portrait.rect.height = ptr->portrait.texture.getSize().y;
 
-		ptr->name.texture.createFromText(card.second.cardName.c_str(), lobbyData->getFont(12), {450, 20}, &size);
+		ptr->name.texture.createFromText(nameIt == map.end() ? "Unknown card" : nameIt->second.cardName.c_str(), lobbyData->getFont(12), {450, 20}, &size);
 		ptr->name.setSize(size.to<unsigned>());
 		ptr->name.rect.width = size.x;
 		ptr->name.rect.height = size.y;

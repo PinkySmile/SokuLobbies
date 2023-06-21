@@ -95,9 +95,7 @@ void LobbyData::_loadGameCards()
 	char buffer[] = "data/csv/000000000000/spellcard.csv";
 
 	for (auto [id, chr] : characters) {
-		if (id == SokuLib::CHARACTER_RANDOM)
-			continue;
-		sprintf(buffer, "data/csv/%s/spellcard.csv", chr.codeName.c_str());
+		sprintf(buffer, "data/csv/%s/spellcard.csv", id == SokuLib::CHARACTER_RANDOM ? "common" : chr.codeName.c_str());
 		printf("Loading cards from %s\n", buffer);
 
 		SokuLib::CSVParser parser{buffer};
@@ -125,16 +123,12 @@ void LobbyData::_loadGameCards()
 				);
 				abort();
 			}
-			sprintf(buffer, "data/card/%s/card%03i.bmp", chr.codeName.c_str(), cid);
+			sprintf(buffer, "data/card/%s/card%03i.bmp", id == SokuLib::CHARACTER_RANDOM ? "common" : chr.codeName.c_str(), cid);
 			loadTexture(this->cardsTextures[id][cid], buffer);
 			this->cardsTextures[id][cid].cardName = parser.getNextCell();
 		} while (parser.goToNextLine());
 	}
-	for (int i = 0; i <= 20; i++) {
-		sprintf(buffer, "data/card/common/card%03i.bmp", i);
-		loadTexture(this->cardsTextures[SokuLib::CHARACTER_RANDOM][i], buffer);
-	}
-	loadTexture(cardsTextures[SokuLib::CHARACTER_RANDOM][21], "data/battle/cardFaceDown.bmp");
+	loadTexture(cardsTextures[SokuLib::CHARACTER_RANDOM][301], "data/battle/cardFaceDown.bmp");
 }
 
 void LobbyData::_loadAvatars()
