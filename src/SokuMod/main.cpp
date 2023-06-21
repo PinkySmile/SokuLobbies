@@ -170,6 +170,14 @@ void countGame()
 	auto &wins = lobbyData->achievementByRequ["win"];
 	auto &loss = lobbyData->achievementByRequ["lose"];
 	auto &play = lobbyData->achievementByRequ["play"];
+
+	if (data == lobbyData->loadedCharacterStats.end()) {
+		LobbyData::CharacterStatEntry entry{0, 0, 0, 0};
+
+		lobbyData->loadedCharacterStats[mid] = entry;
+		data = lobbyData->loadedCharacterStats.find(mid);
+	}
+
 	// Wins achievements
 	auto it = std::find_if(wins.begin(), wins.end(), [mid, &data](LobbyData::Achievement *achievement){
 		return !achievement->awarded && achievement->requirement["chr"] == mid && achievement->requirement["count"] <= data->second.wins;
@@ -199,12 +207,6 @@ void countGame()
 	}
 
 	// My stats
-	if (data == lobbyData->loadedCharacterStats.end()) {
-		LobbyData::CharacterStatEntry entry{0, 0, 0, 0};
-
-		lobbyData->loadedCharacterStats[mid] = entry;
-		data = lobbyData->loadedCharacterStats.find(mid);
-	}
 	data->second.wins += chr.score >= 2;
 	data->second.losses += chr.score < 2;
 	// Random select
@@ -302,7 +304,7 @@ void countGame()
 	}
 
 	auto &cards = lobbyData->achievementByRequ["cards"];
-	auto itCardsAch = std::find_if(cards.begin(), cards.end(), [mid, &data](LobbyData::Achievement *achievement){
+	auto itCardsAch = std::find_if(cards.begin(), cards.end(), [mid](LobbyData::Achievement *achievement){
 		return !achievement->awarded && achievement->requirement["chr"] == mid;
 	});
 
