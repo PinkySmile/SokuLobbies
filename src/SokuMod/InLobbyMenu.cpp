@@ -866,12 +866,12 @@ int InLobbyMenu::onRender()
 				if (timeInfo) {
 					if (bg.clock->hour) {
 						bg.clock->hour->setPosition(bg.clock->center - bg.clock->hour->getSize() / 2 + this->_translate);
-						bg.clock->hour->setRotation(timeInfo->tm_hour * M_PI * 2 / 12);
+						bg.clock->hour->setRotation((((timeInfo->tm_sec / 60.f + timeInfo->tm_min) / 60.f) + timeInfo->tm_hour) * M_PI * 2 / 12);
 						bg.clock->hour->draw();
 					}
 					if (bg.clock->minute) {
 						bg.clock->minute->setPosition(bg.clock->center - bg.clock->minute->getSize() / 2 + this->_translate);
-						bg.clock->minute->setRotation(timeInfo->tm_min * M_PI * 2 / 60);
+						bg.clock->minute->setRotation((timeInfo->tm_sec / 60.f + timeInfo->tm_min) * M_PI * 2 / 60);
 						bg.clock->minute->draw();
 					}
 					if (bg.clock->second) {
