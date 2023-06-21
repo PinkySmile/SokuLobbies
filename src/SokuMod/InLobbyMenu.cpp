@@ -840,11 +840,18 @@ int InLobbyMenu::onRender()
 
 		for (auto &layer : bg.layers) {
 			if (layer.image) {
-				int tsize = layer.image->getSize().x - 640;
-				int bsize = bg.size.x - 640;
+				SokuLib::Vector2i tsize = {
+					static_cast<int>(layer.image->getSize().x - 640),
+					static_cast<int>(layer.image->getSize().y - 480)
+				};
+				SokuLib::Vector2i bsize = {
+					static_cast<int>(bg.size.x - 640),
+					static_cast<int>(bg.size.y - 480)
+				};
 				auto translate = this->_translate;
 
-				translate.x = translate.x * tsize / bsize;
+				translate.x = translate.x * tsize.x / bsize.x;
+				translate.y = translate.y * tsize.y / bsize.y;
 				layer.image->setPosition(translate);
 				layer.image->draw();
 				continue;
