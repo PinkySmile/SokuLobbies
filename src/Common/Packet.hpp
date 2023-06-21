@@ -10,7 +10,7 @@
 #include <string>
 
 #define MOD_VERSION 9
-#define VERSION_STR "0.3.1"
+#define VERSION_STR "0.4.0"
 
 namespace Lobbies
 {

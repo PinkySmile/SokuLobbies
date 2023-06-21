@@ -2,9 +2,11 @@
 // Created by PinkySmile on 02/10/2022.
 //
 
+#define _USE_MATH_DEFINES
 #include <dinput.h>
 #include <filesystem>
 #include <random>
+#include <cstdlib>
 #include "InLobbyMenu.hpp"
 #include "LobbyData.hpp"
 #include "data.hpp"
@@ -300,8 +302,8 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 				lobbyData->elevators[0]
 			);
 		this->_background = r.bg;
-		connection.getMe()->pos.x = bg.platforms.front().pos.x + 20;
-		connection.getMe()->pos.y = bg.platforms.front().pos.y;
+		connection.getMe()->pos.x = bg.startX;
+		connection.getMe()->pos.y = bg.platforms[bg.startPlatform].pos.y;
 
 		SokuLib::Vector2i size;
 
@@ -839,7 +841,7 @@ int InLobbyMenu::onRender()
 		rect2.setFillColor(SokuLib::Color{0x00, 0x00, 0x00, 0xA0});
 
 		for (auto &layer : bg.layers) {
-			if (layer.image) {
+			if (layer.type == LobbyData::LAYERTYPE_IMAGE) {
 				SokuLib::Vector2i tsize = {
 					static_cast<int>(layer.image->getSize().x - 640),
 					static_cast<int>(layer.image->getSize().y - 480)
@@ -854,6 +856,31 @@ int InLobbyMenu::onRender()
 				translate.y = translate.y * tsize.y / bsize.y;
 				layer.image->setPosition(translate);
 				layer.image->draw();
+				continue;
+			}
+			if (layer.type == LobbyData::LAYERTYPE_CLOCK && bg.clock) {
+				auto t = std::chrono::system_clock::now();
+				std::time_t timestamp = std::chrono::system_clock::to_time_t(t);
+				auto timeInfo = std::localtime(&timestamp);
+
+				if (timeInfo) {
+					if (bg.clock->hour) {
+						bg.clock->hour->setPosition(bg.clock->center - bg.clock->hour->getSize() / 2 + this->_translate);
+						bg.clock->hour->setRotation(timeInfo->tm_hour * M_PI * 2 / 12);
+						bg.clock->hour->draw();
+					}
+					if (bg.clock->minute) {
+						bg.clock->minute->setPosition(bg.clock->center - bg.clock->minute->getSize() / 2 + this->_translate);
+						bg.clock->minute->setRotation(timeInfo->tm_min * M_PI * 2 / 60);
+						bg.clock->minute->draw();
+					}
+					if (bg.clock->second) {
+						bg.clock->second->setPosition(bg.clock->center - bg.clock->second->getSize() / 2 + this->_translate);
+						bg.clock->second->setRotation(timeInfo->tm_sec * M_PI * 2 / 60);
+						bg.clock->second->draw();
+					}
+				} else
+					puts("Error");
 				continue;
 			}
 			for (auto &machine : this->_machines) {

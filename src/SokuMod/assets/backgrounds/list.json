@@ -3,10 +3,22 @@
 		"width": 2800,
 		"height": 2240,
 		"layers": [
+			"assets/backgrounds/14670.png",
 			"assets/backgrounds/mansion_hall/background.png",
 			"system",
+			"clock",
 			"assets/backgrounds/mansion_hall/foreground.png"
 		],
+		"spawn": {
+			"x": 1372,
+			"platform": 0
+		},
+		"clock": {
+			"hour": "assets/backgrounds/mansion_hall/hour.png",
+			"minute": "assets/backgrounds/mansion_hall/minute.png",
+			"second": null,
+			"center": {"x": 211, "y": 867}
+		},
 		"elevators": [
 			{
 				"comment": "0: To VIP",
@@ -30,7 +42,7 @@
 
 			{
 				"comment": "2: Roof",
-				"x": 1649,
+				"x": 1623,
 				"y": 1060,
 				"down_link": 3,
 				"up_link": null,
@@ -253,15 +265,15 @@
 		],
 		"platforms": [
 			{
-				"left": 0,
+				"left": 228,
 				"top": 1920,
-				"width": 2570
+				"width": 2422
 			},
 
 			{
-				"left": 20,
+				"left": 228,
 				"top": 1736,
-				"width": 1100
+				"width": 972
 			},
 			{
 				"left": 1612,
@@ -276,9 +288,9 @@
 			},
 
 			{
-				"left": 20,
+				"left": 155,
 				"top": 1544,
-				"width": 1100
+				"width": 965
 			},
 			{
 				"left": 1612,

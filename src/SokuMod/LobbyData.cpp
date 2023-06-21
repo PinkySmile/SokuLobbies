@@ -336,6 +336,40 @@ void LobbyData::_loadBackgrounds()
 		bg.id = this->backgrounds.size() - 1;
 		bg.size.x = val["width"];
 		bg.size.y = val["height"];
+		bg.startX = val["spawn"]["x"];
+		bg.startPlatform = val["spawn"]["platform"];
+		if (val.contains("clock")) {
+			ClockLayer clock{nullptr, nullptr, nullptr, {0, 0}};
+			auto &cl = val["clock"];
+
+			clock.center.x = cl["center"]["x"];
+			clock.center.y = cl["center"]["y"];
+			if (!cl["hour"].is_null()) {
+				bg.images.emplace_back();
+				clock.hour = &bg.images.back();
+				clock.hour->texture.loadFromFile((folder / cl["hour"].get<std::string>()).string().c_str());
+				clock.hour->setSize(clock.hour->texture.getSize());
+				clock.hour->rect.width = clock.hour->getSize().x;
+				clock.hour->rect.height = clock.hour->getSize().y;
+			}
+			if (!cl["minute"].is_null()) {
+				bg.images.emplace_back();
+				clock.minute = &bg.images.back();
+				clock.minute->texture.loadFromFile((folder / cl["minute"].get<std::string>()).string().c_str());
+				clock.minute->setSize(clock.minute->texture.getSize());
+				clock.minute->rect.width = clock.minute->getSize().x;
+				clock.minute->rect.height = clock.minute->getSize().y;
+			}
+			if (!cl["second"].is_null()) {
+				bg.images.emplace_back();
+				clock.second = &bg.images.back();
+				clock.second->texture.loadFromFile((folder / cl["second"].get<std::string>()).string().c_str());
+				clock.second->setSize(clock.second->texture.getSize());
+				clock.second->rect.width = clock.second->getSize().x;
+				clock.second->rect.height = clock.second->getSize().y;
+			}
+			bg.clock = clock;
+		}
 		bg.layers.reserve(val["layers"].size());
 		for (auto &layer_j : val["layers"]) {
 			bg.layers.emplace_back();
@@ -345,9 +379,16 @@ void LobbyData::_loadBackgrounds()
 
 			if (img == "system") {
 				layer.image = nullptr;
+				layer.type = LAYERTYPE_SYSTEM;
+				continue;
+			}
+			if (img == "clock") {
+				layer.image = nullptr;
+				layer.type = LAYERTYPE_CLOCK;
 				continue;
 			}
 			bg.images.emplace_back();
+			layer.type = LAYERTYPE_IMAGE;
 			layer.image = &bg.images.back();
 			layer.image->texture.loadFromFile((folder / img).string().c_str());
 			layer.image->setSize(layer.image->texture.getSize());

@@ -112,9 +112,6 @@ public:
 		SokuLib::Vector2i pos;
 		unsigned width;
 	};
-	struct Layer {
-		SokuLib::DrawUtils::Sprite *image;
-	};
 	struct ArcadePlacement {
 		SokuLib::Vector2i pos;
 		bool old;
@@ -133,6 +130,21 @@ public:
 		bool noIndicator;
 		bool hidden;
 	};
+	enum LayerType {
+		LAYERTYPE_IMAGE,
+		LAYERTYPE_SYSTEM,
+		LAYERTYPE_CLOCK,
+	};
+	struct Layer {
+		LayerType type;
+		SokuLib::DrawUtils::Sprite *image;
+	};
+	struct ClockLayer {
+		SokuLib::DrawUtils::Sprite *hour;
+		SokuLib::DrawUtils::Sprite *minute;
+		SokuLib::DrawUtils::Sprite *second;
+		SokuLib::Vector2i center;
+	};
 	struct Background {
 		unsigned short id = 0;
 		SokuLib::Vector2u size;
@@ -141,6 +153,9 @@ public:
 		std::vector<Platform> platforms;
 		std::vector<ArcadePlacement> arcades;
 		std::vector<ElevatorPlacement> elevators;
+		std::optional<ClockLayer> clock;
+		int startX;
+		int startPlatform;
 		Achievement *requirement = nullptr;
 
 		Background() = default;
