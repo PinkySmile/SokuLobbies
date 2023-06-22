@@ -3,7 +3,7 @@
 		"width": 2800,
 		"height": 2240,
 		"layers": [
-			"assets/backgrounds/14670.png",
+			"assets/backgrounds/mansion_hall/back.png",
 			"assets/backgrounds/mansion_hall/background.png",
 			"system",
 			"clock",
@@ -267,7 +267,7 @@
 			{
 				"left": 228,
 				"top": 1920,
-				"width": 2422
+				"width": 2334
 			},
 
 			{

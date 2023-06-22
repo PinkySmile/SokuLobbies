@@ -104,7 +104,7 @@
         "name": "Sakuya Izayoi"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/2 Sakuya 2.png",
         "accessories": 1,
         "animations": 4,
         "scale": 2,
@@ -112,7 +112,7 @@
         "name": "Sakuya Izayoi Alt 1"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/2 Sakuya 3.png",
         "accessories": 1,
         "animations": 4,
         "scale": 2,
@@ -120,7 +120,7 @@
         "name": "Sakuya Izayoi Alt 2"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/2 Sakuya 4.png",
         "accessories": 1,
         "animations": 4,
         "scale": 2,
@@ -168,7 +168,7 @@
         "name": "Patchouli Knowledge"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/7 Patchi 2.png",
         "accessories": 6,
         "animations": 4,
         "scale": 2,
@@ -176,7 +176,7 @@
         "name": "Patchouli Knowledge Alt 1"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/7 Patchi 3.png",
         "accessories": 6,
         "animations": 4,
         "scale": 2,
@@ -184,7 +184,7 @@
         "name": "Patchouli Knowledge Alt 2"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/7 Patchi 4.png",
         "accessories": 6,
         "animations": 4,
         "scale": 2,
@@ -360,7 +360,7 @@
         "name": "Reisen Udongein Inaba"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/1 Reisen 2.png",
         "accessories": 0,
         "animations": 4,
         "scale": 2,
@@ -368,7 +368,7 @@
         "name": "Reisen Udongein Inaba Alt 1"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/1 Reisen 3.png",
         "accessories": 0,
         "animations": 4,
         "scale": 2,
@@ -376,7 +376,7 @@
         "name": "Reisen Udongein Inaba Alt 2"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/1 Reisen 4.png",
         "accessories": 0,
         "animations": 4,
         "scale": 2,
@@ -648,7 +648,7 @@
         "name": "Suwako Moriya"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/9 Suwako 2.png",
         "accessories": 8,
         "animations": 4,
         "scale": 2,
@@ -656,7 +656,7 @@
         "name": "Suwako Moriya Alt 1"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/9 Suwako 3.png",
         "accessories": 8,
         "animations": 4,
         "scale": 2,
@@ -664,7 +664,7 @@
         "name": "Suwako Moriya Alt 2"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/9 Suwako 4.png",
         "accessories": 8,
         "animations": 4,
         "scale": 2,
