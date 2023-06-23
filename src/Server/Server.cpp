@@ -188,7 +188,11 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 
 			// There is no need to check if the vector is of size >= 2
 			// because there is no way that the connection is not in the list if the battle status is not 0
-			if (machine[0] == &connection || machine[1] == &connection) {
+			// Update: Apparently there is
+			if (
+				(!machine.empty() && machine[0] == &connection) ||
+				(machine.size() >= 2 && machine[1] == &connection)
+			) {
 				// This is one of the players, so we boot everyone out
 				for (auto &c1 : machine) {
 					Lobbies::PacketArcadeLeave packet{c1->getId()};
@@ -201,8 +205,12 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 					this->_connectionsMutex.unlock();
 				}
 				machine.clear();
-			} else
-				machine.erase(std::find(machine.begin(), machine.end(), &connection));
+			} else {
+				auto it = std::find(machine.begin(), machine.end(), &connection);
+
+				if (it != machine.end())
+					machine.erase(it);
+			}
 			this->_machinesMutex.unlock();
 		}
 	};
