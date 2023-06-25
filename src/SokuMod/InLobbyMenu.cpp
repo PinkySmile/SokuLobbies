@@ -410,12 +410,17 @@ InLobbyMenu::~InLobbyMenu()
 
 void InLobbyMenu::_()
 {
+	if (!this->_connection.isInit() || !this->_connection.isConnected())
+		return;
+
 	Lobbies::PacketArcadeLeave leave{0};
 
 	this->_connection.send(&leave, sizeof(leave));
+	this->_currentMachine = nullptr;
 	*(*(char **)0x89a390 + 20) = false;
 	this->_parent->choice = 0;
 	this->_parent->subchoice = 0;
+	this->_connection.getMe()->battleStatus = 0;
 	messageBox->active = false;
 	*(int *)0x882a94 = 0x16;
 	SokuLib::playBGM(this->_music.c_str());
@@ -463,6 +468,8 @@ int InLobbyMenu::onProcess()
 				Lobbies::PacketArcadeLeave leave{0};
 
 				this->_connection.send(&leave, sizeof(leave));
+				this->_currentMachine = nullptr;
+				me->battleStatus = 0;
 				*(*(char **)0x89a390 + 20) = false;
 				this->_addMessageToList(0xFF0000, 0, "Failed connecting to opponent: " + std::string(this->_parent->subchoice == 5 ? "They are already playing" : "Connection failed"));
 				this->_parent->choice = 0;
@@ -481,8 +488,7 @@ int InLobbyMenu::onProcess()
 					SokuLib::inputMgrs.input.b = 1;
 					reinterpret_cast<void (__thiscall *)(SokuLib::MenuConnect *)>(0x449160)(this->_parent);
 					SokuLib::inputMgrs.input = inputs;
-				} else
-					playSound(0x29);
+				}
 				this->_parent->choice = 0;
 				this->_parent->subchoice = 0;
 				return false;
