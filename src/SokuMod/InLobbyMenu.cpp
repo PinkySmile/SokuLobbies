@@ -386,10 +386,8 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 	ptrMutex.lock();
 	activeMenu = this;
 	ptrMutex.unlock();
-	if (!Original_WndProc) {
+	if (!Original_WndProc)
 		Original_WndProc = (WNDPROC) SetWindowLongPtr(SokuLib::window, GWL_WNDPROC, (LONG_PTR) Hooked_WndProc);
-		//ImmDisableIME(GetCurrentThreadId());
-	}
 }
 
 InLobbyMenu::~InLobbyMenu()
@@ -1131,16 +1129,29 @@ int InLobbyMenu::onRender()
 				}
 			}
 		}
-		for (auto &player : players) {
-			size_t size = 64;
 
-			if (player.player.avatar < lobbyData->avatars.size())
-				size = lobbyData->avatars[player.player.avatar].sprite.getSize().y;
-			this->_extraPlayerData[player.id].name.setPosition({
-				static_cast<int>(this->_translate.x + player.pos.x - this->_extraPlayerData[player.id].name.getSize().x / 2),
-				static_cast<int>(this->_translate.y + player.pos.y - size - 20)
+		std::vector<std::tuple<float, float, unsigned>> lastTexts;
+
+		lastTexts.reserve(players.size());
+		for (auto &player : players) {
+			unsigned nb = 0;
+			auto &name = this->_extraPlayerData[player.id].name;
+			auto minPos = this->_translate.x + player.pos.x - name.getSize().x / 2.f;
+			auto maxPos = this->_translate.x + player.pos.x + name.getSize().x / 2.f;
+
+			for (auto &old : lastTexts) {
+				if (std::get<1>(old) < minPos)
+					continue;
+				if (std::get<0>(old) > maxPos)
+					continue;
+				nb = max(nb, std::get<2>(old) + 1);
+			}
+			name.setPosition({
+				static_cast<int>(minPos),
+				static_cast<int>(this->_translate.y + player.pos.y - 120 - 20 * nb)
 			});
-			this->_extraPlayerData[player.id].name.draw();
+			lastTexts.emplace_back(minPos, maxPos, nb);
+			name.draw();
 		}
 		if (this->_currentMachine)
 			this->_renderMachineOverlay();
