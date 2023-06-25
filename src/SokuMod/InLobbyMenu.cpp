@@ -605,13 +605,6 @@ int InLobbyMenu::onProcess()
 				break;
 			}
 		} else if (!this->_currentMachine && !this->_editingText) {
-			if (SokuLib::inputMgrs.input.b == 1) {
-				playSound(0x29);
-				this->_connection.meMutex.unlock();
-				this->_unhook();
-				this->_connection.disconnect();
-				return false;
-			}
 			if (SokuLib::inputMgrs.input.a == 1) {
 				for (auto &machine : this->_machines) {
 					if (me->pos.x < machine.pos.x - machine.skin.sprite.getSize().x / 2)
