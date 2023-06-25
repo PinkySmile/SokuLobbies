@@ -29,7 +29,7 @@
         "animations": 4,
         "scale": 2,
         "anim_step": 8,
-        "name": "PC98 Reimu Alt 3"
+        "name": "Placeholder-chan"
     },
     {
         "spritesheet": "assets/avatars/1 Reimu.png",
@@ -72,7 +72,7 @@
         "name": "Marisa Kirisame"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/1 Marisa 2.png",
         "accessories": 0,
         "animations": 4,
         "scale": 2,
@@ -80,7 +80,7 @@
         "name": "Marisa Kirisame Alt 1"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/1 Marisa 3.png",
         "accessories": 0,
         "animations": 4,
         "scale": 2,
@@ -88,7 +88,7 @@
         "name": "Marisa Kirisame Alt 2"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/1 Marisa 4.png",
         "accessories": 0,
         "animations": 4,
         "scale": 2,
@@ -136,7 +136,7 @@
         "name": "Alice Margatroid"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/2 Alice 2.png",
         "accessories": 1,
         "animations": 4,
         "scale": 2,
@@ -144,7 +144,7 @@
         "name": "Alice Margatroid Alt 1"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/2 Alice 3.png",
         "accessories": 1,
         "animations": 4,
         "scale": 2,
@@ -152,7 +152,7 @@
         "name": "Alice Margatroid Alt 2"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/2 Alice 4.png",
         "accessories": 1,
         "animations": 4,
         "scale": 2,
@@ -264,7 +264,7 @@
         "name": "Yuyuko Saigyouji"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/7 Yuyuko 2.png",
         "accessories": 6,
         "animations": 4,
         "scale": 2,
@@ -272,7 +272,7 @@
         "name": "Yuyuko Saigyouji Alt 1"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/7 Yuyuko 3.png",
         "accessories": 6,
         "animations": 4,
         "scale": 2,
@@ -280,7 +280,7 @@
         "name": "Yuyuko Saigyouji Alt 2"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/7 Yuyuko 4.png",
         "accessories": 6,
         "animations": 4,
         "scale": 2,
@@ -296,7 +296,7 @@
         "name": "Yukari Yukumo"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/3 Yukari 2.png",
         "accessories": 2,
         "animations": 4,
         "scale": 2,
@@ -304,7 +304,7 @@
         "name": "Yukari Yukumo Alt 2"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/3 Yukari 3.png",
         "accessories": 2,
         "animations": 4,
         "scale": 2,
@@ -312,7 +312,7 @@
         "name": "Yukari Yukumo Alt 3"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/3 Yukari 4.png",
         "accessories": 2,
         "animations": 4,
         "scale": 2,
@@ -328,7 +328,7 @@
         "name": "Suika Ibuki"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/6 Suika 2.png",
         "accessories": 5,
         "animations": 4,
         "scale": 2,
@@ -336,7 +336,7 @@
         "name": "Suika Ibuki Alt 1"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/6 Suika 3.png",
         "accessories": 5,
         "animations": 4,
         "scale": 2,
@@ -344,7 +344,7 @@
         "name": "Suika Ibuki Alt 2"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/6 Suika 4.png",
         "accessories": 5,
         "animations": 4,
         "scale": 2,
@@ -392,7 +392,7 @@
         "name": "Aya Shameimaru"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/2 Aya 2.png",
         "accessories": 1,
         "animations": 4,
         "scale": 2,
@@ -400,7 +400,7 @@
         "name": "Aya Shameimaru Alt 1"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/2 Aya 3.png",
         "accessories": 1,
         "animations": 4,
         "scale": 2,
@@ -408,7 +408,7 @@
         "name": "Aya Shameimaru Alt 2"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/2 Aya 4.png",
         "accessories": 1,
         "animations": 4,
         "scale": 2,
@@ -456,7 +456,7 @@
         "name": "Iku Nagae"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/7 Iku 2.png",
         "accessories": 0,
         "animations": 4,
         "scale": 2,
@@ -464,7 +464,7 @@
         "name": "Iku Nagae Alt 1"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/7 Iku 3.png",
         "accessories": 0,
         "animations": 4,
         "scale": 2,
@@ -472,7 +472,7 @@
         "name": "Iku Nagae Alt 2"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/7 Iku 4.png",
         "accessories": 0,
         "animations": 4,
         "scale": 2,
@@ -488,7 +488,7 @@
         "name": "Tenshi Hinanawi"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/1 Tenshi 2.png",
         "accessories": 0,
         "animations": 4,
         "scale": 2,
@@ -496,7 +496,7 @@
         "name": "Tenshi Hinanawi Alt 1"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/1 Tenshi 3.png",
         "accessories": 0,
         "animations": 4,
         "scale": 2,
@@ -504,7 +504,7 @@
         "name": "Tenshi Hinanawi Alt 2"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/1 Tenshi 4.png",
         "accessories": 0,
         "animations": 4,
         "scale": 2,
@@ -520,7 +520,7 @@
         "name": "Sanae Kochiya"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/1 Sanae 2.png",
         "accessories": 0,
         "animations": 4,
         "scale": 2,
@@ -528,7 +528,7 @@
         "name": "Sanae Kochiya Alt 1"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/1 Sanae 3.png",
         "accessories": 0,
         "animations": 4,
         "scale": 2,
@@ -536,7 +536,7 @@
         "name": "Sanae Kochiya Alt 2"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/1 Sanae 4.png",
         "accessories": 0,
         "animations": 4,
         "scale": 2,
@@ -552,7 +552,7 @@
         "name": "Cirno"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/5 Cirno 2.png",
         "accessories": 4,
         "animations": 4,
         "scale": 2,
@@ -560,7 +560,7 @@
         "name": "Cirno Alt 1"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/5 Cirno 3.png",
         "accessories": 4,
         "animations": 4,
         "scale": 2,
@@ -568,7 +568,7 @@
         "name": "Cirno Alt 2"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/5 Cirno 4.png",
         "accessories": 4,
         "animations": 4,
         "scale": 2,
@@ -673,11 +673,74 @@
     },
     {
         "spritesheet": "assets/avatars/7 Koishi.png",
-        "accessories": 8,
+        "accessories": 6,
         "animations": 4,
         "scale": 2,
         "anim_step": 8,
         "name": "Koishi Komeiji",
+        "hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/7 Koishi 2.png",
+        "accessories": 6,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Koishi Komeiji Alt 1",
+        "hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/7 Koishi 3.png",
+        "accessories": 6,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Koishi Komeiji Alt 2",
+        "hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/7 Koishi 4.png",
+        "accessories": 6,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Koishi Komeiji Alt 3",
+        "hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/1 Mokou.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Fujiwara no Mokou",
+        "hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/1 Mokou 2.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Fujiwara no Mokou Alt 1",
+        "hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/1 Mokou 3.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Fujiwara no Mokou Alt 2",
+        "hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/1 Mokou 4.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Fujiwara no Mokou Alt 3",
         "hidden": true
     }
 ]
