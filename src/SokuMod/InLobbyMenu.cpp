@@ -23,6 +23,7 @@
 #define MAX_LINE_SIZE 342
 #define SCROLL_AMOUNT 20
 #define CHAT_FONT_HEIGHT 14
+#define ELEVEATOR_CTR_DIVIDER 90.f
 
 struct CDesignSprite {
 	void *vftable; // =008576ac
@@ -978,12 +979,12 @@ int InLobbyMenu::onRender()
 					avatar.sprite.rect.width = avatar.sprite.texture.getSize().x / avatar.nbAnimations;
 					avatar.sprite.rect.height = avatar.sprite.texture.getSize().y / 2;
 					avatar.sprite.setSize({
-						static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale / (this->_elevatorCtr / 45.f + 1)),
-						static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale / (this->_elevatorCtr / 45.f + 1))
+						static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale / (this->_elevatorCtr / ELEVEATOR_CTR_DIVIDER + 1)),
+						static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale / (this->_elevatorCtr / ELEVEATOR_CTR_DIVIDER + 1))
 					});
 					avatar.sprite.setPosition({
 						static_cast<int>(this->_translate.x + player.pos.x - avatar.sprite.getSize().x / 2),
-						static_cast<int>(this->_translate.y + player.pos.y - avatar.sprite.getSize().y - this->_elevatorCtr / 3)
+						static_cast<int>(this->_translate.y + player.pos.y - avatar.sprite.getSize().y)
 					});
 					avatar.sprite.rect.top = avatar.sprite.rect.height * player.animation;
 					avatar.sprite.rect.left = player.currentAnimation * avatar.sprite.rect.width;
@@ -1005,13 +1006,13 @@ int InLobbyMenu::onRender()
 						pos += this->_currentElevator->skin.doorOffset;
 						if (avatar.sprite.getPosition().x < pos.x) {
 							newPos.x = pos.x;
-							avatar.sprite.rect.left += (pos.x - oldPos.x) * (this->_elevatorCtr / 45.f + 1) / avatar.scale;
+							avatar.sprite.rect.left += (pos.x - oldPos.x) * (this->_elevatorCtr / ELEVEATOR_CTR_DIVIDER + 1) / avatar.scale;
 							newSize.x -= pos.x - oldPos.x;
 							changed = true;
 						}
 						if (avatar.sprite.getPosition().y < pos.y) {
 							newPos.y = pos.y;
-							avatar.sprite.rect.top += (pos.y - oldPos.y) * (this->_elevatorCtr / 45.f + 1) / avatar.scale;
+							avatar.sprite.rect.top += (pos.y - oldPos.y) * (this->_elevatorCtr / ELEVEATOR_CTR_DIVIDER + 1) / avatar.scale;
 							newSize.y -= pos.y - oldPos.y;
 							changed = true;
 						}
@@ -1026,8 +1027,8 @@ int InLobbyMenu::onRender()
 						if (changed) {
 							avatar.sprite.setPosition(newPos);
 							avatar.sprite.setSize(newSize);
-							avatar.sprite.rect.width = newSize.x * (this->_elevatorCtr / 45.f + 1) / avatar.scale;
-							avatar.sprite.rect.height = newSize.y * (this->_elevatorCtr / 45.f + 1) / avatar.scale;
+							avatar.sprite.rect.width = newSize.x * (this->_elevatorCtr / ELEVEATOR_CTR_DIVIDER + 1) / avatar.scale;
+							avatar.sprite.rect.height = newSize.y * (this->_elevatorCtr / ELEVEATOR_CTR_DIVIDER + 1) / avatar.scale;
 						}
 					}
 					avatar.sprite.setMirroring(false, false);

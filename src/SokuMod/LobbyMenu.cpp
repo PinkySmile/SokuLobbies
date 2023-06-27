@@ -26,6 +26,9 @@
 
 
 extern bool activated;
+#ifdef _DEBUG
+extern bool debug;
+#endif
 
 enum MenuItems {
 	MENUITEM_CREATE_LOBBY,
@@ -565,8 +568,10 @@ void LobbyMenu::_customizeAvatarRender()
 #ifdef _DEBUG
 	SokuLib::DrawUtils::RectangleShape rect;
 
-	rect.setBorderColor(SokuLib::Color::White);
-	rect.setFillColor(SokuLib::Color{0xFF, 0xFF, 0xFF, 0xA0});
+	if (debug) {
+		rect.setBorderColor(SokuLib::Color::White);
+		rect.setFillColor(SokuLib::Color{0xFF, 0xFF, 0xFF, 0xA0});
+	}
 #endif
 	for (int i = 0; i < lobbyData->avatars.size(); i++) {
 		auto &avatar = lobbyData->avatars[i];
@@ -612,10 +617,12 @@ void LobbyMenu::_customizeAvatarRender()
 		}
 		sprite.setPosition(pos);
 #ifdef _DEBUG
-		rect.setSize(sprite.getSize());
-		rect.setPosition(pos);
-		if (sprite.getPosition().y >= 130)
-			rect.draw();
+		if (debug) {
+			rect.setSize(sprite.getSize());
+			rect.setPosition(pos);
+			if (sprite.getPosition().y >= 130)
+				rect.draw();
+		}
 #endif
 
 		if (this->_customCursor == i)
@@ -979,14 +986,16 @@ void LobbyMenu::_renderCustomAvatarPreview()
 #ifdef _DEBUG
 	SokuLib::DrawUtils::RectangleShape rect;
 
-	rect.setBorderColor(SokuLib::Color::White);
-	rect.setFillColor(SokuLib::Color{0xFF, 0xFF, 0xFF, 0xA0});
-	rect.setSize(avatar.sprite.getSize());
-	rect.setPosition(avatar.sprite.getPosition());
-	rect.draw();
+	if (debug) {
+		rect.setBorderColor(SokuLib::Color::White);
+		rect.setFillColor(SokuLib::Color{0xFF, 0xFF, 0xFF, 0xA0});
+		rect.setSize(avatar.sprite.getSize());
+		rect.setPosition(avatar.sprite.getPosition());
+		rect.draw();
+	}
 #endif
 	avatar.sprite.rect.top = 0;
-	avatar.sprite.rect.left = this->_showcases[this->_customCursor].anim * avatar.sprite.rect.width;
+	avatar.sprite.rect.left = this->_showcases[this->_loadedSettings.player.avatar].anim * avatar.sprite.rect.width;
 	avatar.sprite.setMirroring(false, false);
 	avatar.sprite.draw();
 	this->_playerName.setPosition({

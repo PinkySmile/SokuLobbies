@@ -1,35 +1,71 @@
 [
     {
-        "spritesheet": "assets/avatars/8 PC98 Reimu A.png",
-        "accessories": 7,
+        "spritesheet": "assets/avatars/9 PC98 Reimu.png",
+        "accessories": 8,
         "animations": 4,
         "scale": 2,
         "anim_step": 8,
         "name": "PC98 Reimu"
     },
     {
-        "spritesheet": "assets/avatars/8 PC98 Reimu B.png",
-        "accessories": 7,
+        "spritesheet": "assets/avatars/9 PC98 Reimu 2.png",
+        "accessories": 8,
         "animations": 4,
         "scale": 2,
         "anim_step": 8,
         "name": "PC98 Reimu Alt 1"
     },
     {
-        "spritesheet": "assets/avatars/8 PC98 Reimu C.png",
-        "accessories": 7,
+        "spritesheet": "assets/avatars/9 PC98 Reimu 3.png",
+        "accessories": 8,
         "animations": 4,
         "scale": 2,
         "anim_step": 8,
         "name": "PC98 Reimu Alt 2"
     },
     {
-        "spritesheet": "assets/avatars/placeholder.png",
+        "spritesheet": "assets/avatars/9 PC98 Reimu 4.png",
+        "accessories": 8,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "PC98 Reimu Alt 3"
+    },
+    {
+        "spritesheet": "assets/avatars/8 PC98 Marisa.png",
         "accessories": 7,
         "animations": 4,
         "scale": 2,
         "anim_step": 8,
-        "name": "Placeholder-chan"
+        "name": "PC98 Marisa",
+        "hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/8 PC98 Marisa 2.png",
+        "accessories": 7,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "PC98 Marisa Alt 1",
+        "hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/8 PC98 Marisa 3.png",
+        "accessories": 7,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "PC98 Marisa Alt 2",
+        "hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/8 PC98 Marisa 4.png",
+        "accessories": 7,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "PC98 Marisa Alt 3",
+        "hidden": true
     },
     {
         "spritesheet": "assets/avatars/1 Reimu.png",
@@ -741,6 +777,24 @@
         "scale": 2,
         "anim_step": 8,
         "name": "Fujiwara no Mokou Alt 3",
+        "hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/6 Suika.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 4,
+        "anim_step": 16,
+        "name": "Giant Suika",
+        "hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Placeholder-chan",
         "hidden": true
     }
 ]
