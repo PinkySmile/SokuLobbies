@@ -18,6 +18,66 @@ extern std::mutex logMutex;
 #include "Server.hpp"
 #include "Utils.hpp"
 
+constexpr uint8_t SR_SWR[16] = {
+	0x64, 0x73, 0x65, 0xD9,
+	0xFF, 0xC4, 0x6E, 0x48,
+	0x8D, 0x7C, 0xA1, 0x92,
+	0x31, 0x34, 0x72, 0x95
+};
+constexpr uint8_t SR[16] = {
+	0x6F, 0x53, 0xD5, 0x29,
+	0xFA, 0xC9, 0x60, 0x18,
+	0x85, 0x9C, 0x21, 0xE2,
+	0x71, 0x36, 0x70, 0x9F
+};
+constexpr uint8_t VN_SWR[16] = {
+	0x6E, 0x73, 0x65, 0xD9,
+	0xFF, 0xC4, 0x6E, 0x48,
+	0x8D, 0x7C, 0xA1, 0x92,
+	0x31, 0x34, 0x72, 0x95
+};
+constexpr uint8_t VN[16] = {
+	0x46, 0xC9, 0x67, 0xC8,
+	0xAC, 0xF2, 0x44, 0x4D,
+	0xB8, 0xB1, 0xEC, 0xEE,
+	0xD4, 0xD5, 0x40, 0x4A
+};
+constexpr uint8_t GR_SWR[16] = {
+	0x69, 0x73, 0x65, 0xD9,
+	0xFF, 0xC4, 0x6E, 0x48,
+	0x8D, 0x7C, 0xA1, 0x92,
+	0x31, 0x34, 0x72, 0x95
+};
+constexpr uint8_t GR[16] = {
+	0x69, 0xC9, 0x67, 0xC8,
+	0xAC, 0xF2, 0x44, 0x4D,
+	0xB8, 0xB1, 0xEC, 0xEE,
+	0xD4, 0xD5, 0x40, 0x4A
+};
+constexpr uint8_t GRCN_SWR[16] = {
+	0x6A, 0x73, 0x65, 0xD9,
+	0xFF, 0xC4, 0x6E, 0x48,
+	0x8D, 0x7C, 0xA1, 0x92,
+	0x31, 0x34, 0x72, 0x95
+};
+constexpr uint8_t GRCN[16] = {
+	0x6A, 0xC9, 0x67, 0xC8,
+	0xAC, 0xF2, 0x44, 0x4D,
+	0xB8, 0xB1, 0xEC, 0xEE,
+	0xD4, 0xD5, 0x40, 0x4A
+};
+const uint8_t *versions[] = {
+	SR_SWR,
+	SR,
+	VN_SWR,
+	VN,
+	GR_SWR,
+	GR,
+	GRCN_SWR,
+	GRCN
+};
+const char * const versionNames[] = { "SR", "VN", "GR", "GR62" };
+const char * const versionNamesFull[] = { "SokuRoll", "Vanilla", "GiuRoll", "GiuRoll-62FPS" };
 
 Server::Server()
 {
@@ -79,10 +139,12 @@ void Server::run(unsigned short port, unsigned maxPlayers, const std::string &na
 		this->_registerToMainServer();
 		while (this->_opened) {
 			if (sf::Socket::Done == this->_listener.accept(*socket)) {
+				auto addr = socket->getRemoteAddress();
+
 				this->_connectionsMutex.lock();
 			#ifndef _LOBBYNOLOG
 				logMutex.lock();
-				std::cout << "New connection from " << socket->getRemoteAddress().toString() << ":" << socket->getRemotePort() << std::endl;
+				std::cout << "New connection from " << addr.toString() << ":" << socket->getRemotePort() << std::endl;
 				logMutex.unlock();
 			#endif
 				this->_connections.emplace_back(new Connection(socket, this->_password));
@@ -221,15 +283,31 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 		}
 
 		auto it = std::find_if(this->_banList.begin(), this->_banList.end(), [&connection, &ip](BanEntry entry){
-			return entry.ip == connection.getIp().toString();// || memcmp(entry.uniqueId, connection.getUniqueId(), sizeof(entry.uniqueId)) == 0;
+			return entry.ip == connection.getIp().toString();
 		});
+		bool foundVersion = false;
 
 		if (it != this->_banList.end()) {
 			std::cout << connection.getName() << " (" << connection.getIp() << ") tried to join but is banned (" << it->profileName << " " << it->ip << " " << it->reason << ")." << std::endl;
 			connection.kick("You are banned from this server: " + std::string(it->reason, strnlen(it->reason, sizeof(it->reason))));
 			return false;
 		}
-		name = this->_sanitizeName(std::string(packet.name, strnlen(packet.name, sizeof(packet.name))), &connection);
+		name = std::string(packet.name, strnlen(packet.name, sizeof(packet.name)));
+		name = this->_sanitizeName(name, &connection);
+		/*for (int i = 0; i < sizeof(versionNames) / sizeof(*versionNames); i++) {
+			if (memcmp(versions[i * 2], packet.versionString, 16) == 0) {
+				name = std::string("[") + versionNames[i] + "] " + name;
+				foundVersion = true;
+				break;
+			}
+			if (memcmp(versions[i * 2 + 1], packet.versionString, 16) == 0) {
+				name = std::string("[") + versionNames[i] + "-NoSWR] " + name;
+				foundVersion = true;
+				break;
+			}
+		}
+		if (!foundVersion)
+			name = "?? " + name;*/
 
 		Lobbies::PacketOlleh res{this->_infos.name, name, id};
 		Lobbies::PacketPlayerJoin join{id, name, packet.custom};
@@ -312,7 +390,7 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 		this->_machinesMutex.unlock();
 	};
 	connection.onGameRequest = [&connection, this](){
-		this->_onPlayerJoinArcade(connection, connection.getActiveMachine());
+		return this->_onPlayerJoinArcade(connection, connection.getActiveMachine());
 	};
 	connection.onArcadeLeave = [&connection, this](){
 		if (!connection.getBattleStatus())
@@ -496,18 +574,98 @@ void Server::close()
 	this->_opened = false;
 }
 
-void Server::_onPlayerJoinArcade(Connection &connection, unsigned int aid)
+bool Server::_onPlayerJoinArcade(Connection &connection, unsigned int aid)
 {
 	if (connection.getBattleStatus())
-		return;
+		return false;
+
+	this->_machinesMutex.lock();
+	auto &machine = this->_machines[aid];
+
+	if (!machine.empty() && memcmp(machine[0]->getVersionString(), connection.getVersionString(), 16) != 0) {
+		bool foundVersion = false;
+		std::string message = "Cannot join arcade " + std::to_string(aid) + " because the players here are using a different netplay version than you.\nYour version: ";
+
+		for (int i = 0; i < sizeof(versionNamesFull) / sizeof(*versionNamesFull); i++) {
+			if (memcmp(versions[i * 2], connection.getVersionString(), 16) == 0) {
+				message += std::string(versionNamesFull[i]) + " with SWR.";
+				foundVersion = true;
+				break;
+			}
+			if (memcmp(versions[i * 2 + 1], connection.getVersionString(), 16) == 0) {
+				message += std::string(versionNamesFull[i]) + " without SWR.";
+				foundVersion = true;
+				break;
+			}
+		}
+		if (!foundVersion)
+			message += "Unknown version string.";
+		foundVersion = false;
+		message += "\nTheir version: ";
+		for (int i = 0; i < sizeof(versionNamesFull) / sizeof(*versionNamesFull); i++) {
+			if (memcmp(versions[i * 2], machine[0]->getVersionString(), 16) == 0) {
+				message += std::string(versionNamesFull[i]) + " with SWR.";
+				foundVersion = true;
+				break;
+			}
+			if (memcmp(versions[i * 2 + 1], machine[0]->getVersionString(), 16) == 0) {
+				message += std::string(versionNamesFull[i]) + " without SWR.";
+				foundVersion = true;
+				break;
+			}
+		}
+		if (!foundVersion)
+			message += "Unknown version string.";
+
+		Lobbies::PacketMessage errPacket{0xFF0000, 0, message};
+		Lobbies::PacketArcadeLeave leave{connection.getId()};
+
+		connection.send(&errPacket, sizeof(errPacket));
+		connection.send(&leave, sizeof(leave));
+		this->_machinesMutex.unlock();
+		return false;
+	}
+
+	if (!machine.empty()) {
+		auto mySoku2 = connection.getSoku2Version();
+		auto theirSoku2 = machine[0]->getSoku2Version();
+
+		if (
+			(theirSoku2.major || theirSoku2.minor) &&
+			(theirSoku2.forceSoku2 || (machine.size() >= 2 && (
+				machine[1]->getSoku2Version().major == theirSoku2.major &&
+				machine[1]->getSoku2Version().minor == theirSoku2.minor &&
+				machine[1]->getSoku2Version().letter== theirSoku2.letter
+			))) &&
+			(theirSoku2.major != mySoku2.major || theirSoku2.minor != mySoku2.minor || theirSoku2.letter != mySoku2.letter)
+		) {
+			std::string message = "Cannot join arcade " + std::to_string(aid) + " because your Soku2 version mismatches.\nYour version: ";
+
+			if (mySoku2.major || mySoku2.minor) {
+				message += std::to_string(mySoku2.major) + "." + std::to_string(mySoku2.minor);
+				if (mySoku2.letter)
+					message += std::string(&mySoku2.letter, 1);
+			} else
+				message += "Not found.";
+			message += "\nTheir version: ";
+			message += std::to_string(theirSoku2.major) + "." + std::to_string(theirSoku2.minor);
+			if (theirSoku2.letter)
+				message += std::string(&theirSoku2.letter, 1);
+
+			Lobbies::PacketMessage errPacket{0xFF0000, 0, message};
+			Lobbies::PacketArcadeLeave leave{connection.getId()};
+
+			connection.send(&errPacket, sizeof(errPacket));
+			connection.send(&leave, sizeof(leave));
+			this->_machinesMutex.unlock();
+			return false;
+		}
+	}
 
 	Lobbies::PacketMessage msgPacket{0x00FFFF, 0, "You joined arcade " + std::to_string(aid) + "."};
 	Lobbies::PacketArcadeEngage engage{connection.getId(), aid};
 
 	connection.setActiveMachine(aid);
-	this->_machinesMutex.lock();
-	auto &machine = this->_machines[aid];
-
 	connection.send(&msgPacket, sizeof(msgPacket));
 	if (machine.size() >= 2) {
 		if (machine[0]->getBattleStatus() == 2) {
@@ -523,7 +681,7 @@ void Server::_onPlayerJoinArcade(Connection &connection, unsigned int aid)
 	machine.push_back(&connection);
 	if (machine.size() == 2 && !this->_startRoom(machine)) {
 		this->_machinesMutex.unlock();
-		return;
+		return true;
 	}
 	this->_machinesMutex.unlock();
 
@@ -532,6 +690,7 @@ void Server::_onPlayerJoinArcade(Connection &connection, unsigned int aid)
 		if (c->isInit())
 			c->send(&engage, sizeof(engage));
 	this->_connectionsMutex.unlock();
+	return true;
 }
 
 std::vector<std::string> Server::_parseCommand(const std::string &msg)

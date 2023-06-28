@@ -9,8 +9,8 @@
 #include <cstdint>
 #include <string>
 
-#define MOD_VERSION 9
-#define VERSION_STR "0.4.0"
+#define PROTOCOL_VERSION 10
+#define VERSION_STR "0.5.0"
 
 namespace Lobbies
 {
@@ -59,20 +59,29 @@ namespace Lobbies
 		HostPreference hostPref;
 	};
 
+	struct Soku2VersionInfo {
+		unsigned char major;
+		unsigned char minor;
+		char letter;
+		bool forceSoku2;
+	};
+
 	struct PacketHello {
 	private:
 		Opcode opcode;
 
 	public:
-		uint32_t modVersion = MOD_VERSION;
+		uint32_t modVersion = PROTOCOL_VERSION;
+		unsigned char versionString[16];
+		Soku2VersionInfo soku2Info;
 		char uniqueId[16];
 		char name[32];
 		char password[32] = {0};
 		PlayerCustomization custom;
 		LobbySettings settings;
 
-		PacketHello(char uniqueId[16], const std::string &name, const PlayerCustomization &custom, const LobbySettings &settings);
-		PacketHello(char uniqueId[16], const std::string &name, const PlayerCustomization &custom, const LobbySettings &settings, const std::string &pwd);
+		PacketHello(const Soku2VersionInfo &soku2Info, unsigned char versionString[16], const std::string &name, const PlayerCustomization &custom, const LobbySettings &settings);
+		PacketHello(const Soku2VersionInfo &soku2Info, unsigned char versionString[16], const std::string &name, const PlayerCustomization &custom, const LobbySettings &settings, const std::string &pwd);
 		std::string toString() const;
 	};
 

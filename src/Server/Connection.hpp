@@ -28,6 +28,8 @@ private:
 	bool _connected = true;
 	bool _init = false;
 	uint32_t _id = 0;
+	Lobbies::Soku2VersionInfo _soku2Infos;
+	unsigned char _versionString[16];
 	char _uniqueId[16];
 	std::string _name;
 	std::string _realName;
@@ -70,7 +72,7 @@ public:
 	std::function<void (uint8_t channel, const std::string &msg)> onMessage;
 	std::function<void (const Lobbies::PacketSettingsUpdate &settings)> onSettingsUpdate;
 	std::function<void (const Room &port)> onGameStart;
-	std::function<void ()> onGameRequest;
+	std::function<bool ()> onGameRequest;
 	std::function<void ()> onArcadeLeave;
 
 	Connection(std::unique_ptr<sf::TcpSocket> &socket, const char *password);
@@ -82,6 +84,7 @@ public:
 	void send(const void *packet, size_t size);
 	uint32_t getId() const;
 	bool isInit() const;
+	const unsigned char *getVersionString() const;
 	const char *getUniqueId() const;
 	std::string getName() const;
 	std::string getRealName() const;
@@ -93,6 +96,7 @@ public:
 	void setActiveMachine(uint8_t id);
 	uint8_t getActiveMachine() const;
 	const Room &getRoomInfo() const;
+	Lobbies::Soku2VersionInfo getSoku2Version() const;
 	Lobbies::LobbySettings getSettings() const;
 	Lobbies::PlayerCustomization getPlayer() const;
 	bool isConnected() const;

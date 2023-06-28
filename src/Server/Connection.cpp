@@ -130,6 +130,11 @@ bool Connection::isInit() const
 	return this->_init;
 }
 
+const unsigned char *Connection::getVersionString() const
+{
+	return this->_versionString;
+}
+
 const char *Connection::getUniqueId() const
 {
 	return this->_uniqueId;
@@ -253,16 +258,20 @@ bool Connection::_handlePacket(const Lobbies::PacketHello &packet, size_t &size)
 {
 	if (this->_init)
 		return false;
+	if (size < 5)
+		return false;
+	if (packet.modVersion > PROTOCOL_VERSION)
+		return this->kick("Outdated server!"), false;
 	if (size < sizeof(packet))
 		return false;
 	size -= sizeof(packet);
-	if (packet.modVersion > MOD_VERSION)
-		return this->kick("Outdated server!"), false;
-	if (packet.modVersion < MOD_VERSION)
+	if (packet.modVersion < PROTOCOL_VERSION)
 		return this->kick("You are running an old version of SokuLobbies! Please update your mod and try again."), false;
 	if (this->_password && strncmp(this->_password, packet.password, sizeof(packet.password)) != 0)
 		return this->kick("Incorrect password"), false;
 	memcpy(this->_uniqueId, packet.uniqueId, sizeof(packet.uniqueId));
+	memcpy(this->_versionString, packet.versionString, sizeof(packet.versionString));
+	this->_soku2Infos = packet.soku2Info;
 
 	char buffer[sizeof(packet.name) + 1];
 	char invalidChars[] = {'\\', '/', ':', '*', '?', '\"', '<', '>', '|'};
@@ -349,8 +358,8 @@ bool Connection::_handlePacket(const Lobbies::PacketGameRequest &packet, size_t 
 		return false;
 	size -= sizeof(packet);
 	this->_machineId = packet.consoleId;
-	this->onGameRequest();
-	this->_battleStatus = 1;
+	if (this->onGameRequest())
+		this->_battleStatus = 1;
 	return true;
 }
 
@@ -438,4 +447,9 @@ sf::IpAddress Connection::getIp() const
 	if (this->_socket)
 		return this->_socket->getRemoteAddress();
 	return sf::IpAddress::Any;
+}
+
+Lobbies::Soku2VersionInfo Connection::getSoku2Version() const
+{
+	return this->_soku2Infos;
 }

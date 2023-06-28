@@ -7,17 +7,18 @@
 
 namespace Lobbies
 {
-	PacketHello::PacketHello(char uniqueId[16], const std::string &name, const PlayerCustomization &custom, const LobbySettings &settings) :
+	PacketHello::PacketHello(const Soku2VersionInfo &soku2Info, unsigned char versionString[16], const std::string &name, const PlayerCustomization &custom, const LobbySettings &settings) :
 		opcode(OPCODE_HELLO),
+		soku2Info(soku2Info),
 		custom(custom),
 		settings(settings)
 	{
-		memcpy(this->uniqueId, uniqueId, sizeof(this->uniqueId));
+		memcpy(this->versionString, versionString, sizeof(this->versionString));
 		strncpy(this->name, name.c_str(), sizeof(this->name));
 	}
 
-	PacketHello::PacketHello(char uniqueId[16], const std::string &name, const PlayerCustomization &custom, const LobbySettings &settings, const std::string &pwd) :
-		PacketHello(uniqueId, name, custom, settings)
+	PacketHello::PacketHello(const Soku2VersionInfo &soku2Info, unsigned char versionString[16], const std::string &name, const PlayerCustomization &custom, const LobbySettings &settings, const std::string &pwd) :
+		PacketHello(soku2Info, versionString, name, custom, settings)
 	{
 		strncpy(this->password, pwd.c_str(), sizeof(this->password));
 	}

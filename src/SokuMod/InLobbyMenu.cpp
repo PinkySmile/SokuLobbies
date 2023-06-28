@@ -362,7 +362,11 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 		}
 		machine.mutex.unlock();
 	};
-	connection.onArcadeLeave = [this](const Player &, uint32_t id){
+	connection.onArcadeLeave = [this](const Player &p, uint32_t id){
+		if (p.id == this->_connection.getMe()->id) {
+			this->_currentMachine = nullptr;
+			this->_connection.getMe()->battleStatus = 0;
+		}
 		if (id >= this->_machines.size() - 1)
 			return;
 

@@ -15,6 +15,11 @@ std::mutex logMutex;
 #include "getPublicIp.hpp"
 
 
+extern unsigned char soku2Major;
+extern unsigned char soku2Minor;
+extern char soku2Letter;
+extern bool soku2Force;
+
 void Connection::_netLoop()
 {
 	char buffer[sizeof(Lobbies::Packet) * 6];
@@ -377,13 +382,35 @@ void Connection::connect()
 	if (this->_init)
 		return;
 
-	char uniqueId[16] = {0};
+	unsigned char version[16];
+	constexpr unsigned char rollNoSWRVersion[16] = {
+		0x6F, 0x53, 0xD5, 0x29,
+		0xFA, 0xC9, 0x60, 0x18,
+		0x85, 0x9C, 0x21, 0xE2,
+		0x71, 0x36, 0x70, 0x9F
+	};
+	Lobbies::Soku2VersionInfo soku2Info{soku2Major, soku2Minor, soku2Letter, soku2Force};
+
+	// SokuRoll doesn't change the version string for non SWR linked so we replace it with something custom
+	if (memcmp((unsigned char *)0x858B80, SokuLib::Soku110acRollSWRAllChars, 16) == 0 && SokuLib::SWRUnlinked)
+		memcpy(version, rollNoSWRVersion, 16);
+	else if (SokuLib::SWRUnlinked)
+		memcpy(version, (unsigned char *)0x858B90, 16);
+	else
+		memcpy(version, (unsigned char *)0x858B80, 16);
+	// Giuroll doesn't change the version string for non SWR linked either so we mirror the first byte
+	if (
+		memcmp((unsigned char *)0x858B81, SokuLib::Soku110acNoRollSWRAllChars + 1, 15) == 0 &&
+		*(unsigned char *)0x858B80 != *SokuLib::Soku110acNoRollSWRAllChars
+	)
+		version[0] = *(unsigned char *)0x858B80;
+
 	if (this->_pwd) {
-		Lobbies::PacketHello hello{uniqueId, this->_initParams.name, this->_initParams.player, this->_initParams.settings, *this->_pwd};
+		Lobbies::PacketHello hello{soku2Info, version, this->_initParams.name, this->_initParams.player, this->_initParams.settings, *this->_pwd};
 
 		this->send(&hello, sizeof(hello));
 	} else {
-		Lobbies::PacketHello hello{uniqueId, this->_initParams.name, this->_initParams.player, this->_initParams.settings};
+		Lobbies::PacketHello hello{soku2Info, version, this->_initParams.name, this->_initParams.player, this->_initParams.settings};
 
 		this->send(&hello, sizeof(hello));
 	}

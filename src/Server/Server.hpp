@@ -39,7 +39,7 @@ private:
 	bool _startRoom(const std::vector<Connection *> &machine);
 	void _registerToMainServer();
 	std::vector<std::string> _parseCommand(const std::string &msg);
-	void _onPlayerJoinArcade(Connection &connection, unsigned id);
+	bool _onPlayerJoinArcade(Connection &connection, unsigned id);
 
 	static void sendSystemMessageTo(Connection *recipient, const std::string &msg, unsigned color);
 

@@ -43,6 +43,10 @@ static int (SokuLib::LoadingServer::*og_LoadingServerOnProcess)();
 static int (SokuLib::LoadingServer::*og_LoadingServerOnRender)();
 static void (SokuLib::KeymapManager::*s_origKeymapManager_SetInputs)();
 
+unsigned char soku2Major = 0;
+unsigned char soku2Minor = 0;
+char soku2Letter = 0;
+bool soku2Force = false;
 wchar_t profilePath[MAX_PATH];
 wchar_t profileFolderPath[MAX_PATH];
 char servHost[64];
@@ -657,7 +661,55 @@ int __fastcall LoadingServerOnRender(SokuLib::LoadingServer *This)
 	renderCommon();
 	return ret;
 }
+void getSoku2Version(wchar_t *path)
+{
+	std::ifstream stream{path};
+	std::string line;
 
+	printf("Loading file %S\n", path);
+	while (std::getline(stream, line)) {
+		auto pos = line.find("set_version(");
+
+		if (pos == std::string::npos)
+			continue;
+		printf("Line is %s\n", line.c_str());
+		line = line.substr(pos + strlen("set_version(") + 1);
+		pos = line.find('"');
+		if (pos == std::string::npos) {
+			MessageBox(nullptr, "Cannot parse Soku2 version: Missing closing \" in set_version line.", "SokuLobbies Init error", MB_ICONERROR);
+			return;
+		}
+		line = line.substr(0, pos);
+		printf("Version string is %s\n", line.c_str());
+		pos = line.find('.');
+		if (pos == std::string::npos) {
+			MessageBox(nullptr, "Cannot parse Soku2 version: Cannot find . chaarcter in version string.", "SokuLobbies Init error", MB_ICONERROR);
+			return;
+		}
+		try {
+			soku2Major = std::stoul(line.substr(0, pos));
+			line = line.substr(pos + 1);
+			soku2Minor = std::stoul(line, &pos);
+			if (pos != line.size()) {
+				if (pos != line.size() - 1) {
+					printf("%zu %zu\n", pos, line.size() - 1);
+					MessageBox(nullptr, "Cannot parse Soku2 version: Trailing letters found.", "SokuLobbies Init error", MB_ICONWARNING);
+					return;
+				}
+				soku2Letter = line.back();
+			}
+		} catch (std::exception &e) {
+			MessageBox(nullptr, ("Cannot parse Soku2 version: " + std::string(e.what()) + ".").c_str(), "SokuLobbies Init error", MB_ICONERROR);
+			soku2Major = 0;
+			soku2Minor = 0;
+			soku2Letter = 0;
+			return;
+		}
+		printf("Soku2 version is %i.%i%c\n", soku2Major, soku2Minor, soku2Letter);
+		return;
+	}
+	MessageBox(nullptr, "Cannot parse Soku2 version: The set_version line was not found.", "SokuLobbies Init error", MB_ICONERROR);
+}
 
 void loadSoku2CSV(LPWSTR path)
 {
@@ -764,14 +816,17 @@ void loadSoku2Config()
 			continue;
 
 		hasSoku2 = true;
-		wcscpy(module_path, app_path);
-		PathAppendW(module_path, moduleValue);
-		while (auto result = wcschr(module_path, '/'))
+		PathAppendW(app_path, moduleValue);
+		while (auto result = wcschr(app_path, '/'))
 			*result = '\\';
-		PathRemoveFileSpecW(module_path);
+		PathRemoveFileSpecW(app_path);
+		wcscpy(module_path, app_path);
 		printf("Found Soku2 module folder at %S\n", module_path);
 		PathAppendW(module_path, L"\\config\\info\\characters.csv");
 		loadSoku2CSV(module_path);
+		wcscpy(module_path, app_path);
+		PathAppendW(module_path, L"\\config\\SOKU2.lua");
+		getSoku2Version(module_path);
 		return;
 	}
 }
