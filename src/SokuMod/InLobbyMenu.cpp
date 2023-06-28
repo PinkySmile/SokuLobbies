@@ -629,6 +629,11 @@ int InLobbyMenu::onProcess()
 					if (machine.id == UINT32_MAX) {
 						this->_hostlist.reset(new SmallHostlist(0.6, {128, 48}, this->_parent));
 						SokuLib::playBGM("data/bgm/op2.ogg");
+						for (auto &achievement : lobbyData->achievementByRequ["old_arcade"])
+							if (!achievement->awarded) {
+								achievement->awarded = true;
+								lobbyData->achievementAwardQueue.push_back(achievement);
+							}
 						goto touched;
 					}
 

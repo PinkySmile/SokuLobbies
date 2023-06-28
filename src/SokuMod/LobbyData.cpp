@@ -684,6 +684,9 @@ LobbyData::LobbyData()
 	this->_loadAchievements();
 	this->_loadGameCards();
 	this->_grantStatsAchievements();
+#ifdef _DEBUG
+	this->_grantDebugAchievements();
+#endif
 	if (GetFileAttributesW(L".crash") != INVALID_FILE_ATTRIBUTES)
 		this->_grantCrashAchievements();
 
@@ -1176,6 +1179,15 @@ void LobbyData::_grantCrashAchievements()
 			this->achievementAwardQueue.push_back(achievement);
 		}
 	DeleteFileW(L".crash");
+}
+
+void LobbyData::_grantDebugAchievements()
+{
+	for (auto &achievement : this->achievementByRequ["debug"])
+		if (!achievement->awarded) {
+			achievement->awarded = true;
+			this->achievementAwardQueue.push_back(achievement);
+		}
 }
 
 std::string LobbyData::httpRequest(const std::string &url, const std::string &method, const std::string &data)

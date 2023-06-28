@@ -47,6 +47,7 @@ private:
 
 	void _grantStatsAchievements();
 	void _grantCrashAchievements();
+	void _grantDebugAchievements();
 
 	static size_t LobbyData::writeMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp);
 

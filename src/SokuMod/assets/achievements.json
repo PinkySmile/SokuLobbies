@@ -2627,19 +2627,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 4
+                "id": 89
             },
-	    {
+            {
                 "type": "avatar",
-                "id": 5
+                "id": 90
             },
-	    {
+            {
                 "type": "avatar",
-                "id": 6
-            },
-	    {
-                "type": "avatar",
-                "id": 7
+                "id": 91
             },
 	    {
                 "type": "avatar",
@@ -2656,18 +2652,73 @@
 	    {
                 "type": "avatar",
                 "id": 95
-            },
-	    {
-                "type": "avatar",
-                "id": 96
-            },
-	    {
-                "type": "avatar",
-                "id": 97
             }
         ],
         "name": "Impossible",
-        "description": "Impossible achievement there only to lock<br>stuff that don't have any",
+        "description": "Impossible achievement there only to lock<br>stuff that doesn't have any requirement<br>but should.",
         "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "old_arcade"
+        },
+        "rewards": [
+            {
+                "type": "avatar",
+                "id": 4
+            },
+	    {
+                "type": "avatar",
+                "id": 5
+            },
+	    {
+                "type": "avatar",
+                "id": 6
+            },
+	    {
+                "type": "avatar",
+                "id": 7
+            }
+        ],
+        "name": "Reminiscence of an ancient time",
+        "description": "Use the old arcade machine to access the<br>hostlist.",
+        "hidden": false
+    },
+    {
+        "requirement": {
+            "type": "debug"
+        },
+        "rewards": [
+	    {
+                "type": "avatar",
+                "id": 97
+            },
+	    {
+                "type": "accessory",
+                "id": 20,
+                "comment": "Butterfly net"
+            }
+        ],
+        "name": "Gotta catch'em all!",
+        "description": "Use the debug version of the mod.",
+        "hidden": true
+    },
+    {
+        "requirement": {
+            "type": "win_move",
+	    "chr": 9,
+	    "action": 605,
+	    "block_blacklist": [0]
+        },
+        "rewards": [
+	    {
+                "type": "avatar",
+                "id": 96
+            }
+        ],
+        "name": "IaMP Ending",
+        "description": "Close a game with \"Missing Purple Power\".",
+        "hidden": true,
+	"comment": "Not implemented!"
     }
 ]
