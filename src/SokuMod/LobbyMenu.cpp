@@ -586,72 +586,127 @@ void LobbyMenu::_customizeAvatarRender()
 				break;
 		}
 
-		auto bottom = pos.y + (avatar.sprite.texture.getSize().y / 2) * avatar.scale / 2;
-
-		if (bottom > maxBottom)
-			avatar.sprite.rect.height = avatar.sprite.texture.getSize().y / 2 - (bottom - maxBottom) * 2 / avatar.scale;
-		else
-			avatar.sprite.rect.height = avatar.sprite.texture.getSize().y / 2;
-		avatar.sprite.setSize({
-			static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale / 2),
-			static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale / 2)
-		});
-		avatar.sprite.rect.left = avatar.sprite.rect.width * showcase.anim;
-		avatar.sprite.rect.top = (avatar.sprite.texture.getSize().y / 2) * (showcase.action / 4);
-
 		auto locked = lobbyData->isLocked(avatar);
-		auto realPos = pos;
 		auto otherSprite = locked && avatar.hidden;
-		auto &sprite = otherSprite ? this->_hidden : avatar.sprite;
+		
+		if (otherSprite) {
+			auto bottom = pos.y + this->_hidden.getSize().y;
 
-		if (otherSprite);
-		else if (pos.y + (int)avatar.sprite.getSize().y <= 130);
-		else if (pos.y < 130) {
-			avatar.sprite.rect.top += 130 - pos.y;
-			avatar.sprite.rect.height -= (130 - pos.y) * 2 / avatar.scale;
-			pos.y = 130;
+			if (bottom > maxBottom)
+				this->_hidden.rect.height = this->_hidden.texture.getSize().y - (bottom - maxBottom);
+			else
+				this->_hidden.rect.height = this->_hidden.texture.getSize().y;
+			this->_hidden.setSize({
+				static_cast<unsigned int>(this->_hidden.rect.width),
+				static_cast<unsigned int>(this->_hidden.rect.height)
+			});
+			this->_hidden.rect.top = 0;
+
+			auto realPos = pos;
+
+			if (pos.y + (int)avatar.sprite.getSize().y <= 130);
+			else if (pos.y < 130) {
+				this->_hidden.rect.top += 130 - pos.y;
+				this->_hidden.rect.height -= (130 - pos.y) * 2 / avatar.scale;
+				pos.y = 130;
+				this->_hidden.setSize({
+					static_cast<unsigned int>(this->_hidden.rect.width),
+					static_cast<unsigned int>(this->_hidden.rect.height)
+				});
+			}
+
+			this->_hidden.setPosition(pos);
+#ifdef _DEBUG
+			if (debug) {
+				rect.setSize(this->_hidden.getSize());
+				rect.setPosition(pos);
+				if (this->_hidden.getPosition().y >= 130)
+					rect.draw();
+			}
+#endif
+
+			if (this->_customCursor == i)
+				displaySokuCursor(pos + SokuLib::Vector2i{8, 0}, this->_hidden.getSize());
+			pos = realPos;
+			size = max(size, this->_hidden.texture.getSize().y);
+			if (this->_hidden.getPosition().y >= 130) {
+				this->_hidden.draw();
+				if (locked && bottom <= maxBottom) {
+					this->_lock.setPosition(
+						pos + SokuLib::Vector2i{
+							static_cast<int>(this->_hidden.texture.getSize().x / 2 - this->_lock.getSize().x / 2),
+							static_cast<int>(this->_hidden.texture.getSize().y / 2)
+						}
+					);
+					if (this->_lock.getPosition().y >= 130)
+						this->_lock.draw();
+				}
+			}
+			pos.x += this->_hidden.getSize().x;
+		} else {
+			auto bottom = pos.y + (avatar.sprite.texture.getSize().y / 2) * avatar.scale / 2;
+
+			if (bottom > maxBottom)
+				avatar.sprite.rect.height = avatar.sprite.texture.getSize().y / 2 - (bottom - maxBottom) * 2 / avatar.scale;
+			else
+				avatar.sprite.rect.height = avatar.sprite.texture.getSize().y / 2;
 			avatar.sprite.setSize({
 				static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale / 2),
 				static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale / 2)
 			});
-		}
-		sprite.setPosition(pos);
+			avatar.sprite.rect.left = avatar.sprite.rect.width * showcase.anim;
+			avatar.sprite.rect.top = (avatar.sprite.texture.getSize().y / 2) * (showcase.action / 4);
+
+			auto realPos = pos;
+
+			if (pos.y + (int)avatar.sprite.getSize().y <= 130);
+			else if (pos.y < 130) {
+				avatar.sprite.rect.top += 130 - pos.y;
+				avatar.sprite.rect.height -= (130 - pos.y) * 2 / avatar.scale;
+				pos.y = 130;
+				avatar.sprite.setSize({
+					static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale / 2),
+					static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale / 2)
+				});
+			}
+			avatar.sprite.setPosition(pos);
 #ifdef _DEBUG
-		if (debug) {
-			rect.setSize(sprite.getSize());
-			rect.setPosition(pos);
-			if (sprite.getPosition().y >= 130)
-				rect.draw();
-		}
+			if (debug) {
+				rect.setSize(avatar.sprite.getSize());
+				rect.setPosition(pos);
+				if (avatar.sprite.getPosition().y >= 130)
+					rect.draw();
+			}
 #endif
 
-		if (this->_customCursor == i)
-			displaySokuCursor(pos + SokuLib::Vector2i{8, 0}, avatar.sprite.getSize());
-		pos = realPos;
-		size = max(size, avatar.sprite.texture.getSize().y / 2);
-		if (!otherSprite) {
-			avatar.sprite.setMirroring(showcase.side, false);
-			avatar.sprite.tint = locked ? SokuLib::Color{0x60, 0x60, 0x60, 0xFF} : SokuLib::Color::White;
-		}
-		if (sprite.getPosition().y >= 130) {
-			sprite.draw();
-			if (locked && bottom <= maxBottom) {
-				this->_lock.setPosition(
-					pos + SokuLib::Vector2i{
-						static_cast<int>((avatar.sprite.rect.width * avatar.scale / 2) / 2 - this->_lock.getSize().x / 2),
-						static_cast<int>(((avatar.sprite.texture.getSize().y / 2) * avatar.scale / 2) / 2)
-					}
-				);
-				if (this->_lock.getPosition().y >= 130)
-					this->_lock.draw();
+			if (this->_customCursor == i)
+				displaySokuCursor(pos + SokuLib::Vector2i{8, 0}, avatar.sprite.getSize());
+			pos = realPos;
+			size = max(size, (avatar.sprite.texture.getSize().y / 2) * avatar.scale / 2);
+			if (!otherSprite) {
+				avatar.sprite.setMirroring(showcase.side, false);
+				avatar.sprite.tint = locked ? SokuLib::Color{0x60, 0x60, 0x60, 0xFF} : SokuLib::Color::White;
 			}
+			if (avatar.sprite.getPosition().y >= 130) {
+				avatar.sprite.draw();
+				if (locked && bottom <= maxBottom) {
+					this->_lock.setPosition(
+						pos + SokuLib::Vector2i{
+							static_cast<int>(avatar.sprite.rect.width * avatar.scale / 2 / 2 - this->_lock.getSize().x / 2),
+							static_cast<int>(avatar.sprite.texture.getSize().y / 2 * avatar.scale / 2 / 2)
+						}
+					);
+					if (this->_lock.getPosition().y >= 130)
+						this->_lock.draw();
+				}
+			}
+			pos.x += avatar.sprite.getSize().x;
+			avatar.sprite.rect.height = avatar.sprite.texture.getSize().y / 2;
+			avatar.sprite.setSize({
+				static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale),
+				static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale)
+			});
 		}
-		pos.x += avatar.sprite.rect.width;
-		avatar.sprite.rect.height = avatar.sprite.texture.getSize().y / 2;
-		avatar.sprite.setSize({
-			static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale),
-			static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale)
-		});
 	}
 	this->_renderAvatarCustomText();
 	this->_renderCustomAvatarPreview();
@@ -949,15 +1004,20 @@ void LobbyMenu::_renderAvatarCustomText()
 			static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale / 2),
 			static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale / 2)
 		});
-	sprite.setPosition({352, static_cast<int>(360 - sprite.getSize().y)});
+	sprite.setPosition({
+		static_cast<int>(384 - sprite.getSize().x / 2),
+		static_cast<int>(360 - sprite.getSize().y)
+	});
 #ifdef _DEBUG
-	SokuLib::DrawUtils::RectangleShape rect;
+	if (debug) {
+		SokuLib::DrawUtils::RectangleShape rect;
 
-	rect.setBorderColor(SokuLib::Color::White);
-	rect.setFillColor(SokuLib::Color{0xFF, 0xFF, 0xFF, 0xA0});
-	rect.setSize(sprite.getSize());
-	rect.setPosition(sprite.getPosition());
-	rect.draw();
+		rect.setBorderColor(SokuLib::Color::White);
+		rect.setFillColor(SokuLib::Color{0xFF, 0xFF, 0xFF, 0xA0});
+		rect.setSize(sprite.getSize());
+		rect.setPosition(sprite.getPosition());
+		rect.draw();
+	}
 #endif
 	if (!otherSprite) {
 		avatar.sprite.setMirroring(true, false);

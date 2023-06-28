@@ -296,7 +296,7 @@ void StatsMenu::_createCardsStats(std::vector<std::shared_ptr<ChrEntry>> &list, 
 	ptr->name.rect.width = size.x;
 	ptr->name.rect.height = size.y;
 
-	ptr->wins.texture.createFromText("In Deck", lobbyData->getFont(12), {200, 20}, &size);
+/*	ptr->wins.texture.createFromText("In Deck", lobbyData->getFont(12), {200, 20}, &size);
 	ptr->wins.setSize(size.to<unsigned>());
 	ptr->wins.setPosition({345, 118});
 	ptr->wins.rect.width = size.x;
@@ -312,7 +312,13 @@ void StatsMenu::_createCardsStats(std::vector<std::shared_ptr<ChrEntry>> &list, 
 	ptr->total.setSize(size.to<unsigned>());
 	ptr->total.setPosition({558, 118});
 	ptr->total.rect.width = size.x;
-	ptr->total.rect.height = size.y;
+	ptr->total.rect.height = size.y;*/
+
+	ptr->losses.texture.createFromText("Used?", lobbyData->getFont(12), {200, 20}, &size);
+	ptr->losses.setSize(size.to<unsigned>());
+	ptr->losses.setPosition({452, 118});
+	ptr->losses.rect.width = size.x;
+	ptr->losses.rect.height = size.y;
 
 	auto entry = lobbyData->loadedCharacterCardUsage.find(chr.first);
 	auto val1 = entry == lobbyData->loadedCharacterCardUsage.end() ? LobbyData::CardChrStatEntry{0} : entry->second;
@@ -341,12 +347,12 @@ void StatsMenu::_createCardsStats(std::vector<std::shared_ptr<ChrEntry>> &list, 
 		ptr->portrait.rect.width = ptr->portrait.texture.getSize().x;
 		ptr->portrait.rect.height = ptr->portrait.texture.getSize().y;
 
-		ptr->name.texture.createFromText(nameIt == map.end() ? "Unknown card" : nameIt->second.cardName.c_str(), lobbyData->getFont(12), {450, 20}, &size);
+		ptr->name.texture.createFromText(nameIt == map.end() ? ("Unknown card #" + std::to_string(card)).c_str() : nameIt->second.cardName.c_str(), lobbyData->getFont(12), {450, 20}, &size);
 		ptr->name.setSize(size.to<unsigned>());
 		ptr->name.rect.width = size.x;
 		ptr->name.rect.height = size.y;
 
-		if (val1.nbGames != 0)
+		/*if (val1.nbGames != 0)
 			sprintf(buffer, "%u (%.2f/game)", val2.inDeck, val2.inDeck / (float)val1.nbGames);
 		else
 			sprintf(buffer, "%u (0/game)", val2.inDeck);
@@ -371,7 +377,11 @@ void StatsMenu::_createCardsStats(std::vector<std::shared_ptr<ChrEntry>> &list, 
 		ptr->total.texture.createFromText(buffer, lobbyData->getFont(12), {200, 20}, &size);
 		ptr->total.setSize(size.to<unsigned>());
 		ptr->total.rect.width = size.x;
-		ptr->total.rect.height = size.y;
+		ptr->total.rect.height = size.y;*/
+		ptr->losses.texture.createFromText(val2.used ? "Used" : "Not used", lobbyData->getFont(12), {200, 20}, &size);
+		ptr->losses.setSize(size.to<unsigned>());
+		ptr->losses.rect.width = size.x;
+		ptr->losses.rect.height = size.y;
 	}
 }
 

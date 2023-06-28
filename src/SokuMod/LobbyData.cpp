@@ -18,10 +18,24 @@ std::unique_ptr<LobbyData> lobbyData;
 
 extern std::map<unsigned int, Character> characters;
 
+static void trashCardData(LobbyData *l)
+{
+	//TODO: Remove this!
+	for (auto &entry : l->loadedCharacterCardUsage) {
+		entry.second.nbGames = 0;
+		for (auto &card : entry.second.cards) {
+			card.second.inDeck = min(card.second.inDeck, 1);
+			card.second.used = min(card.second.used, 1);
+			card.second.burnt = 0;
+		}
+	}
+}
+
 void LobbyData::saveStats()
 {
 	auto path = std::filesystem::path(profileFolderPath) / "stats.dat";
 
+	trashCardData(this);
 	_wrename(path.wstring().c_str(), (path.wstring() + L".backup").c_str());
 
 	std::ofstream stream{path, std::fstream::binary};
@@ -66,6 +80,7 @@ void LobbyData::_loadStats()
 #else
 		MessageBox(SokuLib::window, "Warning: Invalid magic", "Warning", MB_ICONWARNING);
 #endif
+	trashCardData(this);
 }
 
 static void loadTexture(SokuLib::DrawUtils::Texture &container, const char *path)
