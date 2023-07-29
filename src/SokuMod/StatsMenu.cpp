@@ -405,7 +405,7 @@ StatsMenu::StatsMenu()
 			continue;
 		this->_cardsStats.emplace_back();
 	}
-	this->_nbMenus = 2 + characters.size() - 1;
+	this->_nbMenus = 2 + (characters.size() - 1) * 2;
 }
 
 void StatsMenu::_()
@@ -464,21 +464,25 @@ std::vector<std::shared_ptr<StatsMenu::ChrEntry>> *StatsMenu::_getCurrentList(un
 		list = &this->_againstStats;
 		if (list->empty())
 			this->_createAgainstStats();
-	} else if (this->_currentMenu < 2 + characters.size() - 1 + characters.size() - 1 && this->_currentMenu % 2 == 0) {
+	} else if (this->_currentMenu < 2 + (characters.size() - 1) * 2 && this->_currentMenu % 2 == 0) {
 		list = &this->_matchupStats[(this->_currentMenu - 2) / 2];
 		if (list->empty()) {
 			auto it = characters.begin();
 
 			for (unsigned i = 0; i < (this->_currentMenu - 2) / 2; i++)
 				it++;
+			if ((this->_currentMenu - 2) / 2 >= SokuLib::CHARACTER_RANDOM)
+				it++;
 			this->_createMUStats(this->_matchupStats[(this->_currentMenu - 2) / 2], *it);
 		}
-	} else if (this->_currentMenu < 2 + characters.size() - 1 + characters.size() - 1) {
+	} else if (this->_currentMenu < 2 + (characters.size() - 1) * 2) {
 		list = &this->_cardsStats[(this->_currentMenu - 2) / 2];
 		if (list->empty()) {
 			auto it = characters.begin();
 
 			for (unsigned i = 0; i < (this->_currentMenu - 2) / 2; i++)
+				it++;
+			if ((this->_currentMenu - 2) / 2 >= SokuLib::CHARACTER_RANDOM)
 				it++;
 			this->_createCardsStats(this->_cardsStats[(this->_currentMenu - 2) / 2], *it);
 		}
@@ -558,9 +562,9 @@ int StatsMenu::onRender()
 		this->_renderNormalStats(this->_globalStats, 10);
 	else if (this->_currentMenu == 1)
 		this->_renderNormalStats(this->_againstStats, 10);
-	else if (this->_currentMenu < 2 + characters.size() - 1 + characters.size() - 1 && this->_currentMenu % 2 == 0)
+	else if (this->_currentMenu < 2 + (characters.size() - 1) * 2 && this->_currentMenu % 2 == 0)
 		this->_renderNormalStats(this->_matchupStats[(this->_currentMenu - 2) / 2], 10);
-	else if (this->_currentMenu < 2 + characters.size() - 1 + characters.size() - 1)
+	else if (this->_currentMenu < 2 + (characters.size() - 1) * 2)
 		this->_renderNormalStats(this->_cardsStats[(this->_currentMenu - 2) / 2], 8);
 	return 0;
 }

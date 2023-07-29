@@ -899,7 +899,9 @@ void getModVersionStr()
 		delete[] verData;
 		return;
 	}
-	sprintf_s(modVersion, "%d.%d.%d.%d",
+	sprintf_s(
+		modVersion,
+		"%d.%d.%d.%d",
 		( verInfo->dwFileVersionMS >> 16 ) & 0xffff,
 		( verInfo->dwFileVersionMS >>  0 ) & 0xffff,
 		( verInfo->dwFileVersionLS >> 16 ) & 0xffff,
