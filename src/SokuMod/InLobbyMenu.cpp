@@ -419,14 +419,17 @@ void InLobbyMenu::_()
 	Lobbies::PacketArcadeLeave leave{0};
 
 	this->_connection.send(&leave, sizeof(leave));
-	this->_currentMachine = nullptr;
+	if (!this->_hostlist) {
+		this->_currentMachine = nullptr;
+		SokuLib::playBGM(this->_music.c_str());
+	} else
+		SokuLib::playBGM("data/bgm/op2.ogg");
 	*(*(char **)0x89a390 + 20) = false;
 	this->_parent->choice = 0;
 	this->_parent->subchoice = 0;
 	this->_connection.getMe()->battleStatus = 0;
 	messageBox->active = false;
 	*(int *)0x882a94 = 0x16;
-	SokuLib::playBGM(this->_music.c_str());
 }
 
 int InLobbyMenu::onProcess()
@@ -471,7 +474,8 @@ int InLobbyMenu::onProcess()
 				Lobbies::PacketArcadeLeave leave{0};
 
 				this->_connection.send(&leave, sizeof(leave));
-				this->_currentMachine = nullptr;
+				if (!this->_hostlist)
+					this->_currentMachine = nullptr;
 				me->battleStatus = 0;
 				*(*(char **)0x89a390 + 20) = false;
 				this->_addMessageToList(0xFF0000, 0, "Failed connecting to opponent: " + std::string(this->_parent->subchoice == 5 ? "They are already playing" : "Connection failed"));
@@ -929,9 +933,9 @@ int InLobbyMenu::onRender()
 
 				if (elevator.links.noIndicator)
 					continue;
-				
+
 				auto posBase = pos;
-				
+
 				posBase.x += elevator.skin.cage.width / 2;
 				posBase.y -= elevator.skin.indicator.height / 2 + 8;
 				pos = posBase;
@@ -1050,6 +1054,16 @@ int InLobbyMenu::onRender()
 					}
 				#endif
 					avatar.sprite.draw();
+					avatar.sprite.rect.width = avatar.sprite.texture.getSize().x / avatar.nbAnimations;
+					avatar.sprite.rect.height = avatar.sprite.texture.getSize().y / 2;
+					avatar.sprite.setSize({
+						static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale / (this->_elevatorCtr / ELEVEATOR_CTR_DIVIDER + 1)),
+						static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale / (this->_elevatorCtr / ELEVEATOR_CTR_DIVIDER + 1))
+					});
+					avatar.sprite.setPosition({
+						static_cast<int>(this->_translate.x + player.pos.x - avatar.sprite.getSize().x / 2),
+						static_cast<int>(this->_translate.y + player.pos.y - avatar.sprite.getSize().y)
+					});
 				} else {
 					rect2.setSize({64, 64});
 					rect2.setPosition({
@@ -1810,8 +1824,8 @@ void InLobbyMenu::_startHosting()
 		puts("Putting hostlist");
 
 		nlohmann::json data = {
-			{"profile_name", SokuLib::profile1.name},
-			{"message", "SokuLobbies " VERSION_STR ": Waiting in " + this->_roomName + " | " + (ranked ? "ranked" : "casual")},
+			{"profile_name", convertEncoding<char, char, shiftJISDecode, UTF8Encode>(SokuLib::profile1.name)},
+			{"message", "SokuLobbies " VERSION_STR ": Waiting in " + convertEncoding<char, char, shiftJISDecode, UTF8Encode>(this->_roomName) + " | " + (ranked ? "ranked" : "casual")},
 			{"port", hostPort}
 		};
 
