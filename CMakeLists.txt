@@ -185,6 +185,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 		ws2_32
 		d3dx9
 		imm32
+		version
 		CURL::libcurl
 	)
 	target_link_directories(SokuLobbiesMod PRIVATE lib)

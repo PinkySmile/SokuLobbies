@@ -113,6 +113,12 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 
 	SokuLib::Vector2i size;
 
+	this->_version.texture.createFromText((std::string("Version ") + modVersion).c_str(), lobbyData->getFont(12), {200, 20}, &size);
+	this->_version.setSize(size.to<unsigned>());
+	this->_version.setPosition({635 - size.x, 460 - size.y});
+	this->_version.rect.width = size.x;
+	this->_version.rect.height = size.y;
+
 	this->_playerName.texture.createFromText(SokuLib::profile1.name, lobbyData->getFont(16), {200, 20}, &size);
 	this->_playerName.setSize(size.to<unsigned>());
 	this->_playerName.rect.width = size.x;
@@ -536,6 +542,7 @@ int LobbyMenu::onRender()
 		this->_connectionsMutex.unlock();
 		(this->*_renderCallbacks[this->_menuState])();
 		inputBoxRender();
+		this->_version.draw();
 	} catch (std::exception &e) {
 		MessageBoxA(
 			SokuLib::window,

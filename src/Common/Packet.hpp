@@ -10,7 +10,6 @@
 #include <string>
 
 #define PROTOCOL_VERSION 10
-#define VERSION_STR "0.5.0"
 
 namespace Lobbies
 {

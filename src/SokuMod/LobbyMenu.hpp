@@ -52,6 +52,7 @@ private:
 	SokuLib::DrawUtils::Sprite _ui;
 	SokuLib::DrawUtils::Sprite _title;
 	SokuLib::DrawUtils::Sprite _hidden;
+	SokuLib::DrawUtils::Sprite _version;
 	SokuLib::DrawUtils::Sprite _customizeTexts[3];
 	SokuLib::DrawUtils::Sprite _customizeSeat;
 	SokuLib::DrawUtils::Sprite _playerName;

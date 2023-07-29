@@ -1825,7 +1825,7 @@ void InLobbyMenu::_startHosting()
 
 		nlohmann::json data = {
 			{"profile_name", convertEncoding<char, char, shiftJISDecode, UTF8Encode>(SokuLib::profile1.name)},
-			{"message", "SokuLobbies " VERSION_STR ": Waiting in " + convertEncoding<char, char, shiftJISDecode, UTF8Encode>(this->_roomName) + " | " + (ranked ? "ranked" : "casual")},
+			{"message", "SokuLobbies " + std::string(modVersion) + ": Waiting in " + convertEncoding<char, char, shiftJISDecode, UTF8Encode>(this->_roomName) + " | " + (ranked ? "ranked" : "casual")},
 			{"port", hostPort}
 		};
 

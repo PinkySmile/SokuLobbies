@@ -1206,7 +1206,7 @@ std::string LobbyData::httpRequest(const std::string &url, const std::string &me
 	}
 	curl_easy_setopt(request_handle, CURLOPT_WRITEFUNCTION, &LobbyData::writeMemoryCallback);
 	curl_easy_setopt(request_handle, CURLOPT_WRITEDATA, (void *)&request_chunk);
-	curl_easy_setopt(request_handle, CURLOPT_USERAGENT, "SokuLobbies " VERSION_STR);
+	curl_easy_setopt(request_handle, CURLOPT_USERAGENT, ("SokuLobbies " + std::string(modVersion)).c_str());
 	curl_easy_setopt(request_handle, CURLOPT_SSL_VERIFYPEER, false);
 	curl_easy_setopt(request_handle, CURLOPT_AUTOREFERER, 1L);
 	curl_easy_setopt(request_handle, CURLOPT_FOLLOWLOCATION, 1L);

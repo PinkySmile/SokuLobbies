@@ -49,6 +49,7 @@ char soku2Letter = 0;
 bool soku2Force = false;
 wchar_t profilePath[MAX_PATH];
 wchar_t profileFolderPath[MAX_PATH];
+char modVersion[16] = "unknown";
 char servHost[64];
 unsigned hostPref;
 unsigned short servPort;
@@ -866,6 +867,49 @@ int __stdcall Hooked_EndScene(IDirect3DDevice9* pDevice)
 	return 0x8a0e14;
 }
 
+void getModVersionStr()
+{
+	DWORD  verHandle = 0;
+	UINT   size      = 0;
+	LPBYTE lpBuffer  = nullptr;
+	DWORD  verSize   = GetFileVersionInfoSizeW(profilePath, &verHandle);
+
+	if (verSize == 0)
+		return;
+
+	auto verData = new char[verSize];
+
+	if (!GetFileVersionInfoW(profilePath, verHandle, verSize, verData)) {
+		delete[] verData;
+		return;
+	}
+
+	if (!VerQueryValueA(verData, "\\", (void **)&lpBuffer, &size)) {
+		delete[] verData;
+		return;
+	}
+	if (!size) {
+		delete[] verData;
+		return;
+	}
+
+	auto verInfo = (VS_FIXEDFILEINFO *)lpBuffer;
+
+	if (verInfo->dwSignature != 0xFEEF04BD) {
+		delete[] verData;
+		return;
+	}
+	sprintf_s(modVersion, "%d.%d.%d.%d",
+		( verInfo->dwFileVersionMS >> 16 ) & 0xffff,
+		( verInfo->dwFileVersionMS >>  0 ) & 0xffff,
+		( verInfo->dwFileVersionLS >> 16 ) & 0xffff,
+		( verInfo->dwFileVersionLS >>  0 ) & 0xffff
+	);
+	if (( verInfo->dwFileVersionLS >>  0 ) & 0xffff)
+		return;
+	*strrchr(modVersion, '.') = 0;
+}
+
 extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
 	return memcmp(SokuLib::targetHash, hash, 16) == 0;
 }
@@ -884,6 +928,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 
 	loadSoku2Config();
 	GetModuleFileNameW(hMyModule, profilePath, 1024);
+	getModVersionStr();
 	PathRemoveFileSpecW(profilePath);
 	wcscpy(profileFolderPath, profilePath);
 	PathAppendW(profilePath, L"SokuLobbies.ini");
@@ -891,7 +936,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	servPort = GetPrivateProfileIntW(L"Lobby", L"Port", 5254, profilePath);
 	hostPort = GetPrivateProfileIntW(L"Lobby", L"HostPort", 10800, profilePath);
 
-	bool hostlist = GetPrivateProfileIntW(L"Lobby", L"AcceptHostlist", 0, profilePath) != 0;
+	bool hostlist = GetPrivateProfileIntW(L"Lobby", L"AcceptHostlist", 1, profilePath) != 0;
 
 	// By default HOSTPREF_NO_PREF | HOSTPREF_ACCEPT_RELAY | HOSTPREF_ACCEPT_HOSTLIST
 	hostPref = GetPrivateProfileIntW(L"Lobby", L"HostPref", hostlist ? Lobbies::HOSTPREF_HOST_ONLY : Lobbies::HOSTPREF_NO_PREF, profilePath);
