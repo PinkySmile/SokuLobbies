@@ -54,6 +54,7 @@ char servHost[64];
 unsigned hostPref;
 unsigned short servPort;
 unsigned short hostPort;
+
 bool hasSoku2 = false;
 bool counted = false;
 bool activated = true;

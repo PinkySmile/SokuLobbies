@@ -419,8 +419,7 @@ void StatsMenu::_updateNormalStats(const std::vector<std::shared_ptr<ChrEntry>> 
 	if (list.empty())
 		return;
 
-	unsigned id = 0;
-	auto start = list.front();
+	const auto &start = list.front();
 
 	for (int i = this->_start + 1, id = 0; id < maxLine && i < list.size(); i++, id++) {
 		const auto &ptr = list[i];

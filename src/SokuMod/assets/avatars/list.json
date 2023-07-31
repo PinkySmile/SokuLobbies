@@ -708,6 +708,643 @@
         "name": "Suwako Moriya Alt 3"
     },
     {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Inubashiri Momiji"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Inubashiri Momiji Alt 1"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Inubashiri Momiji Alt 2"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Inubashiri Momiji Alt 3"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Clownpiece"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Clownpiece Alt 1"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Clownpiece Alt 2"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Clownpiece Alt 3"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Flandre Scarlet"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Flandre Scarlet Alt 1"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Flandre Scarlet Alt 2"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Flandre Scarlet Alt 3"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Rin Kaenbyou"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Rin Kaenbyou Alt 1"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Rin Kaenbyou Alt 2"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Rin Kaenbyou Alt 3"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Yuuka Kazami"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Yuuka Kazami Alt 1"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Yuuka Kazami Alt 2"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Yuuka Kazami Alt 3"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Kaguya Houraisan"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Kaguya Houraisan Alt 1"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Kaguya Houraisan Alt 2"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Kaguya Houraisan Alt 3"
+    },
+    {
+        "spritesheet": "assets/avatars/1 Mokou.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Fujiwara no Mokou"
+    },
+    {
+        "spritesheet": "assets/avatars/1 Mokou 2.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Fujiwara no Mokou Alt 1"
+    },
+    {
+        "spritesheet": "assets/avatars/1 Mokou 3.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Fujiwara no Mokou Alt 2"
+    },
+    {
+        "spritesheet": "assets/avatars/1 Mokou 4.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Fujiwara no Mokou Alt 3"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Mima"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Mima Alt 1"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Mima Alt 2"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Mima Alt 3"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Shou Toramaru"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Shou Toramaru Alt 1"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Shou Toramaru Alt 2"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Shou Toramaru Alt 3"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Murasa Minamitsu"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Murasa Minamitsu Alt 1"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Murasa Minamitsu Alt 2"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Murasa Minamitsu Alt 3"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Sekibanki"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Sekibanki Alt 1"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Sekibanki Alt 2"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Sekibanki Alt 3"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Satori Komeiji"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Satori Komeiji Alt 1"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Satori Komeiji Alt 2"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Satori Komeiji Alt 3"
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Ran Yakumo",
+	"hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Ran Yakumo Alt 1",
+	"hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Ran Yakumo Alt 2",
+	"hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Ran Yakumo Alt 3",
+	"hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Soku2 character slot 1",
+	"hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Soku2 character slot 1 Alt 1",
+	"hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Soku2 character slot 1 Alt 2",
+	"hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Soku2 character slot 1 Alt 3",
+	"hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Soku2 character slot 2",
+	"hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Soku2 character slot 2 Alt 1",
+	"hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Soku2 character slot 2 Alt 2",
+	"hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Soku2 character slot 2 Alt 3",
+	"hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Soku2 character slot 3",
+	"hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Soku2 character slot 3 Alt 1",
+	"hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Soku2 character slot 3 Alt 2",
+	"hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Soku2 character slot 3 Alt 3",
+	"hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Soku2 character slot 4",
+	"hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Soku2 character slot 4 Alt 1",
+	"hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Soku2 character slot 4 Alt 2",
+	"hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Soku2 character slot 4 Alt 3",
+	"hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Soku2 character slot 5",
+	"hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Soku2 character slot 5 Alt 1",
+	"hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Soku2 character slot 5 Alt 2",
+	"hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Soku2 character slot 5 Alt 3",
+	"hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Soku2 character slot 6",
+	"hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Soku2 character slot 6 Alt 1",
+	"hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Soku2 character slot 6 Alt 2",
+	"hidden": true
+    },
+    {
+        "spritesheet": "assets/avatars/placeholder.png",
+        "accessories": 0,
+        "animations": 4,
+        "scale": 2,
+        "anim_step": 8,
+        "name": "Soku2 character slot 6 Alt 3",
+	"hidden": true
+    },
+
+    {
         "spritesheet": "assets/avatars/7 Koishi.png",
         "accessories": 6,
         "animations": 4,
@@ -741,42 +1378,6 @@
         "scale": 2,
         "anim_step": 8,
         "name": "Koishi Komeiji Alt 3",
-        "hidden": true
-    },
-    {
-        "spritesheet": "assets/avatars/1 Mokou.png",
-        "accessories": 0,
-        "animations": 4,
-        "scale": 2,
-        "anim_step": 8,
-        "name": "Fujiwara no Mokou",
-        "hidden": true
-    },
-    {
-        "spritesheet": "assets/avatars/1 Mokou 2.png",
-        "accessories": 0,
-        "animations": 4,
-        "scale": 2,
-        "anim_step": 8,
-        "name": "Fujiwara no Mokou Alt 1",
-        "hidden": true
-    },
-    {
-        "spritesheet": "assets/avatars/1 Mokou 3.png",
-        "accessories": 0,
-        "animations": 4,
-        "scale": 2,
-        "anim_step": 8,
-        "name": "Fujiwara no Mokou Alt 2",
-        "hidden": true
-    },
-    {
-        "spritesheet": "assets/avatars/1 Mokou 4.png",
-        "accessories": 0,
-        "animations": 4,
-        "scale": 2,
-        "anim_step": 8,
-        "name": "Fujiwara no Mokou Alt 3",
         "hidden": true
     },
     {

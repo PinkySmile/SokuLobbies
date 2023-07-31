@@ -595,10 +595,11 @@ void LobbyMenu::_customizeAvatarRender()
 
 		auto locked = lobbyData->isLocked(avatar);
 		auto otherSprite = locked && avatar.hidden;
-		
-		if (otherSprite) {
-			auto bottom = pos.y + this->_hidden.getSize().y;
 
+		if (otherSprite) {
+			auto bottom = pos.y + this->_hidden.texture.getSize().y;
+
+			this->_hidden.rect.width = this->_hidden.texture.getSize().x;
 			if (bottom > maxBottom)
 				this->_hidden.rect.height = this->_hidden.texture.getSize().y - (bottom - maxBottom);
 			else
@@ -607,21 +608,21 @@ void LobbyMenu::_customizeAvatarRender()
 				static_cast<unsigned int>(this->_hidden.rect.width),
 				static_cast<unsigned int>(this->_hidden.rect.height)
 			});
+			this->_hidden.rect.left = 0;
 			this->_hidden.rect.top = 0;
 
 			auto realPos = pos;
 
-			if (pos.y + (int)avatar.sprite.getSize().y <= 130);
+			if (pos.y + (int)this->_hidden.texture.getSize().y <= 130);
 			else if (pos.y < 130) {
 				this->_hidden.rect.top += 130 - pos.y;
-				this->_hidden.rect.height -= (130 - pos.y) * 2 / avatar.scale;
+				this->_hidden.rect.height -= 130 - pos.y;
 				pos.y = 130;
 				this->_hidden.setSize({
 					static_cast<unsigned int>(this->_hidden.rect.width),
 					static_cast<unsigned int>(this->_hidden.rect.height)
 				});
 			}
-
 			this->_hidden.setPosition(pos);
 #ifdef _DEBUG
 			if (debug) {
@@ -641,7 +642,7 @@ void LobbyMenu::_customizeAvatarRender()
 				if (locked && bottom <= maxBottom) {
 					this->_lock.setPosition(
 						pos + SokuLib::Vector2i{
-							static_cast<int>(this->_hidden.texture.getSize().x / 2 - this->_lock.getSize().x / 2),
+							static_cast<int>(this->_hidden.rect.width / 2 - this->_lock.getSize().x / 2),
 							static_cast<int>(this->_hidden.texture.getSize().y / 2)
 						}
 					);
@@ -690,10 +691,8 @@ void LobbyMenu::_customizeAvatarRender()
 				displaySokuCursor(pos + SokuLib::Vector2i{8, 0}, avatar.sprite.getSize());
 			pos = realPos;
 			size = max(size, (avatar.sprite.texture.getSize().y / 2) * avatar.scale / 2);
-			if (!otherSprite) {
-				avatar.sprite.setMirroring(showcase.side, false);
-				avatar.sprite.tint = locked ? SokuLib::Color{0x60, 0x60, 0x60, 0xFF} : SokuLib::Color::White;
-			}
+			avatar.sprite.setMirroring(showcase.side, false);
+			avatar.sprite.tint = locked ? SokuLib::Color{0x60, 0x60, 0x60, 0xFF} : SokuLib::Color::White;
 			if (avatar.sprite.getPosition().y >= 130) {
 				avatar.sprite.draw();
 				if (locked && bottom <= maxBottom) {

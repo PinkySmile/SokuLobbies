@@ -142,5 +142,8 @@
     {"path": "assets/emotes/characters/Yuyuko 2 (Sad).png",       "alias": ["yuyuko4","yuyu4","headache_yuy"]},
     {"path": "assets/emotes/characters/Yuyuko 3 (Normal).png",    "alias": ["yuyuko5","yuyu5","disarray_yuy"]},
     {"path": "assets/emotes/characters/Yuyuko 3 (Sad).png",       "alias": ["yuyuko6","yuyu6","dazed_yuy"]},
-    {"path": "assets/emotes/special/Yuyuko (Special).png",        "alias": ["yuyuko7","yuyu7","ohoho"]}
+    {"path": "assets/emotes/special/Yuyuko (Special).png",        "alias": ["yuyuko7","yuyu7","ohoho"]},
+    {"path": "assets/emotes/unknown.png",                         "alias": ["momiji2", "clownpiece2", "flandre2", "rin2", "yuuka2", "kaguya2", "mokou2"]},
+    {"path": "assets/emotes/unknown.png",                         "alias": ["mima2", "shou2", "murasa2", "sekibanki2", "satori2", "ran2"]},
+    {"path": "assets/emotes/unknown.png",                         "alias": ["placeholder"]}
 ]
