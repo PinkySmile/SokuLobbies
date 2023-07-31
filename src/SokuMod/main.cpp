@@ -41,8 +41,10 @@ static int (SokuLib::SelectServer::*og_SelectServerOnProcess)();
 static int (SokuLib::SelectServer::*og_SelectServerOnRender)();
 static int (SokuLib::LoadingServer::*og_LoadingServerOnProcess)();
 static int (SokuLib::LoadingServer::*og_LoadingServerOnRender)();
+static int (SokuLib::BattleManager::*og_BattleMgrOnProcess)();
 static void (SokuLib::KeymapManager::*s_origKeymapManager_SetInputs)();
 
+unsigned &currentFrame = *(unsigned *)0x8985D8;
 unsigned char soku2Major = 0;
 unsigned char soku2Minor = 0;
 char soku2Letter = 0;
@@ -65,8 +67,8 @@ bool debug = true;
 #endif
 std::function<int ()> onGameEnd;
 std::vector<unsigned short> deck;
-std::vector<unsigned short> cardsUsed;
-std::vector<unsigned short> cardsBurnt;
+std::vector<std::pair<unsigned, unsigned short>> cardsUsed;
+std::vector<std::pair<unsigned, unsigned short>> cardsBurnt;
 LobbyMenu *menu = nullptr;
 PTOP_LEVEL_EXCEPTION_FILTER oldFilter = nullptr;
 std::pair<bool, bool> selectedRandom{false, false};
@@ -137,7 +139,6 @@ static void __fastcall onCardUsed(SokuLib::CharacterManager *This)
 {
 	auto &battlemgr = SokuLib::getBattleMgr();
 
-	puts("Card used");
 	if (!lobbyData)
 		return;
 	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER && This == &battlemgr.rightCharacterManager)
@@ -151,11 +152,24 @@ static void __fastcall onCardUsed(SokuLib::CharacterManager *This)
 	return;
 
 ok:
-	auto cost = This->hand[0].cost;
+	// Special case for Utsuho's 1SC
+	if (
+		This->characterIndex == SokuLib::CHARACTER_UTSUHO &&
+		This->objectBase.action == SokuLib::ACTION_USING_SC_ID_206 &&
+		This->objectBase.actionBlockId == 3
+	) {
+		puts("Okuu 1SC consume card");
+		cardsBurnt.emplace_back(currentFrame, This->hand[0].id);
+		return;
+	}
 
-	cardsUsed.push_back(This->hand[0].id);
-	//for (unsigned i = 0; (!i || i < cost) && i < This->hand.size; i++)
-	//	(i == 0 ? cardsUsed : cardsBurnt).push_back(This->hand[i].id);
+	auto cost = max(1, This->hand[0].cost - (This->effectiveWeather == SokuLib::WEATHER_CLOUDY));
+
+	printf("Card %i used, costing %i\n", This->hand[0].id, cost);
+	for (unsigned i = 0; (!i || i < cost) && i < This->hand.size; i++) {
+		(i == 0 ? cardsUsed : cardsBurnt).emplace_back(currentFrame, This->hand[i].id);
+		printf("Card %i used%s on frame %i\n", This->hand[i].id, i == 0 ? "" : " as fuel", currentFrame);
+	}
 }
 
 void countGame()
@@ -274,20 +288,20 @@ void countGame()
 	}
 	cardsIt->second.nbGames++;
 	for (auto card : cardsBurnt) {
-		auto cardIt = cardsIt->second.cards.find(card);
+		auto cardIt = cardsIt->second.cards.find(card.second);
 
 		if (cardIt == cardsIt->second.cards.end()) {
-			cardsIt->second.cards[card] = {0, 0, 0};
-			cardIt = cardsIt->second.cards.find(card);
+			cardsIt->second.cards[card.second] = {0, 0, 0};
+			cardIt = cardsIt->second.cards.find(card.second);
 		}
 		cardIt->second.burnt++;
 	}
 	for (auto card : cardsUsed) {
-		auto cardIt = cardsIt->second.cards.find(card);
+		auto cardIt = cardsIt->second.cards.find(card.second);
 
 		if (cardIt == cardsIt->second.cards.end()) {
-			cardsIt->second.cards[card] = {0, 0, 0};
-			cardIt = cardsIt->second.cards.find(card);
+			cardsIt->second.cards[card.second] = {0, 0, 0};
+			cardIt = cardsIt->second.cards.find(card.second);
 		}
 		cardIt->second.used++;
 	}
@@ -484,13 +498,24 @@ int __fastcall SelectOnProcess(SokuLib::Select *This)
 	return (This->*og_SelectOnProcess)();
 }
 
-int __fastcall BattleOnProcess(SokuLib::Battle *This)
+void rollbackEvents()
 {
-	auto ret = (This->*og_BattleOnProcess)();
-	auto &mgr = SokuLib::getBattleMgr();
+	while (!cardsBurnt.empty() && cardsBurnt.back().first >= currentFrame) {
+		printf("Rolling back card %u burnt on frame %u\n", cardsBurnt.back().second, cardsBurnt.back().first);
+		cardsBurnt.pop_back();
+	}
+	while (!cardsUsed.empty() && cardsUsed.back().first >= currentFrame) {
+		printf("Rolling back card %u used on frame %u\n", cardsUsed.back().second, cardsUsed.back().first);
+		cardsUsed.pop_back();
+	}
+}
+
+int __fastcall CBattleManager_OnProcess(SokuLib::BattleManager *mgr)
+{
+	int result = (mgr->*og_BattleMgrOnProcess)();
 
 	if (!init) {
-		auto &chr = mgr.leftCharacterManager;
+		auto &chr = SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER ? mgr->rightCharacterManager : mgr->leftCharacterManager;
 
 		deck.clear();
 		cardsUsed.clear();
@@ -499,13 +524,18 @@ int __fastcall BattleOnProcess(SokuLib::Battle *This)
 			deck.push_back(chr.deckInfo.deck[i]);
 		init = true;
 	}
-	if (mgr.matchState > 3 && !counted) {
+	if (mgr->matchState > 4 && !counted) {
 		counted = true;
-		if (onGameEnd)
-			ret = onGameEnd();
-		else
-			countGame();
+		countGame();
 	}
+	return result;
+}
+
+int __fastcall BattleOnProcess(SokuLib::Battle *This)
+{
+	auto &mgr = SokuLib::getBattleMgr();
+	auto ret = (This->*og_BattleOnProcess)();
+
 	if (ret != SokuLib::SCENE_BATTLE) {
 		counted = false;
 		init = false;
@@ -524,28 +554,9 @@ int __fastcall LoadingWatchOnProcess(SokuLib::LoadingWatch *This)
 }
 int __fastcall BattleClientOnProcess(SokuLib::BattleClient *This)
 {
-	processCommon(false);
-
-	auto ret = (This->*og_BattleClientOnProcess)();
 	auto &mgr = SokuLib::getBattleMgr();
-	
-	if (!init) {
-		auto &chr = mgr.leftCharacterManager;
+	auto ret = (This->*og_BattleClientOnProcess)();
 
-		deck.clear();
-		cardsUsed.clear();
-		cardsBurnt.clear();
-		for (unsigned i = 0; i < chr.deckInfo.deck.size; i++)
-			deck.push_back(chr.deckInfo.deck[i]);
-		init = true;
-	}
-	if (mgr.matchState > 4 && !counted) {
-		counted = true;
-		if (onGameEnd)
-			ret = onGameEnd();
-		else
-			countGame();
-	}
 	if (ret != SokuLib::SCENE_BATTLECL) {
 		counted = false;
 		init = false;
@@ -565,28 +576,9 @@ int __fastcall LoadingClientOnProcess(SokuLib::LoadingClient *This)
 }
 int __fastcall BattleServerOnProcess(SokuLib::BattleServer *This)
 {
-	processCommon(false);
-
-	auto ret = (This->*og_BattleServerOnProcess)();
 	auto &mgr = SokuLib::getBattleMgr();
-	
-	if (!init) {
-		auto &chr = mgr.leftCharacterManager;
+	auto ret = (This->*og_BattleServerOnProcess)();
 
-		deck.clear();
-		cardsUsed.clear();
-		cardsBurnt.clear();
-		for (unsigned i = 0; i < chr.deckInfo.deck.size; i++)
-			deck.push_back(chr.deckInfo.deck[i]);
-		init = true;
-	}
-	if (mgr.matchState > 4 && !counted) {
-		counted = true;
-		if (onGameEnd)
-			ret = onGameEnd();
-		else
-			countGame();
-	}
 	if (ret != SokuLib::SCENE_BATTLESV) {
 		counted = false;
 		init = false;
@@ -913,6 +905,18 @@ void getModVersionStr()
 	*strrchr(modVersion, '.') = 0;
 }
 
+void __declspec(naked) rollbackChecker()
+{
+	__asm {
+		pushad
+		pushfd
+		call rollbackEvents
+		popfd
+		popad
+		ret
+	}
+}
+
 extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
 	return memcmp(SokuLib::targetHash, hash, 16) == 0;
 }
@@ -975,8 +979,8 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	og_LoadingServerOnRender = SokuLib::TamperDword(&SokuLib::VTable_LoadingServer.onRender, LoadingServerOnRender);
 	og_SelectServerOnProcess = SokuLib::TamperDword(&SokuLib::VTable_SelectServer.onProcess, SelectServerOnProcess);
 	og_SelectServerOnRender  = SokuLib::TamperDword(&SokuLib::VTable_SelectServer.onRender,  SelectServerOnRender);
-	//ogBattleMgrOnRender  = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onRender,  CBattleManager_OnRender);
-	//ogBattleMgrOnProcess = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onProcess, CBattleManager_OnProcess);
+	//og_BattleMgrOnRender  = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onRender,  CBattleManager_OnRender);
+	og_BattleMgrOnProcess = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onProcess, CBattleManager_OnProcess);
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 
 	VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
@@ -996,6 +1000,17 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	} else
 		og_onUpdate = SokuLib::TamperNearJmpOpr(0x407E6B, onUpdate);
 	new SokuLib::Trampoline(0x469C77, (void (*)())onCardUsed, 7);
+	// Check for GR hook, and if so, hook on top to check for rollbacks
+	if (*(unsigned char *)0x482701 == 0xE9) {
+		// First, we force the hook into a call, instead of a JMP
+		*(char *)0x482701 = 0xE8;
+		// GR doesn't clean that byte so we nop it
+		*(char *)0x482706 = 0x90;
+		// We grab the start of the hook in memory
+		int hookAddr = *(int *)0x482702 + 0x482706;
+		// And we replace the footer so that it calls our function instead of jumping back
+		SokuLib::TamperNearJmp(hookAddr + 0x1A, rollbackChecker);
+	}
 	VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 
 	FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
