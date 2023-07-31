@@ -1396,7 +1396,7 @@ void InLobbyMenu::_inputBoxUpdate()
 		else
 			this->_timers[i] = 0;
 	}
-	if (this->_timers[VK_RETURN] == 1)
+	if (this->_timers[chatKey] == 1)
 		this->_returnPressed = true;
 	if (this->_timers[VK_PRIOR] == 1 || (this->_timers[VK_PRIOR] > 36 && this->_timers[VK_PRIOR] % 6 == 0)) {
 		playSound(0x27);
@@ -1412,7 +1412,7 @@ void InLobbyMenu::_inputBoxUpdate()
 		playSound(0x27);
 	}
 	if (!this->_editingText) {
-		if (this->_returnPressed && this->_timers[VK_RETURN] == 0) {
+		if (this->_returnPressed && this->_timers[chatKey] == 0) {
 			this->_editingText = true;
 			this->_initInputBox();
 			playSound(0x28);
@@ -1435,7 +1435,7 @@ void InLobbyMenu::_inputBoxUpdate()
 		return;
 	}
 	if (this->_returnPressed) {
-		if (this->_timers[VK_RETURN] == 0) {
+		if (this->_timers[chatKey] == 0) {
 			if (this->immComposition.empty()) {
 				if (this->_buffer.size() != 1) {
 					this->_sendMessage(std::wstring{this->_buffer.begin(), this->_buffer.end() - 1});

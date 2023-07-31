@@ -52,9 +52,9 @@ wchar_t profileFolderPath[MAX_PATH];
 char modVersion[16] = "unknown";
 char servHost[64];
 unsigned hostPref;
+unsigned chatKey;
 unsigned short servPort;
 unsigned short hostPort;
-
 bool hasSoku2 = false;
 bool counted = false;
 bool activated = true;
@@ -938,6 +938,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	GetPrivateProfileStringW(L"Lobby", L"Host", L"pinkysmile.fr", servHostW, sizeof(servHost), profilePath);
 	servPort = GetPrivateProfileIntW(L"Lobby", L"Port", 5254, profilePath);
 	hostPort = GetPrivateProfileIntW(L"Lobby", L"HostPort", 10800, profilePath);
+	chatKey = GetPrivateProfileIntW(L"Lobby", L"ChatKey", VK_RETURN, profilePath);
 
 	bool hostlist = GetPrivateProfileIntW(L"Lobby", L"AcceptHostlist", 1, profilePath) != 0;
 
