@@ -80,6 +80,7 @@ public:
 	};
 
 	struct Achievement {
+		std::string code;
 		std::string description;
 		std::string name;
 		nlohmann::json requirement;
@@ -92,9 +93,9 @@ public:
 		SokuLib::DrawUtils::Sprite descSprite;
 
 		Achievement() = default;
-		Achievement(const Achievement &) { assert(false); }
 	};
 	struct Avatar {
+		std::string code;
 		unsigned short id = 0;
 		std::string name;
 		float scale = 0;
@@ -107,7 +108,6 @@ public:
 		Achievement *requirement = nullptr;
 
 		Avatar() = default;
-		Avatar(const Avatar &) { assert(false); }
 	};
 	struct Platform {
 		SokuLib::Vector2i pos;
@@ -237,6 +237,7 @@ public:
 	std::vector<Background> backgrounds;
 	std::vector<Achievement> achievements;
 	std::map<std::string, Emote *> emotesByName;
+	std::map<std::string, Avatar *> avatarsByCode;
 	std::map<std::string, std::unique_ptr<SokuLib::DrawUtils::Sprite>> flags;
 	std::map<unsigned char, CharacterStatEntry> loadedCharacterStats;
 	std::map<unsigned char, CardChrStatEntry> loadedCharacterCardUsage;

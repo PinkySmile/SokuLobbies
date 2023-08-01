@@ -986,7 +986,7 @@ void LobbyMenu::_refreshAvatarCustomText()
 		int pos = 23;
 		constexpr int offset = 6;
 
-		while (!isspace(name[pos]))
+		while (pos && !isspace(name[pos]))
 			pos--;
 		name = name.substr(0, pos) + "<br>" + name.substr(pos + 1);
 		this->_customAvatarRequ.texture.createFromText(("Unlocked by completing<br>\"<color 8080FF>" + name + "</color>\"").c_str(), lobbyData->getFont(12), {600, 74});

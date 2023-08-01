@@ -150,14 +150,27 @@ void LobbyData::_loadAvatars()
 {
 	std::filesystem::path folder = profileFolderPath;
 	auto path = folder / "assets/avatars/list.json";
+	auto path2 = folder / "assets/avatars/order.json";
 	std::ifstream stream{path};
 	nlohmann::json j;
+	nlohmann::json j2;
+	std::vector<std::string> order;
 
 	if (stream.fail())
 		throw std::runtime_error("Cannot open file " + path.string() + ": " + strerror(errno));
 	printf("Loading %s\n", path.string().c_str());
 	stream >> j;
 	stream.close();
+
+	std::ifstream stream2{path2};
+
+	if (stream2.fail())
+		throw std::runtime_error("Cannot open file " + path2.string() + ": " + strerror(errno));
+	printf("Loading %s\n", path2.string().c_str());
+	stream2 >> j2;
+	stream2.close();
+	order = j2.get<std::vector<std::string>>();
+
 	this->avatars.reserve(j.size());
 	for (auto &val : j) {
 		// Strings in the array are used as comments
@@ -168,6 +181,7 @@ void LobbyData::_loadAvatars()
 		auto &avatar = this->avatars.back();
 
 		avatar.id = this->avatars.size() - 1;
+		avatar.code = val["id"];
 		avatar.name = val["name"];
 		avatar.scale = val["scale"];
 		avatar.nbAnimations = val["animations"];
@@ -184,7 +198,15 @@ void LobbyData::_loadAvatars()
 			static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale),
 			static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale)
 		});
+		if (std::find(order.begin(), order.end(), avatar.code) == order.end())
+			throw std::invalid_argument("Avatar ID is not in the order list: " + avatar.code);
+		if (this->avatarsByCode.find(avatar.code) != this->avatarsByCode.end())
+			throw std::invalid_argument("Duplicate avatar ID found: " + avatar.code);
+		this->avatarsByCode[avatar.code] = &avatar;
 	}
+	std::sort(this->avatars.begin(), this->avatars.end(), [&order](const Avatar &a, const Avatar &b){
+		return std::find(order.begin(), order.end(), a.code) < std::find(order.begin(), order.end(), b.code);
+	});
 	printf("There are %zu avatars\n", this->avatars.size());
 }
 
@@ -192,16 +214,28 @@ void LobbyData::_loadAchievements()
 {
 	std::filesystem::path folder = profileFolderPath;
 	auto path = folder / "assets/achievements.json";
+	auto path2 = folder / "assets/ach_order.json";
 	std::ifstream stream{path};
 	nlohmann::json j;
+	nlohmann::json j2;
+	std::vector<std::string> order;
 	char *buffer;
 	int index = 0;
 
+	printf("Loading %s\n", path.string().c_str());
 	if (stream.fail())
 		throw std::runtime_error("Cannot open file " + path.string() + ": " + strerror(errno));
-	printf("Loading %s\n", path.string().c_str());
 	stream >> j;
 	stream.close();
+
+	std::ifstream stream2{path2};
+
+	printf("Loading %s\n", path2.string().c_str());
+	if (stream2.fail())
+		throw std::runtime_error("Cannot open file " + path2.string() + ": " + strerror(errno));
+	stream2 >> j2;
+	stream2.close();
+	order = j2.get<std::vector<std::string>>();
 
 	size_t nbBytes = std::ceil(j.size() / 7.f);
 
@@ -234,6 +268,7 @@ void LobbyData::_loadAchievements()
 		SokuLib::Vector2i size;
 
 		bit += bit >= flagBit;
+		achievement.code = val["id"];
 		achievement.description = val["description"];
 		achievement.name = val["name"];
 		achievement.requirement = val["requirement"];
@@ -272,30 +307,43 @@ void LobbyData::_loadAchievements()
 		achievement.descSprite.setPosition({0, -20});
 		achievement.descSprite.tint = SokuLib::Color{0x80, 0xFF, 0x80};
 
+		index++;
+	}
+	delete[] buffer;
+	std::sort(this->achievements.begin(), this->achievements.end(), [&order](const Achievement &a, const Achievement &b){
+		return std::find(order.begin(), order.end(), a.code) < std::find(order.begin(), order.end(), b.code);
+	});
+	for (auto &achievement : this->achievements) {
+		if (achievement.name.size() > 39)
+			printf("Warning: Too long achievement name '%s'\n", achievement.name.c_str());
 		this->achievementByRequ[achievement.requirement["type"]].push_back(&achievement);
 		if (!achievement.rewards.empty()) {
 			for (auto &reward : achievement.rewards) {
 				auto type = reward["type"];
 
-				if (type != "title") {
-					if (type == "avatar")
-						this->avatars[reward["id"]].requirement = &achievement;
-					else if (type == "emote")
-						this->emotesByName[reward["name"]]->requirement = &achievement;
-					else if (type == "prop") {
+				if (type == "title");
+				else if (type == "avatar") {
+					std::string id = reward["id"];
+					auto it = std::find_if(this->avatars.begin(), this->avatars.end(), [&id](Avatar &a){ return a.code == id; });
 
-					} else if (type == "accessory") {
+					if (it == this->avatars.end())
+						throw std::invalid_argument("Invalid avatar " + id);
+					it->requirement = &achievement;
+				} else if (type == "emote") {
+					std::string id = reward["name"];
+					auto it = this->emotesByName.find(id);
 
-					}
+					if (it == this->emotesByName.end())
+						throw std::invalid_argument("Invalid emote " + id);
+					it->second->requirement = &achievement;
+				} else if (type == "prop") {
+
+				} else if (type == "accessory") {
+
 				}
 			}
 		}
-		index++;
 	}
-	delete[] buffer;
-	for (auto &achievement : this->achievements)
-		if (achievement.name.size() > 39)
-			printf("Warning: Too long achievement name '%s'\n", achievement.name.c_str());
 	printf("There are %zu achievements and they are %slocked\n", this->achievements.size(), (this->achievementsLocked ? "" : "un"));
 }
 
@@ -990,7 +1038,7 @@ void LobbyData::update()
 			this->achHolder.holder.getPosition().y + 5
 		});
 		if (type == "avatar") {
-			auto &avatar = lobbyData->avatars[reward["id"]];
+			auto &avatar = *this->avatarsByCode[reward["id"]];
 
 			this->_animCtr++;
 			if (this->_animCtr >= avatar.animationsStep) {
@@ -1030,7 +1078,7 @@ void LobbyData::render()
 		return;
 
 	SokuLib::SpriteEx sprite;
-	auto &achievement = this->achievementAwardQueue.front();
+	auto achievement = this->achievementAwardQueue.front();
 	auto reward = achievement->rewards.empty() ? nlohmann::json{} : achievement->rewards[this->_reward];
 	auto type = achievement->rewards.empty() ? "title" : reward["type"];
 	unsigned offset = 20;
@@ -1049,7 +1097,7 @@ void LobbyData::render()
 	this->achHolder.getText.draw();
 	achievement->nameSprite.draw();
 	if (type == "avatar") {
-		auto &avatar = lobbyData->avatars[reward["id"]];
+		auto &avatar = *this->avatarsByCode[reward["id"]];
 		auto pos = this->achHolder.behindGear.getPosition();
 
 		pos.x += this->achHolder.behindGear.getSize().x / 2;
@@ -1110,6 +1158,7 @@ void LobbyData::_grantStatsAchievements()
 		});
 
 		while (it != wins.end()) {
+			printf("Win: grant %s\n", (*it)->name.c_str());
 			(*it)->awarded = true;
 			this->achievementAwardQueue.push_back(*it);
 			it = std::find_if(wins.begin(), wins.end(), [mid, &data](LobbyData::Achievement *achievement){
@@ -1121,6 +1170,7 @@ void LobbyData::_grantStatsAchievements()
 			return !achievement->awarded && achievement->requirement["chr"] == mid && achievement->requirement["count"] <= data.second.losses;
 		});
 		while (it != loss.end()) {
+			printf("Loss: grant %s\n", (*it)->name.c_str());
 			(*it)->awarded = true;
 			this->achievementAwardQueue.push_back(*it);
 			it = std::find_if(loss.begin(), loss.end(), [mid, &data](LobbyData::Achievement *achievement){
@@ -1132,6 +1182,7 @@ void LobbyData::_grantStatsAchievements()
 			return !achievement->awarded && achievement->requirement["chr"] == mid && achievement->requirement["count"] <= data.second.losses + data.second.wins;
 		});
 		while (it != play.end()) {
+			printf("Play: grant %s\n", (*it)->name.c_str());
 			(*it)->awarded = true;
 			this->achievementAwardQueue.push_back(*it);
 			it = std::find_if(play.begin(), play.end(), [mid, &data](LobbyData::Achievement *achievement){
@@ -1162,6 +1213,7 @@ void LobbyData::_grantStatsAchievements()
 			});
 
 			if (itCardsAch != cards.end()) {
+				printf("Cards: grant %s\n", (*itCardsAch)->name.c_str());
 				(*itCardsAch)->awarded = true;
 				this->achievementAwardQueue.push_back(*itCardsAch);
 			}
@@ -1175,6 +1227,7 @@ void LobbyData::_grantCrashAchievements()
 {
 	for (auto &achievement : this->achievementByRequ["crash"])
 		if (!achievement->awarded) {
+			printf("Crash: grant %s\n", achievement->name.c_str());
 			achievement->awarded = true;
 			this->achievementAwardQueue.push_back(achievement);
 		}
@@ -1185,6 +1238,7 @@ void LobbyData::_grantDebugAchievements()
 {
 	for (auto &achievement : this->achievementByRequ["debug"])
 		if (!achievement->awarded) {
+			printf("Debug: grant %s\n", achievement->name.c_str());
 			achievement->awarded = true;
 			this->achievementAwardQueue.push_back(achievement);
 		}

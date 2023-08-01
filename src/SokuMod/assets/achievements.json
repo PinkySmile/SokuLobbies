@@ -11,7 +11,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 8
+                "id": "reimu"
             },
             {
                 "type": "title",
@@ -20,7 +20,8 @@
         ],
         "name": "Eternal Shrine Maiden",
         "description": "Win 10 games as Reimu.",
-        "hidden": false
+        "hidden": false,
+        "id": "reimu_win"
     },
     {
         "requirement": {
@@ -40,7 +41,8 @@
         ],
         "name": "Bankrupt",
         "description": "Lose 10 games as Reimu.",
-        "hidden": false
+        "hidden": false,
+        "id": "reimu_lose"
     },
     {
         "requirement": {
@@ -60,7 +62,8 @@
         ],
         "name": "Yin Yang Connoisseur",
         "description": "Play 10 games as Reimu.",
-        "hidden": false
+        "hidden": false,
+        "id": "reimu_play"
     },
     {
         "requirement": {
@@ -70,15 +73,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 9
+                "id": "reimu1"
             },
             {
                 "type": "avatar",
-                "id": 10
+                "id": "reimu2"
             },
             {
                 "type": "avatar",
-                "id": 11
+                "id": "reimu3"
             },
             {
                 "type": "title",
@@ -87,7 +90,8 @@
         ],
         "name": "Hand to Gohei Style",
         "description": "Use each Reimu's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "reimu_cards"
     },
     {
         "requirement": {
@@ -108,7 +112,8 @@
         ],
         "name": "Gensokyo's Barrier",
         "description": "Play 100 games as Reimu.",
-        "hidden": false
+        "hidden": false,
+        "id": "reimu_play2"
     },
     {
         "requirement": {
@@ -129,7 +134,8 @@
         ],
         "name": "\"8 Million Gods\"",
         "description": "Play 1000 games as Reimu.",
-        "hidden": false
+        "hidden": false,
+        "id": "reimu_play3"
     },
     "Marisa",
     {
@@ -141,7 +147,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 12
+                "id": "marisa"
             },
             {
                 "type": "title",
@@ -150,7 +156,8 @@
         ],
         "name": "Just a Normal Witch",
         "description": "Win 10 games as Marisa.",
-        "hidden": false
+        "hidden": false,
+        "id": "marisa_win"
     },
     {
         "requirement": {
@@ -170,7 +177,8 @@
         ],
         "name": "Human Magician",
         "description": "Lose 10 games as Marisa.",
-        "hidden": false
+        "hidden": false,
+        "id": "marisa_lose"
     },
     {
         "requirement": {
@@ -190,7 +198,8 @@
         ],
         "name": "Ordinary Magician",
         "description": "Play 10 games as Marisa.",
-        "hidden": false
+        "hidden": false,
+        "id": "marisa_play"
     },
     {
         "requirement": {
@@ -200,15 +209,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 13
+                "id": "marisa1"
             },
             {
                 "type": "avatar",
-                "id": 14
+                "id": "marisa2"
             },
             {
                 "type": "avatar",
-                "id": 15
+                "id": "marisa3"
             },
             {
                 "type": "title",
@@ -217,7 +226,8 @@
         ],
         "name": "Powerhouse in Black",
         "description": "Use each Marisa's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "marisa_cards"
     },
     {
         "requirement": {
@@ -238,7 +248,8 @@
         ],
         "name": "Powered by Astronomy",
         "description": "Play 100 games as Marisa.",
-        "hidden": false
+        "hidden": false,
+        "id": "marisa_play2"
     },
     {
         "requirement": {
@@ -259,7 +270,8 @@
         ],
         "name": "Magical Event Horizon",
         "description": "Play 1000 games as Marisa.",
-        "hidden": false
+        "hidden": false,
+        "id": "marisa_play3"
     },
     "Sakuya",
     {
@@ -271,7 +283,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 16
+                "id": "sakuya"
             },
             {
                 "type": "title",
@@ -280,7 +292,8 @@
         ],
         "name": "Elegant Head-Maid",
         "description": "Win 10 games as Sakuya.",
-        "hidden": false
+        "hidden": false,
+        "id": "sakuya_win"
     },
     {
         "requirement": {
@@ -300,7 +313,8 @@
         ],
         "name": "Maid in Time-Out",
         "description": "Lose 10 games as Sakuya.",
-        "hidden": false
+        "hidden": false,
+        "id": "sakuya_lose"
     },
     {
         "requirement": {
@@ -320,7 +334,8 @@
         ],
         "name": "This time is only mine",
         "description": "Play 10 games as Sakuya.",
-        "hidden": false
+        "hidden": false,
+        "id": "sakuya_play"
     },
     {
         "requirement": {
@@ -330,15 +345,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 17
+                "id": "sakuya1"
             },
             {
                 "type": "avatar",
-                "id": 18
+                "id": "sakuya2"
             },
             {
                 "type": "avatar",
-                "id": 19
+                "id": "sakuya3"
             },
             {
                 "type": "title",
@@ -347,7 +362,8 @@
         ],
         "name": "Commando Pro",
         "description": "Use each Sakuya's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "sakuya_cards"
     },
     {
         "requirement": {
@@ -368,7 +384,8 @@
         ],
         "name": "Hound of the Devil",
         "description": "Play 100 games as Sakuya.",
-        "hidden": false
+        "hidden": false,
+        "id": "sakuya_play2"
     },
     {
         "requirement": {
@@ -389,7 +406,8 @@
         ],
         "name": "Spaceship Window Opener",
         "description": "Play 1000 games as Sakuya.",
-        "hidden": false
+        "hidden": false,
+        "id": "sakuya_play3"
     },
     "Alice",
     {
@@ -401,7 +419,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 20
+                "id": "alice"
             },
             {
                 "type": "title",
@@ -410,7 +428,8 @@
         ],
         "name": "Puppet Master",
         "description": "Win 10 games as Alice.",
-        "hidden": false
+        "hidden": false,
+        "id": "alice_win"
     },
     {
         "requirement": {
@@ -430,7 +449,8 @@
         ],
         "name": "Broken Threads",
         "description": "Lose 10 games as Alice.",
-        "hidden": false
+        "hidden": false,
+        "id": "alice_lose"
     },
     {
         "requirement": {
@@ -450,7 +470,8 @@
         ],
         "name": "Artful Puppet Show",
         "description": "Play 10 games as Alice.",
-        "hidden": false
+        "hidden": false,
+        "id": "alice_play"
     },
     {
         "requirement": {
@@ -460,15 +481,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 21
+                "id": "alice1"
             },
             {
                 "type": "avatar",
-                "id": 22
+                "id": "alice2"
             },
             {
                 "type": "avatar",
-                "id": 23
+                "id": "alice3"
             },
             {
                 "type": "title",
@@ -477,7 +498,8 @@
         ],
         "name": "Army of One",
         "description": "Use each Alice's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "alice_cards"
     },
     {
         "requirement": {
@@ -498,7 +520,8 @@
         ],
         "name": "Controlling People's Shapes",
         "description": "Play 100 games as Alice.",
-        "hidden": false
+        "hidden": false,
+        "id": "alice_play2"
     },
     {
         "requirement": {
@@ -519,7 +542,8 @@
         ],
         "name": "Grand Guignol's Artist",
         "description": "Play 1000 games as Alice.",
-        "hidden": false
+        "hidden": false,
+        "id": "alice_play3"
     },
     "Patchouli",
     {
@@ -531,7 +555,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 24
+                "id": "patchouli"
             },
             {
                 "type": "title",
@@ -540,7 +564,8 @@
         ],
         "name": "Great Library",
         "description": "Win 10 games as Patchouli.",
-        "hidden": false
+        "hidden": false,
+        "id": "patchouli_win"
     },
     {
         "requirement": {
@@ -560,7 +585,8 @@
         ],
         "name": "Anemic Alchemist",
         "description": "Lose 10 games as Patchouli.",
-        "hidden": false
+        "hidden": false,
+        "id": "patchouli_lose"
     },
     {
         "requirement": {
@@ -580,7 +606,8 @@
         ],
         "name": "Wu Xing Magician",
         "description": "Play 10 games as Patchouli.",
-        "hidden": false
+        "hidden": false,
+        "id": "patchouli_play"
     },
     {
         "requirement": {
@@ -590,15 +617,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 25
+                "id": "patchouli1"
             },
             {
                 "type": "avatar",
-                "id": 26
+                "id": "patchouli2"
             },
             {
                 "type": "avatar",
-                "id": 27
+                "id": "patchouli3"
             },
             {
                 "type": "title",
@@ -607,7 +634,8 @@
         ],
         "name": "Never Ending Knowledge",
         "description": "Use each Patchouli's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "patchouli_cards"
     },
     {
         "requirement": {
@@ -628,7 +656,8 @@
         ],
         "name": "Weekly Magic",
         "description": "Play 100 games as Patchouli.",
-        "hidden": false
+        "hidden": false,
+        "id": "patchouli_play2"
     },
     {
         "requirement": {
@@ -649,7 +678,8 @@
         ],
         "name": "Full Asthma Alchemist",
         "description": "Play 1000 games as Patchouli.",
-        "hidden": false
+        "hidden": false,
+        "id": "patchouli_play3"
     },
     "Youmu",
     {
@@ -661,7 +691,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 28
+                "id": "youmu"
             },
             {
                 "type": "title",
@@ -670,7 +700,8 @@
         ],
         "name": "Phantom Gardener",
         "description": "Win 10 games as Youmu.",
-        "hidden": false
+        "hidden": false,
+        "id": "youmu_win"
     },
     {
         "requirement": {
@@ -690,7 +721,8 @@
         ],
         "name": "Half-Baked",
         "description": "Lose 10 games as Youmu.",
-        "hidden": false
+        "hidden": false,
+        "id": "youmu_lose"
     },
     {
         "requirement": {
@@ -710,7 +742,8 @@
         ],
         "name": "Youki's Disciple",
         "description": "Play 10 games as Youmu.",
-        "hidden": false
+        "hidden": false,
+        "id": "youmu_play"
     },
     {
         "requirement": {
@@ -720,15 +753,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 29
+                "id": "youmu1"
             },
             {
                 "type": "avatar",
-                "id": 30
+                "id": "youmu2"
             },
             {
                 "type": "avatar",
-                "id": 31
+                "id": "youmu3"
             },
             {
                 "type": "title",
@@ -737,7 +770,8 @@
         ],
         "name": "Konpaku's Kenjutsu Master",
         "description": "Use each Youmu's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "youmu_cards"
     },
     {
         "requirement": {
@@ -758,7 +792,8 @@
         ],
         "name": "Phantom Samurai",
         "description": "Play 100 games as Youmu.",
-        "hidden": false
+        "hidden": false,
+        "id": "youmu_play2"
     },
     {
         "requirement": {
@@ -779,7 +814,8 @@
         ],
         "name": "Saigyouji's Ronin",
         "description": "Play 1000 games as Youmu.",
-        "hidden": false
+        "hidden": false,
+        "id": "youmu_play3"
     },
     "Remilia",
     {
@@ -791,7 +827,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 32
+                "id": "remilia"
             },
             {
                 "type": "title",
@@ -800,7 +836,8 @@
         ],
         "name": "Young Scarlet Moon",
         "description": "Win 10 games as Remilia.",
-        "hidden": false
+        "hidden": false,
+        "id": "remilia_win"
     },
     {
         "requirement": {
@@ -820,7 +857,8 @@
         ],
         "name": "Devil May Whine",
         "description": "Lose 10 games as Remilia.",
-        "hidden": false
+        "hidden": false,
+        "id": "remilia_lose"
     },
     {
         "requirement": {
@@ -840,7 +878,8 @@
         ],
         "name": "Dracul's Descendant",
         "description": "Play 10 games as Remilia.",
-        "hidden": false
+        "hidden": false,
+        "id": "remilia_play"
     },
     {
         "requirement": {
@@ -850,15 +889,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 33
+                "id": "remilia1"
             },
             {
                 "type": "avatar",
-                "id": 34
+                "id": "remilia2"
             },
             {
                 "type": "avatar",
-                "id": 35
+                "id": "remilia3"
             },
             {
                 "type": "title",
@@ -867,7 +906,8 @@
         ],
         "name": "Lady of The Mansion",
         "description": "Use each Remilia's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "remilia_cards"
     },
     {
         "requirement": {
@@ -888,7 +928,8 @@
         ],
         "name": "Skerlet Vampir",
         "description": "Play 100 games as Remilia.",
-        "hidden": false
+        "hidden": false,
+        "id": "remilia_play2"
     },
     {
         "requirement": {
@@ -909,7 +950,8 @@
         ],
         "name": "Soaked in Red",
         "description": "Play 1000 games as Remilia.",
-        "hidden": false
+        "hidden": false,
+        "id": "remilia_play3"
     },
     "Yuyuko",
     {
@@ -921,7 +963,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 36
+                "id": "yuyuko"
             },
             {
                 "type": "title",
@@ -930,7 +972,8 @@
         ],
         "name": "Netherworld's Ghost",
         "description": "Win 10 games as Yuyuko.",
-        "hidden": false
+        "hidden": false,
+        "id": "yuyuko_win"
     },
     {
         "requirement": {
@@ -950,7 +993,8 @@
         ],
         "name": "Lazy Ghost",
         "description": "Lose 10 games as Yuyuko.",
-        "hidden": false
+        "hidden": false,
+        "id": "yuyuko_lose"
     },
     {
         "requirement": {
@@ -970,7 +1014,8 @@
         ],
         "name": "Inscrutable White Jade",
         "description": "Play 10 games as Yuyuko.",
-        "hidden": false
+        "hidden": false,
+        "id": "yuyuko_play"
     },
     {
         "requirement": {
@@ -980,15 +1025,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 37
+                "id": "yuyuko1"
             },
             {
                 "type": "avatar",
-                "id": 38
+                "id": "yuyuko2"
             },
             {
                 "type": "avatar",
-                "id": 39
+                "id": "yuyuko3"
             },
             {
                 "type": "title",
@@ -997,7 +1042,8 @@
         ],
         "name": "Ageless Dream",
         "description": "Use each Yuyuko's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "yuyuko_cards"
     },
     {
         "requirement": {
@@ -1018,7 +1064,8 @@
         ],
         "name": "Princess of Restless Souls",
         "description": "Play 100 games as Yuyuko.",
-        "hidden": false
+        "hidden": false,
+        "id": "yuyuko_play2"
     },
     {
         "requirement": {
@@ -1039,7 +1086,8 @@
         ],
         "name": "Perfect Cherry Blossom",
         "description": "Play 1000 games as Yuyuko.",
-        "hidden": false
+        "hidden": false,
+        "id": "yuyuko_play3"
     },
     "Yukari",
     {
@@ -1051,7 +1099,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 40
+                "id": "yukari"
             },
             {
                 "type": "title",
@@ -1060,7 +1108,8 @@
         ],
         "name": "Border of Phantasm",
         "description": "Win 10 games as Yukari.",
-        "hidden": false
+        "hidden": false,
+        "id": "yukari_win"
     },
     {
         "requirement": {
@@ -1080,7 +1129,8 @@
         ],
         "name": "Eternally Dormant",
         "description": "Lose 10 games as Yukari.",
-        "hidden": false
+        "hidden": false,
+        "id": "yukari_lose"
     },
     {
         "requirement": {
@@ -1100,7 +1150,8 @@
         ],
         "name": "Living Inside (Your) Walls",
         "description": "Play 10 games as Yukari.",
-        "hidden": false
+        "hidden": false,
+        "id": "yukari_play"
     },
     {
         "requirement": {
@@ -1110,15 +1161,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 41
+                "id": "yukari1"
             },
             {
                 "type": "avatar",
-                "id": 42
+                "id": "yukari2"
             },
             {
                 "type": "avatar",
-                "id": 43
+                "id": "yukari3"
             },
             {
                 "type": "title",
@@ -1127,7 +1178,8 @@
         ],
         "name": "Ancient \"Programmer\"",
         "description": "Use each Yukari's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "yukari_cards"
     },
     {
         "requirement": {
@@ -1148,7 +1200,8 @@
         ],
         "name": "Shikigami's Spirit Medium (Master)",
         "description": "Play 100 games as Yukari.",
-        "hidden": false
+        "hidden": false,
+        "id": "yukari_play2"
     },
     {
         "requirement": {
@@ -1169,7 +1222,8 @@
         ],
         "name": "Gensokyo's Sage",
         "description": "Play 1000 games as Yukari.",
-        "hidden": false
+        "hidden": false,
+        "id": "yukari_play3"
     },
     "Suika",
     {
@@ -1181,7 +1235,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 44
+                "id": "suika"
             },
             {
                 "type": "title",
@@ -1190,7 +1244,8 @@
         ],
         "name": "Night Parade of a Hundred Demons",
         "description": "Win 10 games as Suika.",
-        "hidden": false
+        "hidden": false,
+        "id": "suika_win"
     },
     {
         "requirement": {
@@ -1210,7 +1265,8 @@
         ],
         "name": "Wasted",
         "description": "Lose 10 games as Suika.",
-        "hidden": false
+        "hidden": false,
+        "id": "suika_lose"
     },
     {
         "requirement": {
@@ -1230,7 +1286,8 @@
         ],
         "name": "Layered Like an Onion",
         "description": "Play 10 games as Suika.",
-        "hidden": false
+        "hidden": false,
+        "id": "suika_play"
     },
     {
         "requirement": {
@@ -1240,15 +1297,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 45
+                "id": "suika1"
             },
             {
                 "type": "avatar",
-                "id": 46
+                "id": "suika2"
             },
             {
                 "type": "avatar",
-                "id": 47
+                "id": "suika3"
             },
             {
                 "type": "title",
@@ -1257,7 +1314,8 @@
         ],
         "name": "Material and Present Power",
         "description": "Use each Suika's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "suika_cards"
     },
     {
         "requirement": {
@@ -1278,7 +1336,8 @@
         ],
         "name": "Deva of The Youkai Mountain",
         "description": "Play 100 games as Suika.",
-        "hidden": false
+        "hidden": false,
+        "id": "suika_play2"
     },
     {
         "requirement": {
@@ -1299,7 +1358,8 @@
         ],
         "name": "A Million Oni in One",
         "description": "Play 1000 games as Suika.",
-        "hidden": false
+        "hidden": false,
+        "id": "suika_play3"
     },
     "Reisen",
     {
@@ -1311,7 +1371,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 48
+                "id": "reisen"
             },
             {
                 "type": "title",
@@ -1320,7 +1380,8 @@
         ],
         "name": "Moon Rabbit on Earth",
         "description": "Win 10 games as Reisen.",
-        "hidden": false
+        "hidden": false,
+        "id": "reisen_win"
     },
     {
         "requirement": {
@@ -1340,7 +1401,8 @@
         ],
         "name": "Rabbit Stew",
         "description": "Lose 10 games as Reisen.",
-        "hidden": false
+        "hidden": false,
+        "id": "reisen_lose"
     },
     {
         "requirement": {
@@ -1360,7 +1422,8 @@
         ],
         "name": "Insanity Overdrive",
         "description": "Play 10 games as Reisen.",
-        "hidden": false
+        "hidden": false,
+        "id": "reisen_play"
     },
     {
         "requirement": {
@@ -1370,15 +1433,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 49
+                "id": "reisen1"
             },
             {
                 "type": "avatar",
-                "id": 50
+                "id": "reisen2"
             },
             {
                 "type": "avatar",
-                "id": 51
+                "id": "reisen3"
             },
             {
                 "type": "title",
@@ -1387,7 +1450,8 @@
         ],
         "name": "Lunar Soldier",
         "description": "Use each Reisen's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "reisen_cards"
     },
     {
         "requirement": {
@@ -1408,7 +1472,8 @@
         ],
         "name": "Disciple of the God of Wisdom",
         "description": "Play 100 games as Reisen.",
-        "hidden": false
+        "hidden": false,
+        "id": "reisen_play2"
     },
     {
         "requirement": {
@@ -1429,7 +1494,8 @@
         ],
         "name": "Lunatic Red Eyes",
         "description": "Play 1000 games as Reisen.",
-        "hidden": false
+        "hidden": false,
+        "id": "reisen_play3"
     },
     "Aya",
     {
@@ -1441,7 +1507,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 52
+                "id": "aya"
             },
             {
                 "type": "title",
@@ -1450,7 +1516,8 @@
         ],
         "name": "Wind God Girl",
         "description": "Win 10 games as Aya.",
-        "hidden": false
+        "hidden": false,
+        "id": "aya_win"
     },
     {
         "requirement": {
@@ -1470,7 +1537,8 @@
         ],
         "name": "Paparazzi",
         "description": "Lose 10 games as Aya.",
-        "hidden": false
+        "hidden": false,
+        "id": "aya_lose"
     },
     {
         "requirement": {
@@ -1490,7 +1558,8 @@
         ],
         "name": "Speed-o'-Sound Youkai",
         "description": "Play 10 games as Aya.",
-        "hidden": false
+        "hidden": false,
+        "id": "aya_play"
     },
     {
         "requirement": {
@@ -1500,15 +1569,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 53
+                "id": "aya1"
             },
             {
                 "type": "avatar",
-                "id": 54
+                "id": "aya2"
             },
             {
                 "type": "avatar",
-                "id": 55
+                "id": "aya3"
             },
             {
                 "type": "title",
@@ -1517,7 +1586,8 @@
         ],
         "name": "Infinite Nightmare",
         "description": "Use each Aya's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "aya_cards"
     },
     {
         "requirement": {
@@ -1538,7 +1608,8 @@
         ],
         "name": "Pure and Honest",
         "description": "Play 100 games as Aya.",
-        "hidden": false
+        "hidden": false,
+        "id": "aya_play2"
     },
     {
         "requirement": {
@@ -1559,7 +1630,8 @@
         ],
         "name": "Fastest in Gensokyo",
         "description": "Play 1000 games as Aya.",
-        "hidden": false
+        "hidden": false,
+        "id": "aya_play3"
     },
     "Komachi",
     {
@@ -1571,7 +1643,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 56
+                "id": "komachi"
             },
             {
                 "type": "title",
@@ -1580,7 +1652,8 @@
         ],
         "name": "Shinigami of The Sanzu River",
         "description": "Win 10 games as Komachi.",
-        "hidden": false
+        "hidden": false,
+        "id": "komachi_win"
     },
     {
         "requirement": {
@@ -1600,7 +1673,8 @@
         ],
         "name": "Lazy Charon",
         "description": "Lose 10 games as Komachi.",
-        "hidden": false
+        "hidden": false,
+        "id": "komachi_lose"
     },
     {
         "requirement": {
@@ -1620,7 +1694,8 @@
         ],
         "name": "Lover of Apples",
         "description": "Play 10 games as Komachi.",
-        "hidden": false
+        "hidden": false,
+        "id": "komachi_play"
     },
     {
         "requirement": {
@@ -1630,15 +1705,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 57
+                "id": "komachi1"
             },
             {
                 "type": "avatar",
-                "id": 58
+                "id": "komachi2"
             },
             {
                 "type": "avatar",
-                "id": 59
+                "id": "komachi3"
             },
             {
                 "type": "title",
@@ -1647,7 +1722,8 @@
         ],
         "name": "Divine Comedy of Errors",
         "description": "Use each Komachi's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "komachi_cards"
     },
     {
         "requirement": {
@@ -1668,7 +1744,8 @@
         ],
         "name": "E-scythe-ing Guide of The Lifeless",
         "description": "Play 100 games as Komachi.",
-        "hidden": false
+        "hidden": false,
+        "id": "komachi_play2"
     },
     {
         "requirement": {
@@ -1689,7 +1766,8 @@
         ],
         "name": "Ferry-Woman of The Acheron",
         "description": "Play 1000 games as Komachi.",
-        "hidden": false
+        "hidden": false,
+        "id": "komachi_play3"
     },
     "Iku",
     {
@@ -1701,7 +1779,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 60
+                "id": "iku"
             },
             {
                 "type": "title",
@@ -1710,7 +1788,8 @@
         ],
         "name": "Messenger From the Dragon Palace",
         "description": "Win 10 games as Iku.",
-        "hidden": false
+        "hidden": false,
+        "id": "iku_win"
     },
     {
         "requirement": {
@@ -1730,7 +1809,8 @@
         ],
         "name": "Malfunctioning Spark",
         "description": "Lose 10 games as Iku.",
-        "hidden": false
+        "hidden": false,
+        "id": "iku_lose"
     },
     {
         "requirement": {
@@ -1750,7 +1830,8 @@
         ],
         "name": "Oarfish Covered In Scarlet Cloth",
         "description": "Play 10 games as Iku.",
-        "hidden": false
+        "hidden": false,
+        "id": "iku_play"
     },
     {
         "requirement": {
@@ -1760,15 +1841,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 61
+                "id": "iku1"
             },
             {
                 "type": "avatar",
-                "id": 62
+                "id": "iku2"
             },
             {
                 "type": "avatar",
-                "id": 63
+                "id": "iku3"
             },
             {
                 "type": "title",
@@ -1777,7 +1858,8 @@
         ],
         "name": "Swimming in The Sky",
         "description": "Use each Iku's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "iku_cards"
     },
     {
         "requirement": {
@@ -1798,7 +1880,8 @@
         ],
         "name": "The Will of The Great Spiral",
         "description": "Play 100 games as Iku.",
-        "hidden": false
+        "hidden": false,
+        "id": "iku_play2"
     },
     {
         "requirement": {
@@ -1819,7 +1902,8 @@
         ],
         "name": "The Dragon's Veil",
         "description": "Play 1000 games as Iku.",
-        "hidden": false
+        "hidden": false,
+        "id": "iku_play3"
     },
     "Tenshi",
     {
@@ -1831,7 +1915,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 64
+                "id": "tenshi"
             },
             {
                 "type": "title",
@@ -1840,7 +1924,8 @@
         ],
         "name": "Fallen Celestial",
         "description": "Win 10 games as Tenshi.",
-        "hidden": false
+        "hidden": false,
+        "id": "tenshi_win"
     },
     {
         "requirement": {
@@ -1860,7 +1945,8 @@
         ],
         "name": "Catastrophe of Bhavaagra",
         "description": "Lose 10 games as Tenshi.",
-        "hidden": false
+        "hidden": false,
+        "id": "tenshi_lose"
     },
     {
         "requirement": {
@@ -1880,7 +1966,8 @@
         ],
         "name": "Eldest Daughter of the Hinanawi",
         "description": "Play 10 games as Tenshi.",
-        "hidden": false
+        "hidden": false,
+        "id": "tenshi_play"
     },
     {
         "requirement": {
@@ -1890,15 +1977,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 65
+                "id": "tenshi1"
             },
             {
                 "type": "avatar",
-                "id": 66
+                "id": "tenshi2"
             },
             {
                 "type": "avatar",
-                "id": 67
+                "id": "tenshi3"
             },
             {
                 "type": "title",
@@ -1907,7 +1994,8 @@
         ],
         "name": "Wielder of \"The Sword of Hisou\"",
         "description": "Use each Tenshi's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "tenshi_cards"
     },
     {
         "requirement": {
@@ -1928,7 +2016,8 @@
         ],
         "name": "Manipulator of \"Earth\" and \"Spirit\"",
         "description": "Play 100 games as Tenshi.",
-        "hidden": false
+        "hidden": false,
+        "id": "tenshi_play2"
     },
     {
         "requirement": {
@@ -1949,7 +2038,8 @@
         ],
         "name": "Sky of Scarlet Perception",
         "description": "Play 1000 games as Tenshi.",
-        "hidden": false
+        "hidden": false,
+        "id": "tenshi_play3"
     },
     "Sanae",
     {
@@ -1961,7 +2051,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 68
+                "id": "sanae"
             },
             {
                 "type": "title",
@@ -1970,7 +2060,8 @@
         ],
         "name": "Deified Shrine Maiden",
         "description": "Win 10 games as Sanae.",
-        "hidden": false
+        "hidden": false,
+        "id": "sanae_win"
     },
     {
         "requirement": {
@@ -1990,7 +2081,8 @@
         ],
         "name": "2nd Class Shrine Maiden",
         "description": "Lose 10 games as Sanae.",
-        "hidden": false
+        "hidden": false,
+        "id": "sanae_lose"
     },
     {
         "requirement": {
@@ -2010,7 +2102,8 @@
         ],
         "name": "Actually 3 Adversaries",
         "description": "Play 10 games as Sanae.",
-        "hidden": false
+        "hidden": false,
+        "id": "sanae_play"
     },
     {
         "requirement": {
@@ -2020,15 +2113,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 69
+                "id": "sanae1"
             },
             {
                 "type": "avatar",
-                "id": 70
+                "id": "sanae2"
             },
             {
                 "type": "avatar",
-                "id": 71
+                "id": "sanae3"
             },
             {
                 "type": "title",
@@ -2037,7 +2130,8 @@
         ],
         "name": "Master of Wind-Fu",
         "description": "Use each Sanae's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "sanae_cards"
     },
     {
         "requirement": {
@@ -2058,7 +2152,8 @@
         ],
         "name": "Moriya's Conspiracy",
         "description": "Play 100 games as Sanae.",
-        "hidden": false
+        "hidden": false,
+        "id": "sanae_play2"
     },
     {
         "requirement": {
@@ -2079,7 +2174,8 @@
         ],
         "name": "Everyday Miracle",
         "description": "Play 1000 games as Sanae.",
-        "hidden": false
+        "hidden": false,
+        "id": "sanae_play3"
     },
     "Cirno",
     {
@@ -2091,7 +2187,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 72
+                "id": "cirno"
             },
             {
                 "type": "title",
@@ -2100,7 +2196,8 @@
         ],
         "name": "Ice Fairy",
         "description": "Win 10 games as Cirno.",
-        "hidden": false
+        "hidden": false,
+        "id": "cirno_win"
     },
     {
         "requirement": {
@@ -2120,7 +2217,8 @@
         ],
         "name": "Cold Shoulders",
         "description": "Lose 10 games as Cirno.",
-        "hidden": false
+        "hidden": false,
+        "id": "cirno_lose"
     },
     {
         "requirement": {
@@ -2140,7 +2238,8 @@
         ],
         "name": "Genius Fairy",
         "description": "Play 10 games as Cirno.",
-        "hidden": false
+        "hidden": false,
+        "id": "cirno_play"
     },
     {
         "requirement": {
@@ -2150,15 +2249,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 73
+                "id": "cirno1"
             },
             {
                 "type": "avatar",
-                "id": 74
+                "id": "cirno2"
             },
             {
                 "type": "avatar",
-                "id": 75
+                "id": "cirno3"
             },
             {
                 "type": "title",
@@ -2167,7 +2266,8 @@
         ],
         "name": "Stronger Than a Grown Human",
         "description": "Use each Cirno's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "cirno_cards"
     },
     {
         "requirement": {
@@ -2188,7 +2288,8 @@
         ],
         "name": "Naiad of The Lake",
         "description": "Play 100 games as Cirno.",
-        "hidden": false
+        "hidden": false,
+        "id": "cirno_play2"
     },
     {
         "requirement": {
@@ -2209,7 +2310,8 @@
         ],
         "name": "Absolute Zero",
         "description": "Play 1000 games as Cirno.",
-        "hidden": false
+        "hidden": false,
+        "id": "cirno_play3"
     },
     "Meiling",
     {
@@ -2221,7 +2323,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 76
+                "id": "meiling"
             },
             {
                 "type": "title",
@@ -2230,7 +2332,8 @@
         ],
         "name": "Green Martial Artist",
         "description": "Win 10 games as Meiling.",
-        "hidden": false
+        "hidden": false,
+        "id": "meiling_win"
     },
     {
         "requirement": {
@@ -2250,7 +2353,8 @@
         ],
         "name": "Sleeping on The Job",
         "description": "Lose 10 games as Meiling.",
-        "hidden": false
+        "hidden": false,
+        "id": "meiling_lose"
     },
     {
         "requirement": {
@@ -2270,7 +2374,8 @@
         ],
         "name": "Keeper of Gates",
         "description": "Play 10 games as Meiling.",
-        "hidden": false
+        "hidden": false,
+        "id": "meiling_play"
     },
     {
         "requirement": {
@@ -2280,15 +2385,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 77
+                "id": "meiling1"
             },
             {
                 "type": "avatar",
-                "id": 78
+                "id": "meiling2"
             },
             {
                 "type": "avatar",
-                "id": 79
+                "id": "meiling3"
             },
             {
                 "type": "title",
@@ -2297,7 +2402,8 @@
         ],
         "name": "Yi Er Fanclub",
         "description": "Use each Meiling's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "meiling_cards"
     },
     {
         "requirement": {
@@ -2318,7 +2424,8 @@
         ],
         "name": "Dreamy Savior of Gensokyo",
         "description": "Play 100 games as Meiling.",
-        "hidden": false
+        "hidden": false,
+        "id": "meiling_play2"
     },
     {
         "requirement": {
@@ -2339,7 +2446,8 @@
         ],
         "name": "Legendary Dragon of Gensou",
         "description": "Play 1000 games as Meiling.",
-        "hidden": false
+        "hidden": false,
+        "id": "meiling_play3"
     },
     "Utsuho",
     {
@@ -2351,7 +2459,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 80
+                "id": "utsuho"
             },
             {
                 "type": "title",
@@ -2360,7 +2468,8 @@
         ],
         "name": "Hell Raven",
         "description": "Win 10 games as Utsuho.",
-        "hidden": false
+        "hidden": false,
+        "id": "utsuho_win"
     },
     {
         "requirement": {
@@ -2380,7 +2489,8 @@
         ],
         "name": "Bird-Brained God",
         "description": "Lose 10 games as Utsuho.",
-        "hidden": false
+        "hidden": false,
+        "id": "utsuho_lose"
     },
     {
         "requirement": {
@@ -2400,7 +2510,8 @@
         ],
         "name": "Low Crusher of The Inferi",
         "description": "Play 10 games as Utsuho.",
-        "hidden": false
+        "hidden": false,
+        "id": "utsuho_play"
     },
     {
         "requirement": {
@@ -2410,15 +2521,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 81
+                "id": "utsuho1"
             },
             {
                 "type": "avatar",
-                "id": 82
+                "id": "utsuho2"
             },
             {
                 "type": "avatar",
-                "id": 83
+                "id": "utsuho3"
             },
             {
                 "type": "title",
@@ -2427,7 +2538,8 @@
         ],
         "name": "Sector 7G's Finest Employee",
         "description": "Use each Utsuho's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "utsuho_cards"
     },
     {
         "requirement": {
@@ -2448,7 +2560,8 @@
         ],
         "name": "The Black Sun of Yatagarasu",
         "description": "Play 100 games as Utsuho.",
-        "hidden": false
+        "hidden": false,
+        "id": "utsuho_play2"
     },
     {
         "requirement": {
@@ -2469,7 +2582,8 @@
         ],
         "name": "The Crow that Stole the Sun",
         "description": "Play 1000 games as Utsuho.",
-        "hidden": false
+        "hidden": false,
+        "id": "utsuho_play3"
     },
     "Suwako",
     {
@@ -2481,7 +2595,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 84
+                "id": "suwako"
             },
             {
                 "type": "title",
@@ -2490,7 +2604,8 @@
         ],
         "name": "Kero Kero",
         "description": "Win 10 games as Suwako.",
-        "hidden": false
+        "hidden": false,
+        "id": "suwako_win"
     },
     {
         "requirement": {
@@ -2510,7 +2625,8 @@
         ],
         "name": "Vivisection",
         "description": "Lose 10 games as Suwako.",
-        "hidden": false
+        "hidden": false,
+        "id": "suwako_lose"
     },
     {
         "requirement": {
@@ -2530,7 +2646,8 @@
         ],
         "name": "Braving the Elements",
         "description": "Play 10 games as Suwako.",
-        "hidden": false
+        "hidden": false,
+        "id": "suwako_play"
     },
     {
         "requirement": {
@@ -2540,15 +2657,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 85
+                "id": "suwako1"
             },
             {
                 "type": "avatar",
-                "id": 86
+                "id": "suwako2"
             },
             {
                 "type": "avatar",
-                "id": 87
+                "id": "suwako3"
             },
             {
                 "type": "title",
@@ -2557,7 +2674,8 @@
         ],
         "name": "Snake God in Frog Skin",
         "description": "Use each Suwako's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "suwako_cards"
     },
     {
         "requirement": {
@@ -2578,7 +2696,8 @@
         ],
         "name": "Ruler of Suwa",
         "description": "Play 100 games as Suwako.",
-        "hidden": false
+        "hidden": false,
+        "id": "suwako_play2"
     },
     {
         "requirement": {
@@ -2599,8 +2718,11 @@
         ],
         "name": "Mishaguji-sama Destiny",
         "description": "Play 1000 games as Suwako.",
-        "hidden": false
+        "hidden": false,
+        "id": "suwako_play3"
     },
+
+    "SOKU2",
     "Momiji",
     {
         "requirement": {
@@ -2611,7 +2733,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 88
+                "id": "momiji"
             },
             {
                 "type": "title",
@@ -2620,7 +2742,8 @@
         ],
         "name": "Awooo!",
         "description": "Win 10 games as Momiji.",
-        "hidden": false
+        "hidden": false,
+        "id": "momiji_win"
     },
     {
         "requirement": {
@@ -2638,9 +2761,10 @@
                 "name": null
             }
         ],
-        "name": "Penalty for \"Awooo-ing\" Without A Permit",
+        "name": "No \"Awooo-ing\" Without A Permit",
         "description": "Lose 10 games as Momiji.",
-        "hidden": false
+        "hidden": false,
+        "id": "momiji_lose"
     },
     {
         "requirement": {
@@ -2660,7 +2784,8 @@
         ],
         "name": "The Watchful Eye of The Youkai Mountain",
         "description": "Play 10 games as Momiji.",
-        "hidden": false
+        "hidden": false,
+        "id": "momiji_play"
     },
     {
         "requirement": {
@@ -2670,15 +2795,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 89
+                "id": "momiji1"
             },
             {
                 "type": "avatar",
-                "id": 90
+                "id": "momiji2"
             },
             {
                 "type": "avatar",
-                "id": 91
+                "id": "momiji3"
             },
             {
                 "type": "title",
@@ -2687,7 +2812,8 @@
         ],
         "name": "Expert Sword & Shield User",
         "description": "Use each Momiji's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "momiji_cards"
     },
     {
         "requirement": {
@@ -2708,7 +2834,8 @@
         ],
         "name": "Buster Wolf Of The East",
         "description": "Play 100 games as Momiji.",
-        "hidden": false
+        "hidden": false,
+        "id": "momiji_play2"
     },
     {
         "requirement": {
@@ -2729,7 +2856,8 @@
         ],
         "name": "Would Really Prefer To Play Shogi",
         "description": "Play 1000 games as Momiji.",
-        "hidden": false
+        "hidden": false,
+        "id": "momiji_play3"
     },
     "Clownpiece",
     {
@@ -2741,7 +2869,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 92
+                "id": "clownpiece"
             },
             {
                 "type": "title",
@@ -2750,7 +2878,8 @@
         ],
         "name": "Hell's Fairy",
         "description": "Win 10 games as Clownpiece.",
-        "hidden": false
+        "hidden": false,
+        "id": "clownpiece_win"
     },
     {
         "requirement": {
@@ -2770,7 +2899,8 @@
         ],
         "name": "Maddening Defeat!",
         "description": "Lose 10 games as Clownpiece.",
-        "hidden": false
+        "hidden": false,
+        "id": "clownpiece_lose"
     },
     {
         "requirement": {
@@ -2790,7 +2920,8 @@
         ],
         "name": "Bizarre Patriotism",
         "description": "Play 10 games as Clownpiece.",
-        "hidden": false
+        "hidden": false,
+        "id": "clownpiece_play"
     },
     {
         "requirement": {
@@ -2800,15 +2931,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 93
+                "id": "clownpiece1"
             },
             {
                 "type": "avatar",
-                "id": 94
+                "id": "clownpiece2"
             },
             {
                 "type": "avatar",
-                "id": 95
+                "id": "clownpiece3"
             },
             {
                 "type": "title",
@@ -2817,7 +2948,8 @@
         ],
         "name": "IT'S LUNATIC TIME!",
         "description": "Use each Clownpiece's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "clownpiece_cards"
     },
     {
         "requirement": {
@@ -2836,9 +2968,10 @@
                 "name": null
             }
         ],
-        "name": "JohnMaddenaeiouaeiouJohnMaddenJohnMadden",
+        "name": "JohnMaddenJohnMaddenaeiouaeiou",
         "description": "Play 100 games as Clownpiece.",
-        "hidden": false
+        "hidden": false,
+        "id": "clownpiece_play2"
     },
     {
         "requirement": {
@@ -2857,9 +2990,10 @@
                 "name": null
             }
         ],
-        "name": "In The Name Of The Moon, I'll Punish You!",
+        "name": "By The Moon, I’ll Defeat You!",
         "description": "Play 1000 games as Clownpiece.",
-        "hidden": false
+        "hidden": false,
+        "id": "clownpiece_play3"
     },
     "Flandre",
     {
@@ -2871,7 +3005,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 96
+                "id": "flandre"
             },
             {
                 "type": "title",
@@ -2880,7 +3014,8 @@
         ],
         "name": "Sister Of The Devil",
         "description": "Win 10 games as Flandre.",
-        "hidden": false
+        "hidden": false,
+        "id": "flandre_win"
     },
     {
         "requirement": {
@@ -2900,7 +3035,8 @@
         ],
         "name": "Sent Back To The Basement",
         "description": "Lose 10 games as Flandre.",
-        "hidden": false
+        "hidden": false,
+        "id": "flandre_lose"
     },
     {
         "requirement": {
@@ -2920,7 +3056,8 @@
         ],
         "name": "Deathly Rainbow Tears",
         "description": "Play 10 games as Flandre.",
-        "hidden": false
+        "hidden": false,
+        "id": "flandre_play"
     },
     {
         "requirement": {
@@ -2930,15 +3067,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 97
+                "id": "flandre1"
             },
             {
                 "type": "avatar",
-                "id": 98
+                "id": "flandre2"
             },
             {
                 "type": "avatar",
-                "id": 99
+                "id": "flandre3"
             },
             {
                 "type": "title",
@@ -2947,7 +3084,8 @@
         ],
         "name": "Surprisingly Competent At Poker",
         "description": "Use each Flandre's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "flandre_cards"
     },
     {
         "requirement": {
@@ -2968,7 +3106,8 @@
         ],
         "name": "Bringing Down The Ragnarok",
         "description": "Play 100 games as Flandre.",
-        "hidden": false
+        "hidden": false,
+        "id": "flandre_play2"
     },
     {
         "requirement": {
@@ -2987,9 +3126,10 @@
                 "name": null
             }
         ],
-        "name": "Breaking Anything Just With Her Right Hand",
+        "name": "Right Hand Of Total Annihilation",
         "description": "Play 1000 games as Flandre.",
-        "hidden": false
+        "hidden": false,
+        "id": "flandre_play3"
     },
     "Rin",
     {
@@ -3001,7 +3141,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 100
+                "id": "rin"
             },
             {
                 "type": "title",
@@ -3010,7 +3150,8 @@
         ],
         "name": "Fairly Efficient Corpse Carrier",
         "description": "Win 10 games as Rin.",
-        "hidden": false
+        "hidden": false,
+        "id": "rin_win"
     },
     {
         "requirement": {
@@ -3030,7 +3171,8 @@
         ],
         "name": "Broken Cart, Broken Heart",
         "description": "Lose 10 games as Rin.",
-        "hidden": false
+        "hidden": false,
+        "id": "rin_lose"
     },
     {
         "requirement": {
@@ -3048,9 +3190,10 @@
                 "name": null
             }
         ],
-        "name": "Enjoying Conversations On The Brink Of Death",
+        "name": "Conversing At The Brink Of Death",
         "description": "Play 10 games as Rin.",
-        "hidden": false
+        "hidden": false,
+        "id": "rin_play"
     },
     {
         "requirement": {
@@ -3060,15 +3203,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 101
+                "id": "rin1"
             },
             {
                 "type": "avatar",
-                "id": 102
+                "id": "rin2"
             },
             {
                 "type": "avatar",
-                "id": 103
+                "id": "rin3"
             },
             {
                 "type": "title",
@@ -3077,7 +3220,8 @@
         ],
         "name": "Knows All Tricks To WheelBarrow-ing",
         "description": "Use each Rin's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "rin_cards"
     },
     {
         "requirement": {
@@ -3098,7 +3242,8 @@
         ],
         "name": "Extremely Cheery Despite The Cadavers",
         "description": "Play 100 games as Rin.",
-        "hidden": false
+        "hidden": false,
+        "id": "rin_play2"
     },
     {
         "requirement": {
@@ -3119,7 +3264,8 @@
         ],
         "name": "Exceptional Former Hell's Tourist Guide",
         "description": "Play 1000 games as Rin.",
-        "hidden": false
+        "hidden": false,
+        "id": "rin_play3"
     },
     "Yuuka",
     {
@@ -3131,7 +3277,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 104
+                "id": "yuuka"
             },
             {
                 "type": "title",
@@ -3140,7 +3286,8 @@
         ],
         "name": "Just A Seedling",
         "description": "Win 10 games as Yuuka.",
-        "hidden": false
+        "hidden": false,
+        "id": "yuuka_win"
     },
     {
         "requirement": {
@@ -3160,7 +3307,8 @@
         ],
         "name": "Reduced To Plant's Fertilizer",
         "description": "Lose 10 games as Yuuka.",
-        "hidden": false
+        "hidden": false,
+        "id": "yuuka_lose"
     },
     {
         "requirement": {
@@ -3180,7 +3328,8 @@
         ],
         "name": "Beautiful Garden Of Sunflowers",
         "description": "Play 10 games as Yuuka.",
-        "hidden": false
+        "hidden": false,
+        "id": "yuuka_play"
     },
     {
         "requirement": {
@@ -3190,15 +3339,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 105
+                "id": "yuuka1"
             },
             {
                 "type": "avatar",
-                "id": 106
+                "id": "yuuka2"
             },
             {
                 "type": "avatar",
-                "id": 107
+                "id": "yuuka3"
             },
             {
                 "type": "title",
@@ -3207,7 +3356,8 @@
         ],
         "name": "Hyper-fixated On Gardening Techniques",
         "description": "Use each Yuuka's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "yuuka_cards"
     },
     {
         "requirement": {
@@ -3228,7 +3378,8 @@
         ],
         "name": "I Only Trust Me, Myself and I",
         "description": "Play 100 games as Yuuka.",
-        "hidden": false
+        "hidden": false,
+        "id": "yuuka_play2"
     },
     {
         "requirement": {
@@ -3249,7 +3400,8 @@
         ],
         "name": "Originally From A Lotus Land",
         "description": "Play 1000 games as Yuuka.",
-        "hidden": false
+        "hidden": false,
+        "id": "yuuka_play3"
     },
     "Kaguya",
     {
@@ -3261,7 +3413,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 108
+                "id": "kaguya"
             },
             {
                 "type": "title",
@@ -3270,7 +3422,8 @@
         ],
         "name": "Small Bamboo Sprout",
         "description": "Win 10 games as Kaguya.",
-        "hidden": false
+        "hidden": false,
+        "id": "kaguya_win"
     },
     {
         "requirement": {
@@ -3290,7 +3443,8 @@
         ],
         "name": "1 Loss or 1000, I Got Time To Practice",
         "description": "Lose 10 games as Kaguya.",
-        "hidden": false
+        "hidden": false,
+        "id": "kaguya_lose"
     },
     {
         "requirement": {
@@ -3310,7 +3464,8 @@
         ],
         "name": "Crouching Eternal, Hidden NEET",
         "description": "Play 10 games as Kaguya.",
-        "hidden": false
+        "hidden": false,
+        "id": "kaguya_play"
     },
     {
         "requirement": {
@@ -3320,15 +3475,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 109
+                "id": "kaguya1"
             },
             {
                 "type": "avatar",
-                "id": 110
+                "id": "kaguya2"
             },
             {
                 "type": "avatar",
-                "id": 111
+                "id": "kaguya3"
             },
             {
                 "type": "title",
@@ -3337,7 +3492,8 @@
         ],
         "name": "Passed All The Impossible Requests",
         "description": "Use each Kaguya's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "kaguya_cards"
     },
     {
         "requirement": {
@@ -3358,7 +3514,8 @@
         ],
         "name": "Space Royalty",
         "description": "Play 100 games as Kaguya.",
-        "hidden": false
+        "hidden": false,
+        "id": "kaguya_play2"
     },
     {
         "requirement": {
@@ -3379,7 +3536,8 @@
         ],
         "name": "Living Eternity & Instant At Once",
         "description": "Play 1000 games as Kaguya.",
-        "hidden": false
+        "hidden": false,
+        "id": "kaguya_play3"
     },
     "Mokou",
     {
@@ -3391,7 +3549,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 112
+                "id": "mokou"
             },
             {
                 "type": "title",
@@ -3400,7 +3558,8 @@
         ],
         "name": "A Small Flickering Ember",
         "description": "Win 10 games as Mokou.",
-        "hidden": false
+        "hidden": false,
+        "id": "mokou_win"
     },
     {
         "requirement": {
@@ -3420,7 +3579,8 @@
         ],
         "name": "Losing Is Inconsequential, I'm Immortal",
         "description": "Lose 10 games as Mokou.",
-        "hidden": false
+        "hidden": false,
+        "id": "mokou_lose"
     },
     {
         "requirement": {
@@ -3440,7 +3600,8 @@
         ],
         "name": "More Interested In Cooking Yakitori",
         "description": "Play 10 games as Mokou.",
-        "hidden": false
+        "hidden": false,
+        "id": "mokou_play"
     },
     {
         "requirement": {
@@ -3450,15 +3611,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 113
+                "id": "mokou1"
             },
             {
                 "type": "avatar",
-                "id": 114
+                "id": "mokou2"
             },
             {
                 "type": "avatar",
-                "id": 115
+                "id": "mokou3"
             },
             {
                 "type": "title",
@@ -3467,7 +3628,8 @@
         ],
         "name": "Strong Control Over Flames & Re-Birth",
         "description": "Use each Mokou's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "mokou_cards"
     },
     {
         "requirement": {
@@ -3488,7 +3650,8 @@
         ],
         "name": "Infinite Amount of Phoenix Feathers",
         "description": "Play 100 games as Mokou.",
-        "hidden": false
+        "hidden": false,
+        "id": "mokou_play2"
     },
     {
         "requirement": {
@@ -3507,9 +3670,10 @@
                 "name": null
             }
         ],
-        "name": "Limits Of The Flesh Are Meant To Be Broken",
+        "name": "Breaking Limits Of The Earthly Flesh",
         "description": "Play 1000 games as Mokou.",
-        "hidden": false
+        "hidden": false,
+        "id": "mokou_play3"
     },
     "Mima",
     {
@@ -3521,7 +3685,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 116
+                "id": "mima"
             },
             {
                 "type": "title",
@@ -3530,7 +3694,8 @@
         ],
         "name": "The Best Since '97",
         "description": "Win 10 games as Mima.",
-        "hidden": false
+        "hidden": false,
+        "id": "mima_win"
     },
     {
         "requirement": {
@@ -3550,7 +3715,8 @@
         ],
         "name": "Never Coming Back...",
         "description": "Lose 10 games as Mima.",
-        "hidden": false
+        "hidden": false,
+        "id": "mima_lose"
     },
     {
         "requirement": {
@@ -3570,7 +3736,8 @@
         ],
         "name": "Extremely Hellish Magician",
         "description": "Play 10 games as Mima.",
-        "hidden": false
+        "hidden": false,
+        "id": "mima_play"
     },
     {
         "requirement": {
@@ -3580,15 +3747,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 117
+                "id": "mima1"
             },
             {
                 "type": "avatar",
-                "id": 118
+                "id": "mima2"
             },
             {
                 "type": "avatar",
-                "id": 119
+                "id": "mima3"
             },
             {
                 "type": "title",
@@ -3597,7 +3764,8 @@
         ],
         "name": "The Original Master Spark",
         "description": "Use each Mima's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "mima_cards"
     },
     {
         "requirement": {
@@ -3618,7 +3786,8 @@
         ],
         "name": "Nemesis Of The Shrine Maiden",
         "description": "Play 100 games as Mima.",
-        "hidden": false
+        "hidden": false,
+        "id": "mima_play2"
     },
     {
         "requirement": {
@@ -3639,7 +3808,8 @@
         ],
         "name": "She Will Be Back... Eventually...",
         "description": "Play 1000 games as Mima.",
-        "hidden": false
+        "hidden": false,
+        "id": "mima_play3"
     },
     "Shou",
     {
@@ -3651,7 +3821,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 120
+                "id": "shou"
             },
             {
                 "type": "title",
@@ -3660,7 +3830,8 @@
         ],
         "name": "Tip Of The Lance",
         "description": "Win 10 games as Shou.",
-        "hidden": false
+        "hidden": false,
+        "id": "shou_win"
     },
     {
         "requirement": {
@@ -3680,7 +3851,8 @@
         ],
         "name": "The Lance Is Just For Show...",
         "description": "Lose 10 games as Shou.",
-        "hidden": false
+        "hidden": false,
+        "id": "shou_lose"
     },
     {
         "requirement": {
@@ -3700,7 +3872,8 @@
         ],
         "name": "Impossible Curved Lasers!",
         "description": "Play 10 games as Shou.",
-        "hidden": false
+        "hidden": false,
+        "id": "shou_play"
     },
     {
         "requirement": {
@@ -3710,15 +3883,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 121
+                "id": "shou1"
             },
             {
                 "type": "avatar",
-                "id": 122
+                "id": "shou2"
             },
             {
                 "type": "avatar",
-                "id": 123
+                "id": "shou3"
             },
             {
                 "type": "title",
@@ -3727,7 +3900,8 @@
         ],
         "name": "One Of The Seven Gods Of Fortune",
         "description": "Use each Shou's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "shou_cards"
     },
     {
         "requirement": {
@@ -3748,7 +3922,8 @@
         ],
         "name": "Immense Power From The Pagoda",
         "description": "Play 100 games as Shou.",
-        "hidden": false
+        "hidden": false,
+        "id": "shou_play2"
     },
     {
         "requirement": {
@@ -3769,7 +3944,8 @@
         ],
         "name": "The Radiant & Hungry Youkai Tiger",
         "description": "Play 1000 games as Shou.",
-        "hidden": false
+        "hidden": false,
+        "id": "shou_play3"
     },
     "Murasa",
     {
@@ -3781,7 +3957,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 124
+                "id": "murasa"
             },
             {
                 "type": "title",
@@ -3790,7 +3966,8 @@
         ],
         "name": "Freshwater's Captain",
         "description": "Win 10 games as Murasa.",
-        "hidden": false
+        "hidden": false,
+        "id": "murasa_win"
     },
     {
         "requirement": {
@@ -3810,7 +3987,8 @@
         ],
         "name": "Not The First Shipwreck Nor The Last",
         "description": "Lose 10 games as Murasa.",
-        "hidden": false
+        "hidden": false,
+        "id": "murasa_lose"
     },
     {
         "requirement": {
@@ -3830,7 +4008,8 @@
         ],
         "name": "Unexpected Musical POP",
         "description": "Play 10 games as Murasa.",
-        "hidden": false
+        "hidden": false,
+        "id": "murasa_play"
     },
     {
         "requirement": {
@@ -3840,15 +4019,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 125
+                "id": "murasa1"
             },
             {
                 "type": "avatar",
-                "id": 126
+                "id": "murasa2"
             },
             {
                 "type": "avatar",
-                "id": 127
+                "id": "murasa3"
             },
             {
                 "type": "title",
@@ -3857,7 +4036,8 @@
         ],
         "name": "Sailed Every Known Sea",
         "description": "Use each Murasa's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "murasa_cards"
     },
     {
         "requirement": {
@@ -3878,7 +4058,8 @@
         ],
         "name": "No Dolphins Here",
         "description": "Play 100 games as Murasa.",
-        "hidden": false
+        "hidden": false,
+        "id": "murasa_play2"
     },
     {
         "requirement": {
@@ -3899,7 +4080,8 @@
         ],
         "name": "Unbeatable Maelstrom",
         "description": "Play 1000 games as Murasa.",
-        "hidden": false
+        "hidden": false,
+        "id": "murasa_play3"
     },
     "Sekibanki",
     {
@@ -3911,7 +4093,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 128
+                "id": "sekibanki"
             },
             {
                 "type": "title",
@@ -3920,7 +4102,8 @@
         ],
         "name": "6-6-B",
         "description": "Win 10 games as Sekibanki.",
-        "hidden": false
+        "hidden": false,
+        "id": "sekibanki_win"
     },
     {
         "requirement": {
@@ -3940,7 +4123,8 @@
         ],
         "name": "Wow, My Head is Spinning!",
         "description": "Lose 10 games as Sekibanki.",
-        "hidden": false
+        "hidden": false,
+        "id": "sekibanki_lose"
     },
     {
         "requirement": {
@@ -3960,7 +4144,8 @@
         ],
         "name": "Also A Nukekubi and Dullahan",
         "description": "Play 10 games as Sekibanki.",
-        "hidden": false
+        "hidden": false,
+        "id": "sekibanki_play"
     },
     {
         "requirement": {
@@ -3970,15 +4155,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 129
+                "id": "sekibanki1"
             },
             {
                 "type": "avatar",
-                "id": 130
+                "id": "sekibanki2"
             },
             {
                 "type": "avatar",
-                "id": 131
+                "id": "sekibanki3"
             },
             {
                 "type": "title",
@@ -3987,7 +4172,8 @@
         ],
         "name": "Doesn't Know \"Neck Pains\"",
         "description": "Use each Sekibanki's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "sekibanki_cards"
     },
     {
         "requirement": {
@@ -4008,7 +4194,8 @@
         ],
         "name": "Head Full Of Optic Blasts",
         "description": "Play 100 games as Sekibanki.",
-        "hidden": false
+        "hidden": false,
+        "id": "sekibanki_play2"
     },
     {
         "requirement": {
@@ -4029,7 +4216,8 @@
         ],
         "name": "Dreams Don't Die!",
         "description": "Play 1000 games as Sekibanki.",
-        "hidden": false
+        "hidden": false,
+        "id": "sekibanki_play3"
     },
     "Satori",
     {
@@ -4041,7 +4229,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 132
+                "id": "satori"
             },
             {
                 "type": "title",
@@ -4050,7 +4238,8 @@
         ],
         "name": "Going Beyond The Nous",
         "description": "Win 10 games as Satori.",
-        "hidden": false
+        "hidden": false,
+        "id": "satori_win"
     },
     {
         "requirement": {
@@ -4070,7 +4259,8 @@
         ],
         "name": "Got Read Like A Book",
         "description": "Lose 10 games as Satori.",
-        "hidden": false
+        "hidden": false,
+        "id": "satori_lose"
     },
     {
         "requirement": {
@@ -4090,7 +4280,8 @@
         ],
         "name": "Never Lost A Game Of RPS",
         "description": "Play 10 games as Satori.",
-        "hidden": false
+        "hidden": false,
+        "id": "satori_play"
     },
     {
         "requirement": {
@@ -4100,15 +4291,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 133
+                "id": "satori1"
             },
             {
                 "type": "avatar",
-                "id": 134
+                "id": "satori2"
             },
             {
                 "type": "avatar",
-                "id": 135
+                "id": "satori3"
             },
             {
                 "type": "title",
@@ -4117,7 +4308,8 @@
         ],
         "name": "Foul But Solid Detective",
         "description": "Use each Satori's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "satori_cards"
     },
     {
         "requirement": {
@@ -4138,7 +4330,8 @@
         ],
         "name": "Mistress Of The Blazing Hellfire",
         "description": "Play 100 games as Satori.",
-        "hidden": false
+        "hidden": false,
+        "id": "satori_play2"
     },
     {
         "requirement": {
@@ -4159,7 +4352,8 @@
         ],
         "name": "Master \"Recollection\" Copy-Cat",
         "description": "Play 1000 games as Satori.",
-        "hidden": false
+        "hidden": false,
+        "id": "satori_play3"
     },
     "Ran",
     {
@@ -4171,7 +4365,7 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 136
+                "id": "ran"
             },
             {
                 "type": "title",
@@ -4180,7 +4374,8 @@
         ],
         "name": "????????",
         "description": "Win 10 games as Ran.",
-        "hidden": false
+        "hidden": false,
+        "id": "ran_win"
     },
     {
         "requirement": {
@@ -4200,7 +4395,8 @@
         ],
         "name": "????????",
         "description": "Lose 10 games as Ran.",
-        "hidden": false
+        "hidden": false,
+        "id": "ran_lose"
     },
     {
         "requirement": {
@@ -4220,7 +4416,8 @@
         ],
         "name": "????????",
         "description": "Play 10 games as Ran.",
-        "hidden": false
+        "hidden": false,
+        "id": "ran_play"
     },
     {
         "requirement": {
@@ -4230,15 +4427,15 @@
         "rewards": [
             {
                 "type": "avatar",
-                "id": 137
+                "id": "ran1"
             },
             {
                 "type": "avatar",
-                "id": 138
+                "id": "ran2"
             },
             {
                 "type": "avatar",
-                "id": 139
+                "id": "ran3"
             },
             {
                 "type": "title",
@@ -4247,7 +4444,8 @@
         ],
         "name": "????????",
         "description": "Use each Ran's skill and spell<br>card at least once.",
-        "hidden": false
+        "hidden": false,
+        "id": "ran_cards"
     },
     {
         "requirement": {
@@ -4268,7 +4466,8 @@
         ],
         "name": "????????",
         "description": "Play 100 games as Ran.",
-        "hidden": false
+        "hidden": false,
+        "id": "ran_play2"
     },
     {
         "requirement": {
@@ -4289,911 +4488,11 @@
         ],
         "name": "????????",
         "description": "Play 1000 games as Ran.",
-        "hidden": false
-    },
-    "Soku2Placeholder1",
-    {
-        "requirement": {
-            "type": "win",
-            "count": 10,
-            "chr": 33
-        },
-        "rewards": [
-            {
-                "type": "avatar",
-                "id": 140
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Win 10 games as Soku2Placeholder1.",
         "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "lose",
-            "count": 10,
-            "chr": 33
-        },
-        "rewards": [
-            {
-                "type": "emote",
-                "name": "placeholder"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Lose 10 games as Soku2Placeholder1.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 10,
-            "chr": 33
-        },
-        "rewards": [
-            {
-                "type": "prop",
-                "id": 33
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Play 10 games as Soku2Placeholder1.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "cards",
-            "chr": 33
-        },
-        "rewards": [
-            {
-                "type": "avatar",
-                "id": 141
-            },
-            {
-                "type": "avatar",
-                "id": 142
-            },
-            {
-                "type": "avatar",
-                "id": 143
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Use each Soku2Placeholder1's skill and spell<br>card at least once.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 100,
-            "chr": 33
-        },
-        "rewards": [
-            {
-                "type": "accessory",
-                "id": 33,
-                "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Play 100 games as Soku2Placeholder1.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 1000,
-            "chr": 33
-        },
-        "rewards": [
-            {
-                "type": "background",
-                "id": 33,
-                "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Play 1000 games as Soku2Placeholder1.",
-        "hidden": false,
-        "shown": false
-    },
-    "Soku2Placeholder2",
-    {
-        "requirement": {
-            "type": "win",
-            "count": 10,
-            "chr": 34
-        },
-        "rewards": [
-            {
-                "type": "avatar",
-                "id": 144
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Win 10 games as Soku2Placeholder2.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "lose",
-            "count": 10,
-            "chr": 34
-        },
-        "rewards": [
-            {
-                "type": "emote",
-                "name": "placeholder"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Lose 10 games as Soku2Placeholder2.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 10,
-            "chr": 34
-        },
-        "rewards": [
-            {
-                "type": "prop",
-                "id": 34
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Play 10 games as Soku2Placeholder2.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "cards",
-            "chr": 34
-        },
-        "rewards": [
-            {
-                "type": "avatar",
-                "id": 145
-            },
-            {
-                "type": "avatar",
-                "id": 146
-            },
-            {
-                "type": "avatar",
-                "id": 147
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Use each Soku2Placeholder2's skill and spell<br>card at least once.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 100,
-            "chr": 34
-        },
-        "rewards": [
-            {
-                "type": "accessory",
-                "id": 34,
-                "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Play 100 games as Soku2Placeholder2.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 1000,
-            "chr": 34
-        },
-        "rewards": [
-            {
-                "type": "background",
-                "id": 34,
-                "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Play 1000 games as Soku2Placeholder2.",
-        "hidden": false,
-        "shown": false
-    },
-    "Soku2Placeholder3",
-    {
-        "requirement": {
-            "type": "win",
-            "count": 10,
-            "chr": 35
-        },
-        "rewards": [
-            {
-                "type": "avatar",
-                "id": 148
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Win 10 games as Soku2Placeholder3.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "lose",
-            "count": 10,
-            "chr": 35
-        },
-        "rewards": [
-            {
-                "type": "emote",
-                "name": "placeholder"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Lose 10 games as Soku2Placeholder3.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 10,
-            "chr": 35
-        },
-        "rewards": [
-            {
-                "type": "prop",
-                "id": 35
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Play 10 games as Soku2Placeholder3.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "cards",
-            "chr": 35
-        },
-        "rewards": [
-            {
-                "type": "avatar",
-                "id": 149
-            },
-            {
-                "type": "avatar",
-                "id": 150
-            },
-            {
-                "type": "avatar",
-                "id": 151
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Use each Soku2Placeholder3's skill and spell<br>card at least once.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 100,
-            "chr": 35
-        },
-        "rewards": [
-            {
-                "type": "accessory",
-                "id": 35,
-                "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Play 100 games as Soku2Placeholder3.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 1000,
-            "chr": 35
-        },
-        "rewards": [
-            {
-                "type": "background",
-                "id": 35,
-                "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Play 1000 games as Soku2Placeholder3.",
-        "hidden": false,
-        "shown": false
-    },
-    "Soku2Placeholder4",
-    {
-        "requirement": {
-            "type": "win",
-            "count": 10,
-            "chr": 36
-        },
-        "rewards": [
-            {
-                "type": "avatar",
-                "id": 152
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Win 10 games as Soku2Placeholder4.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "lose",
-            "count": 10,
-            "chr": 36
-        },
-        "rewards": [
-            {
-                "type": "emote",
-                "name": "placeholder"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Lose 10 games as Soku2Placeholder4.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 10,
-            "chr": 36
-        },
-        "rewards": [
-            {
-                "type": "prop",
-                "id": 36
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Play 10 games as Soku2Placeholder4.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "cards",
-            "chr": 36
-        },
-        "rewards": [
-            {
-                "type": "avatar",
-                "id": 153
-            },
-            {
-                "type": "avatar",
-                "id": 154
-            },
-            {
-                "type": "avatar",
-                "id": 155
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Use each Soku2Placeholder4's skill and spell<br>card at least once.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 100,
-            "chr": 36
-        },
-        "rewards": [
-            {
-                "type": "accessory",
-                "id": 36,
-                "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Play 100 games as Soku2Placeholder4.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 1000,
-            "chr": 36
-        },
-        "rewards": [
-            {
-                "type": "background",
-                "id": 36,
-                "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Play 1000 games as Soku2Placeholder4.",
-        "hidden": false,
-        "shown": false
-    },
-    "Soku2Placeholder5",
-    {
-        "requirement": {
-            "type": "win",
-            "count": 10,
-            "chr": 37
-        },
-        "rewards": [
-            {
-                "type": "avatar",
-                "id": 156
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Win 10 games as Soku2Placeholder5.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "lose",
-            "count": 10,
-            "chr": 37
-        },
-        "rewards": [
-            {
-                "type": "emote",
-                "name": "placeholder"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Lose 10 games as Soku2Placeholder5.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 10,
-            "chr": 37
-        },
-        "rewards": [
-            {
-                "type": "prop",
-                "id": 37
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Play 10 games as Soku2Placeholder5.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "cards",
-            "chr": 37
-        },
-        "rewards": [
-            {
-                "type": "avatar",
-                "id": 157
-            },
-            {
-                "type": "avatar",
-                "id": 158
-            },
-            {
-                "type": "avatar",
-                "id": 159
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Use each Soku2Placeholder5's skill and spell<br>card at least once.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 100,
-            "chr": 37
-        },
-        "rewards": [
-            {
-                "type": "accessory",
-                "id": 37,
-                "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Play 100 games as Soku2Placeholder5.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 1000,
-            "chr": 37
-        },
-        "rewards": [
-            {
-                "type": "background",
-                "id": 37,
-                "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Play 1000 games as Soku2Placeholder5.",
-        "hidden": false,
-        "shown": false
-    },
-    "Soku2Placeholder6",
-    {
-        "requirement": {
-            "type": "win",
-            "count": 10,
-            "chr": 38
-        },
-        "rewards": [
-            {
-                "type": "avatar",
-                "id": 160
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Win 10 games as Soku2Placeholder6.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "lose",
-            "count": 10,
-            "chr": 38
-        },
-        "rewards": [
-            {
-                "type": "emote",
-                "name": "placeholder"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Lose 10 games as Soku2Placeholder6.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 10,
-            "chr": 38
-        },
-        "rewards": [
-            {
-                "type": "prop",
-                "id": 38
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Play 10 games as Soku2Placeholder6.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "cards",
-            "chr": 38
-        },
-        "rewards": [
-            {
-                "type": "avatar",
-                "id": 161
-            },
-            {
-                "type": "avatar",
-                "id": 162
-            },
-            {
-                "type": "avatar",
-                "id": 163
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Use each Soku2Placeholder6's skill and spell<br>card at least once.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 100,
-            "chr": 38
-        },
-        "rewards": [
-            {
-                "type": "accessory",
-                "id": 38,
-                "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Play 100 games as Soku2Placeholder6.",
-        "hidden": false,
-        "shown": false
-    },
-    {
-        "requirement": {
-            "type": "play",
-            "count": 1000,
-            "chr": 38
-        },
-        "rewards": [
-            {
-                "type": "background",
-                "id": 38,
-                "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
-            }
-        ],
-        "name": "????????",
-        "description": "Play 1000 games as Soku2Placeholder6.",
-        "hidden": false,
-        "shown": false
+        "id": "ran_play3"
     },
 
-    "Meta",
-    {
-        "requirement": {
-            "type": "crash"
-        },
-        "rewards": [
-            {
-                "type": "avatar",
-                "id": 164
-            },
-            {
-                "type": "title",
-                "name": "Spaghetti Master"
-            }
-        ],
-        "name": "Modding at its finest",
-        "description": "Have the game crash once",
-        "hidden": true
-    },
-    {
-        "requirement": {
-            "type": "invalid"
-        },
-        "rewards": [
-            {
-                "type": "avatar",
-                "id": 165
-            },
-            {
-                "type": "avatar",
-                "id": 166
-            },
-            {
-                "type": "avatar",
-                "id": 167
-            }
-        ],
-        "name": "Impossible",
-        "description": "Impossible achievement there only to lock<br>stuff that doesn't have any requirement<br>but should.",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "old_arcade"
-        },
-        "rewards": [
-            {
-                "type": "avatar",
-                "id": 4
-            },
-	    {
-                "type": "avatar",
-                "id": 5
-            },
-	    {
-                "type": "avatar",
-                "id": 6
-            },
-	    {
-                "type": "avatar",
-                "id": 7
-            }
-        ],
-        "name": "Reminiscence of an ancient time",
-        "description": "Use the old arcade machine to access the<br>hostlist.",
-        "hidden": false
-    },
-    {
-        "requirement": {
-            "type": "debug"
-        },
-        "rewards": [
-	    {
-                "type": "avatar",
-                "id": 169
-            },
-	    {
-                "type": "accessory",
-                "id": 20,
-                "comment": "Butterfly net"
-            }
-        ],
-        "name": "Gotta catch'em all!",
-        "description": "Use the debug version of the mod.",
-        "hidden": true
-    },
+    "Win condition",
     {
         "requirement": {
             "type": "win_move",
@@ -5204,12 +4503,104 @@
         "rewards": [
 	    {
                 "type": "avatar",
-                "id": 168
+                "id": "giant_suika"
             }
         ],
         "name": "IaMP Ending",
         "description": "Close a game with \"Missing Purple Power\".",
         "hidden": true,
-	"comment": "Not implemented!"
+	"comment": "Not implemented!",
+	"id": "suika_mpp"
+    },
+
+    "Meta",
+    {
+        "requirement": {
+            "type": "crash"
+        },
+        "rewards": [
+            {
+                "type": "avatar",
+                "id": "koishi"
+            },
+            {
+                "type": "title",
+                "name": "Spaghetti Master"
+            }
+        ],
+        "name": "Modding at its finest",
+        "description": "Have the game crash once",
+        "hidden": true,
+	"id": "crash"
+    },
+    {
+        "requirement": {
+            "type": "invalid"
+        },
+        "rewards": [
+            {
+                "type": "avatar",
+                "id": "koishi1"
+            },
+            {
+                "type": "avatar",
+                "id": "koishi2"
+            },
+            {
+                "type": "avatar",
+                "id": "koishi3"
+            }
+        ],
+        "name": "Impossible",
+        "description": "Impossible achievement there only to lock<br>stuff that doesn't have any requirement<br>but should.",
+        "hidden": false,
+	"id": "impossible"
+    },
+    {
+        "requirement": {
+            "type": "old_arcade"
+        },
+        "rewards": [
+            {
+                "type": "avatar",
+                "id": "98marisa"
+            },
+	    {
+                "type": "avatar",
+                "id": "98marisa1"
+            },
+	    {
+                "type": "avatar",
+                "id": "98marisa2"
+            },
+	    {
+                "type": "avatar",
+                "id": "98marisa3"
+            }
+        ],
+        "name": "Reminiscence of an ancient time",
+        "description": "Use the old arcade machine to access the<br>hostlist.",
+        "hidden": false,
+	"id": "crash"
+    },
+    {
+        "requirement": {
+            "type": "debug"
+        },
+        "rewards": [
+	    {
+                "type": "avatar",
+                "id": "placeholder"
+            },
+	    {
+                "type": "accessory",
+                "id": 20,
+                "comment": "Butterfly net"
+            }
+        ],
+        "name": "Gotta catch'em all!",
+        "description": "Use the debug version of the mod.",
+        "hidden": true,
+	"id": "debug"
     }
 ]
