@@ -237,23 +237,7 @@ void LobbyData::_loadAchievements()
 	stream2.close();
 	order = j2.get<std::vector<std::string>>();
 
-	size_t nbBytes = std::ceil(j.size() / 7.f);
-
-	stream.open(folder / "achievements.dat", std::fstream::binary);
-	buffer = new char[nbBytes];
-	memset(buffer, 0, nbBytes);
-	if (stream) {
-		stream.read(buffer, nbBytes);
-		stream.close();
-	} else
-		printf("Cannot open file %s: %s\n", (folder / "achievements.dat").string().c_str(), strerror(errno));
-
 	this->achievements.reserve(j.size());
-	for (size_t i = 0; i < nbBytes; i++)
-		if (buffer[i] & (1 << (i % 8))) {
-			this->achievementsLocked = true;
-			break;
-		}
 	for (auto &val : j) {
 		// Strings in the array are used as comments
 		if (val.is_string())
@@ -262,19 +246,14 @@ void LobbyData::_loadAchievements()
 		this->achievements.emplace_back();
 
 		auto &achievement = this->achievements.back();
-		auto arrayIndex = index / 7;
-		auto bit = index % 7;
-		auto flagBit = arrayIndex % 8;
 		SokuLib::Vector2i size;
 
-		bit += bit >= flagBit;
 		achievement.code = val["id"];
 		achievement.description = val["description"];
 		achievement.name = val["name"];
 		achievement.requirement = val["requirement"];
 		achievement.hidden = val["hidden"];
 		achievement.rewards = val["rewards"].get<std::vector<nlohmann::json>>();
-		achievement.awarded = (buffer[arrayIndex] & (1 << bit)) != 0;
 
 		achievement.nameSpriteTitle.texture.createFromText(achievement.name.c_str(), this->getFont(18), {400, 22}, &size);
 		achievement.nameSpriteTitle.rect.width = size.x;
@@ -306,16 +285,40 @@ void LobbyData::_loadAchievements()
 		achievement.descSprite.setSize(size.to<unsigned>());
 		achievement.descSprite.setPosition({0, -20});
 		achievement.descSprite.tint = SokuLib::Color{0x80, 0xFF, 0x80};
-
-		index++;
 	}
-	delete[] buffer;
 	std::sort(this->achievements.begin(), this->achievements.end(), [&order](const Achievement &a, const Achievement &b){
 		return std::find(order.begin(), order.end(), a.code) < std::find(order.begin(), order.end(), b.code);
 	});
+
+	size_t nbBytes = std::ceil(j.size() / 7.f);
+
+	stream.open(folder / "achievements.dat", std::fstream::binary);
+	buffer = new char[nbBytes];
+	memset(buffer, 0, nbBytes);
+	if (stream) {
+		stream.read(buffer, nbBytes);
+		stream.close();
+	} else
+		printf("Cannot open file %s: %s\n", (folder / "achievements.dat").string().c_str(), strerror(errno));
+	for (size_t i = 0; i < nbBytes; i++)
+		if (buffer[i] & (1 << (i % 8))) {
+			this->achievementsLocked = true;
+			break;
+		}
+
+	bool warning = false;
+
 	for (auto &achievement : this->achievements) {
-		if (achievement.name.size() > 39)
+		auto arrayIndex = index / 7;
+		auto bit = index % 7;
+		auto flagBit = arrayIndex % 8;
+
+		bit += bit >= flagBit;
+		achievement.awarded = (buffer[arrayIndex] & (1 << bit)) != 0;
+		if (achievement.name.size() > 35) {
 			printf("Warning: Too long achievement name '%s'\n", achievement.name.c_str());
+			warning = true;
+		}
 		this->achievementByRequ[achievement.requirement["type"]].push_back(&achievement);
 		if (!achievement.rewards.empty()) {
 			for (auto &reward : achievement.rewards) {
@@ -343,7 +346,11 @@ void LobbyData::_loadAchievements()
 				}
 			}
 		}
+		index++;
 	}
+	if (warning)
+		MessageBox(SokuLib::window, ".", ".", MB_ICONWARNING);
+	delete[] buffer;
 	printf("There are %zu achievements and they are %slocked\n", this->achievements.size(), (this->achievementsLocked ? "" : "un"));
 }
 

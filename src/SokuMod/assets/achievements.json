@@ -2782,7 +2782,7 @@
                 "name": null
             }
         ],
-        "name": "The Watchful Eye of The Youkai Mountain",
+        "name": "Watchful Eye of The Youkai Mountain",
         "description": "Play 10 games as Momiji.",
         "hidden": false,
         "id": "momiji_play"
@@ -2990,7 +2990,7 @@
                 "name": null
             }
         ],
-        "name": "By The Moon, I’ll Defeat You!",
+        "name": "By The Moon, I'll Defeat You!",
         "description": "Play 1000 games as Clownpiece.",
         "hidden": false,
         "id": "clownpiece_play3"
@@ -3240,7 +3240,7 @@
                 "name": null
             }
         ],
-        "name": "Extremely Cheery Despite The Cadavers",
+        "name": "Cheerful Despite The Cadavers",
         "description": "Play 100 games as Rin.",
         "hidden": false,
         "id": "rin_play2"
@@ -3262,7 +3262,7 @@
                 "name": null
             }
         ],
-        "name": "Exceptional Former Hell's Tourist Guide",
+        "name": "Former Hell's Tourist Guide",
         "description": "Play 1000 games as Rin.",
         "hidden": false,
         "id": "rin_play3"
@@ -3354,7 +3354,7 @@
                 "name": null
             }
         ],
-        "name": "Hyper-fixated On Gardening Techniques",
+        "name": "Hyper-fixated On Gardening",
         "description": "Use each Yuuka's skill and spell<br>card at least once.",
         "hidden": false,
         "id": "yuuka_cards"
@@ -3441,7 +3441,7 @@
                 "name": null
             }
         ],
-        "name": "1 Loss or 1000, I Got Time To Practice",
+        "name": "\"Got All Of Eternity To Practice\"",
         "description": "Lose 10 games as Kaguya.",
         "hidden": false,
         "id": "kaguya_lose"
@@ -3577,7 +3577,7 @@
                 "name": null
             }
         ],
-        "name": "Losing Is Inconsequential, I'm Immortal",
+        "name": "\"As An Immortal, I Don't Care\"",
         "description": "Lose 10 games as Mokou.",
         "hidden": false,
         "id": "mokou_lose"
@@ -3626,7 +3626,7 @@
                 "name": null
             }
         ],
-        "name": "Strong Control Over Flames & Re-Birth",
+        "name": "Control Over Flames & Re-Birth",
         "description": "Use each Mokou's skill and spell<br>card at least once.",
         "hidden": false,
         "id": "mokou_cards"
@@ -3670,7 +3670,7 @@
                 "name": null
             }
         ],
-        "name": "Breaking Limits Of The Earthly Flesh",
+        "name": "Breaking The Limits Of The Flesh",
         "description": "Play 1000 games as Mokou.",
         "hidden": false,
         "id": "mokou_play3"
@@ -3985,7 +3985,7 @@
                 "name": null
             }
         ],
-        "name": "Not The First Shipwreck Nor The Last",
+        "name": "Not The First Shipwreck...",
         "description": "Lose 10 games as Murasa.",
         "hidden": false,
         "id": "murasa_lose"
