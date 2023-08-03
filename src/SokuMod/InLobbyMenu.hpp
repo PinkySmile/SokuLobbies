@@ -87,6 +87,7 @@ private:
 	Connection &_connection;
 	SokuLib::MenuConnect *_parent;
 	bool _wasConnected = false;
+	bool _disconnected = false;
 	unsigned _chatTimer = 0;
 	unsigned _chatOffset = 0;
 	uint8_t _background = 0;

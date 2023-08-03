@@ -263,6 +263,9 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 	this->onConnect = connection.onConnect;
 	for (int i = ' '; i < 0x100; i++)
 		this->_getTextSize(i);
+	connection.onDisconnect = [this]{
+		this->_disconnected = true;
+	};
 	connection.onPlayerJoin = [this](const Player &r){
 		SokuLib::Vector2i size;
 
@@ -403,7 +406,10 @@ InLobbyMenu::~InLobbyMenu()
 	if (this->immCtx)
 		ImmReleaseContext(SokuLib::window, this->immCtx);
 	this->_unhook();
-	this->_connection.disconnect();
+	if (!this->_disconnected) {
+		this->_connection.onDisconnect = nullptr;
+		this->_connection.disconnect();
+	}
 	this->_menu->setActive();
 	if (!this->_music.empty())
 		SokuLib::playBGM("data/bgm/op2.ogg");
@@ -413,7 +419,8 @@ InLobbyMenu::~InLobbyMenu()
 
 void InLobbyMenu::_()
 {
-	if (!this->_connection.isInit() || !this->_connection.isConnected())
+	*(int *)0x882a94 = 0x16;
+	if (this->_disconnected || !this->_connection.isInit() || !this->_connection.isConnected())
 		return;
 
 	Lobbies::PacketArcadeLeave leave{0};
@@ -429,11 +436,12 @@ void InLobbyMenu::_()
 	this->_parent->subchoice = 0;
 	this->_connection.getMe()->battleStatus = 0;
 	messageBox->active = false;
-	*(int *)0x882a94 = 0x16;
 }
 
 int InLobbyMenu::onProcess()
 {
+	if (this->_disconnected)
+		return false;
 	try {
 		this->_menu->execUiCallbacks();
 		if (!this->_connection.isInit() && !this->_wasConnected) {
@@ -826,6 +834,8 @@ int InLobbyMenu::onProcess()
 
 int InLobbyMenu::onRender()
 {
+	if (this->_disconnected)
+		return 0;
 	try {
 		if (!this->_connection.isInit() && !this->_wasConnected) {
 			this->_messageBox.draw();
@@ -1647,6 +1657,8 @@ void InLobbyMenu::_sendMessage(const std::wstring &msg)
 
 void InLobbyMenu::updateChat(bool inGame)
 {
+	if (this->_disconnected)
+		return;
 	this->_inputBoxUpdate();
 	if (this->_editingText)
 		this->_chatTimer = 300;
@@ -1704,6 +1716,8 @@ void InLobbyMenu::updateChat(bool inGame)
 
 void InLobbyMenu::renderChat()
 {
+	if (this->_disconnected)
+		return;
 	if (this->_chatSeat.tint.a) {
 		this->_chatSeat.draw();
 		for (auto &msg: this->_chatMessages) {

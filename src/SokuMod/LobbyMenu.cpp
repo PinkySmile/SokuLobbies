@@ -221,7 +221,6 @@ void LobbyMenu::_netLoop()
 
 void LobbyMenu::_()
 {
-	puts("_ !");
 	*(int *)0x882a94 = 0x16;
 }
 

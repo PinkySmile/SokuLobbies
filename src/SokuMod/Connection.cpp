@@ -39,6 +39,8 @@ void Connection::_netLoop()
 			this->_init = false;
 			this->_connected = false;
 			this->onError(e.what());
+			if (this->onDisconnect)
+				this->onDisconnect();
 			return;
 		}
 
@@ -48,6 +50,8 @@ void Connection::_netLoop()
 			this->_init = false;
 			this->_connected = false;
 			this->onError("Connection closed");
+			if (this->onDisconnect)
+				this->onDisconnect();
 			return;
 		}
 
@@ -67,6 +71,8 @@ Connection::Connection(const std::string &host, unsigned short port, const Playe
 Connection::~Connection()
 {
 	this->_init = false;
+	if (this->onDisconnect)
+		this->onDisconnect();
 	this->_socket.disconnect();
 	if (this->_netThread.joinable())
 		this->_netThread.join();
@@ -429,6 +435,8 @@ void Connection::disconnect()
 	this->_me = nullptr;
 	this->_players.clear();
 	this->meMutex.unlock();
+	if (this->onDisconnect)
+		this->onDisconnect();
 	if (this->_posThread.joinable())
 		this->_posThread.join();
 }
