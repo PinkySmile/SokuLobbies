@@ -344,7 +344,12 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 			this->_startHosting();
 		return hostPort;
 	};
-	connection.onArcadeEngage = [this](const Player &, uint32_t id){
+	connection.onArcadeEngage = [this, &connection](const Player &p, uint32_t id){
+		if (&p == connection.getMe()) {
+			printf("Host pref %x\n", p.settings.hostPref);
+			if (p.settings.hostPref & Lobbies::HOSTPREF_ACCEPT_HOSTLIST)
+				this->_startHosting();
+		}
 		if (id >= this->_machines.size() - 1)
 			return;
 
@@ -653,9 +658,6 @@ int InLobbyMenu::onProcess()
 
 					me->battleStatus = 1;
 					this->_connection.send(&packet, sizeof(packet));
-					printf("%i\n", me->settings.hostPref);
-					if (me->settings.hostPref & Lobbies::HOSTPREF_ACCEPT_HOSTLIST)
-						this->_startHosting();
 					goto touched;
 				}
 			touched:
