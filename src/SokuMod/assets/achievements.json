@@ -3162,7 +3162,7 @@
         "rewards": [
             {
                 "type": "emote",
-                "name": "rin2"
+                "name": "rin8"
             },
             {
                 "type": "title",
@@ -3434,7 +3434,7 @@
         "rewards": [
             {
                 "type": "emote",
-                "name": "kaguya2"
+                "name": "kaguya8"
             },
             {
                 "type": "title",
@@ -3706,7 +3706,7 @@
         "rewards": [
             {
                 "type": "emote",
-                "name": "mima2"
+                "name": "mima4"
             },
             {
                 "type": "title",
@@ -4549,7 +4549,11 @@
             {
                 "type": "avatar",
                 "id": "koishi3"
-            }
+            },
+	    {
+                "type": "emote",
+		"name": "momiji13"
+	    }
         ],
         "name": "Impossible",
         "description": "Impossible achievement there only to lock<br>stuff that doesn't have any requirement<br>but should.",
