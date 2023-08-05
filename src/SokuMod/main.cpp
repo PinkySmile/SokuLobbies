@@ -557,6 +557,7 @@ int __fastcall BattleClientOnProcess(SokuLib::BattleClient *This)
 	auto &mgr = SokuLib::getBattleMgr();
 	auto ret = (This->*og_BattleClientOnProcess)();
 
+	processCommon(false);
 	if (ret != SokuLib::SCENE_BATTLECL) {
 		counted = false;
 		init = false;
@@ -579,6 +580,7 @@ int __fastcall BattleServerOnProcess(SokuLib::BattleServer *This)
 	auto &mgr = SokuLib::getBattleMgr();
 	auto ret = (This->*og_BattleServerOnProcess)();
 
+	processCommon(false);
 	if (ret != SokuLib::SCENE_BATTLESV) {
 		counted = false;
 		init = false;
@@ -947,7 +949,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	bool hostlist = GetPrivateProfileIntW(L"Lobby", L"AcceptHostlist", 0, profilePath) != 0;
 
 	if (hostlist)
-		hostPref = Lobbies::HOSTPREF_HOST_ONLY;
+		hostPref = Lobbies::HOSTPREF_NO_PREF;
 	else
 		hostPref = GetPrivateProfileIntW(L"Lobby", L"HostPref", Lobbies::HOSTPREF_NO_PREF, profilePath) & 3;
 	hostPref |= (GetPrivateProfileIntW(L"Lobby", L"AcceptRelay", 1, profilePath) != 0) * Lobbies::HOSTPREF_ACCEPT_RELAY;

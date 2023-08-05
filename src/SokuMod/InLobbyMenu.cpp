@@ -13,6 +13,8 @@
 #include "SmallHostlist.hpp"
 #include "encodingConverter.hpp"
 #include "createUTFTexture.hpp"
+#include "integration.hpp"
+#include "getPublicIp.hpp"
 
 #define CHAT_CHARACTER_LIMIT 512
 #define BOX_TEXTURE_SIZE {0x2000, 30}
@@ -1849,11 +1851,14 @@ void InLobbyMenu::_startHosting()
 	if (this->_hostThread.joinable())
 		this->_hostThread.join();
 	this->_hostThread = std::thread{[this, ranked]{
-		puts("Putting hostlist");
+		std::string converted;
 
+		puts("Putting hostlist");
+		th123intl::ConvertCodePage(th123intl::GetTextCodePage(), SokuLib::profile1.name.operator std::string(), CP_UTF8, converted);
 		nlohmann::json data = {
-			{"profile_name", convertEncoding<char, char, shiftJISDecode, UTF8Encode>(SokuLib::profile1.name)},
-			{"message", "SokuLobbies " + std::string(modVersion) + ": Waiting in " + convertEncoding<char, char, shiftJISDecode, UTF8Encode>(this->_roomName) + " | " + (ranked ? "ranked" : "casual")},
+			{"profile_name", converted},
+			{"message", "SokuLobbies " + std::string(modVersion) + ": Waiting in " + this->_roomName + " | " + (ranked ? "ranked" : "casual")},
+			{"host", getMyIp()},
 			{"port", hostPort}
 		};
 

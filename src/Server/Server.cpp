@@ -472,12 +472,10 @@ bool Server::_startRoom(const std::vector<Connection *> &machine)
 
 	if (p1settings == p2settings && p1settings == Lobbies::HOSTPREF_CLIENT_ONLY) {
 		Lobbies::PacketImportantMessage msg{
-			"<color FF0000>"
-				"Error: Cannot start the game because both you and your opponent have their hosting preference set to 'Client only'."
-				"One of you needs to be able to host to start the game."
-				"Either change your settings to 'No preference' or 'Host only' if you can host."
-				"Otherwise, try to join someone that can host games."
-			"</color>"
+			"Error: Cannot start the game because both you and your opponent have their hosting preference set to 'Client only'."
+			"One of you needs to be able to host to start the game."
+			"Either change your settings to 'No preference' or 'Host only' if you can host."
+			"Otherwise, try to join someone that can host games."
 		};
 		Lobbies::PacketArcadeLeave leave{machine[1]->getId()};
 
@@ -488,9 +486,7 @@ bool Server::_startRoom(const std::vector<Connection *> &machine)
 	}
 	if (p1settings == p2settings && p1settings == Lobbies::HOSTPREF_HOST_ONLY) {
 		Lobbies::PacketImportantMessage msg{
-			"<color FF0000>"
-				"Error: Cannot start the game because both you and your opponent have their hosting preference set to 'Host only'."
-			"</color>"
+			"Error: Cannot start the game because both you and your opponent have their hosting preference set to 'Host only'."
 		};
 		Lobbies::PacketArcadeLeave leave{machine[1]->getId()};
 
