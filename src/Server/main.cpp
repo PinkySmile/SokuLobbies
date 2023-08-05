@@ -14,7 +14,7 @@ void s(int)
 	serv = nullptr;
 }
 
-#ifdef _WIN32
+#ifdef _UTF16
 #include <encodingConverter.hpp>
 
 void displayHelp(const wchar_t *prog)
@@ -44,15 +44,17 @@ int wmain(int argc, const wchar_t *argv[])
 	Server server;
 	char pwd[sizeof(Lobbies::PacketHello::password) + 1];
 
-	memset(pwd, 0, sizeof(pwd));
-	for (auto ptr = pwd; *argv[4]; ptr++, argv[4]++)
-		*pwd = *argv[4];
+	if (argv[4]) {
+		memset(pwd, 0, sizeof(pwd));
+		for (auto ptr = pwd; *argv[4]; ptr++, argv[4]++)
+			*pwd = *argv[4];
+	}
 	serv = &server;
 	server.run(
 		std::stoul(argv[1]),
 		std::stoul(argv[2]),
 		convertEncoding<wchar_t, char, UTF16Decode, UTF8Encode>(argv[3]),
-		pwd
+		argv[4] ? pwd : nullptr
 	);
 	return EXIT_SUCCESS;
 }
