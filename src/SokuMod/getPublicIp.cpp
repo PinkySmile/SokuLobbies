@@ -5,11 +5,21 @@
 #include "getPublicIp.hpp"
 #include "Exceptions.hpp"
 #include "Socket.hpp"
+#include "data.hpp"
 
-char *myIp = nullptr;
+static char *myIp = nullptr;
+static char buffer[64];
+static wchar_t buffer2[64];
 
 const char *getMyIp()
 {
+	GetPrivateProfileStringW(L"Lobby", L"HostIP", L"", buffer2, sizeof(buffer2) / sizeof(*buffer2), profilePath);
+	if (*buffer2) {
+		for (int i = 0; i < sizeof(buffer); i++)
+			buffer[i] = buffer2[i];
+		printf("Using forced ip %s\n", buffer);
+		return buffer;
+	}
 	if (myIp)
 		return myIp;
 

@@ -743,6 +743,10 @@ Connection *Server::_findPlayer(uint32_t id)
 
 Connection *Server::_findPlayer(const std::string &name)
 {
+	if (name.empty())
+		return nullptr;
+	if (name[0] != '@')
+		return this->_findPlayer(std::stoul(name));
 	this->_connectionsMutex.lock();
 	for (auto &c : this->_connections)
 		if (c->getName() == name) {
@@ -757,18 +761,18 @@ Connection *Server::_findPlayer(const std::string &name)
 
 const std::map<std::string, Server::Cmd> Server::_commands{
 	{"help",    {"[command]", "Displays list of commands.\nExample:\n/help\n/help help", &Server::_helpCmd}},
-	{"join",    {"(player_name)", "Join an arcade machine. The id must be in the range 0 to 4294967295\nExample:\n/join 1\n/join @PinkySmile", &Server::_joinCmd}},
+	{"join",    {"<player_name>", "Join an arcade machine. The id must be in the range 0 to 4294967295\nExample:\n/join 1\n/join @PinkySmile", &Server::_joinCmd}},
 	{"list",    {"", "Displays the list of connected players.", &Server::_listCmd}},
-	{"locate",  {"(player_name)", "Locate a player in the field.\nExample:\n/locate 1\n/locate @PinkySmile", &Server::_locateCmd}},
-	{"msg",     {"(player_name) (message)", "Sends a message privately\nExample:\n/msg @PinkySmile Hello!", &Server::_msgCmd}},
+	{"locate",  {"<player_name>", "Locate a player in the field.\nExample:\n/locate 1\n/locate @PinkySmile", &Server::_locateCmd}},
+	{"msg",     {"<player_name> <message>", "Sends a message privately\nExample:\n/msg @PinkySmile Hello!", &Server::_msgCmd}},
 };
 
 const std::map<std::string, Server::Cmd> Server::_adminCommands{
-	{"ban",    {"(player_name) (reason)", "Bans a player.\nExample:\n/ban @PinkySmile\n/ban 1", &Server::_banCmd}},
-	{"banip",  {"(ip) (reason)", "Bans a player.\nExample:\n/ban @PinkySmile\n/ban 1", &Server::_banipCmd}},
-	{"kick",   {"(player_name) (reason)", "Kicks a player.\nExample:\n/ban @PinkySmile\n/ban 1", &Server::_kickCmd}},
-	{"say",    {"(message)", "Sends a message as the server.\nExample:\n/say Hello!", &Server::_sayCmd}},
-	{"warn",   {"(message)", "Sends an important message to everyone.\nExample:\n/warn The server will close in 5 minutes.", &Server::_warnCmd}},
+	{"ban",    {"<player_name> <reason>", "Bans a player.\nExample:\n/ban @PinkySmile\n/ban 1", &Server::_banCmd}},
+	{"banip",  {"<ip> <reason>", "Bans a player.\nExample:\n/ban @PinkySmile\n/ban 1", &Server::_banipCmd}},
+	{"kick",   {"<player_name> <reason>", "Kicks a player.\nExample:\n/ban @PinkySmile\n/ban 1", &Server::_kickCmd}},
+	{"say",    {"<message>", "Sends a message as the server.\nExample:\n/say Hello!", &Server::_sayCmd}},
+	{"warn",   {"<message>", "Sends an important message to everyone.\nExample:\n/warn The server will close in 5 minutes.", &Server::_warnCmd}},
 };
 
 void Server::sendSystemMessageTo(Connection *recipient, const std::string &msg, unsigned color)

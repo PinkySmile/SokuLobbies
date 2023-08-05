@@ -12,7 +12,7 @@
 #include "Connection.hpp"
 
 struct BanEntry {
-	char uniqueId[16];
+	unsigned long long uniqueId;
 	char profileName[33];
 	char ip[22];
 	char reason[128];

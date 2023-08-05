@@ -790,11 +790,11 @@ void loadSoku2Config()
 
 	wchar_t moduleKeys[1024];
 	wchar_t moduleValue[MAX_PATH];
-	GetPrivateProfileStringW(L"Module", nullptr, nullptr, moduleKeys, sizeof(moduleKeys), setting_path);
+	GetPrivateProfileStringW(L"Module", nullptr, nullptr, moduleKeys, sizeof(moduleKeys) / sizeof(*moduleKeys), setting_path);
 	for (wchar_t *key = moduleKeys; *key; key += wcslen(key) + 1) {
 		wchar_t module_path[MAX_PATH];
 
-		GetPrivateProfileStringW(L"Module", key, nullptr, moduleValue, sizeof(moduleValue), setting_path);
+		GetPrivateProfileStringW(L"Module", key, nullptr, moduleValue, sizeof(moduleValue) / sizeof(*moduleValue), setting_path);
 
 		wchar_t *filename = wcsrchr(moduleValue, '/');
 
@@ -939,15 +939,17 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	PathRemoveFileSpecW(profilePath);
 	wcscpy(profileFolderPath, profilePath);
 	PathAppendW(profilePath, L"SokuLobbies.ini");
-	GetPrivateProfileStringW(L"Lobby", L"Host", L"pinkysmile.fr", servHostW, sizeof(servHost), profilePath);
+	GetPrivateProfileStringW(L"Lobby", L"Host", L"pinkysmile.fr", servHostW, sizeof(servHost) / sizeof(*servHost), profilePath);
 	servPort = GetPrivateProfileIntW(L"Lobby", L"Port", 5254, profilePath);
 	hostPort = GetPrivateProfileIntW(L"Lobby", L"HostPort", 10800, profilePath);
 	chatKey = GetPrivateProfileIntW(L"Lobby", L"ChatKey", VK_RETURN, profilePath);
 
-	bool hostlist = GetPrivateProfileIntW(L"Lobby", L"AcceptHostlist", 1, profilePath) != 0;
+	bool hostlist = GetPrivateProfileIntW(L"Lobby", L"AcceptHostlist", 0, profilePath) != 0;
 
-	// By default HOSTPREF_NO_PREF | HOSTPREF_ACCEPT_RELAY | HOSTPREF_ACCEPT_HOSTLIST
-	hostPref = GetPrivateProfileIntW(L"Lobby", L"HostPref", hostlist ? Lobbies::HOSTPREF_HOST_ONLY : Lobbies::HOSTPREF_NO_PREF, profilePath);
+	if (hostlist)
+		hostPref = Lobbies::HOSTPREF_HOST_ONLY;
+	else
+		hostPref = GetPrivateProfileIntW(L"Lobby", L"HostPref", Lobbies::HOSTPREF_NO_PREF, profilePath) & 3;
 	hostPref |= (GetPrivateProfileIntW(L"Lobby", L"AcceptRelay", 1, profilePath) != 0) * Lobbies::HOSTPREF_ACCEPT_RELAY;
 	hostPref |= (GetPrivateProfileIntW(L"Lobby", L"IsRanked", 1, profilePath) != 0) * Lobbies::HOSTPREF_PREFER_RANKED;
 	hostPref |= hostlist * Lobbies::HOSTPREF_ACCEPT_HOSTLIST;
