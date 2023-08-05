@@ -2,7 +2,6 @@
 #include <mutex>
 #include <csignal>
 #include <cstring>
-#include <windows.h>
 #include "Server.hpp"
 
 std::mutex logMutex;
