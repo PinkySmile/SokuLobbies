@@ -2728,7 +2728,7 @@
         "requirement": {
             "type": "win",
             "count": 10,
-            "chr": 20
+            "chr": 22
         },
         "rewards": [
             {
@@ -2749,7 +2749,7 @@
         "requirement": {
             "type": "lose",
             "count": 10,
-            "chr": 20
+            "chr": 22
         },
         "rewards": [
             {
@@ -2770,7 +2770,7 @@
         "requirement": {
             "type": "play",
             "count": 10,
-            "chr": 20
+            "chr": 22
         },
         "rewards": [
             {
@@ -2790,7 +2790,7 @@
     {
         "requirement": {
             "type": "cards",
-            "chr": 20
+            "chr": 22
         },
         "rewards": [
             {
@@ -2819,7 +2819,7 @@
         "requirement": {
             "type": "play",
             "count": 100,
-            "chr": 20
+            "chr": 22
         },
         "rewards": [
             {
@@ -2841,7 +2841,7 @@
         "requirement": {
             "type": "play",
             "count": 1000,
-            "chr": 20
+            "chr": 22
         },
         "rewards": [
             {
@@ -2864,7 +2864,7 @@
         "requirement": {
             "type": "win",
             "count": 10,
-            "chr": 21
+            "chr": 23
         },
         "rewards": [
             {
@@ -2885,7 +2885,7 @@
         "requirement": {
             "type": "lose",
             "count": 10,
-            "chr": 21
+            "chr": 23
         },
         "rewards": [
             {
@@ -2906,7 +2906,7 @@
         "requirement": {
             "type": "play",
             "count": 10,
-            "chr": 21
+            "chr": 23
         },
         "rewards": [
             {
@@ -2926,7 +2926,7 @@
     {
         "requirement": {
             "type": "cards",
-            "chr": 21
+            "chr": 23
         },
         "rewards": [
             {
@@ -2955,7 +2955,7 @@
         "requirement": {
             "type": "play",
             "count": 100,
-            "chr": 21
+            "chr": 23
         },
         "rewards": [
             {
@@ -2977,7 +2977,7 @@
         "requirement": {
             "type": "play",
             "count": 1000,
-            "chr": 21
+            "chr": 23
         },
         "rewards": [
             {
@@ -3000,7 +3000,7 @@
         "requirement": {
             "type": "win",
             "count": 10,
-            "chr": 22
+            "chr": 24
         },
         "rewards": [
             {
@@ -3021,7 +3021,7 @@
         "requirement": {
             "type": "lose",
             "count": 10,
-            "chr": 22
+            "chr": 24
         },
         "rewards": [
             {
@@ -3042,7 +3042,7 @@
         "requirement": {
             "type": "play",
             "count": 10,
-            "chr": 22
+            "chr": 24
         },
         "rewards": [
             {
@@ -3062,7 +3062,7 @@
     {
         "requirement": {
             "type": "cards",
-            "chr": 22
+            "chr": 24
         },
         "rewards": [
             {
@@ -3091,7 +3091,7 @@
         "requirement": {
             "type": "play",
             "count": 100,
-            "chr": 22
+            "chr": 24
         },
         "rewards": [
             {
@@ -3113,7 +3113,7 @@
         "requirement": {
             "type": "play",
             "count": 1000,
-            "chr": 22
+            "chr": 24
         },
         "rewards": [
             {
@@ -3136,7 +3136,7 @@
         "requirement": {
             "type": "win",
             "count": 10,
-            "chr": 23
+            "chr": 25
         },
         "rewards": [
             {
@@ -3157,7 +3157,7 @@
         "requirement": {
             "type": "lose",
             "count": 10,
-            "chr": 23
+            "chr": 25
         },
         "rewards": [
             {
@@ -3178,7 +3178,7 @@
         "requirement": {
             "type": "play",
             "count": 10,
-            "chr": 23
+            "chr": 25
         },
         "rewards": [
             {
@@ -3198,7 +3198,7 @@
     {
         "requirement": {
             "type": "cards",
-            "chr": 23
+            "chr": 25
         },
         "rewards": [
             {
@@ -3227,7 +3227,7 @@
         "requirement": {
             "type": "play",
             "count": 100,
-            "chr": 23
+            "chr": 25
         },
         "rewards": [
             {
@@ -3249,7 +3249,7 @@
         "requirement": {
             "type": "play",
             "count": 1000,
-            "chr": 23
+            "chr": 25
         },
         "rewards": [
             {
@@ -3272,7 +3272,7 @@
         "requirement": {
             "type": "win",
             "count": 10,
-            "chr": 24
+            "chr": 26
         },
         "rewards": [
             {
@@ -3293,7 +3293,7 @@
         "requirement": {
             "type": "lose",
             "count": 10,
-            "chr": 24
+            "chr": 26
         },
         "rewards": [
             {
@@ -3314,7 +3314,7 @@
         "requirement": {
             "type": "play",
             "count": 10,
-            "chr": 24
+            "chr": 26
         },
         "rewards": [
             {
@@ -3334,7 +3334,7 @@
     {
         "requirement": {
             "type": "cards",
-            "chr": 24
+            "chr": 26
         },
         "rewards": [
             {
@@ -3363,7 +3363,7 @@
         "requirement": {
             "type": "play",
             "count": 100,
-            "chr": 24
+            "chr": 26
         },
         "rewards": [
             {
@@ -3385,7 +3385,7 @@
         "requirement": {
             "type": "play",
             "count": 1000,
-            "chr": 24
+            "chr": 26
         },
         "rewards": [
             {
@@ -3408,7 +3408,7 @@
         "requirement": {
             "type": "win",
             "count": 10,
-            "chr": 25
+            "chr": 27
         },
         "rewards": [
             {
@@ -3429,7 +3429,7 @@
         "requirement": {
             "type": "lose",
             "count": 10,
-            "chr": 25
+            "chr": 27
         },
         "rewards": [
             {
@@ -3450,7 +3450,7 @@
         "requirement": {
             "type": "play",
             "count": 10,
-            "chr": 25
+            "chr": 27
         },
         "rewards": [
             {
@@ -3470,7 +3470,7 @@
     {
         "requirement": {
             "type": "cards",
-            "chr": 25
+            "chr": 27
         },
         "rewards": [
             {
@@ -3499,7 +3499,7 @@
         "requirement": {
             "type": "play",
             "count": 100,
-            "chr": 25
+            "chr": 27
         },
         "rewards": [
             {
@@ -3521,7 +3521,7 @@
         "requirement": {
             "type": "play",
             "count": 1000,
-            "chr": 25
+            "chr": 27
         },
         "rewards": [
             {
@@ -3544,7 +3544,7 @@
         "requirement": {
             "type": "win",
             "count": 10,
-            "chr": 26
+            "chr": 28
         },
         "rewards": [
             {
@@ -3565,7 +3565,7 @@
         "requirement": {
             "type": "lose",
             "count": 10,
-            "chr": 26
+            "chr": 28
         },
         "rewards": [
             {
@@ -3586,7 +3586,7 @@
         "requirement": {
             "type": "play",
             "count": 10,
-            "chr": 26
+            "chr": 28
         },
         "rewards": [
             {
@@ -3606,7 +3606,7 @@
     {
         "requirement": {
             "type": "cards",
-            "chr": 26
+            "chr": 28
         },
         "rewards": [
             {
@@ -3635,7 +3635,7 @@
         "requirement": {
             "type": "play",
             "count": 100,
-            "chr": 26
+            "chr": 28
         },
         "rewards": [
             {
@@ -3657,7 +3657,7 @@
         "requirement": {
             "type": "play",
             "count": 1000,
-            "chr": 26
+            "chr": 28
         },
         "rewards": [
             {
@@ -3680,7 +3680,7 @@
         "requirement": {
             "type": "win",
             "count": 10,
-            "chr": 27
+            "chr": 29
         },
         "rewards": [
             {
@@ -3701,7 +3701,7 @@
         "requirement": {
             "type": "lose",
             "count": 10,
-            "chr": 27
+            "chr": 29
         },
         "rewards": [
             {
@@ -3722,7 +3722,7 @@
         "requirement": {
             "type": "play",
             "count": 10,
-            "chr": 27
+            "chr": 29
         },
         "rewards": [
             {
@@ -3742,7 +3742,7 @@
     {
         "requirement": {
             "type": "cards",
-            "chr": 27
+            "chr": 29
         },
         "rewards": [
             {
@@ -3771,7 +3771,7 @@
         "requirement": {
             "type": "play",
             "count": 100,
-            "chr": 27
+            "chr": 29
         },
         "rewards": [
             {
@@ -3793,7 +3793,7 @@
         "requirement": {
             "type": "play",
             "count": 1000,
-            "chr": 27
+            "chr": 29
         },
         "rewards": [
             {
@@ -3816,7 +3816,7 @@
         "requirement": {
             "type": "win",
             "count": 10,
-            "chr": 28
+            "chr": 30
         },
         "rewards": [
             {
@@ -3837,7 +3837,7 @@
         "requirement": {
             "type": "lose",
             "count": 10,
-            "chr": 28
+            "chr": 30
         },
         "rewards": [
             {
@@ -3858,7 +3858,7 @@
         "requirement": {
             "type": "play",
             "count": 10,
-            "chr": 28
+            "chr": 30
         },
         "rewards": [
             {
@@ -3878,7 +3878,7 @@
     {
         "requirement": {
             "type": "cards",
-            "chr": 28
+            "chr": 30
         },
         "rewards": [
             {
@@ -3907,7 +3907,7 @@
         "requirement": {
             "type": "play",
             "count": 100,
-            "chr": 28
+            "chr": 30
         },
         "rewards": [
             {
@@ -3929,7 +3929,7 @@
         "requirement": {
             "type": "play",
             "count": 1000,
-            "chr": 28
+            "chr": 30
         },
         "rewards": [
             {
@@ -3952,7 +3952,7 @@
         "requirement": {
             "type": "win",
             "count": 10,
-            "chr": 29
+            "chr": 31
         },
         "rewards": [
             {
@@ -3973,7 +3973,7 @@
         "requirement": {
             "type": "lose",
             "count": 10,
-            "chr": 29
+            "chr": 31
         },
         "rewards": [
             {
@@ -3994,7 +3994,7 @@
         "requirement": {
             "type": "play",
             "count": 10,
-            "chr": 29
+            "chr": 31
         },
         "rewards": [
             {
@@ -4014,7 +4014,7 @@
     {
         "requirement": {
             "type": "cards",
-            "chr": 29
+            "chr": 31
         },
         "rewards": [
             {
@@ -4043,7 +4043,7 @@
         "requirement": {
             "type": "play",
             "count": 100,
-            "chr": 29
+            "chr": 31
         },
         "rewards": [
             {
@@ -4065,7 +4065,7 @@
         "requirement": {
             "type": "play",
             "count": 1000,
-            "chr": 29
+            "chr": 31
         },
         "rewards": [
             {
@@ -4088,7 +4088,7 @@
         "requirement": {
             "type": "win",
             "count": 10,
-            "chr": 30
+            "chr": 32
         },
         "rewards": [
             {
@@ -4109,7 +4109,7 @@
         "requirement": {
             "type": "lose",
             "count": 10,
-            "chr": 30
+            "chr": 32
         },
         "rewards": [
             {
@@ -4130,7 +4130,7 @@
         "requirement": {
             "type": "play",
             "count": 10,
-            "chr": 30
+            "chr": 32
         },
         "rewards": [
             {
@@ -4150,7 +4150,7 @@
     {
         "requirement": {
             "type": "cards",
-            "chr": 30
+            "chr": 32
         },
         "rewards": [
             {
@@ -4179,7 +4179,7 @@
         "requirement": {
             "type": "play",
             "count": 100,
-            "chr": 30
+            "chr": 32
         },
         "rewards": [
             {
@@ -4201,7 +4201,7 @@
         "requirement": {
             "type": "play",
             "count": 1000,
-            "chr": 30
+            "chr": 32
         },
         "rewards": [
             {
@@ -4224,7 +4224,7 @@
         "requirement": {
             "type": "win",
             "count": 10,
-            "chr": 31
+            "chr": 33
         },
         "rewards": [
             {
@@ -4245,7 +4245,7 @@
         "requirement": {
             "type": "lose",
             "count": 10,
-            "chr": 31
+            "chr": 33
         },
         "rewards": [
             {
@@ -4266,7 +4266,7 @@
         "requirement": {
             "type": "play",
             "count": 10,
-            "chr": 31
+            "chr": 33
         },
         "rewards": [
             {
@@ -4286,7 +4286,7 @@
     {
         "requirement": {
             "type": "cards",
-            "chr": 31
+            "chr": 33
         },
         "rewards": [
             {
@@ -4315,7 +4315,7 @@
         "requirement": {
             "type": "play",
             "count": 100,
-            "chr": 31
+            "chr": 33
         },
         "rewards": [
             {
@@ -4337,7 +4337,7 @@
         "requirement": {
             "type": "play",
             "count": 1000,
-            "chr": 31
+            "chr": 33
         },
         "rewards": [
             {
@@ -4360,7 +4360,7 @@
         "requirement": {
             "type": "win",
             "count": 10,
-            "chr": 32
+            "chr": 34
         },
         "rewards": [
             {
@@ -4381,7 +4381,7 @@
         "requirement": {
             "type": "lose",
             "count": 10,
-            "chr": 32
+            "chr": 34
         },
         "rewards": [
             {
@@ -4402,7 +4402,7 @@
         "requirement": {
             "type": "play",
             "count": 10,
-            "chr": 32
+            "chr": 34
         },
         "rewards": [
             {
@@ -4422,7 +4422,7 @@
     {
         "requirement": {
             "type": "cards",
-            "chr": 32
+            "chr": 34
         },
         "rewards": [
             {
@@ -4451,7 +4451,7 @@
         "requirement": {
             "type": "play",
             "count": 100,
-            "chr": 32
+            "chr": 34
         },
         "rewards": [
             {
@@ -4473,7 +4473,7 @@
         "requirement": {
             "type": "play",
             "count": 1000,
-            "chr": 32
+            "chr": 34
         },
         "rewards": [
             {
@@ -4496,12 +4496,14 @@
     {
         "requirement": {
             "type": "win_move",
-	    "chr": 9,
-	    "action": 605,
-	    "block_blacklist": [0]
+            "chr": 9,
+            "action": 605,
+            "block_blacklist": [
+                0
+            ]
         },
         "rewards": [
-	    {
+            {
                 "type": "avatar",
                 "id": "giant_suika"
             }
@@ -4509,8 +4511,8 @@
         "name": "IaMP Ending",
         "description": "Close a game with \"Missing Purple Power\".",
         "hidden": true,
-	"comment": "Not implemented!",
-	"id": "suika_mpp"
+        "comment": "Not implemented!",
+        "id": "suika_mpp"
     },
 
     "Meta",
@@ -4531,7 +4533,7 @@
         "name": "Modding at its finest",
         "description": "Have the game crash once",
         "hidden": true,
-	"id": "crash"
+        "id": "crash"
     },
     {
         "requirement": {
@@ -4550,15 +4552,15 @@
                 "type": "avatar",
                 "id": "koishi3"
             },
-	    {
+            {
                 "type": "emote",
-		"name": "momiji13"
-	    }
+                "name": "momiji13"
+            }
         ],
         "name": "Impossible",
         "description": "Impossible achievement there only to lock<br>stuff that doesn't have any requirement<br>but should.",
         "hidden": false,
-	"id": "impossible"
+        "id": "impossible"
     },
     {
         "requirement": {
@@ -4569,15 +4571,15 @@
                 "type": "avatar",
                 "id": "98marisa"
             },
-	    {
+            {
                 "type": "avatar",
                 "id": "98marisa1"
             },
-	    {
+            {
                 "type": "avatar",
                 "id": "98marisa2"
             },
-	    {
+            {
                 "type": "avatar",
                 "id": "98marisa3"
             }
@@ -4585,18 +4587,18 @@
         "name": "Reminiscence of an ancient time",
         "description": "Use the old arcade machine to access the<br>hostlist.",
         "hidden": false,
-	"id": "crash"
+        "id": "crash"
     },
     {
         "requirement": {
             "type": "debug"
         },
         "rewards": [
-	    {
+            {
                 "type": "avatar",
                 "id": "placeholder"
             },
-	    {
+            {
                 "type": "accessory",
                 "id": 20,
                 "comment": "Butterfly net"
@@ -4605,6 +4607,6 @@
         "name": "Gotta catch'em all!",
         "description": "Use the debug version of the mod.",
         "hidden": true,
-	"id": "debug"
+        "id": "debug"
     }
 ]
