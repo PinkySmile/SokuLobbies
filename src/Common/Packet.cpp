@@ -5,6 +5,11 @@
 #include <cstring>
 #include "Packet.hpp"
 
+#ifdef _WIN32
+#include <windows.h>
+#include <random>
+#endif
+
 namespace Lobbies
 {
 	PacketHello::PacketHello(const Soku2VersionInfo &soku2Info, unsigned char versionString[16], const std::string &name, const PlayerCustomization &custom, const LobbySettings &settings) :
@@ -13,6 +18,23 @@ namespace Lobbies
 		custom(custom),
 		settings(settings)
 	{
+#ifdef _WIN32
+		HKEY key;
+
+		if (!RegCreateKeyExW(HKEY_CURRENT_USER, L"Software\\Touhou\\Soku", 0, NULL, 0, KEY_READ | KEY_WRITE | KEY_WOW64_64KEY, NULL, &key, NULL)) {
+			DWORD size = sizeof(this->uniqueId);
+
+			if (RegQueryValueExW(key, L"SokuReplaysID", NULL, NULL, (byte *)&this->uniqueId, &size)) {
+				std::random_device rd;
+				std::mt19937_64 gen(rd());
+				std::uniform_int_distribution<unsigned long long> dis;
+
+				this->uniqueId = dis(gen) >> 1; // let's only keep 63-bits, positive values to avoid any sign quirk...
+				RegSetValueExW(key, L"SokuReplaysID", 0, REG_QWORD, (BYTE*)&this->uniqueId, size);
+			}
+			RegCloseKey(key);
+		}
+#endif
 		memcpy(this->versionString, versionString, sizeof(this->versionString));
 		strncpy(this->name, name.c_str(), sizeof(this->name));
 	}

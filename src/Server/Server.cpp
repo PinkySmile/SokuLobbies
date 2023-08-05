@@ -181,8 +181,10 @@ void Server::run(unsigned short port, unsigned maxPlayers, const std::string &na
 #endif
 	this->_listener.close();
 	this->_connectionsMutex.lock();
-	for (auto &c : this->_connections)
+	for (auto &c : this->_connections) {
+		c->onDisconnect = [](const std::string &){};
 		c->kick("Server closed");
+	}
 	this->_connectionsMutex.unlock();
 #ifndef _LOBBYNOLOG
 	logMutex.lock();
@@ -534,6 +536,9 @@ void Server::_processCommands(Connection *author, const std::string &msg)
 
 void Server::_registerToMainServer()
 {
+#ifdef _DEBUG
+	return;
+#endif
 #ifndef _LOBBYNOLOG
 	logMutex.lock();
 	std::cout << "Registering lobby '" << this->_infos.name << "' to the server: " << static_cast<int>(this->_infos.maxPlayers) << " max slots" << std::endl;

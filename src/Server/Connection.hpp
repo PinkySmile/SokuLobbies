@@ -30,7 +30,7 @@ private:
 	uint32_t _id = 0;
 	Lobbies::Soku2VersionInfo _soku2Infos;
 	unsigned char _versionString[16];
-	char _uniqueId[16];
+	unsigned long long _uniqueId;
 	std::string _name;
 	std::string _realName;
 	std::unique_ptr<sf::TcpSocket> _socket;
@@ -85,7 +85,7 @@ public:
 	uint32_t getId() const;
 	bool isInit() const;
 	const unsigned char *getVersionString() const;
-	const char *getUniqueId() const;
+	unsigned long long getUniqueId() const;
 	std::string getName() const;
 	std::string getRealName() const;
 	sf::Vector2<uint32_t> getPos() const;

@@ -60,6 +60,10 @@ if (SFML_FOUND)
 		src/Common/GuardedMutex.hpp
 		src/Common/Utils.cpp
 		src/Common/Utils.hpp
+		src/Common/encodingConverter.cpp
+		src/Common/encodingConverter.hpp
+		src/Common/shiftJISConvTable.inl
+		src/Common/shiftJISReverseConvTable.inl
 	)
 	if (MAIN_SERVER_HOST)
 		target_compile_definitions(SokuLobbiesServer PRIVATE MAIN_SERVER_HOST="${MAIN_SERVER_HOST}")
@@ -171,10 +175,10 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 		src/SokuMod/BackgroundHost.cpp
 		src/SokuMod/createUTFTexture.cpp
 		src/SokuMod/createUTFTexture.hpp
-		src/SokuMod/encodingConverter.cpp
-		src/SokuMod/encodingConverter.hpp
-		src/SokuMod/shiftJISConvTable.inl
-		src/SokuMod/shiftJISReverseConvTable.inl
+		src/Common/encodingConverter.cpp
+		src/Common/encodingConverter.hpp
+		src/Common/shiftJISConvTable.inl
+		src/Common/shiftJISReverseConvTable.inl
 	)
 	target_compile_options(SokuLobbiesMod PRIVATE /Zi)
 	target_compile_definitions("SokuLobbiesMod" PRIVATE DIRECTINPUT_VERSION=0x0800 _CRT_SECURE_NO_WARNINGS)

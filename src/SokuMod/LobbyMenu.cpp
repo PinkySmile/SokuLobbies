@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <encodingConverter.hpp>
 #include <../directx/dinput.h>
 #include "nlohmann/json.hpp"
 #include "LobbyMenu.hpp"
@@ -16,6 +17,8 @@
 #include "data.hpp"
 #include "StatsMenu.hpp"
 #include "AchievementsMenu.hpp"
+#include "integration.hpp"
+#include "createUTFTexture.hpp"
 
 #define CRenderer_Unknown1 ((void (__thiscall *)(int, int))0x404AF0)
 #define runOnUI(fct) do {                     \
@@ -106,9 +109,10 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 		this->_loadedSettings.player.env = 0;
 		this->_loadedSettings.player.feet = 0;
 	}
+
+	th123intl::ConvertCodePage(th123intl::GetTextCodePage(), SokuLib::profile1.name.operator std::string(), CP_UTF8, this->_loadedSettings.name);
 	// For now, we get the stuff from the INI
 	this->_loadedSettings.settings.hostPref = static_cast<Lobbies::HostPreference>(hostPref);
-	this->_loadedSettings.name = SokuLib::profile1.name.operator std::string();
 	this->_loadedSettings.pos.x = 20;
 
 	SokuLib::Vector2i size;
@@ -860,7 +864,7 @@ void LobbyMenu::_connectLoop()
 
 					connection->c = std::make_shared<Connection>(connection->ip, connection->port, this->_loadedSettings);
 					connection->c->onError = [weak, this](const std::string &msg) {
-						auto fct = [weak, msg]{
+						auto fct = [weak, msg, this]{
 							auto c = weak.lock();
 
 							std::cerr << "Error:" << msg << std::endl;
@@ -875,7 +879,8 @@ void LobbyMenu::_connectLoop()
 							c->name.rect.width = c->name.texture.getSize().x;
 							c->name.rect.height = c->name.texture.getSize().y;
 							c->name.tint = SokuLib::Color::Red;
-							playSound(38);
+							if (this->_active)
+								playSound(38);
 						};
 						runOnUI(fct);
 					};
@@ -907,8 +912,13 @@ void LobbyMenu::_connectLoop()
 				connection->passwd = info.hasPwd;
 				if (connection->lastName != info.name) {
 					auto fct = [info, connection]{
+						SokuLib::Vector2i size;
+						int texId = 0;
+
 						connection->lastName = info.name;
-						connection->name.texture.createFromText(connection->lastName.c_str(), lobbyData->getFont(16), {300, 74});
+						if (!createTextTexture(texId, convertEncoding<char, wchar_t, UTF8Decode, UTF16Encode>(info.name).c_str(), lobbyData->getFont(16), {300, 74}, &size))
+							puts("Error creating text texture");
+						connection->name.texture.setHandle(texId, {300, 74});
 						connection->name.setSize({
 							connection->name.texture.getSize().x,
 							connection->name.texture.getSize().y

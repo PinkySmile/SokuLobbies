@@ -135,7 +135,7 @@ const unsigned char *Connection::getVersionString() const
 	return this->_versionString;
 }
 
-const char *Connection::getUniqueId() const
+unsigned long long Connection::getUniqueId() const
 {
 	return this->_uniqueId;
 }
@@ -262,15 +262,15 @@ bool Connection::_handlePacket(const Lobbies::PacketHello &packet, size_t &size)
 		return false;
 	if (packet.modVersion > PROTOCOL_VERSION)
 		return this->kick("Outdated server!"), false;
+	if (packet.modVersion < PROTOCOL_VERSION)
+		return this->kick("You are running an old version of SokuLobbies! Please update your mod and try again."), false;
 	if (size < sizeof(packet))
 		return false;
 	size -= sizeof(packet);
-	if (packet.modVersion < PROTOCOL_VERSION)
-		return this->kick("You are running an old version of SokuLobbies! Please update your mod and try again."), false;
 	if (this->_password && strncmp(this->_password, packet.password, sizeof(packet.password)) != 0)
 		return this->kick("Incorrect password"), false;
-	memcpy(this->_uniqueId, packet.uniqueId, sizeof(packet.uniqueId));
 	memcpy(this->_versionString, packet.versionString, sizeof(packet.versionString));
+	this->_uniqueId = packet.uniqueId;
 	this->_soku2Infos = packet.soku2Info;
 
 	char buffer[sizeof(packet.name) + 1];

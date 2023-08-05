@@ -268,8 +268,11 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 	};
 	connection.onPlayerJoin = [this](const Player &r){
 		SokuLib::Vector2i size;
+		int texId = 0;
 
-		this->_extraPlayerData[r.id].name.texture.createFromText(r.name.c_str(), lobbyData->getFont(16), {200, 20}, &size);
+		if (!createTextTexture(texId, convertEncoding<char, wchar_t, UTF8Decode, UTF16Encode>(r.name).c_str(), lobbyData->getFont(16), {200, 20}, &size))
+			puts("Error creating text texture");
+		this->_extraPlayerData[r.id].name.texture.setHandle(texId, {200, 20});
 		this->_extraPlayerData[r.id].name.setSize(size.to<unsigned>());
 		this->_extraPlayerData[r.id].name.rect.width = size.x;
 		this->_extraPlayerData[r.id].name.rect.height = size.y;
@@ -310,9 +313,18 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 		connection.getMe()->pos.y = bg.platforms[bg.startPlatform].pos.y;
 
 		SokuLib::Vector2i size;
+		int texId = 0;
 
 		this->_roomName = std::string(r.name, strnlen(r.name, sizeof(r.name)));
-		this->_extraPlayerData[r.id].name.texture.createFromText(std::string(r.realName, strnlen(r.realName, sizeof(r.realName))).c_str(), lobbyData->getFont(16), {200, 20}, &size);
+		if (!createTextTexture(
+			texId,
+			convertEncoding<char, wchar_t, UTF8Decode, UTF16Encode>(std::string(r.realName, strnlen(r.realName, sizeof(r.realName)))).c_str(),
+			lobbyData->getFont(16),
+			{200, 20},
+			&size
+		))
+			puts("Error creating text texture");
+		this->_extraPlayerData[r.id].name.texture.setHandle(texId, {200, 20});
 		this->_extraPlayerData[r.id].name.setSize(size.to<unsigned>());
 		this->_extraPlayerData[r.id].name.rect.width = size.x;
 		this->_extraPlayerData[r.id].name.rect.height = size.y;

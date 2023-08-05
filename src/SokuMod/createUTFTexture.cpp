@@ -28,6 +28,57 @@ static void setFont(HDC context, SokuLib::SWRFont &font)
 	font.gdiobj = SelectObject(context, font.font);
 }
 
+inline unsigned int _div255(unsigned int v) { return (v + 1 + (v >> 8)) >> 8; }
+
+static void __fastcall repl_alphaBlend(unsigned int color, unsigned int alpha, unsigned int* out) {
+	unsigned short a0 = ((alpha*0xffu) >> 4) & 0xff;
+	unsigned short a1 = *out >> 24;
+	unsigned short a2 = a0 + _div255(a1*(255-a0));
+
+	unsigned int result = (unsigned int)a2 << 24;
+	if (a2 != 0) for (int i = 0; i < 3; ++i) {
+		unsigned short c0 = (color >> i*8) & 0xff;
+		unsigned short c1 = (*out >> i*8) & 0xff;
+		unsigned short c2 = (c0*a0 + _div255(c1*a1)*(255-a0)) / a2;
+		result |= ((unsigned int)c2 & 0xff) << i*8;
+	}
+	*out = result;
+}
+
+static void __fastcall repl_textShadow(int height, int width, int lineSize, unsigned int* input, unsigned int* output) {
+	width -= 1;
+	height -= 1;
+
+	for (int j = 1; j < height; ++j) {
+		for (int i = 1; i < width; ++i) {
+			unsigned int c0 = input[j * lineSize + i];
+
+			if (c0 >> 24) {
+				unsigned alpha = c0 >> 27;
+				unsigned int c1 = 0xff000000;
+
+				if (alpha > 16)
+					alpha = 16;
+				repl_alphaBlend(c0, alpha, &c1);
+				repl_alphaBlend(c1, 16, &output[j * lineSize + i]);
+			} else {
+				unsigned char current = input[(j - 1) * lineSize + i] >> 24;
+				unsigned char next = input[(j + 1) * lineSize + i] >> 24;
+
+				if (current < next)
+					current = next;
+				next = input[j * lineSize + (i - 1)] >> 24;
+				if (current < next)
+					current = next;
+				next = input[j * lineSize + (i + 1)] >> 24;
+				if (current < next)
+					current = next;
+				repl_alphaBlend(0, current >> 4, &output[j * lineSize + i]);
+			}
+		}
+	}
+}
+
 bool createTextTexture(int &retId, const wchar_t* text, SokuLib::SWRFont& font, SokuLib::Vector2i texsize, SokuLib::Vector2i *size)
 {
 	printf("Creating texture for wtext %S\n", text);
@@ -114,6 +165,7 @@ bool createTextTexture(int &retId, const wchar_t* text, SokuLib::SWRFont& font, 
 	}
 	if (D3D_OK != texPtr2->LockRect(0, &r2, nullptr, 0)) {
 		puts("Error in LockRect 2");
+		(*texPtr)->UnlockRect(0);
 		texPtr2->Release();
 		SokuLib::textureMgr.deallocate(retId);
 		return false;
@@ -128,9 +180,11 @@ bool createTextTexture(int &retId, const wchar_t* text, SokuLib::SWRFont& font, 
 		if (color) {
 			auto mean = (color.r + color.g + color.b) / 3;
 
-			ptr1[i] = SokuLib::Color{0xFF, 0xFF, 0xFF, static_cast<unsigned char>(mean)};
+			(font.description.shadow ? ptr2 : ptr1)[i] = SokuLib::Color{0xFF, 0xFF, 0xFF, static_cast<unsigned char>(mean)};
 		}
 	}
+	if (font.description.shadow)
+		repl_textShadow(texsize.y, texsize.x, texsize.x, reinterpret_cast<unsigned *>(r2.pBits), reinterpret_cast<unsigned *>(r1.pBits));
 	texPtr2->UnlockRect(0);
 	(*texPtr)->UnlockRect(0);
 	texPtr2->Release();

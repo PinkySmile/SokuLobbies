@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <string>
 
-#define PROTOCOL_VERSION 10
+#define PROTOCOL_VERSION 11
 
 namespace Lobbies
 {
@@ -73,8 +73,8 @@ namespace Lobbies
 		uint32_t modVersion = PROTOCOL_VERSION;
 		unsigned char versionString[16];
 		Soku2VersionInfo soku2Info;
-		char uniqueId[16];
-		char name[32];
+		uint64_t uniqueId;
+		char name[128];
 		char password[32] = {0};
 		PlayerCustomization custom;
 		LobbySettings settings;
