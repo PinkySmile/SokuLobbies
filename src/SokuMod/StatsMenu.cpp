@@ -270,6 +270,18 @@ void StatsMenu::_createMUStats(std::vector<std::shared_ptr<ChrEntry>> &list, con
 	}
 }
 
+static void roundPrintfOutput(char *buffer)
+{
+	auto pos = strlen(buffer) - 7;
+
+	if (buffer[pos] > '5')
+		buffer[pos - 1]++;
+	while (buffer[pos]) {
+		buffer[pos] = buffer[pos + 1];
+		pos++;
+	}
+}
+
 void StatsMenu::_createCardsStats(std::vector<std::shared_ptr<ChrEntry>> &list, const std::pair<unsigned, struct Character> &chr)
 {
 	list.emplace_back(new ChrEntry());
@@ -296,7 +308,7 @@ void StatsMenu::_createCardsStats(std::vector<std::shared_ptr<ChrEntry>> &list, 
 	ptr->name.rect.width = size.x;
 	ptr->name.rect.height = size.y;
 
-/*	ptr->wins.texture.createFromText("In Deck", lobbyData->getFont(12), {200, 20}, &size);
+	ptr->wins.texture.createFromText("In Deck", lobbyData->getFont(12), {200, 20}, &size);
 	ptr->wins.setSize(size.to<unsigned>());
 	ptr->wins.setPosition({345, 118});
 	ptr->wins.rect.width = size.x;
@@ -312,13 +324,13 @@ void StatsMenu::_createCardsStats(std::vector<std::shared_ptr<ChrEntry>> &list, 
 	ptr->total.setSize(size.to<unsigned>());
 	ptr->total.setPosition({558, 118});
 	ptr->total.rect.width = size.x;
-	ptr->total.rect.height = size.y;*/
+	ptr->total.rect.height = size.y;
 
-	ptr->losses.texture.createFromText("Used?", lobbyData->getFont(12), {200, 20}, &size);
+/*	ptr->losses.texture.createFromText("Used?", lobbyData->getFont(12), {200, 20}, &size);
 	ptr->losses.setSize(size.to<unsigned>());
 	ptr->losses.setPosition({452, 118});
 	ptr->losses.rect.width = size.x;
-	ptr->losses.rect.height = size.y;
+	ptr->losses.rect.height = size.y;*/
 
 	auto entry = lobbyData->loadedCharacterCardUsage.find(chr.first);
 	auto val1 = entry == lobbyData->loadedCharacterCardUsage.end() ? LobbyData::CardChrStatEntry{0} : entry->second;
@@ -352,36 +364,40 @@ void StatsMenu::_createCardsStats(std::vector<std::shared_ptr<ChrEntry>> &list, 
 		ptr->name.rect.width = size.x;
 		ptr->name.rect.height = size.y;
 
-		/*if (val1.nbGames != 0)
-			sprintf(buffer, "%u (%.2f/game)", val2.inDeck, val2.inDeck / (float)val1.nbGames);
-		else
+		if (val1.nbGames != 0) {
+			sprintf(buffer, "%u (%.3f/game)", val2.inDeck, (float)val2.inDeck / (float)val1.nbGames);
+			roundPrintfOutput(buffer);
+		} else
 			sprintf(buffer, "%u (0/game)", val2.inDeck);
 		ptr->wins.texture.createFromText(buffer, lobbyData->getFont(12), {200, 20}, &size);
 		ptr->wins.setSize(size.to<unsigned>());
 		ptr->wins.rect.width = size.x;
 		ptr->wins.rect.height = size.y;
 
-		if (val1.nbGames != 0)
-			sprintf(buffer, "%u (%.2f/game)", val2.used, val2.used / (float)val1.nbGames);
-		else
+		if (val1.nbGames != 0) {
+			sprintf(buffer, "%u (%.3f/game)", val2.used, (float)val2.used / (float)val1.nbGames);
+			roundPrintfOutput(buffer);
+		}  else
 			sprintf(buffer, "%u (0/game)", val2.used);
 		ptr->losses.texture.createFromText(buffer, lobbyData->getFont(12), {200, 20}, &size);
 		ptr->losses.setSize(size.to<unsigned>());
 		ptr->losses.rect.width = size.x;
 		ptr->losses.rect.height = size.y;
 
-		if (val1.nbGames != 0)
-			sprintf(buffer, "%u (%.2f/game)", val2.burnt, val2.burnt / (float)val1.nbGames);
-		else
+		if (val1.nbGames != 0) {
+			sprintf(buffer, "%u (%.3f/game)", val2.burnt, (float)val2.burnt / (float)val1.nbGames);
+			roundPrintfOutput(buffer);
+		} else
 			sprintf(buffer, "%u (0/game)", val2.burnt);
 		ptr->total.texture.createFromText(buffer, lobbyData->getFont(12), {200, 20}, &size);
 		ptr->total.setSize(size.to<unsigned>());
 		ptr->total.rect.width = size.x;
-		ptr->total.rect.height = size.y;*/
-		ptr->losses.texture.createFromText(val2.used ? "Used" : "Not used", lobbyData->getFont(12), {200, 20}, &size);
+		ptr->total.rect.height = size.y;
+
+		/*ptr->losses.texture.createFromText(val2.used ? "Used" : "Not used", lobbyData->getFont(12), {200, 20}, &size);
 		ptr->losses.setSize(size.to<unsigned>());
 		ptr->losses.rect.width = size.x;
-		ptr->losses.rect.height = size.y;
+		ptr->losses.rect.height = size.y;*/
 	}
 }
 
