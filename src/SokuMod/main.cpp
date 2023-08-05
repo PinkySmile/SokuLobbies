@@ -187,9 +187,7 @@ void countGame()
 	auto oid = SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER ? SokuLib::leftChar : SokuLib::rightChar;
 	auto &chr = SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER ? battle.rightCharacterManager : battle.leftCharacterManager;
 	auto data = lobbyData->loadedCharacterStats.find(mid);
-	auto &wins = lobbyData->achievementByRequ["win"];
-	auto &loss = lobbyData->achievementByRequ["lose"];
-	auto &play = lobbyData->achievementByRequ["play"];
+	auto dataAgainst = lobbyData->loadedCharacterStats.find(oid);
 
 	if (data == lobbyData->loadedCharacterStats.end()) {
 		LobbyData::CharacterStatEntry entry{0, 0, 0, 0};
@@ -197,34 +195,13 @@ void countGame()
 		lobbyData->loadedCharacterStats[mid] = entry;
 		data = lobbyData->loadedCharacterStats.find(mid);
 	}
+	if (dataAgainst == lobbyData->loadedCharacterStats.end()) {
+		LobbyData::CharacterStatEntry entry{0, 0, 0, 0};
 
-	// Wins achievements
-	auto it = std::find_if(wins.begin(), wins.end(), [mid, &data](LobbyData::Achievement *achievement){
-		return !achievement->awarded && achievement->requirement["chr"] == mid && achievement->requirement["count"] <= data->second.wins;
-	});
-
-	if (it != wins.end()) {
-		(*it)->awarded = true;
-		lobbyData->achievementAwardQueue.push_back(*it);
+		lobbyData->loadedCharacterStats[oid] = entry;
+		dataAgainst = lobbyData->loadedCharacterStats.find(oid);
 	}
 
-	// Losses achievements
-	it = std::find_if(loss.begin(), loss.end(), [mid, &data](LobbyData::Achievement *achievement){
-		return !achievement->awarded && achievement->requirement["chr"] == mid && achievement->requirement["count"] <= data->second.losses;
-	});
-	if (it != loss.end()) {
-		(*it)->awarded = true;
-		lobbyData->achievementAwardQueue.push_back(*it);
-	}
-
-	// Play achievements
-	it = std::find_if(play.begin(), play.end(), [mid, &data](LobbyData::Achievement *achievement){
-		return !achievement->awarded && achievement->requirement["chr"] == mid && achievement->requirement["count"] <= data->second.losses + data->second.wins;
-	});
-	if (it != play.end()) {
-		(*it)->awarded = true;
-		lobbyData->achievementAwardQueue.push_back(*it);
-	}
 
 	// My stats
 	data->second.wins += chr.score >= 2;
@@ -243,26 +220,19 @@ void countGame()
 	}
 
 	// Against stats
-	data = lobbyData->loadedCharacterStats.find(oid);
-	if (data == lobbyData->loadedCharacterStats.end()) {
-		LobbyData::CharacterStatEntry entry{0, 0, 0, 0};
-
-		lobbyData->loadedCharacterStats[oid] = entry;
-		data = lobbyData->loadedCharacterStats.find(oid);
-	}
-	data->second.againstWins += chr.score >= 2;
-	data->second.againstLosses += chr.score < 2;
+	dataAgainst->second.againstWins += chr.score >= 2;
+	dataAgainst->second.againstLosses += chr.score < 2;
 	// Random select
 	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER ? selectedRandom.first : selectedRandom.second) {
-		data = lobbyData->loadedCharacterStats.find(SokuLib::CHARACTER_RANDOM);
-		if (data == lobbyData->loadedCharacterStats.end()) {
+		dataAgainst = lobbyData->loadedCharacterStats.find(SokuLib::CHARACTER_RANDOM);
+		if (dataAgainst == lobbyData->loadedCharacterStats.end()) {
 			LobbyData::CharacterStatEntry entry{0, 0, 0, 0};
 
 			lobbyData->loadedCharacterStats[SokuLib::CHARACTER_RANDOM] = entry;
-			data = lobbyData->loadedCharacterStats.find(SokuLib::CHARACTER_RANDOM);
+			dataAgainst = lobbyData->loadedCharacterStats.find(SokuLib::CHARACTER_RANDOM);
 		}
-		data->second.againstWins += chr.score >= 2;
-		data->second.againstLosses += chr.score < 2;
+		dataAgainst->second.againstWins += chr.score >= 2;
+		dataAgainst->second.againstLosses += chr.score < 2;
 	}
 
 	// Matchup stats
@@ -316,6 +286,39 @@ void countGame()
 	}
 	lobbyData->saveStats();
 
+
+	// Wins achievements
+	auto &wins = lobbyData->achievementByRequ["win"];
+	auto it = std::find_if(wins.begin(), wins.end(), [mid, &data](LobbyData::Achievement *achievement){
+		return !achievement->awarded && achievement->requirement["chr"] == mid && achievement->requirement["count"] <= data->second.wins;
+	});
+
+	if (it != wins.end()) {
+		(*it)->awarded = true;
+		lobbyData->achievementAwardQueue.push_back(*it);
+	}
+
+	// Losses achievements
+	auto &loss = lobbyData->achievementByRequ["lose"];
+	it = std::find_if(loss.begin(), loss.end(), [mid, &data](LobbyData::Achievement *achievement){
+		return !achievement->awarded && achievement->requirement["chr"] == mid && achievement->requirement["count"] <= data->second.losses;
+	});
+	if (it != loss.end()) {
+		(*it)->awarded = true;
+		lobbyData->achievementAwardQueue.push_back(*it);
+	}
+
+	// Play achievements
+	auto &play = lobbyData->achievementByRequ["play"];
+	it = std::find_if(play.begin(), play.end(), [mid, &data](LobbyData::Achievement *achievement){
+		return !achievement->awarded && achievement->requirement["chr"] == mid && achievement->requirement["count"] <= data->second.losses + data->second.wins;
+	});
+	if (it != play.end()) {
+		(*it)->awarded = true;
+		lobbyData->achievementAwardQueue.push_back(*it);
+	}
+
+	// All cards achievements
 	for (auto &elem : textures->second) {
 		auto cardIt = cardsIt->second.cards.find(elem.first);
 
