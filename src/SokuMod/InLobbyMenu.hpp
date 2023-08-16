@@ -143,6 +143,8 @@ public:
 	int compositionCursor = 0;
 	int keyBufferUsed = 0;
 	wchar_t keyBuffer[2] = {0, 0};
+	bool inWine = false;
+	bool wineWorkaroundNeeded = false;
 
 	InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connection &connection);
 	~InLobbyMenu();
