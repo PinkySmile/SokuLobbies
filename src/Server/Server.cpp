@@ -464,7 +464,7 @@ loop:
 	return result;
 }
 
-bool Server::_startRoom(const std::vector<Connection *> &machine)
+bool Server::_startRoom(std::vector<Connection *> &machine)
 {
 	auto p1settings = machine[0]->getSettings().hostPref & Lobbies::HOSTPREF_HOST_PREF_MASK;
 	auto p2settings = machine[1]->getSettings().hostPref & Lobbies::HOSTPREF_HOST_PREF_MASK;
