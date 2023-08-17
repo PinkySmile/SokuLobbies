@@ -192,7 +192,7 @@ std::vector<std::string> split(const std::string &str, char delim)
 	list.push_back(str.substr(i, str.length()));
 	return list;
 }
- 
+
 bool checkIp(const std::string &ip)
 {
 	std::vector<std::string> list = split(ip, '.');
@@ -451,7 +451,19 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 		}
 		machine.mutex.unlock();
 	};
-	connection.connect();
+	this->_connectThread = std::thread{[this, &connection](){
+		for (int i = 0; i < 15; i++) {
+			if (this->_disconnected)
+				return;
+			if (this->_connection.isInit())
+				return;
+			this->_connection.connect();
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+		}
+		playSound(38);
+		this->_wasConnected = true;
+		MessageBox(SokuLib::window, "Failed to join lobby: Connection timed out.", "Timed out", MB_ICONERROR);
+	}};
 	ptrMutex.lock();
 	activeMenu = this;
 	ptrMutex.unlock();
@@ -476,6 +488,8 @@ InLobbyMenu::~InLobbyMenu()
 		SokuLib::playBGM("data/bgm/op2.ogg");
 	if (this->_hostThread.joinable())
 		this->_hostThread.join();
+	if (this->_connectThread.joinable())
+		this->_connectThread.join();
 }
 
 void InLobbyMenu::_()

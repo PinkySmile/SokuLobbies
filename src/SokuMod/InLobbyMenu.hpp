@@ -104,6 +104,7 @@ private:
 	std::vector<ElevatorMachine> _elevators;
 	std::unique_ptr<class SmallHostlist> _hostlist;
 	std::vector<uint32_t> _insideElevator;
+	std::thread _connectThread;
 	unsigned char _elevatorCtr = 0;
 	bool _elevatorOut = false;
 
