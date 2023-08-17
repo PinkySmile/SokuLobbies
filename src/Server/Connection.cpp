@@ -256,8 +256,12 @@ bool Connection::_handlePacket(const Lobbies::Packet &packet, size_t &size)
 
 bool Connection::_handlePacket(const Lobbies::PacketHello &packet, size_t &size)
 {
-	if (this->_init)
-		return false;
+	if (this->_init) {
+		if (size < sizeof(packet))
+			return false;
+		size -= sizeof(packet);
+		return true;
+	}
 	if (size < 5)
 		return false;
 	if (packet.modVersion > PROTOCOL_VERSION)
