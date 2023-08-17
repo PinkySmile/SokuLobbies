@@ -482,6 +482,7 @@ bool Server::_startRoom(const std::vector<Connection *> &machine)
 		machine[0]->send(&msg, sizeof(msg));
 		machine[1]->send(&msg, sizeof(msg));
 		machine[1]->send(&leave, sizeof(leave));
+		machine.pop_back();
 		return false;
 	}
 	if (p1settings == p2settings && p1settings == Lobbies::HOSTPREF_HOST_ONLY) {
@@ -493,6 +494,7 @@ bool Server::_startRoom(const std::vector<Connection *> &machine)
 		machine[0]->send(&msg, sizeof(msg));
 		machine[1]->send(&msg, sizeof(msg));
 		machine[1]->send(&leave, sizeof(leave));
+		machine.pop_back();
 		return false;
 	}
 	if (p1settings >= Lobbies::HOSTPREF_NO_PREF) {
