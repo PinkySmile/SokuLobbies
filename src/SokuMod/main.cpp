@@ -186,15 +186,16 @@ void countGame()
 	auto mid = SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER ? SokuLib::rightChar : SokuLib::leftChar;
 	auto oid = SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER ? SokuLib::leftChar : SokuLib::rightChar;
 	auto &chr = SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER ? battle.rightCharacterManager : battle.leftCharacterManager;
-	auto data = lobbyData->loadedCharacterStats.find(mid);
-	auto dataAgainst = lobbyData->loadedCharacterStats.find(oid);
 
+	auto data = lobbyData->loadedCharacterStats.find(mid);
 	if (data == lobbyData->loadedCharacterStats.end()) {
 		LobbyData::CharacterStatEntry entry{0, 0, 0, 0};
 
 		lobbyData->loadedCharacterStats[mid] = entry;
 		data = lobbyData->loadedCharacterStats.find(mid);
 	}
+
+	auto dataAgainst = lobbyData->loadedCharacterStats.find(oid);
 	if (dataAgainst == lobbyData->loadedCharacterStats.end()) {
 		LobbyData::CharacterStatEntry entry{0, 0, 0, 0};
 
@@ -202,6 +203,19 @@ void countGame()
 		dataAgainst = lobbyData->loadedCharacterStats.find(oid);
 	}
 
+	auto muIt = lobbyData->loadedMatchupStats.find({mid, oid});
+	if (muIt == lobbyData->loadedMatchupStats.end()) {
+		LobbyData::MatchupStatEntry entry{0, 0};
+
+		lobbyData->loadedMatchupStats[{mid, oid}] = entry;
+		muIt = lobbyData->loadedMatchupStats.find({mid, oid});
+	}
+
+	auto cardsIt = lobbyData->loadedCharacterCardUsage.find(mid);
+	if (cardsIt == lobbyData->loadedCharacterCardUsage.end()) {
+		lobbyData->loadedCharacterCardUsage[mid] = {0};
+		cardsIt = lobbyData->loadedCharacterCardUsage.find(mid);
+	}
 
 	// My stats
 	data->second.wins += chr.score >= 2;
@@ -236,26 +250,12 @@ void countGame()
 	}
 
 	// Matchup stats
-	auto muIt = lobbyData->loadedMatchupStats.find({mid, oid});
-
-	if (muIt == lobbyData->loadedMatchupStats.end()) {
-		LobbyData::MatchupStatEntry entry{0, 0};
-
-		lobbyData->loadedMatchupStats[{mid, oid}] = entry;
-		muIt = lobbyData->loadedMatchupStats.find({mid, oid});
-	}
 	muIt->second.wins += chr.score >= 2;
 	muIt->second.losses += chr.score < 2;
-	
-	// Cards stats
-	auto cardsIt = lobbyData->loadedCharacterCardUsage.find(mid);
-	bool usedAll = true;
-	auto textures = lobbyData->cardsTextures.find(mid);
 
-	if (cardsIt == lobbyData->loadedCharacterCardUsage.end()) {
-		lobbyData->loadedCharacterCardUsage[mid] = {0};
-		cardsIt = lobbyData->loadedCharacterCardUsage.find(mid);
-	}
+	// Cards stats
+	bool usedAll = true;
+
 	cardsIt->second.nbGames++;
 	for (auto card : cardsBurnt) {
 		auto cardIt = cardsIt->second.cards.find(card.second);
@@ -319,6 +319,7 @@ void countGame()
 	}
 
 	// All cards achievements
+	auto textures = lobbyData->cardsTextures.find(mid);
 	for (auto &elem : textures->second) {
 		auto cardIt = cardsIt->second.cards.find(elem.first);
 

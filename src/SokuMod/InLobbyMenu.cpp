@@ -333,11 +333,6 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 		this->_music = "data/bgm/" + std::string(r.music, strnlen(r.music, sizeof(r.music))) + ".ogg";
 		SokuLib::playBGM(this->_music.c_str());
 	};
-	connection.onConnectRequest = [this](const std::string &ip, unsigned short port, bool spectate){
-		playSound(57);
-		this->_connection.getMe()->battleStatus = 2;
-		this->_parent->joinHost(ip.c_str(), port, spectate);
-	};
 	connection.onError = [this](const std::string &msg){
 		playSound(38);
 		this->_wasConnected = true;
@@ -351,6 +346,11 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 		playSound(49);
 		this->_addMessageToList(channel, player, msg);
 	};
+	connection.onConnectRequest = [this](const std::string &ip, unsigned short port, bool spectate){
+		playSound(57);
+		this->_connection.getMe()->battleStatus = 2;
+		this->_parent->joinHost(ip.c_str(), port, spectate);
+	};
 	connection.onHostRequest = [this]{
 		playSound(57);
 		this->_connection.getMe()->battleStatus = 2;
@@ -359,11 +359,6 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 		return hostPort;
 	};
 	connection.onArcadeEngage = [this, &connection](const Player &p, uint32_t id){
-		if (&p == connection.getMe()) {
-			printf("Host pref %x\n", p.settings.hostPref);
-			if (p.settings.hostPref & Lobbies::HOSTPREF_ACCEPT_HOSTLIST)
-				this->_startHosting();
-		}
 		if (id >= this->_machines.size() - 1)
 			return;
 
@@ -376,6 +371,11 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 			machine.animationCtr = 0;
 			machine.animIdle = false;
 			machine.currentAnim = &lobbyData->arcades.select;
+			if (&p == connection.getMe()) {
+				printf("Host pref %x\n", p.settings.hostPref);
+				if (p.settings.hostPref & Lobbies::HOSTPREF_ACCEPT_HOSTLIST)
+					this->_startHosting();
+			}
 		} else if (machine.playerCount == 2) {
 			machine.animation = 0;
 			machine.animationCtr = 0;
@@ -1843,6 +1843,47 @@ void InLobbyMenu::_renderMachineOverlay()
 	this->_currentMachine->skin.overlay.draw();
 }
 
+
+
+constexpr uint8_t VN[16] = {
+	0x46, 0xC9, 0x67, 0xC8,
+	0xAC, 0xF2, 0x44, 0x4D,
+	0xB8, 0xB1, 0xEC, 0xEE,
+	0xD4, 0xD5, 0x40, 0x4A
+};
+constexpr uint8_t SR_SWR[16] = {
+	0x64, 0x73, 0x65, 0xD9,
+	0xFF, 0xC4, 0x6E, 0x48,
+	0x8D, 0x7C, 0xA1, 0x92,
+	0x31, 0x34, 0x72, 0x95
+};
+constexpr uint8_t VN_SWR[16] = {
+	0x6E, 0x73, 0x65, 0xD9,
+	0xFF, 0xC4, 0x6E, 0x48,
+	0x8D, 0x7C, 0xA1, 0x92,
+	0x31, 0x34, 0x72, 0x95
+};
+constexpr uint8_t GR_SWR[16] = {
+	0x69, 0x73, 0x65, 0xD9,
+	0xFF, 0xC4, 0x6E, 0x48,
+	0x8D, 0x7C, 0xA1, 0x92,
+	0x31, 0x34, 0x72, 0x95
+};
+constexpr uint8_t GRCN_SWR[16] = {
+	0x6A, 0x73, 0x65, 0xD9,
+	0xFF, 0xC4, 0x6E, 0x48,
+	0x8D, 0x7C, 0xA1, 0x92,
+	0x31, 0x34, 0x72, 0x95
+};
+const uint8_t *versions[] = {
+	VN,
+	SR_SWR,
+	VN_SWR,
+	GR_SWR,
+	GRCN_SWR
+};
+const char * const versionNames[] = { "-SWR", "+SR", "Vanilla", "+GR", "+GR62" };
+
 void InLobbyMenu::_startHosting()
 {
 	auto ranked = this->_connection.getMe()->settings.hostPref & Lobbies::HOSTPREF_PREFER_RANKED;
@@ -1852,16 +1893,39 @@ void InLobbyMenu::_startHosting()
 		this->_hostThread.join();
 	this->_hostThread = std::thread{[this, ranked]{
 		std::string converted;
+		auto ip = getMyIp();
+		unsigned short port = hostPort;
+		auto dup = strdup(ip);
+		char *pos = strchr(dup, ':');
+		std::string name;
 
-		puts("Putting hostlist");
+		for (int i = 0; i < sizeof(versionNames) / sizeof(*versionNames); i++) {
+			if (memcmp(versions[i], (unsigned char *)0x858B80, 16) == 0) {
+				name = versionNames[i];
+				break;
+			}
+		}
+		if (name.empty())
+			name = "+???";
+
+		if (pos) {
+			try {
+				port = std::stoul(pos + 1);
+			} catch (std::exception &e) {
+				puts(e.what());
+			}
+			*pos = 0;
+		}
+		printf("Putting hostlist %s:%u\n", dup, port);
 		th123intl::ConvertCodePage(th123intl::GetTextCodePage(), SokuLib::profile1.name.operator std::string(), CP_UTF8, converted);
 		nlohmann::json data = {
 			{"profile_name", converted},
-			{"message", "SokuLobbies " + std::string(modVersion) + ": Waiting in " + this->_roomName + " | " + (ranked ? "ranked" : "casual")},
-			{"host", getMyIp()},
-			{"port", hostPort}
+			{"message", "[" + name + "] SokuLobbies " + std::string(modVersion) + ": Waiting in " + this->_roomName + " | " + (ranked ? "ranked" : "casual")},
+			{"host", dup},
+			{"port", port}
 		};
 
+		free(dup);
 		try {
 			lobbyData->httpRequest("https://konni.delthas.fr/games", "PUT", data.dump());
 			this->_addMessageToList(0x00FF00, 0, "Broadcast to hostlist successful");
