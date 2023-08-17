@@ -170,6 +170,41 @@ static LRESULT __stdcall Hooked_WndProc(const HWND hWnd, UINT uMsg, WPARAM wPara
 	return CallWindowProc(Original_WndProc, hWnd, uMsg, wParam, lParam);
 }
 
+bool isNumber(const std::string &str)
+{
+	for (auto c : str)
+		if (!std::isdigit(c))
+			return false;
+	return true;
+}
+
+std::vector<std::string> split(const std::string &str, char delim)
+{
+	auto i = 0;
+	std::vector<std::string> list;
+	auto pos = str.find(delim);
+
+	while (pos != std::string::npos) {
+		list.push_back(str.substr(i, pos - i));
+		i = ++pos;
+		pos = str.find(delim, pos);
+	}
+	list.push_back(str.substr(i, str.length()));
+	return list;
+}
+ 
+bool checkIp(const std::string &ip)
+{
+	std::vector<std::string> list = split(ip, '.');
+
+	if (list.size() != 4)
+		return false;
+	for (const auto &str : list)
+		if (!isNumber(str) || stoi(str) > 255 || stoi(str) < 0)
+			return false;
+	return true;
+}
+
 InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connection &connection) :
 	_connection(connection),
 	_parent(parent),
@@ -348,6 +383,13 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 	};
 	connection.onConnectRequest = [this](const std::string &ip, unsigned short port, bool spectate){
 		playSound(57);
+		if (!checkIp(ip)) {
+			Lobbies::PacketArcadeLeave leave{0};
+
+			this->_connection.send(&leave, sizeof(leave));
+			this->_addMessageToList(0xFF0000, 0, "Failed to connect: Your opponent's custom IP is invalid");
+			return;
+		}
 		this->_connection.getMe()->battleStatus = 2;
 		this->_parent->joinHost(ip.c_str(), port, spectate);
 	};

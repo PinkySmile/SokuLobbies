@@ -279,8 +279,23 @@ bool Connection::_handlePacket(const Lobbies::PacketGameRequest &packet, size_t 
 		return false;
 	size -= sizeof(packet);
 
-	Lobbies::PacketGameStart game{getMyIp(), this->onHostRequest(), false};
+	auto ip = getMyIp();
+	unsigned short port = this->onHostRequest();
+	auto dup = strdup(ip);
+	char *pos = strchr(dup, ':');
 
+	if (pos) {
+		try {
+			port = std::stoul(pos + 1);
+		} catch (std::exception &e) {
+			puts(e.what());
+		}
+		*pos = 0;
+	}
+
+	Lobbies::PacketGameStart game{dup, port, false};
+
+	free(dup);
 	this->send(&game, sizeof(game));
 	this->_me->battleStatus = 2;
 	return true;
