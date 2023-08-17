@@ -140,6 +140,7 @@ void LobbyData::_loadAvatars()
 	nlohmann::json j;
 	nlohmann::json j2;
 	std::vector<std::string> order;
+	std::map<std::string, std::string> sprites;
 
 	if (stream.fail())
 		throw std::runtime_error("Cannot open file " + path.string() + ": " + strerror(errno));
@@ -176,6 +177,7 @@ void LobbyData::_loadAvatars()
 			avatar.animationStyle = val["animation_style"];
 		if (val.contains("hidden"))
 			avatar.hidden = val["hidden"];
+		sprites[avatar.code] = val["spritesheet"];
 		avatar.sprite.texture.loadFromFile((std::filesystem::path(profileFolderPath) / val["spritesheet"].get<std::string>()).string().c_str());
 		avatar.sprite.rect.width = avatar.sprite.texture.getSize().x / avatar.nbAnimations;
 		avatar.sprite.rect.height = avatar.sprite.texture.getSize().y / 2;
@@ -185,13 +187,15 @@ void LobbyData::_loadAvatars()
 		});
 		if (std::find(order.begin(), order.end(), avatar.code) == order.end())
 			throw std::invalid_argument("Avatar ID is not in the order list: " + avatar.code);
-		if (this->avatarsByCode.find(avatar.code) != this->avatarsByCode.end())
-			throw std::invalid_argument("Duplicate avatar ID found: " + avatar.code);
-		this->avatarsByCode[avatar.code] = &avatar;
 	}
 	std::sort(this->avatars.begin(), this->avatars.end(), [&order](const Avatar &a, const Avatar &b){
 		return std::find(order.begin(), order.end(), a.code) < std::find(order.begin(), order.end(), b.code);
 	});
+	for (auto &avatar : this->avatars) {
+		if (this->avatarsByCode.find(avatar.code) != this->avatarsByCode.end())
+			throw std::invalid_argument("Duplicate avatar ID found: " + avatar.code);
+		this->avatarsByCode[avatar.code] = &avatar;
+	}
 	printf("There are %zu avatars\n", this->avatars.size());
 }
 
