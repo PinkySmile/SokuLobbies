@@ -885,7 +885,7 @@ void LobbyMenu::_connectLoop()
 						runOnUI(fct);
 					};
 					connection->c->onImpMsg = [weak, this](const std::string &msg) {
-						auto fct = [weak, msg]{
+						auto fct = [weak, msg, this]{
 							auto c = weak.lock();
 
 							std::cerr << "Broadcast: " << msg << std::endl;
