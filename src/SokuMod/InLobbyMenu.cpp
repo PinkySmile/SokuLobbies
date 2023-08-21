@@ -1687,6 +1687,8 @@ void InLobbyMenu::_sendMessage(const std::wstring &msg)
 			auto it = lobbyData->emotesByName.find(convertEncoding<wchar_t, char, UTF16Decode, UTF8Encode>(currentEmote));
 
 			if (it == lobbyData->emotesByName.end() || lobbyData->isLocked(*it->second)) {
+				if (lobbyData->isLocked(*it->second))
+					this->_addMessageToList(0xAFAFAF, 0, "You can't use :" + convertEncoding<wchar_t, char, UTF16Decode, UTF8Encode>(currentEmote) + ": because you didn't unlock it.");
 				token += L':';
 				token += currentEmote;
 				token += L':';
