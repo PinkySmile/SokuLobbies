@@ -4499,7 +4499,7 @@
             "chr": 9,
             "action": 605,
             "block_blacklist": [
-                0
+                14
             ]
         },
         "rewards": [

@@ -110,7 +110,7 @@ LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 		this->_loadedSettings.player.feet = 0;
 	}
 
-	th123intl::ConvertCodePage(th123intl::GetTextCodePage(), SokuLib::profile1.name.operator std::string(), CP_UTF8, this->_loadedSettings.name);
+	th123intl::ConvertCodePage(th123intl::GetTextCodePage(), (char *)SokuLib::profile1.name, CP_UTF8, this->_loadedSettings.name);
 	// For now, we get the stuff from the INI
 	this->_loadedSettings.settings.hostPref = static_cast<Lobbies::HostPreference>(hostPref);
 	this->_loadedSettings.pos.x = 20;

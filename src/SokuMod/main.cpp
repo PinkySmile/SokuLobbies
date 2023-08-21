@@ -318,6 +318,37 @@ void countGame()
 		lobbyData->achievementAwardQueue.push_back(*it);
 	}
 
+	// Win move
+	if (chr.score >= 2) {
+		printf("Won! %i %i %i %i\n", chr.score, mid, chr.objectBase.action, chr.objectBase.actionBlockId);
+		auto &win_move = lobbyData->achievementByRequ["win_move"];
+		it = std::find_if(win_move.begin(), win_move.end(), [mid, &chr](LobbyData::Achievement *achievement){
+			if (achievement->awarded)
+				return false;
+			if (achievement->requirement["chr"] != mid)
+				return false;
+			if (achievement->requirement["action"] != chr.objectBase.action)
+				return false;
+			if (achievement->requirement.contains("block_blacklist")) {
+				auto &list = achievement->requirement["block_blacklist"].get<std::vector<int>>();
+
+				if (std::find(list.begin(), list.end(), chr.objectBase.actionBlockId) != list.end())
+					return false;
+			}
+			if (achievement->requirement.contains("block_whitelist")) {
+				auto &list = achievement->requirement["block_whitelist"].get<std::vector<int>>();
+
+				if (std::find(list.begin(), list.end(), chr.objectBase.actionBlockId) == list.end())
+					return false;
+			}
+			return true;
+		});
+		if (it != win_move.end()) {
+			(*it)->awarded = true;
+			lobbyData->achievementAwardQueue.push_back(*it);
+		}
+	}
+
 	// All cards achievements
 	auto textures = lobbyData->cardsTextures.find(mid);
 	for (auto &elem : textures->second) {
