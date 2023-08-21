@@ -22,13 +22,22 @@ typedef fd_set FD_SET;
 #ifdef _WIN32
 std::string getLastSocketError(int err) {
 	wchar_t *s = nullptr;
-
-	FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, err,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&s, 0, NULL);
+	auto chars = FormatMessageW(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+		nullptr,
+		err,
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(LPWSTR)&s,
+		0,
+		NULL
+	);
 
 	std::stringstream stream;
 
-	stream << "WSAGetLastError " << err << ": ";
+	stream << "WSAGetLastError " << err;
+	if (!chars)
+		return stream.str();
+	stream << ": ";
 	for (int i = 0; s[i]; i++)
 		stream << static_cast<char>(s[i]);
 	LocalFree(s);
