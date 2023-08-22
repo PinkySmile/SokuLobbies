@@ -14,6 +14,16 @@
 
 void displaySokuCursor(SokuLib::Vector2i pos, SokuLib::Vector2u size);
 
+static const char *rewardNames[] = {
+	"Accessory (Not Implemented)",
+	"Avatar",
+	"Background (Not Implemented)",
+	"Emote",
+	"Prop (Not Implemented)",
+	"Title (Not Implemented)",
+	"Unknown"
+};
+
 AchievementsMenu::AchievementsMenu()
 {
 	std::filesystem::path folder = profileFolderPath;
@@ -61,6 +71,22 @@ AchievementsMenu::AchievementsMenu()
 	this->_hiddenSprite.setPosition({0, -20});
 	this->_hiddenSprite.tint = SokuLib::Color{0x40, 0x40, 0x40};
 
+	this->_reward.texture.createFromText("Reward:", lobbyData->getFont(16), {400, 100}, &size);
+	this->_reward.rect.width = size.x;
+	this->_reward.rect.height = size.y;
+	this->_reward.setSize(size.to<unsigned>());
+	this->_reward.setPosition({0, -20});
+	this->_reward.tint = SokuLib::Color::White;
+
+	for (int i = 0; i < 6; i++) {
+		auto &sprite = this->_panRightSpriteTxt[i];
+		SokuLib::Vector2i size;
+
+		sprite.texture.createFromText(rewardNames[i], lobbyData->getFont(14), {600, 474}, &size);
+		sprite.setSize(size.to<unsigned>());
+		sprite.rect.width = size.x;
+		sprite.rect.height = size.y;
+	}
 	for (auto &ach : lobbyData->achievements)
 		ach.nameSpriteFull.tint = ach.awarded ? SokuLib::Color::White : SokuLib::Color{0x80, 0x80, 0x80};
 
@@ -129,6 +155,23 @@ int AchievementsMenu::onProcess()
 	return true;
 }
 
+SokuLib::DrawUtils::Sprite *AchievementsMenu::getRewardText(const std::string &type)
+{
+	if (type == "accessory")
+		return &this->_panRightSpriteTxt[0];
+	if (type == "avatar")
+		return &this->_panRightSpriteTxt[1];
+	if (type == "background")
+		return &this->_panRightSpriteTxt[2];
+	if (type == "emote")
+		return &this->_panRightSpriteTxt[3];
+	if (type == "prop")
+		return &this->_panRightSpriteTxt[4];
+	if (type == "title")
+		return &this->_panRightSpriteTxt[5];
+	return &this->_panRightSpriteTxt[6];
+}
+
 int AchievementsMenu::onRender()
 {
 	this->_title.draw();
@@ -151,11 +194,21 @@ int AchievementsMenu::onRender()
 	auto &ach = lobbyData->achievements[this->_selected];
 
 	ach.nameSpriteTitle.draw();
-	if (!ach.hidden || ach.awarded) {
+	for (auto &pair : this->_avatars) {
+		pair.first.second++;
+		if (pair.first.second >= pair.second->animationsStep) {
+			pair.first.second = 0;
+			pair.first.first++;
+			pair.first.first %= pair.second->nbAnimations;
+		}
+		pair.second->sprite.rect.left = pair.second->sprite.rect.width * pair.first.first;
+	}
+	if (!ach.hidden || ach.awarded)
 		ach.descSprite.draw();
-		this->_panelRightSprite.draw();
-	} else
+	else
 		this->_hiddenSprite.draw();
+	for (auto s : this->_rewardSprites)
+		s->draw();
 	return 0;
 }
 
@@ -172,23 +225,75 @@ void AchievementsMenu::_updateAchRightPanel()
 	auto &desc = !ach.hidden || ach.awarded ? ach.descSprite : this->_hiddenSprite;
 
 	desc.setPosition({315, ach.nameSpriteTitle.getPosition().y + 30});
-	if (ach.hidden && !ach.awarded)
-		return;
+	this->_reward.setPosition({315, static_cast<int>(desc.getPosition().y + desc.getSize().y + 12)});
 
-	std::string str = "Rewards:";
+	int top = this->_reward.getPosition().y + this->_reward.getSize().y + 4;
 
-	for (auto &reward : ach.rewards) {
-		str += "<br>";
-		str += reward.dump(3);
+	this->_avatars.clear();
+	this->_rewards.clear();
+	this->_rewardSprites.clear();
+	this->_extraSprites.clear();
+	this->_rewardSprites.push_back(&this->_reward);
+	for (auto &reward : ach.rewards)
+		this->_rewards[reward["type"]].push_back(reward);
+	for (auto &pair : this->_rewards) {
+		auto &sprite = *this->getRewardText(pair.first);
+		int x = 0;
+		int size = 0;
+
+		sprite.setPosition({315, top});
+		top += sprite.getSize().y;
+		this->_rewardSprites.push_back(&sprite);
+		if (pair.first == "avatar") {
+			for (auto &reward : pair.second) {
+				auto &avatar = *lobbyData->avatarsByCode[reward["id"]];
+
+				avatar.sprite.setPosition({315 + x, top});
+				avatar.sprite.setSize({
+					static_cast<unsigned int>(avatar.sprite.rect.width * avatar.scale / 2),
+					static_cast<unsigned int>(avatar.sprite.rect.height * avatar.scale / 2)
+				});
+				avatar.sprite.tint = SokuLib::Color::White;
+				avatar.sprite.setMirroring(false, false);
+				avatar.sprite.rect.left = 0;
+				avatar.sprite.rect.top = 0;
+				x += avatar.sprite.getSize().x;
+				size = max(size, avatar.sprite.getSize().y);
+				this->_avatars.emplace_back(std::pair<unsigned,unsigned>{0, 0}, &avatar);
+				this->_rewardSprites.push_back(&avatar.sprite);
+			}
+		} else if (pair.first == "emote") {
+			top += 2;
+			for (auto &reward : pair.second) {
+				auto emote = lobbyData->emotesByName[reward["name"]];
+				unsigned offset = 20;
+				SokuLib::Vector2i asize;
+
+				emote->sprite.setSize({32, 32});
+				emote->sprite.draw();
+				this->_extraSprites.emplace_back(new SokuLib::DrawUtils::Sprite());
+
+				auto &s = *this->_extraSprites.back();
+	
+				s.texture.createFromText((":" + reward["name"].get<std::string>() + ":").c_str(), lobbyData->getFont(12), {400, 100}, &asize);
+				s.rect.width = asize.x;
+				s.rect.height = asize.y;
+				s.setSize(asize.to<unsigned>());
+				if (asize.x <= 32) {
+					emote->sprite.setPosition({315 + x, top});
+					s.setPosition({315 + x + 32 - asize.x / 2, top + 34});
+				} else {
+					emote->sprite.setPosition({315 + x - 32 + asize.x - (asize.x - 32) / 2, top});
+					s.setPosition({315 + x, top + 34});
+				}
+				s.tint = SokuLib::Color::White;
+				x += max(36, asize.x + 4);
+				size = max(size, 38 + asize.y);
+				this->_rewardSprites.push_back(&s);
+				this->_rewardSprites.push_back(&emote->sprite);
+			}
+		}
+		top += 8;
+		top += size;
 	}
-	for (auto p = str.find('\n'); p != std::string::npos; p = str.find('\n'))
-		str.replace(p, 1, "<br>");
-	this->_panelRightSprite.texture.createFromText(str.c_str(), lobbyData->getFont(12), {600, 474});
-	this->_panelRightSprite.setSize({
-		this->_panelRightSprite.texture.getSize().x,
-		this->_panelRightSprite.texture.getSize().y
-	});
-	this->_panelRightSprite.rect.width = this->_panelRightSprite.texture.getSize().x;
-	this->_panelRightSprite.rect.height = this->_panelRightSprite.texture.getSize().y;
-	this->_panelRightSprite.setPosition({315, static_cast<int>(desc.getPosition().y + desc.getSize().y)});
 }
