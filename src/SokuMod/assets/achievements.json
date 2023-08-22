@@ -12,16 +12,13 @@
             {
                 "type": "avatar",
                 "id": "reimu"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Eternal Shrine Maiden",
         "description": "Win 10 games as Reimu.",
         "hidden": false,
-        "id": "reimu_win"
+        "id": "reimu_win",
+        "category": "reimu"
     },
     {
         "requirement": {
@@ -33,16 +30,13 @@
             {
                 "type": "emote",
                 "name": "reimu2"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Bankrupt",
         "description": "Lose 10 games as Reimu.",
         "hidden": false,
-        "id": "reimu_lose"
+        "id": "reimu_lose",
+        "category": "reimu"
     },
     {
         "requirement": {
@@ -54,16 +48,13 @@
             {
                 "type": "prop",
                 "id": 0
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Yin Yang Connoisseur",
         "description": "Play 10 games as Reimu.",
         "hidden": false,
-        "id": "reimu_play"
+        "id": "reimu_play",
+        "category": "reimu"
     },
     {
         "requirement": {
@@ -82,16 +73,13 @@
             {
                 "type": "avatar",
                 "id": "reimu3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Hand to Gohei Style",
         "description": "Use each Reimu's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "reimu_cards"
+        "id": "reimu_cards",
+        "category": "reimu"
     },
     {
         "requirement": {
@@ -104,16 +92,13 @@
                 "type": "accessory",
                 "id": 0,
                 "comment": "YinYang Orb"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Gensokyo's Barrier",
         "description": "Play 100 games as Reimu.",
         "hidden": false,
-        "id": "reimu_play2"
+        "id": "reimu_play2",
+        "category": "reimu"
     },
     {
         "requirement": {
@@ -126,16 +111,13 @@
                 "type": "background",
                 "id": 0,
                 "comment": "Hakurei Shrine"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "\"8 Million Gods\"",
         "description": "Play 1000 games as Reimu.",
         "hidden": false,
-        "id": "reimu_play3"
+        "id": "reimu_play3",
+        "category": "reimu"
     },
     "Marisa",
     {
@@ -148,16 +130,13 @@
             {
                 "type": "avatar",
                 "id": "marisa"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Just a Normal Witch",
         "description": "Win 10 games as Marisa.",
         "hidden": false,
-        "id": "marisa_win"
+        "id": "marisa_win",
+        "category": "marisa"
     },
     {
         "requirement": {
@@ -169,16 +148,13 @@
             {
                 "type": "emote",
                 "name": "marisa2"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Human Magician",
         "description": "Lose 10 games as Marisa.",
         "hidden": false,
-        "id": "marisa_lose"
+        "id": "marisa_lose",
+        "category": "marisa"
     },
     {
         "requirement": {
@@ -190,16 +166,13 @@
             {
                 "type": "prop",
                 "id": 1
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Ordinary Magician",
         "description": "Play 10 games as Marisa.",
         "hidden": false,
-        "id": "marisa_play"
+        "id": "marisa_play",
+        "category": "marisa"
     },
     {
         "requirement": {
@@ -218,16 +191,13 @@
             {
                 "type": "avatar",
                 "id": "marisa3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Powerhouse in Black",
         "description": "Use each Marisa's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "marisa_cards"
+        "id": "marisa_cards",
+        "category": "marisa"
     },
     {
         "requirement": {
@@ -240,16 +210,13 @@
                 "type": "accessory",
                 "id": 1,
                 "comment": "Broom / Floating Mini Hakkero"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Powered by Astronomy",
         "description": "Play 100 games as Marisa.",
         "hidden": false,
-        "id": "marisa_play2"
+        "id": "marisa_play2",
+        "category": "marisa"
     },
     {
         "requirement": {
@@ -262,16 +229,13 @@
                 "type": "background",
                 "id": 1,
                 "comment": "Marisa's House / Space"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Magical Event Horizon",
         "description": "Play 1000 games as Marisa.",
         "hidden": false,
-        "id": "marisa_play3"
+        "id": "marisa_play3",
+        "category": "marisa"
     },
     "Sakuya",
     {
@@ -284,16 +248,13 @@
             {
                 "type": "avatar",
                 "id": "sakuya"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Elegant Head-Maid",
         "description": "Win 10 games as Sakuya.",
         "hidden": false,
-        "id": "sakuya_win"
+        "id": "sakuya_win",
+        "category": "sakuya"
     },
     {
         "requirement": {
@@ -305,16 +266,13 @@
             {
                 "type": "emote",
                 "name": "sakuya2"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Maid in Time-Out",
         "description": "Lose 10 games as Sakuya.",
         "hidden": false,
-        "id": "sakuya_lose"
+        "id": "sakuya_lose",
+        "category": "sakuya"
     },
     {
         "requirement": {
@@ -326,16 +284,13 @@
             {
                 "type": "prop",
                 "id": 2
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "This time is only mine",
         "description": "Play 10 games as Sakuya.",
         "hidden": false,
-        "id": "sakuya_play"
+        "id": "sakuya_play",
+        "category": "sakuya"
     },
     {
         "requirement": {
@@ -354,16 +309,13 @@
             {
                 "type": "avatar",
                 "id": "sakuya3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Commando Pro",
         "description": "Use each Sakuya's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "sakuya_cards"
+        "id": "sakuya_cards",
+        "category": "sakuya"
     },
     {
         "requirement": {
@@ -376,16 +328,13 @@
                 "type": "accessory",
                 "id": 2,
                 "comment": "Pocket Watch"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Hound of the Devil",
         "description": "Play 100 games as Sakuya.",
         "hidden": false,
-        "id": "sakuya_play2"
+        "id": "sakuya_play2",
+        "category": "sakuya"
     },
     {
         "requirement": {
@@ -398,16 +347,13 @@
                 "type": "background",
                 "id": 2,
                 "comment": "Clock Tower"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Spaceship Window Opener",
         "description": "Play 1000 games as Sakuya.",
         "hidden": false,
-        "id": "sakuya_play3"
+        "id": "sakuya_play3",
+        "category": "sakuya"
     },
     "Alice",
     {
@@ -420,16 +366,13 @@
             {
                 "type": "avatar",
                 "id": "alice"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Puppet Master",
         "description": "Win 10 games as Alice.",
         "hidden": false,
-        "id": "alice_win"
+        "id": "alice_win",
+        "category": "alice"
     },
     {
         "requirement": {
@@ -441,16 +384,13 @@
             {
                 "type": "emote",
                 "name": "alice2"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Broken Threads",
         "description": "Lose 10 games as Alice.",
         "hidden": false,
-        "id": "alice_lose"
+        "id": "alice_lose",
+        "category": "alice"
     },
     {
         "requirement": {
@@ -462,16 +402,13 @@
             {
                 "type": "prop",
                 "id": 3
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Artful Puppet Show",
         "description": "Play 10 games as Alice.",
         "hidden": false,
-        "id": "alice_play"
+        "id": "alice_play",
+        "category": "alice"
     },
     {
         "requirement": {
@@ -490,16 +427,13 @@
             {
                 "type": "avatar",
                 "id": "alice3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Army of One",
         "description": "Use each Alice's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "alice_cards"
+        "id": "alice_cards",
+        "category": "alice"
     },
     {
         "requirement": {
@@ -512,16 +446,13 @@
                 "type": "accessory",
                 "id": 3,
                 "comment": "Mini Shangai's doll"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Controlling People's Shapes",
         "description": "Play 100 games as Alice.",
         "hidden": false,
-        "id": "alice_play2"
+        "id": "alice_play2",
+        "category": "alice"
     },
     {
         "requirement": {
@@ -534,16 +465,13 @@
                 "type": "background",
                 "id": 3,
                 "comment": "Alice's House"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Grand Guignol's Artist",
         "description": "Play 1000 games as Alice.",
         "hidden": false,
-        "id": "alice_play3"
+        "id": "alice_play3",
+        "category": "alice"
     },
     "Patchouli",
     {
@@ -556,16 +484,13 @@
             {
                 "type": "avatar",
                 "id": "patchouli"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Great Library",
         "description": "Win 10 games as Patchouli.",
         "hidden": false,
-        "id": "patchouli_win"
+        "id": "patchouli_win",
+        "category": "patchouli"
     },
     {
         "requirement": {
@@ -577,16 +502,13 @@
             {
                 "type": "emote",
                 "name": "patchy4"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Anemic Alchemist",
         "description": "Lose 10 games as Patchouli.",
         "hidden": false,
-        "id": "patchouli_lose"
+        "id": "patchouli_lose",
+        "category": "patchouli"
     },
     {
         "requirement": {
@@ -598,16 +520,13 @@
             {
                 "type": "prop",
                 "id": 4
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Wu Xing Magician",
         "description": "Play 10 games as Patchouli.",
         "hidden": false,
-        "id": "patchouli_play"
+        "id": "patchouli_play",
+        "category": "patchouli"
     },
     {
         "requirement": {
@@ -626,16 +545,13 @@
             {
                 "type": "avatar",
                 "id": "patchouli3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Never Ending Knowledge",
         "description": "Use each Patchouli's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "patchouli_cards"
+        "id": "patchouli_cards",
+        "category": "patchouli"
     },
     {
         "requirement": {
@@ -648,16 +564,13 @@
                 "type": "accessory",
                 "id": 4,
                 "comment": "Pile of book Prop"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Weekly Magic",
         "description": "Play 100 games as Patchouli.",
         "hidden": false,
-        "id": "patchouli_play2"
+        "id": "patchouli_play2",
+        "category": "patchouli"
     },
     {
         "requirement": {
@@ -670,16 +583,13 @@
                 "type": "background",
                 "id": 4,
                 "comment": "Library"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Full Asthma Alchemist",
         "description": "Play 1000 games as Patchouli.",
         "hidden": false,
-        "id": "patchouli_play3"
+        "id": "patchouli_play3",
+        "category": "patchouli"
     },
     "Youmu",
     {
@@ -692,16 +602,13 @@
             {
                 "type": "avatar",
                 "id": "youmu"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Phantom Gardener",
         "description": "Win 10 games as Youmu.",
         "hidden": false,
-        "id": "youmu_win"
+        "id": "youmu_win",
+        "category": "youmu"
     },
     {
         "requirement": {
@@ -713,16 +620,13 @@
             {
                 "type": "emote",
                 "name": "youmu4"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Half-Baked",
         "description": "Lose 10 games as Youmu.",
         "hidden": false,
-        "id": "youmu_lose"
+        "id": "youmu_lose",
+        "category": "youmu"
     },
     {
         "requirement": {
@@ -734,16 +638,13 @@
             {
                 "type": "prop",
                 "id": 5
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Youki's Disciple",
         "description": "Play 10 games as Youmu.",
         "hidden": false,
-        "id": "youmu_play"
+        "id": "youmu_play",
+        "category": "youmu"
     },
     {
         "requirement": {
@@ -762,16 +663,13 @@
             {
                 "type": "avatar",
                 "id": "youmu3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Konpaku's Kenjutsu Master",
         "description": "Use each Youmu's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "youmu_cards"
+        "id": "youmu_cards",
+        "category": "youmu"
     },
     {
         "requirement": {
@@ -784,16 +682,13 @@
                 "type": "accessory",
                 "id": 5,
                 "comment": "Roukanken & Hakurouken Display"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Phantom Samurai",
         "description": "Play 100 games as Youmu.",
         "hidden": false,
-        "id": "youmu_play2"
+        "id": "youmu_play2",
+        "category": "youmu"
     },
     {
         "requirement": {
@@ -806,16 +701,13 @@
                 "type": "background",
                 "id": 5,
                 "comment": "UnBloomed Ayakashi (Yuyuko should have the blooming one) / The Nether Soku Stage"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Saigyouji's Ronin",
         "description": "Play 1000 games as Youmu.",
         "hidden": false,
-        "id": "youmu_play3"
+        "id": "youmu_play3",
+        "category": "youmu"
     },
     "Remilia",
     {
@@ -828,16 +720,13 @@
             {
                 "type": "avatar",
                 "id": "remilia"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Young Scarlet Moon",
         "description": "Win 10 games as Remilia.",
         "hidden": false,
-        "id": "remilia_win"
+        "id": "remilia_win",
+        "category": "remilia"
     },
     {
         "requirement": {
@@ -849,16 +738,13 @@
             {
                 "type": "emote",
                 "name": "remilia4"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Devil May Whine",
         "description": "Lose 10 games as Remilia.",
         "hidden": false,
-        "id": "remilia_lose"
+        "id": "remilia_lose",
+        "category": "remilia"
     },
     {
         "requirement": {
@@ -870,16 +756,13 @@
             {
                 "type": "prop",
                 "id": 6
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Dracul's Descendant",
         "description": "Play 10 games as Remilia.",
         "hidden": false,
-        "id": "remilia_play"
+        "id": "remilia_play",
+        "category": "remilia"
     },
     {
         "requirement": {
@@ -898,16 +781,13 @@
             {
                 "type": "avatar",
                 "id": "remilia3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Lady of The Mansion",
         "description": "Use each Remilia's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "remilia_cards"
+        "id": "remilia_cards",
+        "category": "remilia"
     },
     {
         "requirement": {
@@ -920,16 +800,13 @@
                 "type": "accessory",
                 "id": 6,
                 "comment": "Hanger with a parasol on it Prop"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Skerlet Vampir",
         "description": "Play 100 games as Remilia.",
         "hidden": false,
-        "id": "remilia_play2"
+        "id": "remilia_play2",
+        "category": "remilia"
     },
     {
         "requirement": {
@@ -942,16 +819,13 @@
                 "type": "background",
                 "id": 6,
                 "comment": "Scarlet devil mansion"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Soaked in Red",
         "description": "Play 1000 games as Remilia.",
         "hidden": false,
-        "id": "remilia_play3"
+        "id": "remilia_play3",
+        "category": "remilia"
     },
     "Yuyuko",
     {
@@ -964,16 +838,13 @@
             {
                 "type": "avatar",
                 "id": "yuyuko"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Netherworld's Ghost",
         "description": "Win 10 games as Yuyuko.",
         "hidden": false,
-        "id": "yuyuko_win"
+        "id": "yuyuko_win",
+        "category": "yuyuko"
     },
     {
         "requirement": {
@@ -985,16 +856,13 @@
             {
                 "type": "emote",
                 "name": "yuyuko6"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Lazy Ghost",
         "description": "Lose 10 games as Yuyuko.",
         "hidden": false,
-        "id": "yuyuko_lose"
+        "id": "yuyuko_lose",
+        "category": "yuyuko"
     },
     {
         "requirement": {
@@ -1006,16 +874,13 @@
             {
                 "type": "prop",
                 "id": 7
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Inscrutable White Jade",
         "description": "Play 10 games as Yuyuko.",
         "hidden": false,
-        "id": "yuyuko_play"
+        "id": "yuyuko_play",
+        "category": "yuyuko"
     },
     {
         "requirement": {
@@ -1034,16 +899,13 @@
             {
                 "type": "avatar",
                 "id": "yuyuko3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Ageless Dream",
         "description": "Use each Yuyuko's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "yuyuko_cards"
+        "id": "yuyuko_cards",
+        "category": "yuyuko"
     },
     {
         "requirement": {
@@ -1056,16 +918,13 @@
                 "type": "accessory",
                 "id": 7,
                 "comment": "Cool looking giant Fan"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Princess of Restless Souls",
         "description": "Play 100 games as Yuyuko.",
         "hidden": false,
-        "id": "yuyuko_play2"
+        "id": "yuyuko_play2",
+        "category": "yuyuko"
     },
     {
         "requirement": {
@@ -1078,16 +937,13 @@
                 "type": "background",
                 "id": 7,
                 "comment": "Netherworld / Hakugyokurou"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Perfect Cherry Blossom",
         "description": "Play 1000 games as Yuyuko.",
         "hidden": false,
-        "id": "yuyuko_play3"
+        "id": "yuyuko_play3",
+        "category": "yuyuko"
     },
     "Yukari",
     {
@@ -1100,16 +956,13 @@
             {
                 "type": "avatar",
                 "id": "yukari"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Border of Phantasm",
         "description": "Win 10 games as Yukari.",
         "hidden": false,
-        "id": "yukari_win"
+        "id": "yukari_win",
+        "category": "yukari"
     },
     {
         "requirement": {
@@ -1121,16 +974,13 @@
             {
                 "type": "emote",
                 "name": "yukari6"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Eternally Dormant",
         "description": "Lose 10 games as Yukari.",
         "hidden": false,
-        "id": "yukari_lose"
+        "id": "yukari_lose",
+        "category": "yukari"
     },
     {
         "requirement": {
@@ -1142,16 +992,13 @@
             {
                 "type": "prop",
                 "id": 8
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Living Inside (Your) Walls",
         "description": "Play 10 games as Yukari.",
         "hidden": false,
-        "id": "yukari_play"
+        "id": "yukari_play",
+        "category": "yukari"
     },
     {
         "requirement": {
@@ -1170,16 +1017,13 @@
             {
                 "type": "avatar",
                 "id": "yukari3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Ancient \"Programmer\"",
         "description": "Use each Yukari's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "yukari_cards"
+        "id": "yukari_cards",
+        "category": "yukari"
     },
     {
         "requirement": {
@@ -1192,16 +1036,13 @@
                 "type": "accessory",
                 "id": 8,
                 "comment": "Chen and Ran Poster"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Shikigami's Spirit Medium (Master)",
         "description": "Play 100 games as Yukari.",
         "hidden": false,
-        "id": "yukari_play2"
+        "id": "yukari_play2",
+        "category": "yukari"
     },
     {
         "requirement": {
@@ -1214,16 +1055,13 @@
                 "type": "background",
                 "id": 8,
                 "comment": "The Inside of a Gap"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Gensokyo's Sage",
         "description": "Play 1000 games as Yukari.",
         "hidden": false,
-        "id": "yukari_play3"
+        "id": "yukari_play3",
+        "category": "yukari"
     },
     "Suika",
     {
@@ -1236,16 +1074,13 @@
             {
                 "type": "avatar",
                 "id": "suika"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Night Parade of a Hundred Demons",
         "description": "Win 10 games as Suika.",
         "hidden": false,
-        "id": "suika_win"
+        "id": "suika_win",
+        "category": "suika"
     },
     {
         "requirement": {
@@ -1257,16 +1092,13 @@
             {
                 "type": "emote",
                 "name": "suika2"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Wasted",
         "description": "Lose 10 games as Suika.",
         "hidden": false,
-        "id": "suika_lose"
+        "id": "suika_lose",
+        "category": "suika"
     },
     {
         "requirement": {
@@ -1278,16 +1110,13 @@
             {
                 "type": "prop",
                 "id": 9
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Layered Like an Onion",
         "description": "Play 10 games as Suika.",
         "hidden": false,
-        "id": "suika_play"
+        "id": "suika_play",
+        "category": "suika"
     },
     {
         "requirement": {
@@ -1306,16 +1135,13 @@
             {
                 "type": "avatar",
                 "id": "suika3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Material and Present Power",
         "description": "Use each Suika's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "suika_cards"
+        "id": "suika_cards",
+        "category": "suika"
     },
     {
         "requirement": {
@@ -1328,16 +1154,13 @@
                 "type": "accessory",
                 "id": 9,
                 "comment": "Sake Gourd"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Deva of The Youkai Mountain",
         "description": "Play 100 games as Suika.",
         "hidden": false,
-        "id": "suika_play2"
+        "id": "suika_play2",
+        "category": "suika"
     },
     {
         "requirement": {
@@ -1350,16 +1173,13 @@
                 "type": "background",
                 "id": 9,
                 "comment": "Broken Moon"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "A Million Oni in One",
         "description": "Play 1000 games as Suika.",
         "hidden": false,
-        "id": "suika_play3"
+        "id": "suika_play3",
+        "category": "suika"
     },
     "Reisen",
     {
@@ -1372,16 +1192,13 @@
             {
                 "type": "avatar",
                 "id": "reisen"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Moon Rabbit on Earth",
         "description": "Win 10 games as Reisen.",
         "hidden": false,
-        "id": "reisen_win"
+        "id": "reisen_win",
+        "category": "reisen"
     },
     {
         "requirement": {
@@ -1393,16 +1210,13 @@
             {
                 "type": "emote",
                 "name": "reisen4"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Rabbit Stew",
         "description": "Lose 10 games as Reisen.",
         "hidden": false,
-        "id": "reisen_lose"
+        "id": "reisen_lose",
+        "category": "reisen"
     },
     {
         "requirement": {
@@ -1414,16 +1228,13 @@
             {
                 "type": "prop",
                 "id": 10
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Insanity Overdrive",
         "description": "Play 10 games as Reisen.",
         "hidden": false,
-        "id": "reisen_play"
+        "id": "reisen_play",
+        "category": "reisen"
     },
     {
         "requirement": {
@@ -1442,16 +1253,13 @@
             {
                 "type": "avatar",
                 "id": "reisen3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Lunar Soldier",
         "description": "Use each Reisen's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "reisen_cards"
+        "id": "reisen_cards",
+        "category": "reisen"
     },
     {
         "requirement": {
@@ -1464,16 +1272,13 @@
                 "type": "accessory",
                 "id": 10,
                 "comment": "Carrot / AoCF Reisen Gun / Box of meds"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Disciple of the God of Wisdom",
         "description": "Play 100 games as Reisen.",
         "hidden": false,
-        "id": "reisen_play2"
+        "id": "reisen_play2",
+        "category": "reisen"
     },
     {
         "requirement": {
@@ -1486,16 +1291,13 @@
                 "type": "background",
                 "id": 10,
                 "comment": "Red full Moon"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Lunatic Red Eyes",
         "description": "Play 1000 games as Reisen.",
         "hidden": false,
-        "id": "reisen_play3"
+        "id": "reisen_play3",
+        "category": "reisen"
     },
     "Aya",
     {
@@ -1508,16 +1310,13 @@
             {
                 "type": "avatar",
                 "id": "aya"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Wind God Girl",
         "description": "Win 10 games as Aya.",
         "hidden": false,
-        "id": "aya_win"
+        "id": "aya_win",
+        "category": "aya"
     },
     {
         "requirement": {
@@ -1529,16 +1328,13 @@
             {
                 "type": "emote",
                 "name": "aya6"
-            },
-            {
-                "type": "title",
-                "name": "Nosy Reporter"
             }
         ],
         "name": "Paparazzi",
         "description": "Lose 10 games as Aya.",
         "hidden": false,
-        "id": "aya_lose"
+        "id": "aya_lose",
+        "category": "aya"
     },
     {
         "requirement": {
@@ -1550,16 +1346,13 @@
             {
                 "type": "prop",
                 "id": 11
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Speed-o'-Sound Youkai",
         "description": "Play 10 games as Aya.",
         "hidden": false,
-        "id": "aya_play"
+        "id": "aya_play",
+        "category": "aya"
     },
     {
         "requirement": {
@@ -1578,16 +1371,13 @@
             {
                 "type": "avatar",
                 "id": "aya3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Infinite Nightmare",
         "description": "Use each Aya's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "aya_cards"
+        "id": "aya_cards",
+        "category": "aya"
     },
     {
         "requirement": {
@@ -1600,16 +1390,13 @@
                 "type": "accessory",
                 "id": 11,
                 "comment": "Stack of newspapers"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Pure and Honest",
         "description": "Play 100 games as Aya.",
         "hidden": false,
-        "id": "aya_play2"
+        "id": "aya_play2",
+        "category": "aya"
     },
     {
         "requirement": {
@@ -1622,16 +1409,13 @@
                 "type": "background",
                 "id": 11,
                 "comment": "MoF cascade"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Fastest in Gensokyo",
         "description": "Play 1000 games as Aya.",
         "hidden": false,
-        "id": "aya_play3"
+        "id": "aya_play3",
+        "category": "aya"
     },
     "Komachi",
     {
@@ -1644,16 +1428,13 @@
             {
                 "type": "avatar",
                 "id": "komachi"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Shinigami of The Sanzu River",
         "description": "Win 10 games as Komachi.",
         "hidden": false,
-        "id": "komachi_win"
+        "id": "komachi_win",
+        "category": "komachi"
     },
     {
         "requirement": {
@@ -1665,16 +1446,13 @@
             {
                 "type": "emote",
                 "name": "komachi4"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Lazy Charon",
         "description": "Lose 10 games as Komachi.",
         "hidden": false,
-        "id": "komachi_lose"
+        "id": "komachi_lose",
+        "category": "komachi"
     },
     {
         "requirement": {
@@ -1686,16 +1464,13 @@
             {
                 "type": "prop",
                 "id": 12
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Lover of Apples",
         "description": "Play 10 games as Komachi.",
         "hidden": false,
-        "id": "komachi_play"
+        "id": "komachi_play",
+        "category": "komachi"
     },
     {
         "requirement": {
@@ -1714,16 +1489,13 @@
             {
                 "type": "avatar",
                 "id": "komachi3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Divine Comedy of Errors",
         "description": "Use each Komachi's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "komachi_cards"
+        "id": "komachi_cards",
+        "category": "komachi"
     },
     {
         "requirement": {
@@ -1736,16 +1508,13 @@
                 "type": "accessory",
                 "id": 12,
                 "comment": "Boat and Scythe"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "E-scythe-ing Guide of The Lifeless",
         "description": "Play 100 games as Komachi.",
         "hidden": false,
-        "id": "komachi_play2"
+        "id": "komachi_play2",
+        "category": "komachi"
     },
     {
         "requirement": {
@@ -1758,16 +1527,13 @@
                 "type": "background",
                 "id": 12,
                 "comment": "Sanzu River"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Ferry-Woman of The Acheron",
         "description": "Play 1000 games as Komachi.",
         "hidden": false,
-        "id": "komachi_play3"
+        "id": "komachi_play3",
+        "category": "komachi"
     },
     "Iku",
     {
@@ -1780,16 +1546,13 @@
             {
                 "type": "avatar",
                 "id": "iku"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Messenger From the Dragon Palace",
         "description": "Win 10 games as Iku.",
         "hidden": false,
-        "id": "iku_win"
+        "id": "iku_win",
+        "category": "iku"
     },
     {
         "requirement": {
@@ -1801,16 +1564,13 @@
             {
                 "type": "emote",
                 "name": "iku6"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Malfunctioning Spark",
         "description": "Lose 10 games as Iku.",
         "hidden": false,
-        "id": "iku_lose"
+        "id": "iku_lose",
+        "category": "iku"
     },
     {
         "requirement": {
@@ -1822,16 +1582,13 @@
             {
                 "type": "prop",
                 "id": 13
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Oarfish Covered In Scarlet Cloth",
         "description": "Play 10 games as Iku.",
         "hidden": false,
-        "id": "iku_play"
+        "id": "iku_play",
+        "category": "iku"
     },
     {
         "requirement": {
@@ -1850,16 +1607,13 @@
             {
                 "type": "avatar",
                 "id": "iku3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Swimming in The Sky",
         "description": "Use each Iku's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "iku_cards"
+        "id": "iku_cards",
+        "category": "iku"
     },
     {
         "requirement": {
@@ -1872,16 +1626,13 @@
                 "type": "accessory",
                 "id": 13,
                 "comment": "Thunder Cloud / Catfish"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "The Will of The Great Spiral",
         "description": "Play 100 games as Iku.",
         "hidden": false,
-        "id": "iku_play2"
+        "id": "iku_play2",
+        "category": "iku"
     },
     {
         "requirement": {
@@ -1894,16 +1645,13 @@
                 "type": "background",
                 "id": 13,
                 "comment": "Sky / Top of Youkai Mountain"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "The Dragon's Veil",
         "description": "Play 1000 games as Iku.",
         "hidden": false,
-        "id": "iku_play3"
+        "id": "iku_play3",
+        "category": "iku"
     },
     "Tenshi",
     {
@@ -1916,16 +1664,13 @@
             {
                 "type": "avatar",
                 "id": "tenshi"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Fallen Celestial",
         "description": "Win 10 games as Tenshi.",
         "hidden": false,
-        "id": "tenshi_win"
+        "id": "tenshi_win",
+        "category": "tenshi"
     },
     {
         "requirement": {
@@ -1937,16 +1682,13 @@
             {
                 "type": "emote",
                 "name": "tenshi4"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Catastrophe of Bhavaagra",
         "description": "Lose 10 games as Tenshi.",
         "hidden": false,
-        "id": "tenshi_lose"
+        "id": "tenshi_lose",
+        "category": "tenshi"
     },
     {
         "requirement": {
@@ -1958,16 +1700,13 @@
             {
                 "type": "prop",
                 "id": 14
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Eldest Daughter of the Hinanawi",
         "description": "Play 10 games as Tenshi.",
         "hidden": false,
-        "id": "tenshi_play"
+        "id": "tenshi_play",
+        "category": "tenshi"
     },
     {
         "requirement": {
@@ -1986,16 +1725,13 @@
             {
                 "type": "avatar",
                 "id": "tenshi3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Wielder of \"The Sword of Hisou\"",
         "description": "Use each Tenshi's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "tenshi_cards"
+        "id": "tenshi_cards",
+        "category": "tenshi"
     },
     {
         "requirement": {
@@ -2008,16 +1744,13 @@
                 "type": "accessory",
                 "id": 14,
                 "comment": "Keystone / Route 66 sign"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Manipulator of \"Earth\" and \"Spirit\"",
         "description": "Play 100 games as Tenshi.",
         "hidden": false,
-        "id": "tenshi_play2"
+        "id": "tenshi_play2",
+        "category": "tenshi"
     },
     {
         "requirement": {
@@ -2030,16 +1763,13 @@
                 "type": "background",
                 "id": 14,
                 "comment": "Heavens"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Sky of Scarlet Perception",
         "description": "Play 1000 games as Tenshi.",
         "hidden": false,
-        "id": "tenshi_play3"
+        "id": "tenshi_play3",
+        "category": "tenshi"
     },
     "Sanae",
     {
@@ -2052,16 +1782,13 @@
             {
                 "type": "avatar",
                 "id": "sanae"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Deified Shrine Maiden",
         "description": "Win 10 games as Sanae.",
         "hidden": false,
-        "id": "sanae_win"
+        "id": "sanae_win",
+        "category": "sanae"
     },
     {
         "requirement": {
@@ -2073,16 +1800,13 @@
             {
                 "type": "emote",
                 "name": "sanae6"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "2nd Class Shrine Maiden",
         "description": "Lose 10 games as Sanae.",
         "hidden": false,
-        "id": "sanae_lose"
+        "id": "sanae_lose",
+        "category": "sanae"
     },
     {
         "requirement": {
@@ -2094,16 +1818,13 @@
             {
                 "type": "prop",
                 "id": 15
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Actually 3 Adversaries",
         "description": "Play 10 games as Sanae.",
         "hidden": false,
-        "id": "sanae_play"
+        "id": "sanae_play",
+        "category": "sanae"
     },
     {
         "requirement": {
@@ -2122,16 +1843,13 @@
             {
                 "type": "avatar",
                 "id": "sanae3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Master of Wind-Fu",
         "description": "Use each Sanae's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "sanae_cards"
+        "id": "sanae_cards",
+        "category": "sanae"
     },
     {
         "requirement": {
@@ -2144,16 +1862,13 @@
                 "type": "accessory",
                 "id": 15,
                 "comment": "Mini-Suwako & Kanako"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Moriya's Conspiracy",
         "description": "Play 100 games as Sanae.",
         "hidden": false,
-        "id": "sanae_play2"
+        "id": "sanae_play2",
+        "category": "sanae"
     },
     {
         "requirement": {
@@ -2166,16 +1881,13 @@
                 "type": "background",
                 "id": 15,
                 "comment": "Moriya Shrine"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Everyday Miracle",
         "description": "Play 1000 games as Sanae.",
         "hidden": false,
-        "id": "sanae_play3"
+        "id": "sanae_play3",
+        "category": "sanae"
     },
     "Cirno",
     {
@@ -2188,16 +1900,13 @@
             {
                 "type": "avatar",
                 "id": "cirno"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Ice Fairy",
         "description": "Win 10 games as Cirno.",
         "hidden": false,
-        "id": "cirno_win"
+        "id": "cirno_win",
+        "category": "cirno"
     },
     {
         "requirement": {
@@ -2209,16 +1918,13 @@
             {
                 "type": "emote",
                 "name": "cirno6"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Cold Shoulders",
         "description": "Lose 10 games as Cirno.",
         "hidden": false,
-        "id": "cirno_lose"
+        "id": "cirno_lose",
+        "category": "cirno"
     },
     {
         "requirement": {
@@ -2230,16 +1936,13 @@
             {
                 "type": "prop",
                 "id": 16
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Genius Fairy",
         "description": "Play 10 games as Cirno.",
         "hidden": false,
-        "id": "cirno_play"
+        "id": "cirno_play",
+        "category": "cirno"
     },
     {
         "requirement": {
@@ -2258,16 +1961,13 @@
             {
                 "type": "avatar",
                 "id": "cirno3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Stronger Than a Grown Human",
         "description": "Use each Cirno's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "cirno_cards"
+        "id": "cirno_cards",
+        "category": "cirno"
     },
     {
         "requirement": {
@@ -2280,16 +1980,13 @@
                 "type": "accessory",
                 "id": 16,
                 "comment": "Snowman"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Naiad of The Lake",
         "description": "Play 100 games as Cirno.",
         "hidden": false,
-        "id": "cirno_play2"
+        "id": "cirno_play2",
+        "category": "cirno"
     },
     {
         "requirement": {
@@ -2302,16 +1999,13 @@
                 "type": "background",
                 "id": 16,
                 "comment": "The Lake"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Absolute Zero",
         "description": "Play 1000 games as Cirno.",
         "hidden": false,
-        "id": "cirno_play3"
+        "id": "cirno_play3",
+        "category": "cirno"
     },
     "Meiling",
     {
@@ -2324,16 +2018,13 @@
             {
                 "type": "avatar",
                 "id": "meiling"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Green Martial Artist",
         "description": "Win 10 games as Meiling.",
         "hidden": false,
-        "id": "meiling_win"
+        "id": "meiling_win",
+        "category": "meiling"
     },
     {
         "requirement": {
@@ -2345,16 +2036,13 @@
             {
                 "type": "emote",
                 "name": "meiling4"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Sleeping on The Job",
         "description": "Lose 10 games as Meiling.",
         "hidden": false,
-        "id": "meiling_lose"
+        "id": "meiling_lose",
+        "category": "meiling"
     },
     {
         "requirement": {
@@ -2366,16 +2054,13 @@
             {
                 "type": "prop",
                 "id": 17
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Keeper of Gates",
         "description": "Play 10 games as Meiling.",
         "hidden": false,
-        "id": "meiling_play"
+        "id": "meiling_play",
+        "category": "meiling"
     },
     {
         "requirement": {
@@ -2394,16 +2079,13 @@
             {
                 "type": "avatar",
                 "id": "meiling3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Yi Er Fanclub",
         "description": "Use each Meiling's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "meiling_cards"
+        "id": "meiling_cards",
+        "category": "meiling"
     },
     {
         "requirement": {
@@ -2416,16 +2098,13 @@
                 "type": "accessory",
                 "id": 17,
                 "comment": "Green Blade / Small Dragon / Yellow Star / Meiling Hat"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Dreamy Savior of Gensokyo",
         "description": "Play 100 games as Meiling.",
         "hidden": false,
-        "id": "meiling_play2"
+        "id": "meiling_play2",
+        "category": "meiling"
     },
     {
         "requirement": {
@@ -2438,16 +2117,13 @@
                 "type": "background",
                 "id": 17,
                 "comment": "SDM Gates"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Legendary Dragon of Gensou",
         "description": "Play 1000 games as Meiling.",
         "hidden": false,
-        "id": "meiling_play3"
+        "id": "meiling_play3",
+        "category": "meiling"
     },
     "Utsuho",
     {
@@ -2460,16 +2136,13 @@
             {
                 "type": "avatar",
                 "id": "utsuho"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Hell Raven",
         "description": "Win 10 games as Utsuho.",
         "hidden": false,
-        "id": "utsuho_win"
+        "id": "utsuho_win",
+        "category": "utsuho"
     },
     {
         "requirement": {
@@ -2481,16 +2154,13 @@
             {
                 "type": "emote",
                 "name": "utsuho2"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Bird-Brained God",
         "description": "Lose 10 games as Utsuho.",
         "hidden": false,
-        "id": "utsuho_lose"
+        "id": "utsuho_lose",
+        "category": "utsuho"
     },
     {
         "requirement": {
@@ -2502,16 +2172,13 @@
             {
                 "type": "prop",
                 "id": 18
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Low Crusher of The Inferi",
         "description": "Play 10 games as Utsuho.",
         "hidden": false,
-        "id": "utsuho_play"
+        "id": "utsuho_play",
+        "category": "utsuho"
     },
     {
         "requirement": {
@@ -2530,16 +2197,13 @@
             {
                 "type": "avatar",
                 "id": "utsuho3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Sector 7G's Finest Employee",
         "description": "Use each Utsuho's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "utsuho_cards"
+        "id": "utsuho_cards",
+        "category": "utsuho"
     },
     {
         "requirement": {
@@ -2552,16 +2216,13 @@
                 "type": "accessory",
                 "id": 18,
                 "comment": "Tchernobyl elephant leg / Small \"Sun\" / Three legged crow"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "The Black Sun of Yatagarasu",
         "description": "Play 100 games as Utsuho.",
         "hidden": false,
-        "id": "utsuho_play2"
+        "id": "utsuho_play2",
+        "category": "utsuho"
     },
     {
         "requirement": {
@@ -2574,16 +2235,13 @@
                 "type": "background",
                 "id": 18,
                 "comment": "Nuclear reactor"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "The Crow that Stole the Sun",
         "description": "Play 1000 games as Utsuho.",
         "hidden": false,
-        "id": "utsuho_play3"
+        "id": "utsuho_play3",
+        "category": "utsuho"
     },
     "Suwako",
     {
@@ -2596,16 +2254,13 @@
             {
                 "type": "avatar",
                 "id": "suwako"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Kero Kero",
         "description": "Win 10 games as Suwako.",
         "hidden": false,
-        "id": "suwako_win"
+        "id": "suwako_win",
+        "category": "suwako"
     },
     {
         "requirement": {
@@ -2617,16 +2272,13 @@
             {
                 "type": "emote",
                 "name": "suwako2"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Vivisection",
         "description": "Lose 10 games as Suwako.",
         "hidden": false,
-        "id": "suwako_lose"
+        "id": "suwako_lose",
+        "category": "suwako"
     },
     {
         "requirement": {
@@ -2638,16 +2290,13 @@
             {
                 "type": "prop",
                 "id": 19
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Braving the Elements",
         "description": "Play 10 games as Suwako.",
         "hidden": false,
-        "id": "suwako_play"
+        "id": "suwako_play",
+        "category": "suwako"
     },
     {
         "requirement": {
@@ -2666,16 +2315,13 @@
             {
                 "type": "avatar",
                 "id": "suwako3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Snake God in Frog Skin",
         "description": "Use each Suwako's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "suwako_cards"
+        "id": "suwako_cards",
+        "category": "suwako"
     },
     {
         "requirement": {
@@ -2688,16 +2334,13 @@
                 "type": "accessory",
                 "id": 19,
                 "comment": "Frog (Georges XIII ???)"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Ruler of Suwa",
         "description": "Play 100 games as Suwako.",
         "hidden": false,
-        "id": "suwako_play2"
+        "id": "suwako_play2",
+        "category": "suwako"
     },
     {
         "requirement": {
@@ -2710,18 +2353,14 @@
                 "type": "background",
                 "id": 19,
                 "comment": "Moriya Shrine"
-            },
-            {
-                "type": "title",
-                "name": "Mishaguji's Master"
             }
         ],
         "name": "Mishaguji-sama Destiny",
         "description": "Play 1000 games as Suwako.",
         "hidden": false,
-        "id": "suwako_play3"
+        "id": "suwako_play3",
+        "category": "suwako"
     },
-
     "SOKU2",
     "Momiji",
     {
@@ -2734,16 +2373,13 @@
             {
                 "type": "avatar",
                 "id": "momiji"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Awooo!",
         "description": "Win 10 games as Momiji.",
         "hidden": false,
-        "id": "momiji_win"
+        "id": "momiji_win",
+        "category": "momiji"
     },
     {
         "requirement": {
@@ -2755,16 +2391,13 @@
             {
                 "type": "emote",
                 "name": "momiji2"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "No \"Awooo-ing\" Without A Permit",
         "description": "Lose 10 games as Momiji.",
         "hidden": false,
-        "id": "momiji_lose"
+        "id": "momiji_lose",
+        "category": "momiji"
     },
     {
         "requirement": {
@@ -2776,16 +2409,13 @@
             {
                 "type": "prop",
                 "id": 20
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Watchful Eye of The Youkai Mountain",
         "description": "Play 10 games as Momiji.",
         "hidden": false,
-        "id": "momiji_play"
+        "id": "momiji_play",
+        "category": "momiji"
     },
     {
         "requirement": {
@@ -2804,16 +2434,13 @@
             {
                 "type": "avatar",
                 "id": "momiji3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Expert Sword & Shield User",
         "description": "Use each Momiji's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "momiji_cards"
+        "id": "momiji_cards",
+        "category": "momiji"
     },
     {
         "requirement": {
@@ -2826,16 +2453,13 @@
                 "type": "accessory",
                 "id": 20,
                 "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Buster Wolf Of The East",
         "description": "Play 100 games as Momiji.",
         "hidden": false,
-        "id": "momiji_play2"
+        "id": "momiji_play2",
+        "category": "momiji"
     },
     {
         "requirement": {
@@ -2848,16 +2472,13 @@
                 "type": "background",
                 "id": 20,
                 "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Would Really Prefer To Play Shogi",
         "description": "Play 1000 games as Momiji.",
         "hidden": false,
-        "id": "momiji_play3"
+        "id": "momiji_play3",
+        "category": "momiji"
     },
     "Clownpiece",
     {
@@ -2870,16 +2491,13 @@
             {
                 "type": "avatar",
                 "id": "clownpiece"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Hell's Fairy",
         "description": "Win 10 games as Clownpiece.",
         "hidden": false,
-        "id": "clownpiece_win"
+        "id": "clownpiece_win",
+        "category": "clownpiece"
     },
     {
         "requirement": {
@@ -2891,16 +2509,13 @@
             {
                 "type": "emote",
                 "name": "clownpiece2"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Maddening Defeat!",
         "description": "Lose 10 games as Clownpiece.",
         "hidden": false,
-        "id": "clownpiece_lose"
+        "id": "clownpiece_lose",
+        "category": "clownpiece"
     },
     {
         "requirement": {
@@ -2912,16 +2527,13 @@
             {
                 "type": "prop",
                 "id": 21
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Bizarre Patriotism",
         "description": "Play 10 games as Clownpiece.",
         "hidden": false,
-        "id": "clownpiece_play"
+        "id": "clownpiece_play",
+        "category": "clownpiece"
     },
     {
         "requirement": {
@@ -2940,16 +2552,13 @@
             {
                 "type": "avatar",
                 "id": "clownpiece3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "IT'S LUNATIC TIME!",
         "description": "Use each Clownpiece's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "clownpiece_cards"
+        "id": "clownpiece_cards",
+        "category": "clownpiece"
     },
     {
         "requirement": {
@@ -2962,16 +2571,13 @@
                 "type": "accessory",
                 "id": 21,
                 "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "JohnMaddenJohnMaddenaeiouaeiou",
         "description": "Play 100 games as Clownpiece.",
         "hidden": false,
-        "id": "clownpiece_play2"
+        "id": "clownpiece_play2",
+        "category": "clownpiece"
     },
     {
         "requirement": {
@@ -2984,16 +2590,13 @@
                 "type": "background",
                 "id": 21,
                 "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "By The Moon, I'll Defeat You!",
         "description": "Play 1000 games as Clownpiece.",
         "hidden": false,
-        "id": "clownpiece_play3"
+        "id": "clownpiece_play3",
+        "category": "clownpiece"
     },
     "Flandre",
     {
@@ -3006,16 +2609,13 @@
             {
                 "type": "avatar",
                 "id": "flandre"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Sister Of The Devil",
         "description": "Win 10 games as Flandre.",
         "hidden": false,
-        "id": "flandre_win"
+        "id": "flandre_win",
+        "category": "flandre"
     },
     {
         "requirement": {
@@ -3027,16 +2627,13 @@
             {
                 "type": "emote",
                 "name": "flandre2"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Sent Back To The Basement",
         "description": "Lose 10 games as Flandre.",
         "hidden": false,
-        "id": "flandre_lose"
+        "id": "flandre_lose",
+        "category": "flandre"
     },
     {
         "requirement": {
@@ -3048,16 +2645,13 @@
             {
                 "type": "prop",
                 "id": 22
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Deathly Rainbow Tears",
         "description": "Play 10 games as Flandre.",
         "hidden": false,
-        "id": "flandre_play"
+        "id": "flandre_play",
+        "category": "flandre"
     },
     {
         "requirement": {
@@ -3076,16 +2670,13 @@
             {
                 "type": "avatar",
                 "id": "flandre3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Surprisingly Competent At Poker",
         "description": "Use each Flandre's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "flandre_cards"
+        "id": "flandre_cards",
+        "category": "flandre"
     },
     {
         "requirement": {
@@ -3098,16 +2689,13 @@
                 "type": "accessory",
                 "id": 22,
                 "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Bringing Down The Ragnarok",
         "description": "Play 100 games as Flandre.",
         "hidden": false,
-        "id": "flandre_play2"
+        "id": "flandre_play2",
+        "category": "flandre"
     },
     {
         "requirement": {
@@ -3120,16 +2708,13 @@
                 "type": "background",
                 "id": 22,
                 "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Right Hand Of Total Annihilation",
         "description": "Play 1000 games as Flandre.",
         "hidden": false,
-        "id": "flandre_play3"
+        "id": "flandre_play3",
+        "category": "flandre"
     },
     "Rin",
     {
@@ -3142,16 +2727,13 @@
             {
                 "type": "avatar",
                 "id": "rin"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Fairly Efficient Corpse Carrier",
         "description": "Win 10 games as Rin.",
         "hidden": false,
-        "id": "rin_win"
+        "id": "rin_win",
+        "category": "rin"
     },
     {
         "requirement": {
@@ -3163,16 +2745,13 @@
             {
                 "type": "emote",
                 "name": "rin8"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Broken Cart, Broken Heart",
         "description": "Lose 10 games as Rin.",
         "hidden": false,
-        "id": "rin_lose"
+        "id": "rin_lose",
+        "category": "rin"
     },
     {
         "requirement": {
@@ -3184,16 +2763,13 @@
             {
                 "type": "prop",
                 "id": 23
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Conversing At The Brink Of Death",
         "description": "Play 10 games as Rin.",
         "hidden": false,
-        "id": "rin_play"
+        "id": "rin_play",
+        "category": "rin"
     },
     {
         "requirement": {
@@ -3212,16 +2788,13 @@
             {
                 "type": "avatar",
                 "id": "rin3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Knows All Tricks To WheelBarrow-ing",
         "description": "Use each Rin's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "rin_cards"
+        "id": "rin_cards",
+        "category": "rin"
     },
     {
         "requirement": {
@@ -3234,16 +2807,13 @@
                 "type": "accessory",
                 "id": 23,
                 "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Cheerful Despite The Cadavers",
         "description": "Play 100 games as Rin.",
         "hidden": false,
-        "id": "rin_play2"
+        "id": "rin_play2",
+        "category": "rin"
     },
     {
         "requirement": {
@@ -3256,16 +2826,13 @@
                 "type": "background",
                 "id": 23,
                 "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Former Hell's Tourist Guide",
         "description": "Play 1000 games as Rin.",
         "hidden": false,
-        "id": "rin_play3"
+        "id": "rin_play3",
+        "category": "rin"
     },
     "Yuuka",
     {
@@ -3278,16 +2845,13 @@
             {
                 "type": "avatar",
                 "id": "yuuka"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Just A Seedling",
         "description": "Win 10 games as Yuuka.",
         "hidden": false,
-        "id": "yuuka_win"
+        "id": "yuuka_win",
+        "category": "yuuka"
     },
     {
         "requirement": {
@@ -3299,16 +2863,13 @@
             {
                 "type": "emote",
                 "name": "yuuka2"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Reduced To Plant's Fertilizer",
         "description": "Lose 10 games as Yuuka.",
         "hidden": false,
-        "id": "yuuka_lose"
+        "id": "yuuka_lose",
+        "category": "yuuka"
     },
     {
         "requirement": {
@@ -3320,16 +2881,13 @@
             {
                 "type": "prop",
                 "id": 24
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Beautiful Garden Of Sunflowers",
         "description": "Play 10 games as Yuuka.",
         "hidden": false,
-        "id": "yuuka_play"
+        "id": "yuuka_play",
+        "category": "yuuka"
     },
     {
         "requirement": {
@@ -3348,16 +2906,13 @@
             {
                 "type": "avatar",
                 "id": "yuuka3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Hyper-fixated On Gardening",
         "description": "Use each Yuuka's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "yuuka_cards"
+        "id": "yuuka_cards",
+        "category": "yuuka"
     },
     {
         "requirement": {
@@ -3370,16 +2925,13 @@
                 "type": "accessory",
                 "id": 24,
                 "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "I Only Trust Me, Myself and I",
         "description": "Play 100 games as Yuuka.",
         "hidden": false,
-        "id": "yuuka_play2"
+        "id": "yuuka_play2",
+        "category": "yuuka"
     },
     {
         "requirement": {
@@ -3392,16 +2944,13 @@
                 "type": "background",
                 "id": 24,
                 "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Originally From A Lotus Land",
         "description": "Play 1000 games as Yuuka.",
         "hidden": false,
-        "id": "yuuka_play3"
+        "id": "yuuka_play3",
+        "category": "yuuka"
     },
     "Kaguya",
     {
@@ -3414,16 +2963,13 @@
             {
                 "type": "avatar",
                 "id": "kaguya"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Small Bamboo Sprout",
         "description": "Win 10 games as Kaguya.",
         "hidden": false,
-        "id": "kaguya_win"
+        "id": "kaguya_win",
+        "category": "kaguya"
     },
     {
         "requirement": {
@@ -3435,16 +2981,13 @@
             {
                 "type": "emote",
                 "name": "kaguya8"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "\"Got All Of Eternity To Practice\"",
         "description": "Lose 10 games as Kaguya.",
         "hidden": false,
-        "id": "kaguya_lose"
+        "id": "kaguya_lose",
+        "category": "kaguya"
     },
     {
         "requirement": {
@@ -3456,16 +2999,13 @@
             {
                 "type": "prop",
                 "id": 25
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Crouching Eternal, Hidden NEET",
         "description": "Play 10 games as Kaguya.",
         "hidden": false,
-        "id": "kaguya_play"
+        "id": "kaguya_play",
+        "category": "kaguya"
     },
     {
         "requirement": {
@@ -3484,16 +3024,13 @@
             {
                 "type": "avatar",
                 "id": "kaguya3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Passed All The Impossible Requests",
         "description": "Use each Kaguya's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "kaguya_cards"
+        "id": "kaguya_cards",
+        "category": "kaguya"
     },
     {
         "requirement": {
@@ -3506,16 +3043,13 @@
                 "type": "accessory",
                 "id": 25,
                 "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Space Royalty",
         "description": "Play 100 games as Kaguya.",
         "hidden": false,
-        "id": "kaguya_play2"
+        "id": "kaguya_play2",
+        "category": "kaguya"
     },
     {
         "requirement": {
@@ -3528,16 +3062,13 @@
                 "type": "background",
                 "id": 25,
                 "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Living Eternity & Instant At Once",
         "description": "Play 1000 games as Kaguya.",
         "hidden": false,
-        "id": "kaguya_play3"
+        "id": "kaguya_play3",
+        "category": "kaguya"
     },
     "Mokou",
     {
@@ -3550,16 +3081,13 @@
             {
                 "type": "avatar",
                 "id": "mokou"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "A Small Flickering Ember",
         "description": "Win 10 games as Mokou.",
         "hidden": false,
-        "id": "mokou_win"
+        "id": "mokou_win",
+        "category": "mokou"
     },
     {
         "requirement": {
@@ -3571,16 +3099,13 @@
             {
                 "type": "emote",
                 "name": "mokou2"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "\"As An Immortal, I Don't Care\"",
         "description": "Lose 10 games as Mokou.",
         "hidden": false,
-        "id": "mokou_lose"
+        "id": "mokou_lose",
+        "category": "mokou"
     },
     {
         "requirement": {
@@ -3592,16 +3117,13 @@
             {
                 "type": "prop",
                 "id": 26
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "More Interested In Cooking Yakitori",
         "description": "Play 10 games as Mokou.",
         "hidden": false,
-        "id": "mokou_play"
+        "id": "mokou_play",
+        "category": "mokou"
     },
     {
         "requirement": {
@@ -3620,16 +3142,13 @@
             {
                 "type": "avatar",
                 "id": "mokou3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Control Over Flames & Re-Birth",
         "description": "Use each Mokou's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "mokou_cards"
+        "id": "mokou_cards",
+        "category": "mokou"
     },
     {
         "requirement": {
@@ -3642,16 +3161,13 @@
                 "type": "accessory",
                 "id": 26,
                 "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Infinite Amount of Phoenix Feathers",
         "description": "Play 100 games as Mokou.",
         "hidden": false,
-        "id": "mokou_play2"
+        "id": "mokou_play2",
+        "category": "mokou"
     },
     {
         "requirement": {
@@ -3664,16 +3180,13 @@
                 "type": "background",
                 "id": 26,
                 "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Breaking The Limits Of The Flesh",
         "description": "Play 1000 games as Mokou.",
         "hidden": false,
-        "id": "mokou_play3"
+        "id": "mokou_play3",
+        "category": "mokou"
     },
     "Mima",
     {
@@ -3686,16 +3199,13 @@
             {
                 "type": "avatar",
                 "id": "mima"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "The Best Since '97",
         "description": "Win 10 games as Mima.",
         "hidden": false,
-        "id": "mima_win"
+        "id": "mima_win",
+        "category": "mima"
     },
     {
         "requirement": {
@@ -3707,16 +3217,13 @@
             {
                 "type": "emote",
                 "name": "mima4"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Never Coming Back...",
         "description": "Lose 10 games as Mima.",
         "hidden": false,
-        "id": "mima_lose"
+        "id": "mima_lose",
+        "category": "mima"
     },
     {
         "requirement": {
@@ -3728,16 +3235,13 @@
             {
                 "type": "prop",
                 "id": 27
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Extremely Hellish Magician",
         "description": "Play 10 games as Mima.",
         "hidden": false,
-        "id": "mima_play"
+        "id": "mima_play",
+        "category": "mima"
     },
     {
         "requirement": {
@@ -3756,16 +3260,13 @@
             {
                 "type": "avatar",
                 "id": "mima3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "The Original Master Spark",
         "description": "Use each Mima's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "mima_cards"
+        "id": "mima_cards",
+        "category": "mima"
     },
     {
         "requirement": {
@@ -3778,16 +3279,13 @@
                 "type": "accessory",
                 "id": 27,
                 "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Nemesis Of The Shrine Maiden",
         "description": "Play 100 games as Mima.",
         "hidden": false,
-        "id": "mima_play2"
+        "id": "mima_play2",
+        "category": "mima"
     },
     {
         "requirement": {
@@ -3800,16 +3298,13 @@
                 "type": "background",
                 "id": 27,
                 "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "She Will Be Back... Eventually...",
         "description": "Play 1000 games as Mima.",
         "hidden": false,
-        "id": "mima_play3"
+        "id": "mima_play3",
+        "category": "mima"
     },
     "Shou",
     {
@@ -3822,16 +3317,13 @@
             {
                 "type": "avatar",
                 "id": "shou"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Tip Of The Lance",
         "description": "Win 10 games as Shou.",
         "hidden": false,
-        "id": "shou_win"
+        "id": "shou_win",
+        "category": "shou"
     },
     {
         "requirement": {
@@ -3843,16 +3335,13 @@
             {
                 "type": "emote",
                 "name": "shou2"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "The Lance Is Just For Show...",
         "description": "Lose 10 games as Shou.",
         "hidden": false,
-        "id": "shou_lose"
+        "id": "shou_lose",
+        "category": "shou"
     },
     {
         "requirement": {
@@ -3864,16 +3353,13 @@
             {
                 "type": "prop",
                 "id": 28
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Impossible Curved Lasers!",
         "description": "Play 10 games as Shou.",
         "hidden": false,
-        "id": "shou_play"
+        "id": "shou_play",
+        "category": "shou"
     },
     {
         "requirement": {
@@ -3892,16 +3378,13 @@
             {
                 "type": "avatar",
                 "id": "shou3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "One Of The Seven Gods Of Fortune",
         "description": "Use each Shou's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "shou_cards"
+        "id": "shou_cards",
+        "category": "shou"
     },
     {
         "requirement": {
@@ -3914,16 +3397,13 @@
                 "type": "accessory",
                 "id": 28,
                 "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Immense Power From The Pagoda",
         "description": "Play 100 games as Shou.",
         "hidden": false,
-        "id": "shou_play2"
+        "id": "shou_play2",
+        "category": "shou"
     },
     {
         "requirement": {
@@ -3936,16 +3416,13 @@
                 "type": "background",
                 "id": 28,
                 "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "The Radiant & Hungry Youkai Tiger",
         "description": "Play 1000 games as Shou.",
         "hidden": false,
-        "id": "shou_play3"
+        "id": "shou_play3",
+        "category": "shou"
     },
     "Murasa",
     {
@@ -3958,16 +3435,13 @@
             {
                 "type": "avatar",
                 "id": "murasa"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Freshwater's Captain",
         "description": "Win 10 games as Murasa.",
         "hidden": false,
-        "id": "murasa_win"
+        "id": "murasa_win",
+        "category": "murasa"
     },
     {
         "requirement": {
@@ -3979,16 +3453,13 @@
             {
                 "type": "emote",
                 "name": "murasa2"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Not The First Shipwreck...",
         "description": "Lose 10 games as Murasa.",
         "hidden": false,
-        "id": "murasa_lose"
+        "id": "murasa_lose",
+        "category": "murasa"
     },
     {
         "requirement": {
@@ -4000,16 +3471,13 @@
             {
                 "type": "prop",
                 "id": 29
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Unexpected Musical POP",
         "description": "Play 10 games as Murasa.",
         "hidden": false,
-        "id": "murasa_play"
+        "id": "murasa_play",
+        "category": "murasa"
     },
     {
         "requirement": {
@@ -4028,16 +3496,13 @@
             {
                 "type": "avatar",
                 "id": "murasa3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Sailed Every Known Sea",
         "description": "Use each Murasa's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "murasa_cards"
+        "id": "murasa_cards",
+        "category": "murasa"
     },
     {
         "requirement": {
@@ -4050,16 +3515,13 @@
                 "type": "accessory",
                 "id": 29,
                 "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "No Dolphins Here",
         "description": "Play 100 games as Murasa.",
         "hidden": false,
-        "id": "murasa_play2"
+        "id": "murasa_play2",
+        "category": "murasa"
     },
     {
         "requirement": {
@@ -4072,16 +3534,13 @@
                 "type": "background",
                 "id": 29,
                 "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Unbeatable Maelstrom",
         "description": "Play 1000 games as Murasa.",
         "hidden": false,
-        "id": "murasa_play3"
+        "id": "murasa_play3",
+        "category": "murasa"
     },
     "Sekibanki",
     {
@@ -4094,16 +3553,13 @@
             {
                 "type": "avatar",
                 "id": "sekibanki"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "6-6-B",
         "description": "Win 10 games as Sekibanki.",
         "hidden": false,
-        "id": "sekibanki_win"
+        "id": "sekibanki_win",
+        "category": "sekibanki"
     },
     {
         "requirement": {
@@ -4115,16 +3571,13 @@
             {
                 "type": "emote",
                 "name": "sekibanki2"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Wow, My Head is Spinning!",
         "description": "Lose 10 games as Sekibanki.",
         "hidden": false,
-        "id": "sekibanki_lose"
+        "id": "sekibanki_lose",
+        "category": "sekibanki"
     },
     {
         "requirement": {
@@ -4136,16 +3589,13 @@
             {
                 "type": "prop",
                 "id": 30
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Also A Nukekubi and Dullahan",
         "description": "Play 10 games as Sekibanki.",
         "hidden": false,
-        "id": "sekibanki_play"
+        "id": "sekibanki_play",
+        "category": "sekibanki"
     },
     {
         "requirement": {
@@ -4164,16 +3614,13 @@
             {
                 "type": "avatar",
                 "id": "sekibanki3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Doesn't Know \"Neck Pains\"",
         "description": "Use each Sekibanki's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "sekibanki_cards"
+        "id": "sekibanki_cards",
+        "category": "sekibanki"
     },
     {
         "requirement": {
@@ -4186,16 +3633,13 @@
                 "type": "accessory",
                 "id": 30,
                 "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Head Full Of Optic Blasts",
         "description": "Play 100 games as Sekibanki.",
         "hidden": false,
-        "id": "sekibanki_play2"
+        "id": "sekibanki_play2",
+        "category": "sekibanki"
     },
     {
         "requirement": {
@@ -4208,16 +3652,13 @@
                 "type": "background",
                 "id": 30,
                 "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": "Rock 'n' Rock 'n' Beat"
             }
         ],
         "name": "Dreams Don't Die!",
         "description": "Play 1000 games as Sekibanki.",
         "hidden": false,
-        "id": "sekibanki_play3"
+        "id": "sekibanki_play3",
+        "category": "sekibanki"
     },
     "Satori",
     {
@@ -4230,16 +3671,13 @@
             {
                 "type": "avatar",
                 "id": "satori"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Going Beyond The Nous",
         "description": "Win 10 games as Satori.",
         "hidden": false,
-        "id": "satori_win"
+        "id": "satori_win",
+        "category": "satori"
     },
     {
         "requirement": {
@@ -4251,16 +3689,13 @@
             {
                 "type": "emote",
                 "name": "satori2"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Got Read Like A Book",
         "description": "Lose 10 games as Satori.",
         "hidden": false,
-        "id": "satori_lose"
+        "id": "satori_lose",
+        "category": "satori"
     },
     {
         "requirement": {
@@ -4272,16 +3707,13 @@
             {
                 "type": "prop",
                 "id": 31
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Never Lost A Game Of RPS",
         "description": "Play 10 games as Satori.",
         "hidden": false,
-        "id": "satori_play"
+        "id": "satori_play",
+        "category": "satori"
     },
     {
         "requirement": {
@@ -4300,16 +3732,13 @@
             {
                 "type": "avatar",
                 "id": "satori3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Foul But Solid Detective",
         "description": "Use each Satori's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "satori_cards"
+        "id": "satori_cards",
+        "category": "satori"
     },
     {
         "requirement": {
@@ -4322,16 +3751,13 @@
                 "type": "accessory",
                 "id": 31,
                 "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Mistress Of The Blazing Hellfire",
         "description": "Play 100 games as Satori.",
         "hidden": false,
-        "id": "satori_play2"
+        "id": "satori_play2",
+        "category": "satori"
     },
     {
         "requirement": {
@@ -4344,16 +3770,13 @@
                 "type": "background",
                 "id": 31,
                 "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "Master \"Recollection\" Copy-Cat",
         "description": "Play 1000 games as Satori.",
         "hidden": false,
-        "id": "satori_play3"
+        "id": "satori_play3",
+        "category": "satori"
     },
     "Ran",
     {
@@ -4366,16 +3789,13 @@
             {
                 "type": "avatar",
                 "id": "ran"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "????????",
         "description": "Win 10 games as Ran.",
         "hidden": false,
-        "id": "ran_win"
+        "id": "ran_win",
+        "category": "ran"
     },
     {
         "requirement": {
@@ -4387,16 +3807,13 @@
             {
                 "type": "emote",
                 "name": "ran2"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "????????",
         "description": "Lose 10 games as Ran.",
         "hidden": false,
-        "id": "ran_lose"
+        "id": "ran_lose",
+        "category": "ran"
     },
     {
         "requirement": {
@@ -4408,16 +3825,13 @@
             {
                 "type": "prop",
                 "id": 32
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "????????",
         "description": "Play 10 games as Ran.",
         "hidden": false,
-        "id": "ran_play"
+        "id": "ran_play",
+        "category": "ran"
     },
     {
         "requirement": {
@@ -4436,16 +3850,13 @@
             {
                 "type": "avatar",
                 "id": "ran3"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "????????",
         "description": "Use each Ran's skill and spell<br>card at least once.",
         "hidden": false,
-        "id": "ran_cards"
+        "id": "ran_cards",
+        "category": "ran"
     },
     {
         "requirement": {
@@ -4458,16 +3869,13 @@
                 "type": "accessory",
                 "id": 32,
                 "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "????????",
         "description": "Play 100 games as Ran.",
         "hidden": false,
-        "id": "ran_play2"
+        "id": "ran_play2",
+        "category": "ran"
     },
     {
         "requirement": {
@@ -4480,18 +3888,14 @@
                 "type": "background",
                 "id": 32,
                 "comment": "????????"
-            },
-            {
-                "type": "title",
-                "name": null
             }
         ],
         "name": "????????",
         "description": "Play 1000 games as Ran.",
         "hidden": false,
-        "id": "ran_play3"
+        "id": "ran_play3",
+        "category": "ran"
     },
-
     "Win condition",
     {
         "requirement": {
@@ -4512,9 +3916,9 @@
         "description": "Close a game with \"Missing Purple Power\".",
         "hidden": true,
         "comment": "Not implemented!",
-        "id": "suika_mpp"
+        "id": "suika_mpp",
+        "category": "suika"
     },
-
     "Meta",
     {
         "requirement": {
@@ -4524,16 +3928,13 @@
             {
                 "type": "avatar",
                 "id": "koishi"
-            },
-            {
-                "type": "title",
-                "name": "Spaghetti Master"
             }
         ],
         "name": "Modding at its finest",
         "description": "Have the game crash once",
         "hidden": true,
-        "id": "crash"
+        "id": "crash",
+        "category": "meta"
     },
     {
         "requirement": {
@@ -4554,13 +3955,882 @@
             },
             {
                 "type": "emote",
+                "name": "alice3"
+            },
+            {
+                "type": "emote",
+                "name": "alice4"
+            },
+            {
+                "type": "emote",
+                "name": "alice5"
+            },
+            {
+                "type": "emote",
+                "name": "alice6"
+            },
+            {
+                "type": "emote",
+                "name": "alice7"
+            },
+            {
+                "type": "emote",
+                "name": "aya2"
+            },
+            {
+                "type": "emote",
+                "name": "aya3"
+            },
+            {
+                "type": "emote",
+                "name": "aya4"
+            },
+            {
+                "type": "emote",
+                "name": "aya5"
+            },
+            {
+                "type": "emote",
+                "name": "aya7"
+            },
+            {
+                "type": "emote",
+                "name": "cirno2"
+            },
+            {
+                "type": "emote",
+                "name": "cirno3"
+            },
+            {
+                "type": "emote",
+                "name": "cirno4"
+            },
+            {
+                "type": "emote",
+                "name": "cirno5"
+            },
+            {
+                "type": "emote",
+                "name": "cirno7"
+            },
+            {
+                "type": "emote",
+                "name": "iku2"
+            },
+            {
+                "type": "emote",
+                "name": "iku3"
+            },
+            {
+                "type": "emote",
+                "name": "iku4"
+            },
+            {
+                "type": "emote",
+                "name": "iku5"
+            },
+            {
+                "type": "emote",
+                "name": "iku7"
+            },
+            {
+                "type": "emote",
+                "name": "komachi2"
+            },
+            {
+                "type": "emote",
+                "name": "komachi3"
+            },
+            {
+                "type": "emote",
+                "name": "komachi5"
+            },
+            {
+                "type": "emote",
+                "name": "komachi6"
+            },
+            {
+                "type": "emote",
+                "name": "komachi7"
+            },
+            {
+                "type": "emote",
+                "name": "marisa3"
+            },
+            {
+                "type": "emote",
+                "name": "marisa4"
+            },
+            {
+                "type": "emote",
+                "name": "marisa5"
+            },
+            {
+                "type": "emote",
+                "name": "marisa6"
+            },
+            {
+                "type": "emote",
+                "name": "marisa7"
+            },
+            {
+                "type": "emote",
+                "name": "meiling2"
+            },
+            {
+                "type": "emote",
+                "name": "meiling3"
+            },
+            {
+                "type": "emote",
+                "name": "meiling5"
+            },
+            {
+                "type": "emote",
+                "name": "meiling6"
+            },
+            {
+                "type": "emote",
+                "name": "meiling7"
+            },
+            {
+                "type": "emote",
+                "name": "patchouli2"
+            },
+            {
+                "type": "emote",
+                "name": "patchouli3"
+            },
+            {
+                "type": "emote",
+                "name": "patchouli5"
+            },
+            {
+                "type": "emote",
+                "name": "patchouli6"
+            },
+            {
+                "type": "emote",
+                "name": "patchouli7"
+            },
+            {
+                "type": "emote",
+                "name": "patchouli8"
+            },
+            {
+                "type": "emote",
+                "name": "reimu3"
+            },
+            {
+                "type": "emote",
+                "name": "reimu4"
+            },
+            {
+                "type": "emote",
+                "name": "reimu5"
+            },
+            {
+                "type": "emote",
+                "name": "reimu6"
+            },
+            {
+                "type": "emote",
+                "name": "reimu7"
+            },
+            {
+                "type": "emote",
+                "name": "reisen3"
+            },
+            {
+                "type": "emote",
+                "name": "reisen4"
+            },
+            {
+                "type": "emote",
+                "name": "reisen5"
+            },
+            {
+                "type": "emote",
+                "name": "reisen6"
+            },
+            {
+                "type": "emote",
+                "name": "reisen7"
+            },
+            {
+                "type": "emote",
+                "name": "remilia2"
+            },
+            {
+                "type": "emote",
+                "name": "remilia3"
+            },
+            {
+                "type": "emote",
+                "name": "remilia5"
+            },
+            {
+                "type": "emote",
+                "name": "remilia6"
+            },
+            {
+                "type": "emote",
+                "name": "remilia7"
+            },
+            {
+                "type": "emote",
+                "name": "sakuya3"
+            },
+            {
+                "type": "emote",
+                "name": "sakuya4"
+            },
+            {
+                "type": "emote",
+                "name": "sakuya5"
+            },
+            {
+                "type": "emote",
+                "name": "sakuya6"
+            },
+            {
+                "type": "emote",
+                "name": "sakuya7"
+            },
+            {
+                "type": "emote",
+                "name": "sanae2"
+            },
+            {
+                "type": "emote",
+                "name": "sanae3"
+            },
+            {
+                "type": "emote",
+                "name": "sanae4"
+            },
+            {
+                "type": "emote",
+                "name": "sanae5"
+            },
+            {
+                "type": "emote",
+                "name": "sanae7"
+            },
+            {
+                "type": "emote",
+                "name": "suika3"
+            },
+            {
+                "type": "emote",
+                "name": "suika4"
+            },
+            {
+                "type": "emote",
+                "name": "suika5"
+            },
+            {
+                "type": "emote",
+                "name": "suika6"
+            },
+            {
+                "type": "emote",
+                "name": "suika7"
+            },
+            {
+                "type": "emote",
+                "name": "suwako3"
+            },
+            {
+                "type": "emote",
+                "name": "suwako4"
+            },
+            {
+                "type": "emote",
+                "name": "suwako5"
+            },
+            {
+                "type": "emote",
+                "name": "suwako6"
+            },
+            {
+                "type": "emote",
+                "name": "suwako7"
+            },
+            {
+                "type": "emote",
+                "name": "tenshi2"
+            },
+            {
+                "type": "emote",
+                "name": "tenshi3"
+            },
+            {
+                "type": "emote",
+                "name": "tenshi5"
+            },
+            {
+                "type": "emote",
+                "name": "tenshi6"
+            },
+            {
+                "type": "emote",
+                "name": "tenshi7"
+            },
+            {
+                "type": "emote",
+                "name": "utsuho3"
+            },
+            {
+                "type": "emote",
+                "name": "utsuho4"
+            },
+            {
+                "type": "emote",
+                "name": "utsuho5"
+            },
+            {
+                "type": "emote",
+                "name": "utsuho6"
+            },
+            {
+                "type": "emote",
+                "name": "utsuho7"
+            },
+            {
+                "type": "emote",
+                "name": "youmu2"
+            },
+            {
+                "type": "emote",
+                "name": "youmu3"
+            },
+            {
+                "type": "emote",
+                "name": "youmu5"
+            },
+            {
+                "type": "emote",
+                "name": "youmu6"
+            },
+            {
+                "type": "emote",
+                "name": "youmu7"
+            },
+            {
+                "type": "emote",
+                "name": "yukari2"
+            },
+            {
+                "type": "emote",
+                "name": "yukari3"
+            },
+            {
+                "type": "emote",
+                "name": "yukari4"
+            },
+            {
+                "type": "emote",
+                "name": "yukari5"
+            },
+            {
+                "type": "emote",
+                "name": "yukari7"
+            },
+            {
+                "type": "emote",
+                "name": "yukari8"
+            },
+            {
+                "type": "emote",
+                "name": "yukari9"
+            },
+            {
+                "type": "emote",
+                "name": "yuyuko2"
+            },
+            {
+                "type": "emote",
+                "name": "yuyuko3"
+            },
+            {
+                "type": "emote",
+                "name": "yuyuko4"
+            },
+            {
+                "type": "emote",
+                "name": "yuyuko5"
+            },
+            {
+                "type": "emote",
+                "name": "yuyuko7"
+            },
+            {
+                "type": "emote",
+                "name": "clownpiece3"
+            },
+            {
+                "type": "emote",
+                "name": "clownpiece4"
+            },
+            {
+                "type": "emote",
+                "name": "clownpiece5"
+            },
+            {
+                "type": "emote",
+                "name": "clownpiece6"
+            },
+            {
+                "type": "emote",
+                "name": "clownpiece7"
+            },
+            {
+                "type": "emote",
+                "name": "clownpiece8"
+            },
+            {
+                "type": "emote",
+                "name": "flandre3"
+            },
+            {
+                "type": "emote",
+                "name": "flandre4"
+            },
+            {
+                "type": "emote",
+                "name": "flandre5"
+            },
+            {
+                "type": "emote",
+                "name": "flandre6"
+            },
+            {
+                "type": "emote",
+                "name": "flandre7"
+            },
+            {
+                "type": "emote",
+                "name": "flandre8"
+            },
+            {
+                "type": "emote",
+                "name": "flandre9"
+            },
+            {
+                "type": "emote",
+                "name": "flandre10"
+            },
+            {
+                "type": "emote",
+                "name": "flandre11"
+            },
+            {
+                "type": "emote",
+                "name": "flandre12"
+            },
+            {
+                "type": "emote",
+                "name": "flandre13"
+            },
+            {
+                "type": "emote",
+                "name": "flandre14"
+            },
+            {
+                "type": "emote",
+                "name": "flandre15"
+            },
+            {
+                "type": "emote",
+                "name": "kaguya2"
+            },
+            {
+                "type": "emote",
+                "name": "kaguya3"
+            },
+            {
+                "type": "emote",
+                "name": "kaguya4"
+            },
+            {
+                "type": "emote",
+                "name": "kaguya5"
+            },
+            {
+                "type": "emote",
+                "name": "kaguya6"
+            },
+            {
+                "type": "emote",
+                "name": "kaguya7"
+            },
+            {
+                "type": "emote",
+                "name": "kaguya9"
+            },
+            {
+                "type": "emote",
+                "name": "kaguya10"
+            },
+            {
+                "type": "emote",
+                "name": "mima2"
+            },
+            {
+                "type": "emote",
+                "name": "mima3"
+            },
+            {
+                "type": "emote",
+                "name": "mima5"
+            },
+            {
+                "type": "emote",
+                "name": "mima6"
+            },
+            {
+                "type": "emote",
+                "name": "mima7"
+            },
+            {
+                "type": "emote",
+                "name": "mima8"
+            },
+            {
+                "type": "emote",
+                "name": "mima9"
+            },
+            {
+                "type": "emote",
+                "name": "mima10"
+            },
+            {
+                "type": "emote",
+                "name": "mima11"
+            },
+            {
+                "type": "emote",
+                "name": "mima12"
+            },
+            {
+                "type": "emote",
+                "name": "mokou3"
+            },
+            {
+                "type": "emote",
+                "name": "mokou4"
+            },
+            {
+                "type": "emote",
+                "name": "mokou5"
+            },
+            {
+                "type": "emote",
+                "name": "mokou6"
+            },
+            {
+                "type": "emote",
+                "name": "mokou7"
+            },
+            {
+                "type": "emote",
+                "name": "mokou8"
+            },
+            {
+                "type": "emote",
+                "name": "mokou9"
+            },
+            {
+                "type": "emote",
+                "name": "momiji3"
+            },
+            {
+                "type": "emote",
+                "name": "momiji4"
+            },
+            {
+                "type": "emote",
+                "name": "momiji5"
+            },
+            {
+                "type": "emote",
+                "name": "momiji6"
+            },
+            {
+                "type": "emote",
+                "name": "momiji7"
+            },
+            {
+                "type": "emote",
+                "name": "momiji8"
+            },
+            {
+                "type": "emote",
+                "name": "momiji9"
+            },
+            {
+                "type": "emote",
+                "name": "momiji10"
+            },
+            {
+                "type": "emote",
+                "name": "momiji11"
+            },
+            {
+                "type": "emote",
+                "name": "momiji12"
+            },
+            {
+                "type": "emote",
                 "name": "momiji13"
+            },
+            {
+                "type": "emote",
+                "name": "murasa3"
+            },
+            {
+                "type": "emote",
+                "name": "murasa4"
+            },
+            {
+                "type": "emote",
+                "name": "murasa5"
+            },
+            {
+                "type": "emote",
+                "name": "murasa6"
+            },
+            {
+                "type": "emote",
+                "name": "murasa7"
+            },
+            {
+                "type": "emote",
+                "name": "murasa8"
+            },
+            {
+                "type": "emote",
+                "name": "murasa9"
+            },
+            {
+                "type": "emote",
+                "name": "orin2"
+            },
+            {
+                "type": "emote",
+                "name": "orin3"
+            },
+            {
+                "type": "emote",
+                "name": "orin4"
+            },
+            {
+                "type": "emote",
+                "name": "orin5"
+            },
+            {
+                "type": "emote",
+                "name": "orin6"
+            },
+            {
+                "type": "emote",
+                "name": "orin7"
+            },
+            {
+                "type": "emote",
+                "name": "orin9"
+            },
+            {
+                "type": "emote",
+                "name": "orin10"
+            },
+            {
+                "type": "emote",
+                "name": "orin11"
+            },
+            {
+                "type": "emote",
+                "name": "satori3"
+            },
+            {
+                "type": "emote",
+                "name": "satori4"
+            },
+            {
+                "type": "emote",
+                "name": "satori5"
+            },
+            {
+                "type": "emote",
+                "name": "satori6"
+            },
+            {
+                "type": "emote",
+                "name": "satori7"
+            },
+            {
+                "type": "emote",
+                "name": "satori8"
+            },
+            {
+                "type": "emote",
+                "name": "satori9"
+            },
+            {
+                "type": "emote",
+                "name": "satori10"
+            },
+            {
+                "type": "emote",
+                "name": "satori11"
+            },
+            {
+                "type": "emote",
+                "name": "satori12"
+            },
+            {
+                "type": "emote",
+                "name": "sekibanki3"
+            },
+            {
+                "type": "emote",
+                "name": "sekibanki4"
+            },
+            {
+                "type": "emote",
+                "name": "sekibanki5"
+            },
+            {
+                "type": "emote",
+                "name": "sekibanki6"
+            },
+            {
+                "type": "emote",
+                "name": "sekibanki7"
+            },
+            {
+                "type": "emote",
+                "name": "sekibanki8"
+            },
+            {
+                "type": "emote",
+                "name": "sekibanki9"
+            },
+            {
+                "type": "emote",
+                "name": "sekibanki10"
+            },
+            {
+                "type": "emote",
+                "name": "sekibanki11"
+            },
+            {
+                "type": "emote",
+                "name": "sekibanki12"
+            },
+            {
+                "type": "emote",
+                "name": "shou3"
+            },
+            {
+                "type": "emote",
+                "name": "shou4"
+            },
+            {
+                "type": "emote",
+                "name": "shou5"
+            },
+            {
+                "type": "emote",
+                "name": "shou6"
+            },
+            {
+                "type": "emote",
+                "name": "shou7"
+            },
+            {
+                "type": "emote",
+                "name": "shou8"
+            },
+            {
+                "type": "emote",
+                "name": "shou9"
+            },
+            {
+                "type": "emote",
+                "name": "shou10"
+            },
+            {
+                "type": "emote",
+                "name": "yuuka3"
+            },
+            {
+                "type": "emote",
+                "name": "yuuka4"
+            },
+            {
+                "type": "emote",
+                "name": "yuuka5"
+            },
+            {
+                "type": "emote",
+                "name": "yuuka6"
+            },
+            {
+                "type": "emote",
+                "name": "yuuka7"
+            },
+            {
+                "type": "emote",
+                "name": "yuuka8"
+            },
+            {
+                "type": "emote",
+                "name": "yuuka9"
+            },
+            {
+                "type": "emote",
+                "name": "yuuka10"
+            },
+            {
+                "type": "emote",
+                "name": "yuuka11"
+            },
+            {
+                "type": "emote",
+                "name": "yuuka12"
+            },
+            {
+                "type": "emote",
+                "name": "yuuka13"
+            },
+            {
+                "type": "emote",
+                "name": "yuuka14"
+            },
+            {
+                "type": "emote",
+                "name": "yuuka15"
+            },
+            {
+                "type": "emote",
+                "name": "yuuka16"
+            },
+            {
+                "type": "emote",
+                "name": "yuuka17"
+            },
+            {
+                "type": "emote",
+                "name": "placeholder"
             }
         ],
         "name": "Impossible",
         "description": "Impossible achievement there only to lock<br>stuff that doesn't have any requirement<br>but should.",
         "hidden": false,
-        "id": "impossible"
+        "id": "impossible",
+        "category": "meta"
     },
     {
         "requirement": {
@@ -4587,7 +4857,8 @@
         "name": "Reminiscence of an ancient time",
         "description": "Use the old arcade machine to access the<br>hostlist.",
         "hidden": false,
-        "id": "crash"
+        "id": "old_arcade",
+        "category": "meta"
     },
     {
         "requirement": {
@@ -4607,6 +4878,7 @@
         "name": "Gotta catch'em all!",
         "description": "Use the debug version of the mod.",
         "hidden": true,
-        "id": "debug"
+        "id": "debug",
+        "category": "meta"
     }
 ]
