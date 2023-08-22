@@ -244,7 +244,7 @@
     {"path": "assets/emotes/special/Satori (Special 3).png",      "alias": ["satori11"]},
     {"path": "assets/emotes/special/Satori (Special 4).png",      "alias": ["satori12"]},
     {"path": "assets/emotes/soku2/Sekibanki 1 (Normal).png",      "alias": ["sekibanki1"]},
-    {"path": "assets/emotes/soku2/Sekibanki 1 (Sad).png",         "alias": ["sekibanki2"]},
+    {"path": "assets/emotes/soku2/Sekibanki 1 (Sad 2).png",       "alias": ["sekibanki2"]},
     {"path": "assets/emotes/soku2/Sekibanki 2 (Normal).png",      "alias": ["sekibanki3"]},
     {"path": "assets/emotes/soku2/Sekibanki 2 (Sad).png",         "alias": ["sekibanki4"]},
     {"path": "assets/emotes/soku2/Sekibanki 3 (Normal).png",      "alias": ["sekibanki5"]},
