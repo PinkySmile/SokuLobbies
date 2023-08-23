@@ -222,15 +222,15 @@ void countGame()
 	data->second.losses += chr.score < 2;
 	// Random select
 	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER ? selectedRandom.second : selectedRandom.first) {
-		data = lobbyData->loadedCharacterStats.find(SokuLib::CHARACTER_RANDOM);
-		if (data == lobbyData->loadedCharacterStats.end()) {
+		auto rdata = lobbyData->loadedCharacterStats.find(SokuLib::CHARACTER_RANDOM);
+		if (rdata == lobbyData->loadedCharacterStats.end()) {
 			LobbyData::CharacterStatEntry entry{0, 0, 0, 0};
 
 			lobbyData->loadedCharacterStats[SokuLib::CHARACTER_RANDOM] = entry;
-			data = lobbyData->loadedCharacterStats.find(SokuLib::CHARACTER_RANDOM);
+			rdata = lobbyData->loadedCharacterStats.find(SokuLib::CHARACTER_RANDOM);
 		}
-		data->second.wins += chr.score >= 2;
-		data->second.losses += chr.score < 2;
+		rdata->second.wins += chr.score >= 2;
+		rdata->second.losses += chr.score < 2;
 	}
 
 	// Against stats
@@ -238,15 +238,15 @@ void countGame()
 	dataAgainst->second.againstLosses += chr.score < 2;
 	// Random select
 	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER ? selectedRandom.first : selectedRandom.second) {
-		dataAgainst = lobbyData->loadedCharacterStats.find(SokuLib::CHARACTER_RANDOM);
-		if (dataAgainst == lobbyData->loadedCharacterStats.end()) {
+		auto rdataAgainst = lobbyData->loadedCharacterStats.find(SokuLib::CHARACTER_RANDOM);
+		if (rdataAgainst == lobbyData->loadedCharacterStats.end()) {
 			LobbyData::CharacterStatEntry entry{0, 0, 0, 0};
 
 			lobbyData->loadedCharacterStats[SokuLib::CHARACTER_RANDOM] = entry;
-			dataAgainst = lobbyData->loadedCharacterStats.find(SokuLib::CHARACTER_RANDOM);
+			rdataAgainst = lobbyData->loadedCharacterStats.find(SokuLib::CHARACTER_RANDOM);
 		}
-		dataAgainst->second.againstWins += chr.score >= 2;
-		dataAgainst->second.againstLosses += chr.score < 2;
+		rdataAgainst->second.againstWins += chr.score >= 2;
+		rdataAgainst->second.againstLosses += chr.score < 2;
 	}
 
 	// Matchup stats
