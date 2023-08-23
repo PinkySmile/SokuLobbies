@@ -242,6 +242,7 @@ void LobbyData::_loadAchievements()
 		achievement.name = val["name"];
 		achievement.requirement = val["requirement"];
 		achievement.hidden = val["hidden"];
+		achievement.category = val["category"];
 		achievement.rewards = val["rewards"].get<std::vector<nlohmann::json>>();
 
 		achievement.nameSpriteTitle.texture.createFromText(achievement.name.c_str(), this->getFont(18), {400, 22}, &size);
@@ -1193,6 +1194,8 @@ void LobbyData::_grantStatsAchievements()
 
 		auto textures = this->cardsTextures.find(mid);
 
+		if (textures == this->cardsTextures.end())
+			continue;
 		for (auto &elem : textures->second) {
 			auto cardIt = cardsIt->second.cards.find(elem.first);
 

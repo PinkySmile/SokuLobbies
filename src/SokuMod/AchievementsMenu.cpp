@@ -14,6 +14,12 @@
 
 void displaySokuCursor(SokuLib::Vector2i pos, SokuLib::Vector2u size);
 
+struct ExtraCategory {
+	std::string name;
+	std::string sprite;
+	bool fromGame;
+};
+
 static const char *rewardNames[] = {
 	"Accessory (Not Implemented)",
 	"Avatar",
@@ -24,9 +30,15 @@ static const char *rewardNames[] = {
 	"Unknown"
 };
 
+static ExtraCategory extra[] = {
+	{"meta", "assets/menu/meta_category.png", false},
+	{"", "assets/menu/all_category.png", false}
+};
+
 AchievementsMenu::AchievementsMenu()
 {
 	std::filesystem::path folder = profileFolderPath;
+	std::map<std::string, std::pair<int, int>> scores;
 	SokuLib::Vector2i size;
 
 	this->_title.texture.loadFromFile((folder / "assets/menu/titleAchievements.png").string().c_str());
@@ -89,8 +101,60 @@ AchievementsMenu::AchievementsMenu()
 	}
 	for (auto &ach : lobbyData->achievements)
 		ach.nameSpriteFull.tint = ach.awarded ? SokuLib::Color::White : SokuLib::Color{0x80, 0x80, 0x80};
+	
+	this->_categories.reserve(characters.size() - 2 + (sizeof(extra) / sizeof(*extra)));
+	for (auto &chr : characters) {
+		if (chr.first == SokuLib::CHARACTER_RANDOM || chr.first == SokuLib::CHARACTER_NAMAZU)
+			continue;
+		this->_categories.emplace_back();
 
-	this->_updateAchRightPanel();
+		auto &category = this->_categories.back();
+
+		category.name = chr.second.codeName;
+		category.sprite.texture.loadFromGame(("data/character/" + chr.second.codeName + "/face/face000.png").c_str());
+		category.sprite.setMirroring(true, false);
+	}
+	for (unsigned i = 0; i < sizeof(extra) / sizeof(*extra); i++) {
+		this->_categories.emplace_back();
+
+		auto &category = this->_categories.back();
+
+		category.name = extra[i].name;
+		if (extra[i].fromGame)
+			category.sprite.texture.loadFromGame(extra[i].sprite.c_str());
+		else
+			category.sprite.texture.loadFromFile((std::filesystem::path(profileFolderPath) / extra[i].sprite).string().c_str());
+	}
+	for (auto &ach : lobbyData->achievements) {
+		if (!ach.category.empty()) {
+			scores[ach.category].first += ach.awarded;
+			scores[ach.category].second++;
+		}
+		scores[""].first += ach.awarded;
+		scores[""].second++;
+	}
+	for (unsigned i = 0; i < this->_categories.size(); i++) {
+		char buffer[10];
+		auto &category = this->_categories[i];
+
+		category.sprite.setSize({80, 32});
+		category.sprite.setPosition({
+			static_cast<int>(i) % 5 * 100 + 60,
+			static_cast<int>(i) / 5 * 40 + 100
+		});
+		category.sprite.rect.width = category.sprite.texture.getSize().x;
+		category.sprite.rect.height = category.sprite.texture.getSize().y;
+
+		sprintf(buffer, "%i/%i", scores[category.name].first, scores[category.name].second);
+		category.completed.texture.createFromText(buffer, lobbyData->getFont(14), {400, 100}, &size);
+		category.completed.rect.width = size.x;
+		category.completed.rect.height = size.y;
+		category.completed.setSize(size.to<unsigned>());
+		category.completed.setPosition({
+			category.sprite.getPosition().x + static_cast<int>(category.sprite.getSize().x) - size.x / 2,
+			category.sprite.getPosition().y + static_cast<int>(category.sprite.getSize().y) - size.y
+		});
+	}
 }
 
 AchievementsMenu::~AchievementsMenu()
@@ -101,6 +165,45 @@ void AchievementsMenu::_()
 {
 	puts("_ !");
 	*(int *)0x882a94 = 0x16;
+}
+
+void AchievementsMenu::_inCategoryUpdate()
+{
+	if (SokuLib::inputMgrs.input.b == 1) {
+		this->_achList.clear();
+		playSound(0x29);
+		return;
+	}
+#ifdef _DEBUG
+	if (SokuLib::inputMgrs.input.changeCard == 1) {
+		lobbyData->achievementAwardQueue.clear();
+		lobbyData->achievementAwardQueue.push_back(this->_achList[this->_selected]);
+	}
+	if (SokuLib::inputMgrs.input.spellcard == 1) {
+		auto &achievement = *this->_achList[this->_selected];
+
+		achievement.awarded = !achievement.awarded;
+		achievement.nameSpriteFull.tint = achievement.awarded ? SokuLib::Color::White : SokuLib::Color{0x80, 0x80, 0x80, 0xFF};
+	}
+#endif
+
+	if (std::abs(SokuLib::inputMgrs.input.horizontalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.horizontalAxis) > 36 && std::abs(SokuLib::inputMgrs.input.horizontalAxis) % 6 == 0)) {
+		int result = this->_selected + std::copysign(ACH_PER_PAGE, SokuLib::inputMgrs.input.horizontalAxis);
+
+		if (result < 0)
+			result = 0;
+		else if (result >= this->_achList.size())
+			result = this->_achList.size() - 1;
+		if (result != this->_selected)
+			playSound(0x27);
+		this->_selected = result;
+		this->_updateAchRightPanel();
+	}
+	if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.verticalAxis) > 36 && std::abs(SokuLib::inputMgrs.input.verticalAxis) % 6 == 0)) {
+		playSound(0x27);
+		this->_selected = static_cast<unsigned>(this->_selected + std::copysign(1, SokuLib::inputMgrs.input.verticalAxis) + this->_achList.size()) % this->_achList.size();
+		this->_updateAchRightPanel();
+	}
 }
 
 int AchievementsMenu::onProcess()
@@ -118,38 +221,40 @@ int AchievementsMenu::onProcess()
 		return true;
 	}
 #endif
+	if (!this->_achList.empty())
+		return this->_inCategoryUpdate(), true;
 	if (SokuLib::inputMgrs.input.b == 1) {
 		playSound(0x29);
 		return false;
 	}
-#ifdef _DEBUG
-	if (SokuLib::inputMgrs.input.changeCard == 1) {
-		lobbyData->achievementAwardQueue.clear();
-		lobbyData->achievementAwardQueue.push_back(&lobbyData->achievements[this->_selected]);
-	}
-	if (SokuLib::inputMgrs.input.spellcard == 1) {
-		auto &achievement = lobbyData->achievements[this->_selected];
-
-		achievement.awarded = !achievement.awarded;
-		achievement.nameSpriteFull.tint = achievement.awarded ? SokuLib::Color::White : SokuLib::Color{0x80, 0x80, 0x80, 0xFF};
-	}
-#endif
-
 	if (std::abs(SokuLib::inputMgrs.input.horizontalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.horizontalAxis) > 36 && std::abs(SokuLib::inputMgrs.input.horizontalAxis) % 6 == 0)) {
-		int result = this->_selected + std::copysign(ACH_PER_PAGE, SokuLib::inputMgrs.input.horizontalAxis);
+		int result = this->_categorySelected + std::copysign(1, SokuLib::inputMgrs.input.horizontalAxis);
 
 		if (result < 0)
-			result = 0;
-		else if (result >= lobbyData->achievements.size())
-			result = lobbyData->achievements.size() - 1;
-		if (result != this->_selected)
-			playSound(0x27);
-		this->_selected = result;
-		this->_updateAchRightPanel();
+			this->_categorySelected = this->_categories.size() - 1;
+		else
+			this->_categorySelected = result % this->_categories.size();
+		playSound(0x27);
 	}
 	if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.verticalAxis) > 36 && std::abs(SokuLib::inputMgrs.input.verticalAxis) % 6 == 0)) {
 		playSound(0x27);
-		this->_selected = static_cast<unsigned>(this->_selected + std::copysign(1, SokuLib::inputMgrs.input.verticalAxis) + lobbyData->achievements.size()) % lobbyData->achievements.size();
+		if (SokuLib::inputMgrs.input.verticalAxis > 0 && this->_categorySelected + 5 > this->_categories.size())
+			this->_categorySelected %= 5;
+		else if (SokuLib::inputMgrs.input.verticalAxis < 0 && this->_categorySelected < 5) {
+			this->_categorySelected = this->_categories.size() - (this->_categories.size() % 5) + this->_categorySelected;
+			if (this->_categorySelected >= this->_categories.size())
+				this->_categorySelected -= 5;
+		} else
+			this->_categorySelected += std::copysign(5, SokuLib::inputMgrs.input.verticalAxis);
+	}
+	if (SokuLib::inputMgrs.input.a == 1) {
+		auto &category = this->_categories[this->_categorySelected];
+
+		for (auto &ach : lobbyData->achievements)
+			if (category.name.empty() || category.name == ach.category)
+				this->_achList.push_back(&ach);
+		playSound(0x28);
+		this->_selected = 0;
 		this->_updateAchRightPanel();
 	}
 	return true;
@@ -172,26 +277,18 @@ SokuLib::DrawUtils::Sprite *AchievementsMenu::getRewardText(const std::string &t
 	return &this->_panRightSpriteTxt[6];
 }
 
-int AchievementsMenu::onRender()
+void AchievementsMenu::_inCategoryRender()
 {
-	this->_title.draw();
-	if (lobbyData->achievementsLocked) {
-		this->_messageBox.draw();
-		this->_loadingText.draw();
-#ifndef _DEBUG
-		return 0;
-#endif
-	}
 	this->_ui.draw();
-	for (unsigned i = 0; i + this->_top < lobbyData->achievements.size() && i < ACH_PER_PAGE; i++) {
-		auto &ach = lobbyData->achievements[i + this->_top];
+	for (unsigned i = 0; i + this->_top < this->_achList.size() && i < ACH_PER_PAGE; i++) {
+		auto &ach = *this->_achList[i + this->_top];
 
 		if (i + this->_top == this->_selected)
 			displaySokuCursor(ach.nameSpriteFull.getPosition() - SokuLib::Vector2i{4, 0}, {300, 16});
 		ach.nameSpriteFull.draw();
 	}
 
-	auto &ach = lobbyData->achievements[this->_selected];
+	auto &ach = *this->_achList[this->_selected];
 
 	ach.nameSpriteTitle.draw();
 	for (auto &pair : this->_avatars) {
@@ -209,6 +306,29 @@ int AchievementsMenu::onRender()
 		this->_hiddenSprite.draw();
 	for (auto s : this->_rewardSprites)
 		s->draw();
+}
+
+int AchievementsMenu::onRender()
+{
+	this->_title.draw();
+	if (lobbyData->achievementsLocked) {
+		this->_messageBox.draw();
+		this->_loadingText.draw();
+#ifndef _DEBUG
+		return 0;
+#endif
+	}
+	if (!this->_achList.empty())
+		return this->_inCategoryRender(), 0;
+	for (unsigned i = 0; i < this->_categories.size(); i++) {
+		if (i == this->_categorySelected)
+			displaySokuCursor(
+				this->_categories[i].sprite.getPosition() + SokuLib::Vector2i{8, 0},
+				this->_categories[i].sprite.getSize() - SokuLib::Vector2i{8, 0}
+			);
+		this->_categories[i].sprite.draw();
+		this->_categories[i].completed.draw();
+	}
 	return 0;
 }
 
@@ -218,10 +338,10 @@ void AchievementsMenu::_updateAchRightPanel()
 		this->_top = this->_selected;
 	else if (this->_selected >= this->_top + ACH_PER_PAGE)
 		this->_top = this->_selected - ACH_PER_PAGE + 1;
-	for (unsigned i = 0; i + this->_top < lobbyData->achievements.size() && i < ACH_PER_PAGE; i++)
-		lobbyData->achievements[i + this->_top].nameSpriteFull.setPosition({50, static_cast<int>(110 + i * 20)});
+	for (unsigned i = 0; i + this->_top < this->_achList.size() && i < ACH_PER_PAGE; i++)
+		this->_achList[i + this->_top]->nameSpriteFull.setPosition({50, static_cast<int>(110 + i * 20)});
 
-	auto &ach = lobbyData->achievements[this->_selected];
+	auto &ach = *this->_achList[this->_selected];
 	auto &desc = !ach.hidden || ach.awarded ? ach.descSprite : this->_hiddenSprite;
 
 	desc.setPosition({315, ach.nameSpriteTitle.getPosition().y + 30});

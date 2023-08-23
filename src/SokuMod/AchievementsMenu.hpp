@@ -15,8 +15,15 @@
 
 class AchievementsMenu : public SokuLib::IMenu {
 private:
+	struct AchievementCategory {
+		std::string name;
+		SokuLib::DrawUtils::Sprite sprite;
+		SokuLib::DrawUtils::Sprite completed;
+	};
+
 	unsigned _top = 0;
 	unsigned _selected = 0;
+	unsigned _categorySelected = 0;
 	SokuLib::DrawUtils::Sprite _title;
 	SokuLib::DrawUtils::Sprite _ui;
 	SokuLib::DrawUtils::Sprite _loadingText;
@@ -29,7 +36,11 @@ private:
 	std::vector<std::unique_ptr<SokuLib::DrawUtils::Sprite>> _extraSprites;
 	std::vector<SokuLib::DrawUtils::Sprite *> _rewardSprites;
 	std::vector<std::pair<std::pair<unsigned, unsigned>, LobbyData::Avatar *>> _avatars;
+	std::vector<LobbyData::Achievement *> _achList;
+	std::vector<AchievementCategory> _categories;
 
+	void _inCategoryUpdate();
+	void _inCategoryRender();
 	void _updateAchRightPanel();
 	void _renderRightPanelRewards();
 	SokuLib::DrawUtils::Sprite *getRewardText(const std::string &type);

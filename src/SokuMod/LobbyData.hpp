@@ -83,6 +83,7 @@ public:
 		std::string code;
 		std::string description;
 		std::string name;
+		std::string category;
 		nlohmann::json requirement;
 		std::vector<nlohmann::json> rewards;
 		bool awarded;

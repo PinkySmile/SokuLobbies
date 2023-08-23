@@ -1198,7 +1198,7 @@
         "description": "Win 10 games as Reisen.",
         "hidden": false,
         "id": "reisen_win",
-        "category": "reisen"
+        "category": "udonge"
     },
     {
         "requirement": {
@@ -1216,7 +1216,7 @@
         "description": "Lose 10 games as Reisen.",
         "hidden": false,
         "id": "reisen_lose",
-        "category": "reisen"
+        "category": "udonge"
     },
     {
         "requirement": {
@@ -1234,7 +1234,7 @@
         "description": "Play 10 games as Reisen.",
         "hidden": false,
         "id": "reisen_play",
-        "category": "reisen"
+        "category": "udonge"
     },
     {
         "requirement": {
@@ -1259,7 +1259,7 @@
         "description": "Use each Reisen's skill and spell<br>card at least once.",
         "hidden": false,
         "id": "reisen_cards",
-        "category": "reisen"
+        "category": "udonge"
     },
     {
         "requirement": {
@@ -1278,7 +1278,7 @@
         "description": "Play 100 games as Reisen.",
         "hidden": false,
         "id": "reisen_play2",
-        "category": "reisen"
+        "category": "udonge"
     },
     {
         "requirement": {
@@ -1297,7 +1297,7 @@
         "description": "Play 1000 games as Reisen.",
         "hidden": false,
         "id": "reisen_play3",
-        "category": "reisen"
+        "category": "udonge"
     },
     "Aya",
     {
@@ -1906,7 +1906,7 @@
         "description": "Win 10 games as Cirno.",
         "hidden": false,
         "id": "cirno_win",
-        "category": "cirno"
+        "category": "chirno"
     },
     {
         "requirement": {
@@ -1924,7 +1924,7 @@
         "description": "Lose 10 games as Cirno.",
         "hidden": false,
         "id": "cirno_lose",
-        "category": "cirno"
+        "category": "chirno"
     },
     {
         "requirement": {
@@ -1942,7 +1942,7 @@
         "description": "Play 10 games as Cirno.",
         "hidden": false,
         "id": "cirno_play",
-        "category": "cirno"
+        "category": "chirno"
     },
     {
         "requirement": {
@@ -1967,7 +1967,7 @@
         "description": "Use each Cirno's skill and spell<br>card at least once.",
         "hidden": false,
         "id": "cirno_cards",
-        "category": "cirno"
+        "category": "chirno"
     },
     {
         "requirement": {
@@ -1986,7 +1986,7 @@
         "description": "Play 100 games as Cirno.",
         "hidden": false,
         "id": "cirno_play2",
-        "category": "cirno"
+        "category": "chirno"
     },
     {
         "requirement": {
@@ -2005,7 +2005,7 @@
         "description": "Play 1000 games as Cirno.",
         "hidden": false,
         "id": "cirno_play3",
-        "category": "cirno"
+        "category": "chirno"
     },
     "Meiling",
     {
@@ -2024,7 +2024,7 @@
         "description": "Win 10 games as Meiling.",
         "hidden": false,
         "id": "meiling_win",
-        "category": "meiling"
+        "category": "meirin"
     },
     {
         "requirement": {
@@ -2042,7 +2042,7 @@
         "description": "Lose 10 games as Meiling.",
         "hidden": false,
         "id": "meiling_lose",
-        "category": "meiling"
+        "category": "meirin"
     },
     {
         "requirement": {
@@ -2060,7 +2060,7 @@
         "description": "Play 10 games as Meiling.",
         "hidden": false,
         "id": "meiling_play",
-        "category": "meiling"
+        "category": "meirin"
     },
     {
         "requirement": {
@@ -2085,7 +2085,7 @@
         "description": "Use each Meiling's skill and spell<br>card at least once.",
         "hidden": false,
         "id": "meiling_cards",
-        "category": "meiling"
+        "category": "meirin"
     },
     {
         "requirement": {
@@ -2104,7 +2104,7 @@
         "description": "Play 100 games as Meiling.",
         "hidden": false,
         "id": "meiling_play2",
-        "category": "meiling"
+        "category": "meirin"
     },
     {
         "requirement": {
@@ -2123,7 +2123,7 @@
         "description": "Play 1000 games as Meiling.",
         "hidden": false,
         "id": "meiling_play3",
-        "category": "meiling"
+        "category": "meirin"
     },
     "Utsuho",
     {
@@ -4830,7 +4830,7 @@
         "description": "Impossible achievement there only to lock<br>stuff that doesn't have any requirement<br>but should.",
         "hidden": false,
         "id": "impossible",
-        "category": "meta"
+        "category": "hidden"
     },
     {
         "requirement": {
