@@ -53,6 +53,7 @@ wchar_t profilePath[MAX_PATH];
 wchar_t profileFolderPath[MAX_PATH];
 char modVersion[16] = "unknown";
 char servHost[64];
+char *wineVersion = nullptr;
 unsigned hostPref;
 unsigned chatKey;
 unsigned short servPort;
@@ -1021,6 +1022,14 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 
 	FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
+
+	HMODULE hntdll = GetModuleHandle("ntdll.dll");
+	if(hntdll){
+		auto wine_get_version = (char *(__cdecl *)(void)) GetProcAddress(hntdll, "wine_get_version");
+		if (wine_get_version)
+			wineVersion = wine_get_version();
+	}
+
 	return true;
 }
 
