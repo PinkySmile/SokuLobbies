@@ -8,6 +8,8 @@
 #include "data.hpp"
 #include "SmallHostlist.hpp"
 #include "LobbyData.hpp"
+#include "createUTFTexture.hpp"
+#include "encodingConverter.hpp"
 
 #define MAX_OVERLAY_ANIMATION 15
 #define modifyPos(x, y) ((SokuLib::Vector2i{static_cast<int>(x), static_cast<int>(y)} * this->_ratio + this->_pos).to<int>())
@@ -291,13 +293,18 @@ void SmallHostlist::render()
 
 			if (!entry.name.texture.hasTexture()) {
 				SokuLib::Vector2i size;
+				int texId = 0;
 
-				entry.name.texture.createFromText(entry.nameStr.c_str(), lobbyData->getFont(12), {400, 20}, &size);
+				if (!createTextTexture(texId, convertEncoding<char, wchar_t, UTF8Decode, UTF16Encode>(entry.nameStr).c_str(), lobbyData->getFont(12), {400, 20}, &size))
+					puts("Error creating text texture");
+				entry.name.texture.setHandle(texId, {400, 20});
 				entry.name.setSize(size.to<unsigned>());
 				entry.name.rect.width = size.x;
 				entry.name.rect.height = size.y;
 
-				entry.msg.texture.createFromText(entry.msgStr.c_str(), lobbyData->getFont(12), {400, 20}, &size);
+				if (!createTextTexture(texId, convertEncoding<char, wchar_t, UTF8Decode, UTF16Encode>(entry.msgStr).c_str(), lobbyData->getFont(12), {400, 20}, &size))
+					puts("Error creating text texture");
+				entry.msg.texture.setHandle(texId, {400, 20});
 				entry.msg.setSize(size.to<unsigned>());
 				entry.msg.rect.width = size.x;
 				entry.msg.rect.height = size.y;
