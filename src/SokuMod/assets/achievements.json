@@ -2733,7 +2733,7 @@
         "description": "Win 10 games as Rin.",
         "hidden": false,
         "id": "rin_win",
-        "category": "rin"
+        "category": "orin"
     },
     {
         "requirement": {
@@ -2751,7 +2751,7 @@
         "description": "Lose 10 games as Rin.",
         "hidden": false,
         "id": "rin_lose",
-        "category": "rin"
+        "category": "orin"
     },
     {
         "requirement": {
@@ -2769,7 +2769,7 @@
         "description": "Play 10 games as Rin.",
         "hidden": false,
         "id": "rin_play",
-        "category": "rin"
+        "category": "orin"
     },
     {
         "requirement": {
@@ -2794,7 +2794,7 @@
         "description": "Use each Rin's skill and spell<br>card at least once.",
         "hidden": false,
         "id": "rin_cards",
-        "category": "rin"
+        "category": "orin"
     },
     {
         "requirement": {
@@ -2813,7 +2813,7 @@
         "description": "Play 100 games as Rin.",
         "hidden": false,
         "id": "rin_play2",
-        "category": "rin"
+        "category": "orin"
     },
     {
         "requirement": {
@@ -2832,7 +2832,7 @@
         "description": "Play 1000 games as Rin.",
         "hidden": false,
         "id": "rin_play3",
-        "category": "rin"
+        "category": "orin"
     },
     "Yuuka",
     {
