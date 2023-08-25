@@ -79,7 +79,14 @@ static LRESULT __stdcall Hooked_WndProc(const HWND hWnd, UINT uMsg, WPARAM wPara
 			activeMenu->immComposition.clear();
 			activeMenu->compositionCursor = 0;
 			ptrMutex.unlock();
-		}
+		} else if (wineVersion && (wParam == 0xf || wParam == 0x10))
+			//#define IMN_WINE_SET_OPEN_STATUS  0x000f
+			//#define IMN_WINE_SET_COMP_STRING  0x0010
+			// On wine>=8.9 IMN_WINE_SET_COMP_STRING should be processed by DefWindowProc,
+			// or all other WM_IME_* messages will not be got.
+			// But th123 doesn't call DefWindowProc when processing WM_IME_NOTIFY.
+			return DefWindowProc(hWnd, uMsg, wParam, lParam);
+
 		return CallWindowProc(Original_WndProc, hWnd, uMsg, wParam, lParam);
 	}
 	ptrMutex.lock();
@@ -115,6 +122,15 @@ static LRESULT __stdcall Hooked_WndProc(const HWND hWnd, UINT uMsg, WPARAM wPara
 		//ptrMutex.unlock();
 		//return 0;
 	} else if (uMsg == WM_IME_COMPOSITION) {
+		// Wine (>=8.9, <=8.14) doesn't send WM_IME_STARTCOMPOSITION and WM_IME_ENDCOMPOSITION,
+		// so here we call ImmGetContext as a workaround if necessary.
+		// Moreover, ImmReleaseContext on Wine does nothing but returns true.
+		// As a result, the possible absence of WM_IME_ENDCOMPOSITION on Wine doesn't matter.
+		if (wineVersion && activeMenu->immCtx == nullptr)
+			activeMenu->wineWorkaroundNeeded = true;
+		if (activeMenu->wineWorkaroundNeeded)
+			activeMenu->immCtx = ImmGetContext(SokuLib::window);
+
 		activeMenu->onKeyReleased();
 		if (lParam & GCS_RESULTSTR) {
 			auto required = ImmGetCompositionStringW(activeMenu->immCtx, GCS_RESULTSTR, nullptr, 0);
@@ -231,6 +247,7 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 	desc.useOffset = 0;
 	strcpy(desc.faceName, "Tahoma");
 	desc.weight = FW_REGULAR;
+
 
 	this->_chatFont.create();
 	this->_chatFont.setIndirect(desc);
