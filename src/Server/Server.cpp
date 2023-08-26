@@ -514,22 +514,26 @@ void Server::_processCommands(Connection *author, const std::string &msg)
 	if (msg.empty())
 		return;
 
-	auto parsed = this->_parseCommand(msg.front() == '/' ? msg.substr(1) : msg);
-	auto it = Server::_commands.find(parsed.front());
+	try {
+		auto parsed = this->_parseCommand(msg.front() == '/' ? msg.substr(1) : msg);
+		auto it = Server::_commands.find(parsed.front());
 
-	if (it != Server::_commands.end()) {
-		parsed.erase(parsed.begin());
-		return (this->*it->second.callback)(author, parsed);
-	}
-	if (!author || author->getIp() == sf::IpAddress::LocalHost) {
-		auto ita = Server::_adminCommands.find(parsed.front());
-
-		if (ita != Server::_adminCommands.end()) {
+		if (it != Server::_commands.end()) {
 			parsed.erase(parsed.begin());
-			return (this->*ita->second.callback)(author, parsed);
+			return (this->*it->second.callback)(author, parsed);
 		}
+		if (!author || author->getIp() == sf::IpAddress::LocalHost) {
+			auto ita = Server::_adminCommands.find(parsed.front());
+
+			if (ita != Server::_adminCommands.end()) {
+				parsed.erase(parsed.begin());
+				return (this->*ita->second.callback)(author, parsed);
+			}
+		}
+		sendSystemMessageTo(author, "Unknown command \"" + parsed[0]+ "\"\nUse /help for a list of command", 0xFF0000);
+	} catch (std::exception &e) {
+		return sendSystemMessageTo(author, "Fatal error when executing command. Please report this error: " + std::string(e.what()), 0xFF0000);
 	}
-	sendSystemMessageTo(author, "Unknown command \"" + parsed[0]+ "\"\nUse /help for a list of command", 0xFF0000);
 }
 
 void Server::_registerToMainServer()
@@ -700,8 +704,8 @@ std::vector<std::string> Server::_parseCommand(const std::string &msg)
 {
 	std::string token;
 	std::vector<std::string> result;
-	bool q = false;
-	bool sq = false;
+	//bool q = false;
+	//bool sq = false;
 	bool esc = false;
 
 	for (auto c : msg) {
@@ -710,11 +714,11 @@ std::vector<std::string> Server::_parseCommand(const std::string &msg)
 			esc = false;
 		} else if (c == '\\')
 			esc = true;
-		else if (c == '"' && !sq)
+		/*else if (c == '"' && !sq)
 			q = !q;
 		else if (c == '\'' && !q)
-			sq = !sq;
-		else if (!isspace(c) || q || sq)
+			sq = !sq;*/
+		else if (!isspace(c)/* || q || sq*/)
 			token += c;
 		else {
 			result.push_back(token);
@@ -747,7 +751,7 @@ Connection *Server::_findPlayer(const std::string &name)
 		return this->_findPlayer(std::stoul(name));
 	this->_connectionsMutex.lock();
 	for (auto &c : this->_connections)
-		if (c->getName() == name) {
+		if ('@' + c->getName() == name) {
 			this->_connectionsMutex.unlock();
 			if (c->isInit())
 				return &*c;
@@ -834,7 +838,14 @@ void Server::_joinCmd(Connection *author, const std::vector<std::string> &args)
 		return sendSystemMessageTo(author, "Can only be used in a lobby", 0xFF0000);
 
 	auto name = args.front();
-	auto player = this->_findPlayer(name);
+	Connection *player;
+
+	try {
+		player = this->_findPlayer(name);
+	} catch (std::exception &e) {
+		sendSystemMessageTo(author, name + " is not a valid player id. Did you want to use @" + name + " instead?", 0xFF0000);
+		return;
+	}
 
 	if (!player)
 		sendSystemMessageTo(author, "Cannot find " + name + ".", 0xFF0000);
@@ -871,7 +882,14 @@ void Server::_locateCmd(Connection *author, const std::vector<std::string> &args
 		return sendSystemMessageTo(author, "Missing argument #1 for command /locate. Use /help locate for more information", 0xFF0000);
 
 	auto name = args.front();
-	auto player = this->_findPlayer(name);
+	Connection *player;
+
+	try {
+		player = this->_findPlayer(name);
+	} catch (std::exception &e) {
+		sendSystemMessageTo(author, name + " is not a valid player id. Did you want to use @" + name + " instead?", 0xFF0000);
+		return;
+	}
 
 	if (!player)
 		return sendSystemMessageTo(author, "Cannot find " + name + ".", 0xFF0000);
@@ -886,7 +904,14 @@ void Server::_teleportCmd(Connection *author, const std::vector<std::string> &ar
 		return sendSystemMessageTo(author, "Missing argument #1 for command /teleport. Use /help teleport for more information", 0xFF0000);
 
 	auto name = args.front();
-	auto player = this->_findPlayer(name);
+	Connection *player;
+
+	try {
+		player = this->_findPlayer(name);
+	} catch (std::exception &e) {
+		sendSystemMessageTo(author, name + " is not a valid player id. Did you want to use @" + name + " instead?", 0xFF0000);
+		return;
+	}
 
 	if (!player)
 		return sendSystemMessageTo(author, "Cannot find " + name + ".", 0xFF0000);
@@ -908,8 +933,15 @@ void Server::_msgCmd(Connection *author, const std::vector<std::string> &args)
 		return sendSystemMessageTo(author, "Missing argument #1 for command /teleport. Use /help teleport for more information", 0xFF0000);
 
 	auto name = args.front();
-	auto player = this->_findPlayer(name);
 	auto msg = join(args.begin() + 1, args.end(), ' ');
+	Connection *player;
+
+	try {
+		player = this->_findPlayer(name);
+	} catch (std::exception &e) {
+		sendSystemMessageTo(author, name + " is not a valid player id. Did you want to use @" + name + " instead?", 0xFF0000);
+		return;
+	}
 
 	if (!player)
 		return sendSystemMessageTo(author, "Cannot find " + name + ".", 0xFF0000);
@@ -957,7 +989,14 @@ void Server::_banCmd(Connection *author, const std::vector<std::string> &args)
 		return sendSystemMessageTo(author, "Missing argument #1 for command /banip. Use /help banip for more information", 0xFF0000);
 
 	auto reason = args.size() == 1 ? "Banned by an operator" : join(args.begin() + 1, args.end(), ' ');
-	Connection *player = this->_findPlayer(args[0]);
+	Connection *player;
+
+	try {
+		player = this->_findPlayer(args[0]);
+	} catch (std::exception &e) {
+		sendSystemMessageTo(author, args[0] + " is not a valid player id. Did you want to use @" + args[0] + " instead?", 0xFF0000);
+		return;
+	}
 
 	if (!player)
 		return sendSystemMessageTo(author, "Cannot find " + args[0] + ".", 0xFF0000);
@@ -1020,7 +1059,14 @@ void Server::_kickCmd(Connection *author, const std::vector<std::string> &args)
 		return sendSystemMessageTo(author, "Missing argument #1 for command /banip. Use /help banip for more information", 0xFF0000);
 
 	auto reason = args.size() == 1 ? "Kicked by an operator" : join(args.begin() + 1, args.end(), ' ');
-	Connection *player = this->_findPlayer(args[0]);
+	Connection *player;
+
+	try {
+		player = this->_findPlayer(args[0]);
+	} catch (std::exception &e) {
+		sendSystemMessageTo(author, args[0] + " is not a valid player id. Did you want to use @" + args[0] + " instead?", 0xFF0000);
+		return;
+	}
 
 	if (!player)
 		return sendSystemMessageTo(author, "Cannot find " + args[0] + ".", 0xFF0000);
