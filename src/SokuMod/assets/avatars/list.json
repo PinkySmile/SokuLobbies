@@ -1236,7 +1236,7 @@
         "scale": 2,
         "anim_step": 8,
         "name": "Ran Yakumo",
-        "hidden": true,
+        "hidden": false,
         "id": "ran"
     },
     {
@@ -1246,7 +1246,7 @@
         "scale": 2,
         "anim_step": 8,
         "name": "Ran Yakumo Alt 1",
-        "hidden": true,
+        "hidden": false,
         "id": "ran1"
     },
     {
@@ -1256,7 +1256,7 @@
         "scale": 2,
         "anim_step": 8,
         "name": "Ran Yakumo Alt 2",
-        "hidden": true,
+        "hidden": false,
         "id": "ran2"
     },
     {
@@ -1266,7 +1266,7 @@
         "scale": 2,
         "anim_step": 8,
         "name": "Ran Yakumo Alt 3",
-        "hidden": true,
+        "hidden": false,
         "id": "ran3"
     },
 

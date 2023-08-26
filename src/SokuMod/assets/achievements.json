@@ -3791,7 +3791,7 @@
                 "id": "ran"
             }
         ],
-        "name": "????????",
+        "name": "Kitsune With A Slow Startup",
         "description": "Win 10 games as Ran.",
         "hidden": false,
         "id": "ran_win",
@@ -3809,7 +3809,7 @@
                 "name": "ran2"
             }
         ],
-        "name": "????????",
+        "name": "Running On Old Firmware",
         "description": "Lose 10 games as Ran.",
         "hidden": false,
         "id": "ran_lose",
@@ -3827,7 +3827,7 @@
                 "id": 32
             }
         ],
-        "name": "????????",
+        "name": "Nine Tails And Still Growing",
         "description": "Play 10 games as Ran.",
         "hidden": false,
         "id": "ran_play",
@@ -3852,7 +3852,7 @@
                 "id": "ran3"
             }
         ],
-        "name": "????????",
+        "name": "Incalculable Intellect Quotient",
         "description": "Use each Ran's skill and spell<br>card at least once.",
         "hidden": false,
         "id": "ran_cards",
@@ -3871,7 +3871,7 @@
                 "comment": "????????"
             }
         ],
-        "name": "????????",
+        "name": "Phantasmagorical Mid-Boss",
         "description": "Play 100 games as Ran.",
         "hidden": false,
         "id": "ran_play2",
@@ -3890,7 +3890,7 @@
                 "comment": "????????"
             }
         ],
-        "name": "????????",
+        "name": "The Legendary Tamamo-No-Mae?",
         "description": "Play 1000 games as Ran.",
         "hidden": false,
         "id": "ran_play3",
