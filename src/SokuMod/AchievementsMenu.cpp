@@ -238,7 +238,7 @@ int AchievementsMenu::onProcess()
 	}
 	if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.verticalAxis) > 36 && std::abs(SokuLib::inputMgrs.input.verticalAxis) % 6 == 0)) {
 		playSound(0x27);
-		if (SokuLib::inputMgrs.input.verticalAxis > 0 && this->_categorySelected + 5 > this->_categories.size())
+		if (SokuLib::inputMgrs.input.verticalAxis > 0 && this->_categorySelected + 5 >= this->_categories.size())
 			this->_categorySelected %= 5;
 		else if (SokuLib::inputMgrs.input.verticalAxis < 0 && this->_categorySelected < 5) {
 			this->_categorySelected = this->_categories.size() - (this->_categories.size() % 5) + this->_categorySelected;

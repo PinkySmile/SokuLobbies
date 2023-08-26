@@ -9,6 +9,8 @@
 #include "LobbyData.hpp"
 #include "data.hpp"
 
+void displaySokuCursor(SokuLib::Vector2i pos, SokuLib::Vector2u size);
+
 void StatsMenu::_createGlobalStats()
 {
 	this->_globalStats.emplace_back(new ChrEntry());
@@ -405,9 +407,10 @@ StatsMenu::StatsMenu()
 {
 	this->title.texture.loadFromFile((std::filesystem::path(profileFolderPath) / "assets/menu/titleStats.png").string().c_str());
 	this->title.setSize(this->title.texture.getSize());
-	this->title.setPosition({23, 6});
+	this->title.setPosition({23, -6});
 	this->title.rect.width = this->title.getSize().x;
 	this->title.rect.height = this->title.getSize().y;
+
 	this->_createGlobalStats();
 	this->_matchupStats.reserve(characters.size() - 1);
 	for (auto &entry : characters) {
@@ -415,11 +418,46 @@ StatsMenu::StatsMenu()
 			continue;
 		this->_matchupStats.emplace_back();
 	}
-	this->_cardsStats.reserve(characters.size() - 1);
-	for (auto &entry : characters) {
-		if (entry.first == SokuLib::CHARACTER_RANDOM)
+	this->_cardsStats.reserve(characters.size() - 2);
+	{
+		this->_categories.emplace_back();
+
+		auto &category = this->_categories.back();
+
+		category.title.texture.loadFromFile((std::filesystem::path(profileFolderPath) / "assets/menu/titleGlobal.png").string().c_str());
+		category.title.setSize(category.title.texture.getSize());
+		category.title.setPosition({20, -6});
+		category.title.rect.width = category.title.getSize().x;
+		category.title.rect.height = category.title.getSize().y;
+		category.sprite.texture.loadFromFile((std::filesystem::path(profileFolderPath) / "assets/menu/global_category.png").string().c_str());
+	}
+	for (auto &chr : characters) {
+		if (chr.first == SokuLib::CHARACTER_RANDOM || chr.first == SokuLib::CHARACTER_NAMAZU)
 			continue;
 		this->_cardsStats.emplace_back();
+		this->_categories.emplace_back();
+
+		auto &category = this->_categories.back();
+
+		category.title.texture.loadFromGame(("data/profile/deck2/name/" + chr.second.codeName + ".png").c_str());
+		category.title.setSize(category.title.texture.getSize());
+		category.title.setPosition({0, 0});
+		category.title.rect.width = category.title.getSize().x;
+		category.title.rect.height = category.title.getSize().y;
+		category.sprite.texture.loadFromGame(("data/character/" + chr.second.codeName + "/face/face000.png").c_str());
+		category.sprite.setMirroring(true, false);
+	}
+	for (unsigned i = 0; i < this->_categories.size(); i++) {
+		char buffer[10];
+		auto &category = this->_categories[i];
+
+		category.sprite.setSize({80, 32});
+		category.sprite.setPosition({
+			static_cast<int>(i) % 5 * 100 + 60,
+			static_cast<int>(i) / 5 * 40 + 100
+		});
+		category.sprite.rect.width = category.sprite.texture.getSize().x;
+		category.sprite.rect.height = category.sprite.texture.getSize().y;
 	}
 	this->_nbMenus = 2 + (characters.size() - 1) * 2;
 }
@@ -486,8 +524,10 @@ std::vector<std::shared_ptr<StatsMenu::ChrEntry>> *StatsMenu::_getCurrentList(un
 
 			for (unsigned i = 0; i < (this->_currentMenu - 2) / 2; i++)
 				it++;
-			if ((this->_currentMenu - 2) / 2 >= SokuLib::CHARACTER_RANDOM)
+			if ((this->_currentMenu - 2) / 2 >= SokuLib::CHARACTER_RANDOM) {
 				it++;
+				it++;
+			}
 			this->_createMUStats(this->_matchupStats[(this->_currentMenu - 2) / 2], *it);
 		}
 	} else if (this->_currentMenu < 2 + (characters.size() - 1) * 2) {
@@ -497,8 +537,10 @@ std::vector<std::shared_ptr<StatsMenu::ChrEntry>> *StatsMenu::_getCurrentList(un
 
 			for (unsigned i = 0; i < (this->_currentMenu - 2) / 2; i++)
 				it++;
-			if ((this->_currentMenu - 2) / 2 >= SokuLib::CHARACTER_RANDOM)
+			if ((this->_currentMenu - 2) / 2 >= SokuLib::CHARACTER_RANDOM) {
 				it++;
+				it++;
+			}
 			this->_createCardsStats(this->_cardsStats[(this->_currentMenu - 2) / 2], *it);
 		}
 		*maxLine = 8;
@@ -509,9 +551,43 @@ std::vector<std::shared_ptr<StatsMenu::ChrEntry>> *StatsMenu::_getCurrentList(un
 
 int StatsMenu::onProcess()
 {
+	if (!this->_isSelected) {
+		if (SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0) || SokuLib::inputMgrs.input.b == 1) {
+			playSound(0x29);
+			return false;
+		}
+		if (std::abs(SokuLib::inputMgrs.input.horizontalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.horizontalAxis) > 36 && std::abs(SokuLib::inputMgrs.input.horizontalAxis) % 6 == 0)) {
+			int result = this->_categorySelected + std::copysign(1, SokuLib::inputMgrs.input.horizontalAxis);
+
+			if (result < 0)
+				this->_categorySelected = this->_categories.size() - 1;
+			else
+				this->_categorySelected = result % this->_categories.size();
+			playSound(0x27);
+		}
+		if (std::abs(SokuLib::inputMgrs.input.verticalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.verticalAxis) > 36 && std::abs(SokuLib::inputMgrs.input.verticalAxis) % 6 == 0)) {
+			playSound(0x27);
+			if (SokuLib::inputMgrs.input.verticalAxis > 0 && this->_categorySelected + 5 >= this->_categories.size())
+				this->_categorySelected %= 5;
+			else if (SokuLib::inputMgrs.input.verticalAxis < 0 && this->_categorySelected < 5) {
+				this->_categorySelected = this->_categories.size() - (this->_categories.size() % 5) + this->_categorySelected;
+				if (this->_categorySelected >= this->_categories.size())
+					this->_categorySelected -= 5;
+			} else
+				this->_categorySelected += std::copysign(5, SokuLib::inputMgrs.input.verticalAxis);
+		}
+		if (SokuLib::inputMgrs.input.a == 1) {
+			playSound(0x28);
+			this->_start = 0;
+			this->_isSelected = true;
+			this->_currentMenu = this->_categorySelected * 2;
+		}
+		return true;
+	}
 	if (SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0) || SokuLib::inputMgrs.input.b == 1) {
 		playSound(0x29);
-		return false;
+		this->_isSelected = false;
+		return true;
 	}
 
 	unsigned maxLine = 10;
@@ -529,17 +605,13 @@ int StatsMenu::onProcess()
 	}
 	if (std::abs(SokuLib::inputMgrs.input.horizontalAxis) == 1 || (std::abs(SokuLib::inputMgrs.input.horizontalAxis) >= 36 && std::abs(SokuLib::inputMgrs.input.horizontalAxis) % 6 == 0)) {
 		if (SokuLib::inputMgrs.input.horizontalAxis > 0) {
-			playSound(0x27);
 			this->_currentMenu++;
-			if (this->_currentMenu == this->_nbMenus)
-				this->_currentMenu = 0;
-		} else if (SokuLib::inputMgrs.input.horizontalAxis < 0) {
-			playSound(0x27);
-			if (this->_currentMenu == 0)
-				this->_currentMenu = this->_nbMenus - 1;
-			else
-				this->_currentMenu--;
+			this->_currentMenu -= !(this->_currentMenu % 2) * 2;
+		} else {
+			this->_currentMenu--;
+			this->_currentMenu += (this->_currentMenu % 2) * 2;
 		}
+		playSound(0x27);
 		this->_start = 0;
 		list = this->_getCurrentList(&maxLine, &lineSize);
 	}
@@ -551,7 +623,6 @@ void StatsMenu::_renderNormalStats(const std::vector<std::shared_ptr<ChrEntry>> 
 {
 	if (list.empty())
 		return;
-	this->title.draw();
 	list[0]->portraitTitle.draw();
 	list[0]->portrait.draw();
 	list[0]->name.draw();
@@ -573,6 +644,19 @@ void StatsMenu::_renderNormalStats(const std::vector<std::shared_ptr<ChrEntry>> 
 
 int StatsMenu::onRender()
 {
+	if (!this->_isSelected) {
+		this->title.draw();
+		for (unsigned i = 0; i < this->_categories.size(); i++) {
+			if (i == this->_categorySelected)
+				displaySokuCursor(
+					this->_categories[i].sprite.getPosition() + SokuLib::Vector2i{8, 0},
+					this->_categories[i].sprite.getSize() - SokuLib::Vector2i{8, 0}
+				);
+			this->_categories[i].sprite.draw();
+		}
+		return 0;
+	}
+	this->_categories[this->_categorySelected].title.draw();
 	if (this->_currentMenu == 0)
 		this->_renderNormalStats(this->_globalStats, 10);
 	else if (this->_currentMenu == 1)

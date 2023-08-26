@@ -11,6 +11,10 @@
 
 class StatsMenu : public SokuLib::IMenu {
 private:
+	struct Category {
+		SokuLib::DrawUtils::Sprite title;
+		SokuLib::DrawUtils::Sprite sprite;
+	};
 	struct ChrEntry {
 		SokuLib::DrawUtils::Sprite portraitTitle;
 		SokuLib::DrawUtils::Sprite portrait;
@@ -23,13 +27,16 @@ private:
 	};
 
 	SokuLib::DrawUtils::Sprite title;
+	std::vector<Category> _categories;
 	std::vector<std::shared_ptr<ChrEntry>> _globalStats;
 	std::vector<std::shared_ptr<ChrEntry>> _againstStats;
 	std::vector<std::vector<std::shared_ptr<ChrEntry>>> _matchupStats;
 	std::vector<std::vector<std::shared_ptr<ChrEntry>>> _cardsStats;
 	unsigned _start = 0;
+	unsigned _categorySelected = 0;
 	unsigned _currentMenu = 0;
 	unsigned _nbMenus = 0;
+	bool _isSelected = false;
 
 	std::vector<std::shared_ptr<ChrEntry>> *_getCurrentList(unsigned *maxLine, unsigned *lineSize);
 	void _createGlobalStats();
