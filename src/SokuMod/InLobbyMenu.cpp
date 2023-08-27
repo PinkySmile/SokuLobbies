@@ -1310,19 +1310,19 @@ void InLobbyMenu::_unhook()
 	this->_connection.onArcadeLeave = this->onArcadeLeave;
 }
 
-void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const std::string &msg8)
+void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const std::string &msg)
 {
 	this->_chatTimer = 900;
 	this->_chatMessages.emplace_front();
 
 	auto *m = &this->_chatMessages.front();
-	auto msg = UTF8Decode(msg8);
-	std::basic_string<unsigned> line;
-	std::basic_string<unsigned> word;
-	std::basic_string<unsigned> token;
+	std::string line;
+	std::string word;
+	std::string token;
 	unsigned startPos = 0;
 	unsigned pos = 0;
 	unsigned wordPos = 0;
+	unsigned skip = 0;
 	unsigned short emoteId;
 	unsigned char emoteCtr = 0;
 	auto pushText = [&]{
@@ -1337,7 +1337,7 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 		if (player == 0)
 			txt.sprite.tint = channel;
 		//txt.sprite.texture.createFromText(line.c_str(), this->_chatFont, {350, 300}, &txt.realSize);
-		if (!createTextTexture(texId, UTF16Encode(line).c_str(), this->_chatFont, {350, 300}, &txt.realSize))
+		if (!createTextTexture(texId, convertEncoding<char, wchar_t, UTF8Decode, UTF16Encode>(line).c_str(), this->_chatFont, {350, 300}, &txt.realSize))
 			puts("Error creating text texture");
 		txt.sprite.texture.setHandle(texId, {350, 300});
 		txt.sprite.rect.width = txt.realSize.x;
@@ -1375,6 +1375,16 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 				for (auto &g : m->text)
 					g.pos.y = (g.realSize.y - EMOTE_SIZE) / 2;
 			}
+		} else if (skip) {
+			if ((c & 0b11000000) == 0x80) {
+				skip--;
+				token += c;
+			} else
+				skip = 0;
+			word += c;
+			if (skip != 0)
+				continue;
+			wordPos += this->_getTextSize(UTF8Decode(token)[0]);
 		} else if (c == 1) {
 			line += word;
 			pos += wordPos;
@@ -1392,7 +1402,15 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 			nextLine();
 			startPos = 0;
 			continue;
-		} else if (c < 0xFFFF && isspace(c)) {
+		} else if (c >= 0x80) {
+			skip = c >= 0xC0;
+			skip += c >= 0xE0;
+			skip += c >= 0xF0;
+			token.clear();
+			token += c;
+			word += c;
+			continue;
+		} else if (isspace(c)) {
 			if (word.empty()) {
 				if (pos == 0)
 					continue;
@@ -1412,7 +1430,7 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 			if (pos == 0) {
 				line = word.substr(0, word.size() - 1);
 				word.erase(word.begin(), word.end() - 1);
-				wordPos = this->_getTextSize(word[0]);
+				wordPos = this->_getTextSize(UTF8Decode(word)[0]);
 			}
 			nextLine();
 			startPos = 0;
