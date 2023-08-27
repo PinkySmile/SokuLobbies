@@ -208,6 +208,7 @@ void LobbyData::_loadAchievements()
 	nlohmann::json j;
 	nlohmann::json j2;
 	std::vector<std::string> order;
+	std::map<std::string, Achievement *> achs;
 	char *buffer;
 	int index = 0;
 
@@ -275,7 +276,17 @@ void LobbyData::_loadAchievements()
 		achievement.descSprite.setSize(size.to<unsigned>());
 		achievement.descSprite.setPosition({0, -20});
 		achievement.descSprite.tint = SokuLib::Color{0x80, 0xFF, 0x80};
+
+		if (achs.find(achievement.code) != achs.end())
+			throw std::invalid_argument("Duplicate achievement ID '" + achievement.code + "'");
+		achs[achievement.code] = &achievement;
 	}
+	for (auto &o : order)
+		if (achs.find(o) == achs.end())
+			throw std::invalid_argument("Achievement ID '" + o + "' in order file doesn't exist.");
+	for (auto &[id, ach] : achs)
+		if (std::find(order.begin(), order.end(), id) == order.end())
+			throw std::invalid_argument("Achievement ID '" + id + "' isn't in order file.");
 	std::sort(this->achievements.begin(), this->achievements.end(), [&order](const Achievement &a, const Achievement &b){
 		return std::find(order.begin(), order.end(), a.code) < std::find(order.begin(), order.end(), b.code);
 	});

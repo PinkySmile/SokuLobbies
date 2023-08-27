@@ -326,7 +326,9 @@ void countGame()
 		it = std::find_if(win_move.begin(), win_move.end(), [mid, &chr](LobbyData::Achievement *achievement){
 			if (achievement->awarded)
 				return false;
-			if (achievement->requirement["chr"] != mid)
+			if (achievement->requirement.contains("stage") && SokuLib::stageId != achievement->requirement["stage"])
+				return false;
+			if (achievement->requirement.contains("chr") && achievement->requirement["chr"] != mid)
 				return false;
 			if (achievement->requirement["action"] != chr.objectBase.action)
 				return false;
@@ -352,21 +354,43 @@ void countGame()
 
 	// All cards achievements
 	auto textures = lobbyData->cardsTextures.find(mid);
+	bool allCards = true;
 	for (auto &elem : textures->second) {
 		auto cardIt = cardsIt->second.cards.find(elem.first);
 
-		if (cardIt == cardsIt->second.cards.end() || cardIt->second.used == 0)
-			return lobbyData->saveAchievements();
+		if (cardIt == cardsIt->second.cards.end() || cardIt->second.used == 0) {
+			allCards = false;
+			break;
+		}
+	}
+	if (allCards) {
+		auto &cards = lobbyData->achievementByRequ["cards"];
+		auto itCardsAch = std::find_if(cards.begin(), cards.end(), [mid](LobbyData::Achievement *achievement){
+			return !achievement->awarded && achievement->requirement["chr"] == mid;
+		});
+
+		if (itCardsAch != cards.end()) {
+			(*itCardsAch)->awarded = true;
+			lobbyData->achievementAwardQueue.push_back(*itCardsAch);
+		}
 	}
 
-	auto &cards = lobbyData->achievementByRequ["cards"];
-	auto itCardsAch = std::find_if(cards.begin(), cards.end(), [mid](LobbyData::Achievement *achievement){
-		return !achievement->awarded && achievement->requirement["chr"] == mid;
-	});
+	bool defaultAllMax = true;
+	for (int i = 0; i < characters[mid].nbSkills; i++)
+		if (chr.skillMap[i].notUsed || chr.skillMap[i].level < 4) {
+			defaultAllMax = false;
+			break;
+		}
+	if (defaultAllMax) {
+		auto &winMaxDefault = lobbyData->achievementByRequ["win_max_default"];
+		auto winMaxDAch = std::find_if(winMaxDefault.begin(), winMaxDefault.end(), [](LobbyData::Achievement *achievement){
+			return !achievement->awarded;
+		});
 
-	if (itCardsAch != cards.end()) {
-		(*itCardsAch)->awarded = true;
-		lobbyData->achievementAwardQueue.push_back(*itCardsAch);
+		if (winMaxDAch != winMaxDefault.end()) {
+			(*winMaxDAch)->awarded = true;
+			lobbyData->achievementAwardQueue.push_back(*winMaxDAch);
+		}
 	}
 	lobbyData->saveAchievements();
 }

@@ -31,6 +31,7 @@ static const char *rewardNames[] = {
 };
 
 static ExtraCategory extra[] = {
+	{"system", "assets/menu/system_category.png", false},
 	{"meta", "assets/menu/meta_category.png", false},
 	{"", "assets/menu/all_category.png", false}
 };

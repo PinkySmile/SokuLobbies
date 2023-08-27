@@ -3915,9 +3915,65 @@
         "name": "IaMP Ending",
         "description": "Close a game with \"Missing Purple Power\".",
         "hidden": true,
-        "comment": "Not implemented!",
         "id": "suika_mpp",
         "category": "suika"
+    },
+    {
+        "requirement": {
+            "type": "win_move",
+            "chr": 5,
+            "action": 608,
+            "block_blacklist": [
+                0
+            ]
+        },
+        "rewards": [
+            {
+                "type": "title"
+            }
+        ],
+        "name": "Becoming One With The Universe",
+        "description": "Close a game with \"6-root Cleansing\".",
+        "hidden": true,
+        "id": "youmu_6root",
+        "category": "youmu"
+    },
+    {
+        "requirement": {
+            "type": "win_move",
+            "chr": 14,
+            "action": 605,
+	    "stage": 5
+        },
+        "rewards": [
+            {
+                "type": "emote",
+		"name": "keystone"
+            }
+        ],
+        "name": "The Weight Of Heaven",
+        "description": "Close a game with \"World Creation Press\" in Bhava-Agra.",
+        "hidden": true,
+        "id": "tenshi_wcp_bagra",
+        "category": "tenshi"
+    },
+    {
+        "requirement": {
+            "type": "win_move",
+            "chr": 6,
+            "action": 601
+        },
+        "rewards": [
+            {
+                "type": "emote",
+		"name": "gungnir"
+            }
+        ],
+        "name": "Heart Piercing Spear",
+        "description": "Close a game with \"Heart Break\" in Bhava-Agra.",
+        "hidden": true,
+        "id": "remilia_spear",
+        "category": "remilia"
     },
     "Meta",
     {
@@ -4880,5 +4936,43 @@
         "hidden": true,
         "id": "debug",
         "category": "meta"
+    },
+
+    "System",
+    {
+        "requirement": {
+            "type": "win_max_default"
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "max"
+            }
+        ],
+        "name": "MAXED OUT",
+        "description": "Win a game with every default skill at level MAX.",
+        "hidden": false,
+        "id": "system_default_max",
+        "category": "system"
+    },
+
+    "System cards",
+    {
+        "requirement": {
+            "type": "win_move",
+            "action": 697
+        },
+        "rewards": [
+            {
+                "type": "accessory",
+                "id": 21,
+                "comment": "Fan accessory"
+            }
+        ],
+        "name": "Hold back to block...?",
+        "description": "Close a game with Left-Handed Folding Fan.",
+        "hidden": false,
+        "id": "lhf_fan",
+        "category": "system_cards"
     }
 ]

@@ -1361,6 +1361,7 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 	for (unsigned char c : msg) {
 		if (emoteCtr) {
 			emoteId |= (c & 0x7F) << ((2 - emoteCtr) * 7);
+			printf("%x %x\n", c, emoteId);
 			emoteCtr--;
 			if (!emoteCtr) {
 				if (pos + EMOTE_SIZE > MAX_LINE_SIZE) {
@@ -1368,6 +1369,8 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 					startPos = 0;
 				}
 				m->emotes.emplace_back();
+				if (emoteId >= lobbyData->emotes.size())
+					printf("Received invalid emote! %u < %u\n", emoteId, lobbyData->emotes.size());
 				m->emotes.back().id = emoteId;
 				m->emotes.back().pos.x = startPos;
 				pos += EMOTE_SIZE;
@@ -1703,9 +1706,12 @@ void InLobbyMenu::_sendMessage(const std::wstring &msg)
 
 			auto it = lobbyData->emotesByName.find(convertEncoding<wchar_t, char, UTF16Decode, UTF8Encode>(currentEmote));
 
-			if (it == lobbyData->emotesByName.end() || lobbyData->isLocked(*it->second)) {
-				if (lobbyData->isLocked(*it->second))
-					this->_addMessageToList(0xAFAFAF, 0, "You can't use :" + convertEncoding<wchar_t, char, UTF16Decode, UTF8Encode>(currentEmote) + ": because you didn't unlock it.");
+			if (it == lobbyData->emotesByName.end()) {
+				token += L':';
+				token += currentEmote;
+				token += L':';
+			} else if (lobbyData->isLocked(*it->second)) {
+				this->_addMessageToList(0xAFAFAF, 0, "You can't use :" + convertEncoding<wchar_t, char, UTF16Decode, UTF8Encode>(currentEmote) + ": because you didn't unlock it.");
 				token += L':';
 				token += currentEmote;
 				token += L':';
@@ -1715,7 +1721,7 @@ void InLobbyMenu::_sendMessage(const std::wstring &msg)
 				encoded += convertEncoding<wchar_t, char, UTF16Decode, UTF8Encode>(token);
 				encoded += '\x01';
 				for (int i = 0; i < 2; i++) {
-					encoded += static_cast<char>(nb & 0x7F | 0x80);
+					encoded += static_cast<char>((nb & 0x7F) | 0x80);
 					nb >>= 7;
 				}
 				token.clear();
