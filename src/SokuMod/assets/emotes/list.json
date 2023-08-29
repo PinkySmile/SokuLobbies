@@ -283,7 +283,7 @@
     {"path": "assets/emotes/special/Yuuka (Special 6).png",       "alias": ["yuuka16"]},
     {"path": "assets/emotes/special/Yuuka (Special 7).png",       "alias": ["yuuka17"]},
 
-    {"path": "assets/emotes/unknown.png",                         "alias": ["placeholder","ran2"]},
+    {"path": "assets/emotes/unknown.png",                         "alias": ["placeholder","ran1","ran2","ran3","ran4","ran5","ran6"]},
 
     {"path": "assets/emotes/system/max.png",                      "alias": ["max","levelmax"]},
     {"path": "assets/emotes/special/gungnir.png",                 "alias": ["gungnir","spear","remi8","remilia8"]},

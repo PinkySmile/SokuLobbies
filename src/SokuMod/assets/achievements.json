@@ -48,6 +48,10 @@
             {
                 "type": "prop",
                 "id": 0
+            },
+            {
+                "type": "title",
+                "name": "           ^-- Carefree"
             }
         ],
         "name": "Yin Yang Connoisseur",
@@ -89,9 +93,16 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 0,
-                "comment": "YinYang Orb"
+                "type": "emote",
+                "name": "reimu1"
+            },
+            {
+                "type": "emote",
+                "name": "reimu3"
+            },
+            {
+                "type": "title",
+                "name": "Hakurei Barrier Given Form"
             }
         ],
         "name": "Gensokyo's Barrier",
@@ -103,18 +114,29 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 0
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 0,
-                "comment": "Hakurei Shrine"
+                "type": "emote",
+                "name": "reimu4"
+            },
+            {
+                "type": "emote",
+                "name": "reimu5"
+            },
+            {
+                "type": "emote",
+                "name": "reimu6"
+            },
+            {
+                "type": "title",
+                "name": "The Main Protagonist"
             }
         ],
         "name": "\"8 Million Gods\"",
-        "description": "Play 1000 games as Reimu.",
+        "description": "Play 500 games as Reimu.",
         "hidden": false,
         "id": "reimu_play3",
         "category": "reimu"
@@ -166,6 +188,10 @@
             {
                 "type": "prop",
                 "id": 1
+            },
+            {
+                "type": "title",
+                "name": "Ordinary Human Magician"
             }
         ],
         "name": "Ordinary Magician",
@@ -207,9 +233,16 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 1,
-                "comment": "Broom / Floating Mini Hakkero"
+                "type": "emote",
+                "name": "marisa1"
+            },
+            {
+                "type": "emote",
+                "name": "marisa3"
+            },
+            {
+                "type": "title",
+                "name": "Danmaku Is All About Firepower!"
             }
         ],
         "name": "Powered by Astronomy",
@@ -221,18 +254,29 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 1
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 1,
-                "comment": "Marisa's House / Space"
+                "type": "emote",
+                "name": "marisa4"
+            },
+            {
+                "type": "emote",
+                "name": "marisa5"
+            },
+            {
+                "type": "emote",
+                "name": "marisa6"
+            },
+            {
+                "type": "title",
+                "name": "The Deuteragonist"
             }
         ],
         "name": "Magical Event Horizon",
-        "description": "Play 1000 games as Marisa.",
+        "description": "Play 500 games as Marisa.",
         "hidden": false,
         "id": "marisa_play3",
         "category": "marisa"
@@ -284,6 +328,10 @@
             {
                 "type": "prop",
                 "id": 2
+            },
+            {
+                "type": "title",
+                "name": "Dangerous Illusionist"
             }
         ],
         "name": "This time is only mine",
@@ -325,9 +373,16 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 2,
-                "comment": "Pocket Watch"
+                "type": "emote",
+                "name": "sakuya1"
+            },
+            {
+                "type": "emote",
+                "name": "sakuya3"
+            },
+            {
+                "type": "title",
+                "name": "The Perfect Maid"
             }
         ],
         "name": "Hound of the Devil",
@@ -339,18 +394,29 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 2
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 2,
-                "comment": "Clock Tower"
+                "type": "emote",
+                "name": "sakuya4"
+            },
+            {
+                "type": "emote",
+                "name": "sakuya5"
+            },
+            {
+                "type": "emote",
+                "name": "sakuya6"
+            },
+            {
+                "type": "title",
+                "name": "\"Do You Believe In Gravity?\""
             }
         ],
         "name": "Spaceship Window Opener",
-        "description": "Play 1000 games as Sakuya.",
+        "description": "Play 500 games as Sakuya.",
         "hidden": false,
         "id": "sakuya_play3",
         "category": "sakuya"
@@ -402,6 +468,10 @@
             {
                 "type": "prop",
                 "id": 3
+            },
+            {
+                "type": "title",
+                "name": "Seven-Colored Puppeteer"
             }
         ],
         "name": "Artful Puppet Show",
@@ -443,9 +513,16 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 3,
-                "comment": "Mini Shangai's doll"
+                "type": "emote",
+                "name": "alice1"
+            },
+            {
+                "type": "emote",
+                "name": "alice3"
+            },
+            {
+                "type": "title",
+                "name": "Holder of The \"Grimoire\""
             }
         ],
         "name": "Controlling People's Shapes",
@@ -457,18 +534,29 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 3
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 3,
-                "comment": "Alice's House"
+                "type": "emote",
+                "name": "alice4"
+            },
+            {
+                "type": "emote",
+                "name": "alice5"
+            },
+            {
+                "type": "emote",
+                "name": "alice6"
+            },
+            {
+                "type": "title",
+                "name": "\"A Boot To The Head!\""
             }
         ],
         "name": "Grand Guignol's Artist",
-        "description": "Play 1000 games as Alice.",
+        "description": "Play 500 games as Alice.",
         "hidden": false,
         "id": "alice_play3",
         "category": "alice"
@@ -520,6 +608,10 @@
             {
                 "type": "prop",
                 "id": 4
+            },
+            {
+                "type": "title",
+                "name": "Asthmatic Alchemist"
             }
         ],
         "name": "Wu Xing Magician",
@@ -561,9 +653,16 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 4,
-                "comment": "Pile of book Prop"
+                "type": "emote",
+                "name": "patchouli1"
+            },
+            {
+                "type": "emote",
+                "name": "patchouli2"
+            },
+            {
+                "type": "title",
+                "name": "Works Out At The Library"
             }
         ],
         "name": "Weekly Magic",
@@ -575,18 +674,29 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 4
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 4,
-                "comment": "Library"
+                "type": "emote",
+                "name": "patchouli3"
+            },
+            {
+                "type": "emote",
+                "name": "patchouli5"
+            },
+            {
+                "type": "emote",
+                "name": "patchouli6"
+            },
+            {
+                "type": "title",
+                "name": "The Ultimate Bookworm"
             }
         ],
         "name": "Full Asthma Alchemist",
-        "description": "Play 1000 games as Patchouli.",
+        "description": "Play 500 games as Patchouli.",
         "hidden": false,
         "id": "patchouli_play3",
         "category": "patchouli"
@@ -638,6 +748,10 @@
             {
                 "type": "prop",
                 "id": 5
+            },
+            {
+                "type": "title",
+                "name": "Klutz Samurai"
             }
         ],
         "name": "Youki's Disciple",
@@ -679,9 +793,16 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 5,
-                "comment": "Roukanken & Hakurouken Display"
+                "type": "emote",
+                "name": "youmu1"
+            },
+            {
+                "type": "emote",
+                "name": "youmu2"
+            },
+            {
+                "type": "title",
+                "name": "Dual-Wielder of Lives"
             }
         ],
         "name": "Phantom Samurai",
@@ -693,18 +814,29 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 5
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 5,
-                "comment": "UnBloomed Ayakashi (Yuyuko should have the blooming one) / The Nether Soku Stage"
+                "type": "emote",
+                "name": "youmu3"
+            },
+            {
+                "type": "emote",
+                "name": "youmu5"
+            },
+            {
+                "type": "emote",
+                "name": "youmu6"
+            },
+            {
+                "type": "title",
+                "name": "The Ultimate Truth Of Spring"
             }
         ],
         "name": "Saigyouji's Ronin",
-        "description": "Play 1000 games as Youmu.",
+        "description": "Play 500 games as Youmu.",
         "hidden": false,
         "id": "youmu_play3",
         "category": "youmu"
@@ -756,6 +888,10 @@
             {
                 "type": "prop",
                 "id": 6
+            },
+            {
+                "type": "title",
+                "name": "Awake At Night"
             }
         ],
         "name": "Dracul's Descendant",
@@ -797,9 +933,16 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 6,
-                "comment": "Hanger with a parasol on it Prop"
+                "type": "emote",
+                "name": "remilia1"
+            },
+            {
+                "type": "emote",
+                "name": "remilia2"
+            },
+            {
+                "type": "title",
+                "name": "Demon Hidden In The Fog"
             }
         ],
         "name": "Skerlet Vampir",
@@ -811,18 +954,29 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 6
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 6,
-                "comment": "Scarlet devil mansion"
+                "type": "emote",
+                "name": "remilia3"
+            },
+            {
+                "type": "emote",
+                "name": "remilia5"
+            },
+            {
+                "type": "emote",
+                "name": "remilia6"
+            },
+            {
+                "type": "title",
+                "name": "Tenebre Rosso Sangue"
             }
         ],
         "name": "Soaked in Red",
-        "description": "Play 1000 games as Remilia.",
+        "description": "Play 500 games as Remilia.",
         "hidden": false,
         "id": "remilia_play3",
         "category": "remilia"
@@ -874,6 +1028,10 @@
             {
                 "type": "prop",
                 "id": 7
+            },
+            {
+                "type": "title",
+                "name": "Deadly Ghost"
             }
         ],
         "name": "Inscrutable White Jade",
@@ -915,9 +1073,16 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 7,
-                "comment": "Cool looking giant Fan"
+                "type": "emote",
+                "name": "yuyuko1"
+            },
+            {
+                "type": "emote",
+                "name": "yuyuko2"
+            },
+            {
+                "type": "title",
+                "name": "Pretending To Be Foolish"
             }
         ],
         "name": "Princess of Restless Souls",
@@ -929,18 +1094,29 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 7
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 7,
-                "comment": "Netherworld / Hakugyokurou"
+                "type": "emote",
+                "name": "yuyuko3"
+            },
+            {
+                "type": "emote",
+                "name": "yuyuko4"
+            },
+            {
+                "type": "emote",
+                "name": "yuyuko5"
+            },
+            {
+                "type": "title",
+                "name": "Touch of Death"
             }
         ],
         "name": "Perfect Cherry Blossom",
-        "description": "Play 1000 games as Yuyuko.",
+        "description": "Play 500 games as Yuyuko.",
         "hidden": false,
         "id": "yuyuko_play3",
         "category": "yuyuko"
@@ -992,6 +1168,10 @@
             {
                 "type": "prop",
                 "id": 8
+            },
+            {
+                "type": "title",
+                "name": "Greater Youkai & Sage"
             }
         ],
         "name": "Living Inside (Your) Walls",
@@ -1033,9 +1213,16 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 8,
-                "comment": "Chen and Ran Poster"
+                "type": "emote",
+                "name": "yukari1"
+            },
+            {
+                "type": "emote",
+                "name": "yukari2"
+            },
+            {
+                "type": "title",
+                "name": "Spinning Out of Control"
             }
         ],
         "name": "Shikigami's Spirit Medium (Master)",
@@ -1047,18 +1234,29 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 8
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 8,
-                "comment": "The Inside of a Gap"
+                "type": "emote",
+                "name": "yukari3"
+            },
+            {
+                "type": "emote",
+                "name": "yukari4"
+            },
+            {
+                "type": "emote",
+                "name": "yukari5"
+            },
+            {
+                "type": "title",
+                "name": "Locomotive Otaku"
             }
         ],
         "name": "Gensokyo's Sage",
-        "description": "Play 1000 games as Yukari.",
+        "description": "Play 500 games as Yukari.",
         "hidden": false,
         "id": "yukari_play3",
         "category": "yukari"
@@ -1110,6 +1308,10 @@
             {
                 "type": "prop",
                 "id": 9
+            },
+            {
+                "type": "title",
+                "name": "Endless Parade"
             }
         ],
         "name": "Layered Like an Onion",
@@ -1151,9 +1353,16 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 9,
-                "comment": "Sake Gourd"
+                "type": "emote",
+                "name": "suika1"
+            },
+            {
+                "type": "emote",
+                "name": "suika3"
+            },
+            {
+                "type": "title",
+                "name": "Dislikes Beans"
             }
         ],
         "name": "Deva of The Youkai Mountain",
@@ -1165,18 +1374,29 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 9
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 9,
-                "comment": "Broken Moon"
+                "type": "emote",
+                "name": "suika4"
+            },
+            {
+                "type": "emote",
+                "name": "suika5"
+            },
+            {
+                "type": "emote",
+                "name": "suika6"
+            },
+            {
+                "type": "title",
+                "name": "Body Made of 70% Alcohol"
             }
         ],
         "name": "A Million Oni in One",
-        "description": "Play 1000 games as Suika.",
+        "description": "Play 500 games as Suika.",
         "hidden": false,
         "id": "suika_play3",
         "category": "suika"
@@ -1228,6 +1448,10 @@
             {
                 "type": "prop",
                 "id": 10
+            },
+            {
+                "type": "title",
+                "name": "Moon Born Earth Rabbit"
             }
         ],
         "name": "Insanity Overdrive",
@@ -1269,9 +1493,16 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 10,
-                "comment": "Carrot / AoCF Reisen Gun / Box of meds"
+                "type": "emote",
+                "name": "reisen1"
+            },
+            {
+                "type": "emote",
+                "name": "reisen3"
+            },
+            {
+                "type": "title",
+                "name": "Misdirecting The Brainwaves"
             }
         ],
         "name": "Disciple of the God of Wisdom",
@@ -1283,18 +1514,29 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 10
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 10,
-                "comment": "Red full Moon"
+                "type": "emote",
+                "name": "reisen4"
+            },
+            {
+                "type": "emote",
+                "name": "reisen5"
+            },
+            {
+                "type": "emote",
+                "name": "reisen6"
+            },
+            {
+                "type": "title",
+                "name": "Red Waves Of Insanity"
             }
         ],
         "name": "Lunatic Red Eyes",
-        "description": "Play 1000 games as Reisen.",
+        "description": "Play 500 games as Reisen.",
         "hidden": false,
         "id": "reisen_play3",
         "category": "udonge"
@@ -1346,6 +1588,10 @@
             {
                 "type": "prop",
                 "id": 11
+            },
+            {
+                "type": "title",
+                "name": "Winning Fights By Mistake"
             }
         ],
         "name": "Speed-o'-Sound Youkai",
@@ -1387,9 +1633,16 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 11,
-                "comment": "Stack of newspapers"
+                "type": "emote",
+                "name": "aya1"
+            },
+            {
+                "type": "emote",
+                "name": "aya2"
+            },
+            {
+                "type": "title",
+                "name": "Exaggerated Journalism"
             }
         ],
         "name": "Pure and Honest",
@@ -1401,18 +1654,29 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 11
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 11,
-                "comment": "MoF cascade"
+                "type": "emote",
+                "name": "aya3"
+            },
+            {
+                "type": "emote",
+                "name": "aya4"
+            },
+            {
+                "type": "emote",
+                "name": "aya5"
+            },
+            {
+                "type": "title",
+                "name": "ZUN's Favorite"
             }
         ],
         "name": "Fastest in Gensokyo",
-        "description": "Play 1000 games as Aya.",
+        "description": "Play 500 games as Aya.",
         "hidden": false,
         "id": "aya_play3",
         "category": "aya"
@@ -1464,6 +1728,10 @@
             {
                 "type": "prop",
                 "id": 12
+            },
+            {
+                "type": "title",
+                "name": "Eastern Grim Reaper"
             }
         ],
         "name": "Lover of Apples",
@@ -1505,9 +1773,16 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 12,
-                "comment": "Boat and Scythe"
+                "type": "emote",
+                "name": "komachi1"
+            },
+            {
+                "type": "emote",
+                "name": "komachi2"
+            },
+            {
+                "type": "title",
+                "name": "Acheron's Driver"
             }
         ],
         "name": "E-scythe-ing Guide of The Lifeless",
@@ -1519,18 +1794,29 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 12
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 12,
-                "comment": "Sanzu River"
+                "type": "emote",
+                "name": "komachi3"
+            },
+            {
+                "type": "emote",
+                "name": "komachi5"
+            },
+            {
+                "type": "emote",
+                "name": "komachi6"
+            },
+            {
+                "type": "title",
+                "name": "Death Odyssey"
             }
         ],
         "name": "Ferry-Woman of The Acheron",
-        "description": "Play 1000 games as Komachi.",
+        "description": "Play 500 games as Komachi.",
         "hidden": false,
         "id": "komachi_play3",
         "category": "komachi"
@@ -1582,6 +1868,10 @@
             {
                 "type": "prop",
                 "id": 13
+            },
+            {
+                "type": "title",
+                "name": "Beautiful Scarlet Cloth"
             }
         ],
         "name": "Oarfish Covered In Scarlet Cloth",
@@ -1623,9 +1913,16 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 13,
-                "comment": "Thunder Cloud / Catfish"
+                "type": "emote",
+                "name": "iku1"
+            },
+            {
+                "type": "emote",
+                "name": "iku2"
+            },
+            {
+                "type": "title",
+                "name": "Giga Drill Breaker!"
             }
         ],
         "name": "The Will of The Great Spiral",
@@ -1637,18 +1934,29 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 13
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 13,
-                "comment": "Sky / Top of Youkai Mountain"
+                "type": "emote",
+                "name": "iku3"
+            },
+            {
+                "type": "emote",
+                "name": "iku4"
+            },
+            {
+                "type": "emote",
+                "name": "iku5"
+            },
+            {
+                "type": "title",
+                "name": "At The Top Of The List"
             }
         ],
         "name": "The Dragon's Veil",
-        "description": "Play 1000 games as Iku.",
+        "description": "Play 500 games as Iku.",
         "hidden": false,
         "id": "iku_play3",
         "category": "iku"
@@ -1700,6 +2008,10 @@
             {
                 "type": "prop",
                 "id": 14
+            },
+            {
+                "type": "title",
+                "name": "Heavenly Entity"
             }
         ],
         "name": "Eldest Daughter of the Hinanawi",
@@ -1741,9 +2053,16 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 14,
-                "comment": "Keystone / Route 66 sign"
+                "type": "emote",
+                "name": "tenshi1"
+            },
+            {
+                "type": "emote",
+                "name": "tenshi2"
+            },
+            {
+                "type": "title",
+                "name": "Powerful Despite The Looks"
             }
         ],
         "name": "Manipulator of \"Earth\" and \"Spirit\"",
@@ -1755,18 +2074,29 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 14
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 14,
-                "comment": "Heavens"
+                "type": "emote",
+                "name": "tenshi3"
+            },
+            {
+                "type": "emote",
+                "name": "tenshi5"
+            },
+            {
+                "type": "emote",
+                "name": "tenshi6"
+            },
+            {
+                "type": "title",
+                "name": "\u5929"
             }
         ],
         "name": "Sky of Scarlet Perception",
-        "description": "Play 1000 games as Tenshi.",
+        "description": "Play 500 games as Tenshi.",
         "hidden": false,
         "id": "tenshi_play3",
         "category": "tenshi"
@@ -1818,6 +2148,10 @@
             {
                 "type": "prop",
                 "id": 15
+            },
+            {
+                "type": "title",
+                "name": "3 VS 1"
             }
         ],
         "name": "Actually 3 Adversaries",
@@ -1859,9 +2193,16 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 15,
-                "comment": "Mini-Suwako & Kanako"
+                "type": "emote",
+                "name": "sanae1"
+            },
+            {
+                "type": "emote",
+                "name": "sanae2"
+            },
+            {
+                "type": "title",
+                "name": "\"Wow!! Cool Robot!!!\""
             }
         ],
         "name": "Moriya's Conspiracy",
@@ -1873,18 +2214,29 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 15
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 15,
-                "comment": "Moriya Shrine"
+                "type": "emote",
+                "name": "sanae3"
+            },
+            {
+                "type": "emote",
+                "name": "sanae4"
+            },
+            {
+                "type": "emote",
+                "name": "sanae5"
+            },
+            {
+                "type": "title",
+                "name": "The Tritagonist"
             }
         ],
         "name": "Everyday Miracle",
-        "description": "Play 1000 games as Sanae.",
+        "description": "Play 500 games as Sanae.",
         "hidden": false,
         "id": "sanae_play3",
         "category": "sanae"
@@ -1936,6 +2288,10 @@
             {
                 "type": "prop",
                 "id": 16
+            },
+            {
+                "type": "title",
+                "name": "\u2468"
             }
         ],
         "name": "Genius Fairy",
@@ -1977,9 +2333,16 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 16,
-                "comment": "Snowman"
+                "type": "emote",
+                "name": "cirno1"
+            },
+            {
+                "type": "emote",
+                "name": "cirno2"
+            },
+            {
+                "type": "title",
+                "name": "THE STRONGEST"
             }
         ],
         "name": "Naiad of The Lake",
@@ -1991,18 +2354,29 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 16
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 16,
-                "comment": "The Lake"
+                "type": "emote",
+                "name": "cirno3"
+            },
+            {
+                "type": "emote",
+                "name": "cirno4"
+            },
+            {
+                "type": "emote",
+                "name": "cirno5"
+            },
+            {
+                "type": "title",
+                "name": "Absolute Zero"
             }
         ],
         "name": "Absolute Zero",
-        "description": "Play 1000 games as Cirno.",
+        "description": "Play 500 games as Cirno.",
         "hidden": false,
         "id": "cirno_play3",
         "category": "chirno"
@@ -2054,6 +2428,10 @@
             {
                 "type": "prop",
                 "id": 17
+            },
+            {
+                "type": "title",
+                "name": "Strikingly Appariscent Red Mane"
             }
         ],
         "name": "Keeper of Gates",
@@ -2095,9 +2473,16 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 17,
-                "comment": "Green Blade / Small Dragon / Yellow Star / Meiling Hat"
+                "type": "emote",
+                "name": "meiling1"
+            },
+            {
+                "type": "emote",
+                "name": "meiling2"
+            },
+            {
+                "type": "title",
+                "name": "Unbeatable Dreamer"
             }
         ],
         "name": "Dreamy Savior of Gensokyo",
@@ -2109,18 +2494,29 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 17
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 17,
-                "comment": "SDM Gates"
+                "type": "emote",
+                "name": "meiling3"
+            },
+            {
+                "type": "emote",
+                "name": "meiling5"
+            },
+            {
+                "type": "emote",
+                "name": "meiling6"
+            },
+            {
+                "type": "title",
+                "name": "Legendary Gatekeeper"
             }
         ],
         "name": "Legendary Dragon of Gensou",
-        "description": "Play 1000 games as Meiling.",
+        "description": "Play 500 games as Meiling.",
         "hidden": false,
         "id": "meiling_play3",
         "category": "meirin"
@@ -2172,6 +2568,10 @@
             {
                 "type": "prop",
                 "id": 18
+            },
+            {
+                "type": "title",
+                "name": "CAUTION!"
             }
         ],
         "name": "Low Crusher of The Inferi",
@@ -2213,9 +2613,16 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 18,
-                "comment": "Tchernobyl elephant leg / Small \"Sun\" / Three legged crow"
+                "type": "emote",
+                "name": "utsuho1"
+            },
+            {
+                "type": "emote",
+                "name": "utsuho3"
+            },
+            {
+                "type": "title",
+                "name": "The Unmatched Power of the Sun"
             }
         ],
         "name": "The Black Sun of Yatagarasu",
@@ -2227,18 +2634,29 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 18
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 18,
-                "comment": "Nuclear reactor"
+                "type": "emote",
+                "name": "utsuho4"
+            },
+            {
+                "type": "emote",
+                "name": "utsuho5"
+            },
+            {
+                "type": "emote",
+                "name": "utsuho6"
+            },
+            {
+                "type": "title",
+                "name": "\u0421\u043b\u043e\u043d\u043e\u0432\u044c\u044f\u0020\u043d\u043e\u0433\u0430"
             }
         ],
         "name": "The Crow that Stole the Sun",
-        "description": "Play 1000 games as Utsuho.",
+        "description": "Play 500 games as Utsuho.",
         "hidden": false,
         "id": "utsuho_play3",
         "category": "utsuho"
@@ -2290,6 +2708,10 @@
             {
                 "type": "prop",
                 "id": 19
+            },
+            {
+                "type": "title",
+                "name": "Relaxed Amphibian"
             }
         ],
         "name": "Braving the Elements",
@@ -2331,9 +2753,16 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 19,
-                "comment": "Frog (Georges XIII ???)"
+                "type": "emote",
+                "name": "suwako1"
+            },
+            {
+                "type": "emote",
+                "name": "suwako3"
+            },
+            {
+                "type": "title",
+                "name": "Low Blows From The Sky"
             }
         ],
         "name": "Ruler of Suwa",
@@ -2345,18 +2774,29 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 19
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 19,
-                "comment": "Moriya Shrine"
+                "type": "emote",
+                "name": "suwako4"
+            },
+            {
+                "type": "emote",
+                "name": "suwako5"
+            },
+            {
+                "type": "emote",
+                "name": "suwako6"
+            },
+            {
+                "type": "title",
+                "name": "Unable To Run"
             }
         ],
         "name": "Mishaguji-sama Destiny",
-        "description": "Play 1000 games as Suwako.",
+        "description": "Play 500 games as Suwako.",
         "hidden": false,
         "id": "suwako_play3",
         "category": "suwako"
@@ -2450,9 +2890,12 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 20,
-                "comment": "????????"
+                "type": "emote",
+                "name": "momiji1"
+            },
+            {
+                "type": "emote",
+                "name": "momiji3"
             }
         ],
         "name": "Buster Wolf Of The East",
@@ -2464,18 +2907,25 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 22
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 20,
-                "comment": "????????"
+                "type": "emote",
+                "name": "momiji4"
+            },
+            {
+                "type": "emote",
+                "name": "momiji5"
+            },
+            {
+                "type": "emote",
+                "name": "momiji6"
             }
         ],
         "name": "Would Really Prefer To Play Shogi",
-        "description": "Play 1000 games as Momiji.",
+        "description": "Play 500 games as Momiji.",
         "hidden": false,
         "id": "momiji_play3",
         "category": "momiji"
@@ -2568,9 +3018,12 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 21,
-                "comment": "????????"
+                "type": "emote",
+                "name": "clownpiece1"
+            },
+            {
+                "type": "emote",
+                "name": "clownpiece3"
             }
         ],
         "name": "JohnMaddenJohnMaddenaeiouaeiou",
@@ -2582,18 +3035,25 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 23
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 21,
-                "comment": "????????"
+                "type": "emote",
+                "name": "clownpiece4"
+            },
+            {
+                "type": "emote",
+                "name": "clownpiece5"
+            },
+            {
+                "type": "emote",
+                "name": "clownpiece6"
             }
         ],
         "name": "By The Moon, I'll Defeat You!",
-        "description": "Play 1000 games as Clownpiece.",
+        "description": "Play 500 games as Clownpiece.",
         "hidden": false,
         "id": "clownpiece_play3",
         "category": "clownpiece"
@@ -2686,9 +3146,12 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 22,
-                "comment": "????????"
+                "type": "emote",
+                "name": "flandre1"
+            },
+            {
+                "type": "emote",
+                "name": "flandre3"
             }
         ],
         "name": "Bringing Down The Ragnarok",
@@ -2700,18 +3163,25 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 24
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 22,
-                "comment": "????????"
+                "type": "emote",
+                "name": "flandre4"
+            },
+            {
+                "type": "emote",
+                "name": "flandre5"
+            },
+            {
+                "type": "emote",
+                "name": "flandre6"
             }
         ],
         "name": "Right Hand Of Total Annihilation",
-        "description": "Play 1000 games as Flandre.",
+        "description": "Play 500 games as Flandre.",
         "hidden": false,
         "id": "flandre_play3",
         "category": "flandre"
@@ -2804,9 +3274,12 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 23,
-                "comment": "????????"
+                "type": "emote",
+                "name": "orin1"
+            },
+            {
+                "type": "emote",
+                "name": "orin2"
             }
         ],
         "name": "Cheerful Despite The Cadavers",
@@ -2818,18 +3291,25 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 25
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 23,
-                "comment": "????????"
+                "type": "emote",
+                "name": "orin3"
+            },
+            {
+                "type": "emote",
+                "name": "orin4"
+            },
+            {
+                "type": "emote",
+                "name": "orin5"
             }
         ],
         "name": "Former Hell's Tourist Guide",
-        "description": "Play 1000 games as Rin.",
+        "description": "Play 500 games as Rin.",
         "hidden": false,
         "id": "rin_play3",
         "category": "orin"
@@ -2922,9 +3402,12 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 24,
-                "comment": "????????"
+                "type": "emote",
+                "name": "yuuka1"
+            },
+            {
+                "type": "emote",
+                "name": "yuuka3"
             }
         ],
         "name": "I Only Trust Me, Myself and I",
@@ -2936,18 +3419,25 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 26
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 24,
-                "comment": "????????"
+                "type": "emote",
+                "name": "yuuka4"
+            },
+            {
+                "type": "emote",
+                "name": "yuuka5"
+            },
+            {
+                "type": "emote",
+                "name": "yuuka6"
             }
         ],
         "name": "Originally From A Lotus Land",
-        "description": "Play 1000 games as Yuuka.",
+        "description": "Play 500 games as Yuuka.",
         "hidden": false,
         "id": "yuuka_play3",
         "category": "yuuka"
@@ -3040,9 +3530,12 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 25,
-                "comment": "????????"
+                "type": "emote",
+                "name": "kaguya1"
+            },
+            {
+                "type": "emote",
+                "name": "kaguya2"
             }
         ],
         "name": "Space Royalty",
@@ -3054,18 +3547,25 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 27
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 25,
-                "comment": "????????"
+                "type": "emote",
+                "name": "kaguya3"
+            },
+            {
+                "type": "emote",
+                "name": "kaguya4"
+            },
+            {
+                "type": "emote",
+                "name": "kaguya5"
             }
         ],
         "name": "Living Eternity & Instant At Once",
-        "description": "Play 1000 games as Kaguya.",
+        "description": "Play 500 games as Kaguya.",
         "hidden": false,
         "id": "kaguya_play3",
         "category": "kaguya"
@@ -3158,9 +3658,12 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 26,
-                "comment": "????????"
+                "type": "emote",
+                "name": "mokou1"
+            },
+            {
+                "type": "emote",
+                "name": "mokou3"
             }
         ],
         "name": "Infinite Amount of Phoenix Feathers",
@@ -3172,18 +3675,25 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 28
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 26,
-                "comment": "????????"
+                "type": "emote",
+                "name": "mokou4"
+            },
+            {
+                "type": "emote",
+                "name": "mokou5"
+            },
+            {
+                "type": "emote",
+                "name": "mokou6"
             }
         ],
         "name": "Breaking The Limits Of The Flesh",
-        "description": "Play 1000 games as Mokou.",
+        "description": "Play 500 games as Mokou.",
         "hidden": false,
         "id": "mokou_play3",
         "category": "mokou"
@@ -3276,9 +3786,12 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 27,
-                "comment": "????????"
+                "type": "emote",
+                "name": "mima1"
+            },
+            {
+                "type": "emote",
+                "name": "mima2"
             }
         ],
         "name": "Nemesis Of The Shrine Maiden",
@@ -3290,18 +3803,25 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 29
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 27,
-                "comment": "????????"
+                "type": "emote",
+                "name": "mima3"
+            },
+            {
+                "type": "emote",
+                "name": "mima5"
+            },
+            {
+                "type": "emote",
+                "name": "mima6"
             }
         ],
         "name": "She Will Be Back... Eventually...",
-        "description": "Play 1000 games as Mima.",
+        "description": "Play 500 games as Mima.",
         "hidden": false,
         "id": "mima_play3",
         "category": "mima"
@@ -3394,9 +3914,12 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 28,
-                "comment": "????????"
+                "type": "emote",
+                "name": "shou1"
+            },
+            {
+                "type": "emote",
+                "name": "shou3"
             }
         ],
         "name": "Immense Power From The Pagoda",
@@ -3408,18 +3931,25 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 30
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 28,
-                "comment": "????????"
+                "type": "emote",
+                "name": "shou4"
+            },
+            {
+                "type": "emote",
+                "name": "shou5"
+            },
+            {
+                "type": "emote",
+                "name": "shou6"
             }
         ],
         "name": "The Radiant & Hungry Youkai Tiger",
-        "description": "Play 1000 games as Shou.",
+        "description": "Play 500 games as Shou.",
         "hidden": false,
         "id": "shou_play3",
         "category": "shou"
@@ -3512,9 +4042,12 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 29,
-                "comment": "????????"
+                "type": "emote",
+                "name": "murasa1"
+            },
+            {
+                "type": "emote",
+                "name": "murasa3"
             }
         ],
         "name": "No Dolphins Here",
@@ -3526,18 +4059,25 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 31
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 29,
-                "comment": "????????"
+                "type": "emote",
+                "name": "murasa4"
+            },
+            {
+                "type": "emote",
+                "name": "murasa5"
+            },
+            {
+                "type": "emote",
+                "name": "murasa6"
             }
         ],
         "name": "Unbeatable Maelstrom",
-        "description": "Play 1000 games as Murasa.",
+        "description": "Play 500 games as Murasa.",
         "hidden": false,
         "id": "murasa_play3",
         "category": "murasa"
@@ -3630,9 +4170,12 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 30,
-                "comment": "????????"
+                "type": "emote",
+                "name": "sekibanki1"
+            },
+            {
+                "type": "emote",
+                "name": "sekibanki3"
             }
         ],
         "name": "Head Full Of Optic Blasts",
@@ -3644,18 +4187,25 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 32
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 30,
-                "comment": "????????"
+                "type": "emote",
+                "name": "sekibanki4"
+            },
+            {
+                "type": "emote",
+                "name": "sekibanki5"
+            },
+            {
+                "type": "emote",
+                "name": "sekibanki6"
             }
         ],
         "name": "Dreams Don't Die!",
-        "description": "Play 1000 games as Sekibanki.",
+        "description": "Play 500 games as Sekibanki.",
         "hidden": false,
         "id": "sekibanki_play3",
         "category": "sekibanki"
@@ -3748,9 +4298,12 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 31,
-                "comment": "????????"
+                "type": "emote",
+                "name": "satori1"
+            },
+            {
+                "type": "emote",
+                "name": "satori3"
             }
         ],
         "name": "Mistress Of The Blazing Hellfire",
@@ -3762,18 +4315,25 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 33
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 31,
-                "comment": "????????"
+                "type": "emote",
+                "name": "satori4"
+            },
+            {
+                "type": "emote",
+                "name": "satori5"
+            },
+            {
+                "type": "emote",
+                "name": "satori6"
             }
         ],
         "name": "Master \"Recollection\" Copy-Cat",
-        "description": "Play 1000 games as Satori.",
+        "description": "Play 500 games as Satori.",
         "hidden": false,
         "id": "satori_play3",
         "category": "satori"
@@ -3866,9 +4426,12 @@
         },
         "rewards": [
             {
-                "type": "accessory",
-                "id": 32,
-                "comment": "????????"
+                "type": "emote",
+                "name": "ran1"
+            },
+            {
+                "type": "emote",
+                "name": "ran3"
             }
         ],
         "name": "Phantasmagorical Mid-Boss",
@@ -3880,18 +4443,25 @@
     {
         "requirement": {
             "type": "play",
-            "count": 1000,
+            "count": 500,
             "chr": 34
         },
         "rewards": [
             {
-                "type": "background",
-                "id": 32,
-                "comment": "????????"
+                "type": "emote",
+                "name": "ran4"
+            },
+            {
+                "type": "emote",
+                "name": "ran5"
+            },
+            {
+                "type": "emote",
+                "name": "ran6"
             }
         ],
         "name": "The Legendary Tamamo-No-Mae?",
-        "description": "Play 1000 games as Ran.",
+        "description": "Play 500 games as Ran.",
         "hidden": false,
         "id": "ran_play3",
         "category": "ran"
@@ -4011,47 +4581,7 @@
             },
             {
                 "type": "emote",
-                "name": "alice1"
-            },
-            {
-                "type": "emote",
-                "name": "alice3"
-            },
-            {
-                "type": "emote",
-                "name": "alice4"
-            },
-            {
-                "type": "emote",
-                "name": "alice5"
-            },
-            {
-                "type": "emote",
-                "name": "alice6"
-            },
-            {
-                "type": "emote",
                 "name": "alice7"
-            },
-            {
-                "type": "emote",
-                "name": "aya1"
-            },
-            {
-                "type": "emote",
-                "name": "aya2"
-            },
-            {
-                "type": "emote",
-                "name": "aya3"
-            },
-            {
-                "type": "emote",
-                "name": "aya4"
-            },
-            {
-                "type": "emote",
-                "name": "aya5"
             },
             {
                 "type": "emote",
@@ -4059,47 +4589,7 @@
             },
             {
                 "type": "emote",
-                "name": "cirno1"
-            },
-            {
-                "type": "emote",
-                "name": "cirno2"
-            },
-            {
-                "type": "emote",
-                "name": "cirno3"
-            },
-            {
-                "type": "emote",
-                "name": "cirno4"
-            },
-            {
-                "type": "emote",
-                "name": "cirno5"
-            },
-            {
-                "type": "emote",
                 "name": "cirno7"
-            },
-            {
-                "type": "emote",
-                "name": "iku1"
-            },
-            {
-                "type": "emote",
-                "name": "iku2"
-            },
-            {
-                "type": "emote",
-                "name": "iku3"
-            },
-            {
-                "type": "emote",
-                "name": "iku4"
-            },
-            {
-                "type": "emote",
-                "name": "iku5"
             },
             {
                 "type": "emote",
@@ -4107,47 +4597,7 @@
             },
             {
                 "type": "emote",
-                "name": "komachi1"
-            },
-            {
-                "type": "emote",
-                "name": "komachi2"
-            },
-            {
-                "type": "emote",
-                "name": "komachi3"
-            },
-            {
-                "type": "emote",
-                "name": "komachi5"
-            },
-            {
-                "type": "emote",
-                "name": "komachi6"
-            },
-            {
-                "type": "emote",
                 "name": "komachi7"
-            },
-            {
-                "type": "emote",
-                "name": "marisa1"
-            },
-            {
-                "type": "emote",
-                "name": "marisa3"
-            },
-            {
-                "type": "emote",
-                "name": "marisa4"
-            },
-            {
-                "type": "emote",
-                "name": "marisa5"
-            },
-            {
-                "type": "emote",
-                "name": "marisa6"
             },
             {
                 "type": "emote",
@@ -4155,47 +4605,7 @@
             },
             {
                 "type": "emote",
-                "name": "meiling1"
-            },
-            {
-                "type": "emote",
-                "name": "meiling2"
-            },
-            {
-                "type": "emote",
-                "name": "meiling3"
-            },
-            {
-                "type": "emote",
-                "name": "meiling5"
-            },
-            {
-                "type": "emote",
-                "name": "meiling6"
-            },
-            {
-                "type": "emote",
                 "name": "meiling7"
-            },
-            {
-                "type": "emote",
-                "name": "patchouli1"
-            },
-            {
-                "type": "emote",
-                "name": "patchouli2"
-            },
-            {
-                "type": "emote",
-                "name": "patchouli3"
-            },
-            {
-                "type": "emote",
-                "name": "patchouli5"
-            },
-            {
-                "type": "emote",
-                "name": "patchouli6"
             },
             {
                 "type": "emote",
@@ -4207,47 +4617,7 @@
             },
             {
                 "type": "emote",
-                "name": "reimu1"
-            },
-            {
-                "type": "emote",
-                "name": "reimu3"
-            },
-            {
-                "type": "emote",
-                "name": "reimu4"
-            },
-            {
-                "type": "emote",
-                "name": "reimu5"
-            },
-            {
-                "type": "emote",
-                "name": "reimu6"
-            },
-            {
-                "type": "emote",
                 "name": "reimu7"
-            },
-            {
-                "type": "emote",
-                "name": "reisen1"
-            },
-            {
-                "type": "emote",
-                "name": "reisen3"
-            },
-            {
-                "type": "emote",
-                "name": "reisen4"
-            },
-            {
-                "type": "emote",
-                "name": "reisen5"
-            },
-            {
-                "type": "emote",
-                "name": "reisen6"
             },
             {
                 "type": "emote",
@@ -4255,47 +4625,7 @@
             },
             {
                 "type": "emote",
-                "name": "remilia1"
-            },
-            {
-                "type": "emote",
-                "name": "remilia2"
-            },
-            {
-                "type": "emote",
-                "name": "remilia3"
-            },
-            {
-                "type": "emote",
-                "name": "remilia5"
-            },
-            {
-                "type": "emote",
-                "name": "remilia6"
-            },
-            {
-                "type": "emote",
                 "name": "remilia7"
-            },
-            {
-                "type": "emote",
-                "name": "sakuya1"
-            },
-            {
-                "type": "emote",
-                "name": "sakuya3"
-            },
-            {
-                "type": "emote",
-                "name": "sakuya4"
-            },
-            {
-                "type": "emote",
-                "name": "sakuya5"
-            },
-            {
-                "type": "emote",
-                "name": "sakuya6"
             },
             {
                 "type": "emote",
@@ -4303,47 +4633,7 @@
             },
             {
                 "type": "emote",
-                "name": "sanae1"
-            },
-            {
-                "type": "emote",
-                "name": "sanae2"
-            },
-            {
-                "type": "emote",
-                "name": "sanae3"
-            },
-            {
-                "type": "emote",
-                "name": "sanae4"
-            },
-            {
-                "type": "emote",
-                "name": "sanae5"
-            },
-            {
-                "type": "emote",
                 "name": "sanae7"
-            },
-            {
-                "type": "emote",
-                "name": "suika1"
-            },
-            {
-                "type": "emote",
-                "name": "suika3"
-            },
-            {
-                "type": "emote",
-                "name": "suika4"
-            },
-            {
-                "type": "emote",
-                "name": "suika5"
-            },
-            {
-                "type": "emote",
-                "name": "suika6"
             },
             {
                 "type": "emote",
@@ -4351,47 +4641,7 @@
             },
             {
                 "type": "emote",
-                "name": "suwako1"
-            },
-            {
-                "type": "emote",
-                "name": "suwako3"
-            },
-            {
-                "type": "emote",
-                "name": "suwako4"
-            },
-            {
-                "type": "emote",
-                "name": "suwako5"
-            },
-            {
-                "type": "emote",
-                "name": "suwako6"
-            },
-            {
-                "type": "emote",
                 "name": "suwako7"
-            },
-            {
-                "type": "emote",
-                "name": "tenshi1"
-            },
-            {
-                "type": "emote",
-                "name": "tenshi2"
-            },
-            {
-                "type": "emote",
-                "name": "tenshi3"
-            },
-            {
-                "type": "emote",
-                "name": "tenshi5"
-            },
-            {
-                "type": "emote",
-                "name": "tenshi6"
             },
             {
                 "type": "emote",
@@ -4399,71 +4649,11 @@
             },
             {
                 "type": "emote",
-                "name": "utsuho1"
-            },
-            {
-                "type": "emote",
-                "name": "utsuho3"
-            },
-            {
-                "type": "emote",
-                "name": "utsuho4"
-            },
-            {
-                "type": "emote",
-                "name": "utsuho5"
-            },
-            {
-                "type": "emote",
-                "name": "utsuho6"
-            },
-            {
-                "type": "emote",
                 "name": "utsuho7"
             },
             {
                 "type": "emote",
-                "name": "youmu1"
-            },
-            {
-                "type": "emote",
-                "name": "youmu2"
-            },
-            {
-                "type": "emote",
-                "name": "youmu3"
-            },
-            {
-                "type": "emote",
-                "name": "youmu5"
-            },
-            {
-                "type": "emote",
-                "name": "youmu6"
-            },
-            {
-                "type": "emote",
                 "name": "youmu7"
-            },
-            {
-                "type": "emote",
-                "name": "yukari1"
-            },
-            {
-                "type": "emote",
-                "name": "yukari2"
-            },
-            {
-                "type": "emote",
-                "name": "yukari3"
-            },
-            {
-                "type": "emote",
-                "name": "yukari4"
-            },
-            {
-                "type": "emote",
-                "name": "yukari5"
             },
             {
                 "type": "emote",
@@ -4479,47 +4669,7 @@
             },
             {
                 "type": "emote",
-                "name": "yuyuko1"
-            },
-            {
-                "type": "emote",
-                "name": "yuyuko2"
-            },
-            {
-                "type": "emote",
-                "name": "yuyuko3"
-            },
-            {
-                "type": "emote",
-                "name": "yuyuko4"
-            },
-            {
-                "type": "emote",
-                "name": "yuyuko5"
-            },
-            {
-                "type": "emote",
                 "name": "yuyuko7"
-            },
-            {
-                "type": "emote",
-                "name": "clownpiece1"
-            },
-            {
-                "type": "emote",
-                "name": "clownpiece3"
-            },
-            {
-                "type": "emote",
-                "name": "clownpiece4"
-            },
-            {
-                "type": "emote",
-                "name": "clownpiece5"
-            },
-            {
-                "type": "emote",
-                "name": "clownpiece6"
             },
             {
                 "type": "emote",
@@ -4528,26 +4678,6 @@
             {
                 "type": "emote",
                 "name": "clownpiece8"
-            },
-            {
-                "type": "emote",
-                "name": "flandre1"
-            },
-            {
-                "type": "emote",
-                "name": "flandre3"
-            },
-            {
-                "type": "emote",
-                "name": "flandre4"
-            },
-            {
-                "type": "emote",
-                "name": "flandre5"
-            },
-            {
-                "type": "emote",
-                "name": "flandre6"
             },
             {
                 "type": "emote",
@@ -4587,26 +4717,6 @@
             },
             {
                 "type": "emote",
-                "name": "kaguya1"
-            },
-            {
-                "type": "emote",
-                "name": "kaguya2"
-            },
-            {
-                "type": "emote",
-                "name": "kaguya3"
-            },
-            {
-                "type": "emote",
-                "name": "kaguya4"
-            },
-            {
-                "type": "emote",
-                "name": "kaguya5"
-            },
-            {
-                "type": "emote",
                 "name": "kaguya6"
             },
             {
@@ -4620,26 +4730,6 @@
             {
                 "type": "emote",
                 "name": "kaguya10"
-            },
-            {
-                "type": "emote",
-                "name": "mima1"
-            },
-            {
-                "type": "emote",
-                "name": "mima2"
-            },
-            {
-                "type": "emote",
-                "name": "mima3"
-            },
-            {
-                "type": "emote",
-                "name": "mima5"
-            },
-            {
-                "type": "emote",
-                "name": "mima6"
             },
             {
                 "type": "emote",
@@ -4667,26 +4757,6 @@
             },
             {
                 "type": "emote",
-                "name": "mokou1"
-            },
-            {
-                "type": "emote",
-                "name": "mokou3"
-            },
-            {
-                "type": "emote",
-                "name": "mokou4"
-            },
-            {
-                "type": "emote",
-                "name": "mokou5"
-            },
-            {
-                "type": "emote",
-                "name": "mokou6"
-            },
-            {
-                "type": "emote",
                 "name": "mokou7"
             },
             {
@@ -4696,26 +4766,6 @@
             {
                 "type": "emote",
                 "name": "mokou9"
-            },
-            {
-                "type": "emote",
-                "name": "momiji1"
-            },
-            {
-                "type": "emote",
-                "name": "momiji3"
-            },
-            {
-                "type": "emote",
-                "name": "momiji4"
-            },
-            {
-                "type": "emote",
-                "name": "momiji5"
-            },
-            {
-                "type": "emote",
-                "name": "momiji6"
             },
             {
                 "type": "emote",
@@ -4747,26 +4797,6 @@
             },
             {
                 "type": "emote",
-                "name": "murasa1"
-            },
-            {
-                "type": "emote",
-                "name": "murasa3"
-            },
-            {
-                "type": "emote",
-                "name": "murasa4"
-            },
-            {
-                "type": "emote",
-                "name": "murasa5"
-            },
-            {
-                "type": "emote",
-                "name": "murasa6"
-            },
-            {
-                "type": "emote",
                 "name": "murasa7"
             },
             {
@@ -4776,26 +4806,6 @@
             {
                 "type": "emote",
                 "name": "murasa9"
-            },
-            {
-                "type": "emote",
-                "name": "orin1"
-            },
-            {
-                "type": "emote",
-                "name": "orin2"
-            },
-            {
-                "type": "emote",
-                "name": "orin3"
-            },
-            {
-                "type": "emote",
-                "name": "orin4"
-            },
-            {
-                "type": "emote",
-                "name": "orin5"
             },
             {
                 "type": "emote",
@@ -4816,26 +4826,6 @@
             {
                 "type": "emote",
                 "name": "orin11"
-            },
-            {
-                "type": "emote",
-                "name": "satori1"
-            },
-            {
-                "type": "emote",
-                "name": "satori3"
-            },
-            {
-                "type": "emote",
-                "name": "satori4"
-            },
-            {
-                "type": "emote",
-                "name": "satori5"
-            },
-            {
-                "type": "emote",
-                "name": "satori6"
             },
             {
                 "type": "emote",
@@ -4863,26 +4853,6 @@
             },
             {
                 "type": "emote",
-                "name": "sekibanki1"
-            },
-            {
-                "type": "emote",
-                "name": "sekibanki3"
-            },
-            {
-                "type": "emote",
-                "name": "sekibanki4"
-            },
-            {
-                "type": "emote",
-                "name": "sekibanki5"
-            },
-            {
-                "type": "emote",
-                "name": "sekibanki6"
-            },
-            {
-                "type": "emote",
                 "name": "sekibanki7"
             },
             {
@@ -4907,26 +4877,6 @@
             },
             {
                 "type": "emote",
-                "name": "shou1"
-            },
-            {
-                "type": "emote",
-                "name": "shou3"
-            },
-            {
-                "type": "emote",
-                "name": "shou4"
-            },
-            {
-                "type": "emote",
-                "name": "shou5"
-            },
-            {
-                "type": "emote",
-                "name": "shou6"
-            },
-            {
-                "type": "emote",
                 "name": "shou7"
             },
             {
@@ -4940,26 +4890,6 @@
             {
                 "type": "emote",
                 "name": "shou10"
-            },
-            {
-                "type": "emote",
-                "name": "yuuka1"
-            },
-            {
-                "type": "emote",
-                "name": "yuuka3"
-            },
-            {
-                "type": "emote",
-                "name": "yuuka4"
-            },
-            {
-                "type": "emote",
-                "name": "yuuka5"
-            },
-            {
-                "type": "emote",
-                "name": "yuuka6"
             },
             {
                 "type": "emote",
