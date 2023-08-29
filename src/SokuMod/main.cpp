@@ -376,7 +376,7 @@ void countGame()
 	}
 
 	bool defaultAllMax = true;
-	for (int i = 0; i < characters[mid].nbSkills; i++)
+	for (int i = 0; i < characters[mid].nbSkills / 3; i++)
 		if (chr.skillMap[i].notUsed || chr.skillMap[i].level < 4) {
 			defaultAllMax = false;
 			break;
@@ -390,6 +390,45 @@ void countGame()
 		if (winMaxDAch != winMaxDefault.end()) {
 			(*winMaxDAch)->awarded = true;
 			lobbyData->achievementAwardQueue.push_back(*winMaxDAch);
+		}
+	}
+
+	std::map<unsigned, unsigned> cardsUsed;
+	auto &useCards = lobbyData->achievementByRequ["use_card"];
+	for (auto &data : lobbyData->loadedCharacterStats) {
+		auto cIt = lobbyData->loadedCharacterCardUsage.find(mid);
+
+		if (cIt == lobbyData->loadedCharacterCardUsage.end())
+			continue;
+		for (auto &card : cIt->second.cards)
+			cardsUsed[card.first] += card.second.used;
+	}
+	for (auto &card : cardsIt->second.cards) {
+		auto useCardIt = std::find_if(useCards.begin(), useCards.end(), [mid, &card](LobbyData::Achievement *achievement){
+			return !achievement->awarded &&
+			       achievement->requirement.contains("chr") &&
+			       achievement->requirement["chr"] == mid &&
+			       card.second.used > achievement->requirement["count"] &&
+			       achievement->requirement["id"] == card.first;
+		});
+
+		if (useCardIt != useCards.end()) {
+			(*useCardIt)->awarded = true;
+			lobbyData->achievementAwardQueue.push_back(*useCardIt);
+		}
+		cardsUsed[card.first] += card.second.used;
+	}
+	for (auto &card : cardsUsed) {
+		printf("Card %u was used %u times.", card.first, card.second);
+		auto useCardIt = std::find_if(useCards.begin(), useCards.end(), [mid, &card](LobbyData::Achievement *achievement){
+			return !achievement->awarded &&
+			       card.second > achievement->requirement["count"] &&
+			       achievement->requirement["id"] == card.first;
+		});
+
+		if (useCardIt != useCards.end()) {
+			(*useCardIt)->awarded = true;
+			lobbyData->achievementAwardQueue.push_back(*useCardIt);
 		}
 	}
 	lobbyData->saveAchievements();

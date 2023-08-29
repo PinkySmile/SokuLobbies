@@ -3952,7 +3952,7 @@
             }
         ],
         "name": "The Weight Of Heaven",
-        "description": "Close a game with \"World Creation Press\" in Bhava-Agra.",
+        "description": "Close a game with \"World Creation Press\"<br>in Bhava-Agra.",
         "hidden": true,
         "id": "tenshi_wcp_bagra",
         "category": "tenshi"
@@ -3970,7 +3970,7 @@
             }
         ],
         "name": "Heart Piercing Spear",
-        "description": "Close a game with \"Heart Break\" in Bhava-Agra.",
+        "description": "Close a game with \"Heart Break\".",
         "hidden": true,
         "id": "remilia_spear",
         "category": "remilia"
@@ -4011,6 +4011,10 @@
             },
             {
                 "type": "emote",
+                "name": "alice1"
+            },
+            {
+                "type": "emote",
                 "name": "alice3"
             },
             {
@@ -4028,6 +4032,10 @@
             {
                 "type": "emote",
                 "name": "alice7"
+            },
+            {
+                "type": "emote",
+                "name": "aya1"
             },
             {
                 "type": "emote",
@@ -4051,6 +4059,10 @@
             },
             {
                 "type": "emote",
+                "name": "cirno1"
+            },
+            {
+                "type": "emote",
                 "name": "cirno2"
             },
             {
@@ -4068,6 +4080,10 @@
             {
                 "type": "emote",
                 "name": "cirno7"
+            },
+            {
+                "type": "emote",
+                "name": "iku1"
             },
             {
                 "type": "emote",
@@ -4091,6 +4107,10 @@
             },
             {
                 "type": "emote",
+                "name": "komachi1"
+            },
+            {
+                "type": "emote",
                 "name": "komachi2"
             },
             {
@@ -4108,6 +4128,10 @@
             {
                 "type": "emote",
                 "name": "komachi7"
+            },
+            {
+                "type": "emote",
+                "name": "marisa1"
             },
             {
                 "type": "emote",
@@ -4131,6 +4155,10 @@
             },
             {
                 "type": "emote",
+                "name": "meiling1"
+            },
+            {
+                "type": "emote",
                 "name": "meiling2"
             },
             {
@@ -4148,6 +4176,10 @@
             {
                 "type": "emote",
                 "name": "meiling7"
+            },
+            {
+                "type": "emote",
+                "name": "patchouli1"
             },
             {
                 "type": "emote",
@@ -4175,6 +4207,10 @@
             },
             {
                 "type": "emote",
+                "name": "reimu1"
+            },
+            {
+                "type": "emote",
                 "name": "reimu3"
             },
             {
@@ -4192,6 +4228,10 @@
             {
                 "type": "emote",
                 "name": "reimu7"
+            },
+            {
+                "type": "emote",
+                "name": "reisen1"
             },
             {
                 "type": "emote",
@@ -4215,6 +4255,10 @@
             },
             {
                 "type": "emote",
+                "name": "remilia1"
+            },
+            {
+                "type": "emote",
                 "name": "remilia2"
             },
             {
@@ -4232,6 +4276,10 @@
             {
                 "type": "emote",
                 "name": "remilia7"
+            },
+            {
+                "type": "emote",
+                "name": "sakuya1"
             },
             {
                 "type": "emote",
@@ -4255,6 +4303,10 @@
             },
             {
                 "type": "emote",
+                "name": "sanae1"
+            },
+            {
+                "type": "emote",
                 "name": "sanae2"
             },
             {
@@ -4272,6 +4324,10 @@
             {
                 "type": "emote",
                 "name": "sanae7"
+            },
+            {
+                "type": "emote",
+                "name": "suika1"
             },
             {
                 "type": "emote",
@@ -4295,6 +4351,10 @@
             },
             {
                 "type": "emote",
+                "name": "suwako1"
+            },
+            {
+                "type": "emote",
                 "name": "suwako3"
             },
             {
@@ -4312,6 +4372,10 @@
             {
                 "type": "emote",
                 "name": "suwako7"
+            },
+            {
+                "type": "emote",
+                "name": "tenshi1"
             },
             {
                 "type": "emote",
@@ -4335,6 +4399,10 @@
             },
             {
                 "type": "emote",
+                "name": "utsuho1"
+            },
+            {
+                "type": "emote",
                 "name": "utsuho3"
             },
             {
@@ -4355,6 +4423,10 @@
             },
             {
                 "type": "emote",
+                "name": "youmu1"
+            },
+            {
+                "type": "emote",
                 "name": "youmu2"
             },
             {
@@ -4372,6 +4444,10 @@
             {
                 "type": "emote",
                 "name": "youmu7"
+            },
+            {
+                "type": "emote",
+                "name": "yukari1"
             },
             {
                 "type": "emote",
@@ -4403,6 +4479,10 @@
             },
             {
                 "type": "emote",
+                "name": "yuyuko1"
+            },
+            {
+                "type": "emote",
                 "name": "yuyuko2"
             },
             {
@@ -4420,6 +4500,10 @@
             {
                 "type": "emote",
                 "name": "yuyuko7"
+            },
+            {
+                "type": "emote",
+                "name": "clownpiece1"
             },
             {
                 "type": "emote",
@@ -4444,6 +4528,10 @@
             {
                 "type": "emote",
                 "name": "clownpiece8"
+            },
+            {
+                "type": "emote",
+                "name": "flandre1"
             },
             {
                 "type": "emote",
@@ -4499,6 +4587,10 @@
             },
             {
                 "type": "emote",
+                "name": "kaguya1"
+            },
+            {
+                "type": "emote",
                 "name": "kaguya2"
             },
             {
@@ -4528,6 +4620,10 @@
             {
                 "type": "emote",
                 "name": "kaguya10"
+            },
+            {
+                "type": "emote",
+                "name": "mima1"
             },
             {
                 "type": "emote",
@@ -4571,6 +4667,10 @@
             },
             {
                 "type": "emote",
+                "name": "mokou1"
+            },
+            {
+                "type": "emote",
                 "name": "mokou3"
             },
             {
@@ -4596,6 +4696,10 @@
             {
                 "type": "emote",
                 "name": "mokou9"
+            },
+            {
+                "type": "emote",
+                "name": "momiji1"
             },
             {
                 "type": "emote",
@@ -4643,6 +4747,10 @@
             },
             {
                 "type": "emote",
+                "name": "murasa1"
+            },
+            {
+                "type": "emote",
                 "name": "murasa3"
             },
             {
@@ -4668,6 +4776,10 @@
             {
                 "type": "emote",
                 "name": "murasa9"
+            },
+            {
+                "type": "emote",
+                "name": "orin1"
             },
             {
                 "type": "emote",
@@ -4704,6 +4816,10 @@
             {
                 "type": "emote",
                 "name": "orin11"
+            },
+            {
+                "type": "emote",
+                "name": "satori1"
             },
             {
                 "type": "emote",
@@ -4747,6 +4863,10 @@
             },
             {
                 "type": "emote",
+                "name": "sekibanki1"
+            },
+            {
+                "type": "emote",
                 "name": "sekibanki3"
             },
             {
@@ -4787,6 +4907,10 @@
             },
             {
                 "type": "emote",
+                "name": "shou1"
+            },
+            {
+                "type": "emote",
                 "name": "shou3"
             },
             {
@@ -4816,6 +4940,10 @@
             {
                 "type": "emote",
                 "name": "shou10"
+            },
+            {
+                "type": "emote",
+                "name": "yuuka1"
             },
             {
                 "type": "emote",
@@ -4950,7 +5078,7 @@
             }
         ],
         "name": "MAXED OUT",
-        "description": "Win a game with every default skill at level MAX.",
+        "description": "Win a game with every default skill at<br>level MAX.",
         "hidden": false,
         "id": "system_default_max",
         "category": "system"
@@ -4970,9 +5098,387 @@
             }
         ],
         "name": "Hold back to block...?",
-        "description": "Close a game with Left-Handed Folding Fan.",
+        "description": "Close a game with \"Left-Handed Folding Fan\".",
         "hidden": false,
         "id": "lhf_fan",
+        "category": "system_cards"
+    },
+    {
+        "requirement": {
+            "type": "use_card",
+            "id": 0,
+	    "count": 10
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "card00"
+            }
+        ],
+        "name": "Bursting With Energy",
+        "description": "Use \"Spiritual Strike Talisman\" 10 times.",
+        "hidden": false,
+        "id": "card_0",
+        "category": "system_cards"
+    },
+    {
+        "requirement": {
+            "type": "use_card",
+            "id": 1,
+	    "count": 10
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "card01"
+            }
+        ],
+        "name": "Canned Spirit",
+        "description": "Use \"Magic Potion\" 10 times.",
+        "hidden": false,
+        "id": "card_1",
+        "category": "system_cards"
+    },
+    {
+        "requirement": {
+            "type": "use_card",
+            "id": 2,
+	    "count": 10
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "card02"
+            }
+        ],
+        "name": "Out of Time",
+        "description": "Use \"Stopwatch\" 10 times.",
+        "hidden": false,
+        "id": "card_2",
+        "category": "system_cards"
+    },
+    {
+        "requirement": {
+            "type": "use_card",
+            "id": 3,
+	    "count": 10
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "card03"
+            }
+        ],
+        "name": "FADC",
+        "description": "Use \"Hakurouken\" 10 times.",
+        "hidden": false,
+        "id": "card_3",
+        "category": "system_cards"
+    },
+    {
+        "requirement": {
+            "type": "use_card",
+            "id": 4,
+	    "count": 10
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "card04"
+            }
+        ],
+        "name": "The Sturdy Puppeteer",
+        "description": "Use \"Sacrificial Doll\" 10 times.",
+        "hidden": false,
+        "id": "card_4",
+        "category": "system_cards"
+    },
+    {
+        "requirement": {
+            "type": "use_card",
+            "id": 5,
+	    "count": 10
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "card05"
+            }
+        ],
+        "name": "Information Overcharge",
+        "description": "Use \"Grimoire\" 10 times.",
+        "hidden": false,
+        "id": "card_5",
+        "category": "system_cards"
+    },
+    {
+        "requirement": {
+            "type": "use_card",
+            "id": 6,
+	    "count": 10
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "card06"
+            }
+        ],
+        "name": "Hiding Under the Shade",
+        "description": "Use \"Custom Parasol\" 10 times.",
+        "hidden": false,
+        "id": "card_6",
+        "category": "system_cards"
+    },
+    {
+        "requirement": {
+            "type": "use_card",
+            "id": 7,
+	    "count": 10
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "card07"
+            }
+        ],
+        "name": "The Will of the Wisp",
+        "description": "Use \"Soul Torch\" 10 times.",
+        "hidden": false,
+        "id": "card_7",
+        "category": "system_cards"
+    },
+    {
+        "requirement": {
+            "type": "use_card",
+            "id": 8,
+	    "count": 10
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "card08"
+            }
+        ],
+        "name": "Blocking Will Get You Nowhere",
+        "description": "Use \"Left-Handed Folding Fan\" 10 times.",
+        "hidden": false,
+        "id": "card_8",
+        "category": "system_cards"
+    },
+    {
+        "requirement": {
+            "type": "use_card",
+            "id": 9,
+	    "count": 10
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "card09"
+            }
+        ],
+        "name": "You Look Like I Need a Drink",
+        "description": "Use \"Ibuki Gourd\" 10 times.",
+        "hidden": false,
+        "id": "card_9",
+        "category": "system_cards"
+    },
+    {
+        "requirement": {
+            "type": "use_card",
+            "id": 10,
+	    "count": 10
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "card10"
+            }
+        ],
+        "name": "I am Speeeeeeeeeeeeed",
+        "description": "Use \"Tengu Fan\" 10 times.",
+        "hidden": false,
+        "id": "card_10",
+        "category": "system_cards"
+    },
+    {
+        "requirement": {
+            "type": "use_card",
+            "id": 11,
+	    "count": 10
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "card11"
+            }
+        ],
+        "name": "It's Time To Cook!",
+        "description": "Use \"Spell-Breaking Drug\" 10 times.",
+        "hidden": false,
+        "id": "card_11",
+        "category": "system_cards"
+    },
+    {
+        "requirement": {
+            "type": "use_card",
+            "id": 12,
+	    "count": 10
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "card12"
+            }
+        ],
+        "name": "I'll pay you 1 Coin to #!?*@+",
+        "description": "Use \"A Penny Saved\" 10 times.",
+        "hidden": false,
+        "id": "card_12",
+        "category": "system_cards"
+    },
+    {
+        "requirement": {
+            "type": "use_card",
+            "id": 13,
+	    "count": 10
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "card13"
+            }
+        ],
+        "name": "OUT OF MY SIGHT!",
+        "description": "Use \"Divine Raiment of the Dragon Fish\"<br>10 times.",
+        "hidden": false,
+        "id": "card_13",
+        "category": "system_cards"
+    },
+    {
+        "requirement": {
+            "type": "use_card",
+            "id": 14,
+	    "count": 10
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "card14"
+            }
+        ],
+        "name": "The Meteorologist",
+        "description": "Use \"Sword of Scarlet Perception\" 10 times.",
+        "hidden": false,
+        "id": "card_14",
+        "category": "system_cards"
+    },
+    {
+        "requirement": {
+            "type": "use_card",
+            "id": 15,
+	    "count": 10
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "card15"
+            }
+        ],
+        "name": "You Found \"Green Herb\"",
+        "description": "Use \"Illness Recovery Charm\" 10 times.",
+        "hidden": false,
+        "id": "card_15",
+        "category": "system_cards"
+    },
+    {
+        "requirement": {
+            "type": "use_card",
+            "id": 16,
+	    "count": 10
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "card16"
+            }
+        ],
+        "name": "She won't be happy about this...",
+        "description": "Use \"Frozen Frog\" 10 times.",
+        "hidden": false,
+        "id": "card_16",
+        "category": "system_cards"
+    },
+    {
+        "requirement": {
+            "type": "use_card",
+            "id": 17,
+	    "count": 10
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "card17"
+            }
+        ],
+        "name": "Professional Neutral Skipper",
+        "description": "Use \"Dragon Star\" 10 times.",
+        "hidden": false,
+        "id": "card_17",
+        "category": "system_cards"
+    },
+    {
+        "requirement": {
+            "type": "use_card",
+            "id": 18,
+	    "count": 10
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "card18"
+            }
+        ],
+        "name": "Extreme Measures",
+        "description": "Use \"Control Rod\" 10 times.",
+        "hidden": false,
+        "id": "card_18",
+        "category": "system_cards"
+    },
+    {
+        "requirement": {
+            "type": "use_card",
+            "id": 19,
+	    "count": 10
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "card19"
+            }
+        ],
+        "name": "An Oni's Best Friend",
+        "description": "Use \"Three Heavenly Drops\" 10 times.",
+        "hidden": false,
+        "id": "card_19",
+        "category": "system_cards"
+    },
+    {
+        "requirement": {
+            "type": "use_card",
+            "id": 20,
+	    "count": 10
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "card20"
+            }
+        ],
+        "name": "Reimu's Nightmare",
+        "description": "Use \"Catfish's Great Earthquake\" 10 times.",
+        "hidden": false,
+        "id": "card_20",
         "category": "system_cards"
     }
 ]

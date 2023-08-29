@@ -1158,6 +1158,9 @@ void LobbyData::_grantStatsAchievements()
 	auto &wins = this->achievementByRequ["win"];
 	auto &loss = this->achievementByRequ["lose"];
 	auto &play = this->achievementByRequ["play"];
+	auto &cards = this->achievementByRequ["cards"];
+	auto &useCards = this->achievementByRequ["use_card"];
+	std::map<unsigned, unsigned> cardsUsed;
 
 	for (auto &data : this->loadedCharacterStats) {
 		unsigned mid = data.first;
@@ -1203,10 +1206,27 @@ void LobbyData::_grantStatsAchievements()
 		if (cardsIt == this->loadedCharacterCardUsage.end())
 			continue;
 
+		for (auto &card : cardsIt->second.cards) {
+			auto useCardIt = std::find_if(useCards.begin(), useCards.end(), [mid, &card](LobbyData::Achievement *achievement){
+				return !achievement->awarded &&
+				       achievement->requirement.contains("chr") &&
+				       achievement->requirement["chr"] == mid &&
+				       card.second.used > achievement->requirement["count"] &&
+				       achievement->requirement["id"] == card.first;
+			});
+
+			if (useCardIt != useCards.end()) {
+				(*useCardIt)->awarded = true;
+				this->achievementAwardQueue.push_back(*useCardIt);
+			}
+			cardsUsed[card.first] += card.second.used;
+		}
+
 		auto textures = this->cardsTextures.find(mid);
 
 		if (textures == this->cardsTextures.end())
 			continue;
+
 		for (auto &elem : textures->second) {
 			auto cardIt = cardsIt->second.cards.find(elem.first);
 
@@ -1216,8 +1236,7 @@ void LobbyData::_grantStatsAchievements()
 			}
 		}
 
-		if (true) {
-			auto &cards = this->achievementByRequ["cards"];
+		{
 			auto itCardsAch = std::find_if(cards.begin(), cards.end(), [mid, &data](LobbyData::Achievement *achievement){
 				return !achievement->awarded && achievement->requirement["chr"] == mid;
 			});
@@ -1230,6 +1249,19 @@ void LobbyData::_grantStatsAchievements()
 		}
 	endOfLoop:
 		continue;
+	}
+	for (auto &card : cardsUsed) {
+		printf("Card %u was used %u times.", card.first, card.second);
+		auto useCardIt = std::find_if(useCards.begin(), useCards.end(), [&card](LobbyData::Achievement *achievement){
+			return !achievement->awarded &&
+			       card.second > achievement->requirement["count"] &&
+			       achievement->requirement["id"] == card.first;
+		});
+
+		if (useCardIt != useCards.end()) {
+			(*useCardIt)->awarded = true;
+			this->achievementAwardQueue.push_back(*useCardIt);
+		}
 	}
 }
 

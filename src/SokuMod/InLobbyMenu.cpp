@@ -584,7 +584,7 @@ int InLobbyMenu::onProcess()
 				messageBox->active = false;
 			}
 		}
-		if (!this->_editingText && SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
+		if (SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
 			playSound(0x29);
 			if (!this->_editingText) {
 				this->_connection.meMutex.unlock();
@@ -1361,7 +1361,6 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 	for (unsigned char c : msg) {
 		if (emoteCtr) {
 			emoteId |= (c & 0x7F) << ((2 - emoteCtr) * 7);
-			printf("%x %x\n", c, emoteId);
 			emoteCtr--;
 			if (!emoteCtr) {
 				if (pos + EMOTE_SIZE > MAX_LINE_SIZE) {
