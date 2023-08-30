@@ -22,6 +22,7 @@ void LobbyData::saveStats()
 {
 	auto path = std::filesystem::path(profileFolderPath) / "stats.dat";
 
+	unlink((path.string() + ".backup").c_str());
 	_wrename(path.wstring().c_str(), (path.wstring() + L".backup").c_str());
 
 	std::ofstream stream{path, std::fstream::binary};
@@ -66,6 +67,35 @@ void LobbyData::_loadStats()
 #else
 		MessageBox(SokuLib::window, "Warning: Invalid magic", "Warning", MB_ICONWARNING);
 #endif
+
+	std::vector<std::map<unsigned char, CardChrStatEntry>::iterator> its;
+	auto it = this->loadedCharacterCardUsage.begin();
+
+	for (; it != this->loadedCharacterCardUsage.end(); it++) {
+		if (it->second.nbGames == 0) {
+			printf("Removing %i: No games\n", it->first);
+			its.push_back(it);
+			continue;
+		}
+
+		std::vector<std::map<unsigned, CardStatEntry>::iterator> its2;
+		auto it2 = it->second.cards.begin();
+
+		for (; it2 != it->second.cards.end(); it2++)
+			if (it2->second.inDeck <= 1 && it2->second.used == 0 && it2->second.burnt == 0) {
+				printf("Removing card %i for %i\n", it2->first, it->first);
+				its2.push_back(it2);
+			}
+		for (auto &i : its2)
+			it->second.cards.erase(i);
+		if (it->second.cards.empty()) {
+			printf("Removing %i: No card entry\n", it->first);
+			its.push_back(it);
+			continue;
+		}
+	}
+	for (auto &i : its)
+		this->loadedCharacterCardUsage.erase(i);
 }
 
 static void loadTexture(SokuLib::DrawUtils::Texture &container, const char *path)
@@ -1251,7 +1281,7 @@ void LobbyData::_grantStatsAchievements()
 		continue;
 	}
 	for (auto &card : cardsUsed) {
-		printf("Card %u was used %u times.", card.first, card.second);
+		printf("Card %u was used %u times.\n", card.first, card.second);
 		auto useCardIt = std::find_if(useCards.begin(), useCards.end(), [&card](LobbyData::Achievement *achievement){
 			return !achievement->awarded &&
 			       card.second > achievement->requirement["count"] &&

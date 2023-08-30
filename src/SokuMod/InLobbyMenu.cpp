@@ -469,13 +469,15 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 		machine.mutex.unlock();
 	};
 	this->_connectThread = std::thread{[this, &connection](){
-		for (int i = 0; i < 15; i++) {
+		for (int i = 0; i < lobbyJoinTries; i++) {
 			if (this->_disconnected)
+				return;
+			if (!this->_connection.isConnected())
 				return;
 			if (this->_connection.isInit())
 				return;
 			this->_connection.connect();
-			std::this_thread::sleep_for(std::chrono::seconds(1));
+			std::this_thread::sleep_for(std::chrono::seconds(lobbyJoinInterval));
 		}
 		playSound(38);
 		this->_wasConnected = true;
@@ -1355,6 +1357,7 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 		m = &this->_chatMessages.front();
 		pos = 0;
 	};
+	size_t lastTokenSize = 0;
 
 	line.reserve(msg.size());
 	word.reserve(msg.size());
@@ -1386,6 +1389,7 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 			word += c;
 			if (skip != 0)
 				continue;
+			lastTokenSize = token.size();
 			wordPos += this->_getTextSize(UTF8Decode(token)[0]);
 		} else if (c == 1) {
 			line += word;
@@ -1423,15 +1427,17 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 				wordPos = 0;
 			}
 			line += ' ';
+			lastTokenSize = 1;
 			pos += this->_getTextSize(' ');
 		} else {
+			lastTokenSize = 1;
 			word += c;
 			wordPos += this->_getTextSize(c);
 		}
 		if (pos + wordPos > MAX_LINE_SIZE) {
 			if (pos == 0) {
-				line = word.substr(0, word.size() - 1);
-				word.erase(word.begin(), word.end() - 1);
+				line = word.substr(0, word.size() - lastTokenSize);
+				word.erase(word.begin(), word.end() - lastTokenSize);
 				wordPos = this->_getTextSize(UTF8Decode(word)[0]);
 			}
 			nextLine();

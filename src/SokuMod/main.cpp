@@ -56,6 +56,8 @@ char servHost[64];
 char *wineVersion = nullptr;
 unsigned hostPref;
 unsigned chatKey;
+unsigned lobbyJoinTries;
+unsigned lobbyJoinInterval;
 unsigned short servPort;
 unsigned short hostPort;
 bool hasSoku2 = false;
@@ -395,13 +397,12 @@ void countGame()
 
 	std::map<unsigned, unsigned> cardsUsed;
 	auto &useCards = lobbyData->achievementByRequ["use_card"];
-	for (auto &data : lobbyData->loadedCharacterStats) {
-		auto cIt = lobbyData->loadedCharacterCardUsage.find(mid);
-
-		if (cIt == lobbyData->loadedCharacterCardUsage.end())
-			continue;
-		for (auto &card : cIt->second.cards)
+	for (auto &data : lobbyData->loadedCharacterCardUsage) {
+		for (auto &card : data.second.cards) {
+			if (cardsUsed.find(card.first) == cardsUsed.end())
+				cardsUsed[card.first] = 0;
 			cardsUsed[card.first] += card.second.used;
+		}
 	}
 	for (auto &card : cardsIt->second.cards) {
 		auto useCardIt = std::find_if(useCards.begin(), useCards.end(), [mid, &card](LobbyData::Achievement *achievement){
@@ -416,10 +417,9 @@ void countGame()
 			(*useCardIt)->awarded = true;
 			lobbyData->achievementAwardQueue.push_back(*useCardIt);
 		}
-		cardsUsed[card.first] += card.second.used;
 	}
 	for (auto &card : cardsUsed) {
-		printf("Card %u was used %u times.", card.first, card.second);
+		printf("Card %u was used %u times.\n", card.first, card.second);
 		auto useCardIt = std::find_if(useCards.begin(), useCards.end(), [mid, &card](LobbyData::Achievement *achievement){
 			return !achievement->awarded &&
 			       card.second > achievement->requirement["count"] &&
@@ -1044,6 +1044,10 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	servPort = GetPrivateProfileIntW(L"Lobby", L"Port", 5254, profilePath);
 	hostPort = GetPrivateProfileIntW(L"Lobby", L"HostPort", 10800, profilePath);
 	chatKey = GetPrivateProfileIntW(L"Lobby", L"ChatKey", VK_RETURN, profilePath);
+	lobbyJoinTries = GetPrivateProfileIntW(L"Lobby", L"JoinTries", 15, profilePath);
+	lobbyJoinInterval = GetPrivateProfileIntW(L"Lobby", L"JoinInterval", 1, profilePath);
+	lobbyJoinTries += !lobbyJoinTries;
+	lobbyJoinInterval += !lobbyJoinInterval;
 
 	bool hostlist = GetPrivateProfileIntW(L"Lobby", L"AcceptHostlist", 0, profilePath) != 0;
 
