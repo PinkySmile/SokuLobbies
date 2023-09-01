@@ -23,11 +23,12 @@ extern bool soku2Force;
 void Connection::_netLoop()
 {
 	char buffer[sizeof(Lobbies::Packet) * 6];
+	size_t recvSizeAdded = 0;
 	size_t recvSize = 0;
 
 	while (true) {
 		try {
-			recvSize = this->_socket.read(buffer + recvSize, sizeof(buffer) - recvSize);
+			recvSize += (recvSizeAdded = this->_socket.read(buffer + recvSize, sizeof(buffer) - recvSize));
 		} catch (std::exception &e) {
 			if (!this->_socket.isOpen())
 				return;
@@ -46,7 +47,7 @@ void Connection::_netLoop()
 
 		if (!this->_connected)
 			return;
-		if (recvSize == 0) {
+		if (recvSizeAdded == 0) {
 			this->_init = false;
 			this->_connected = false;
 			this->onError("Connection closed");
