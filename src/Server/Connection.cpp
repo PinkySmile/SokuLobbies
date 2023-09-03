@@ -15,13 +15,15 @@ void Connection::_netLoop()
 {
 	char buffer[sizeof(Lobbies::Packet) * 6];
 	size_t recvSize = 0;
+	size_t recvSizeAdded = 0;
 
 	this->_timeoutClock.restart();
 	this->_socket->setBlocking(false);
 	do {
-		auto status = this->_socket->receive(buffer + recvSize, sizeof(buffer) - recvSize, recvSize);
+		auto status = this->_socket->receive(buffer + recvSize, sizeof(buffer) - recvSize, recvSizeAdded);
+		recvSize += recvSizeAdded;
 
-		if (status == sf::Socket::NotReady && !recvSize) {
+		if (status == sf::Socket::NotReady && !recvSizeAdded) {
 			if (this->_timeoutClock.getElapsedTime().asSeconds() >= 30)
 				return this->kick("Timed out");
 			std::this_thread::sleep_for(std::chrono::milliseconds(5));
@@ -117,7 +119,7 @@ void Connection::send(const void *packet, size_t size)
 	std::cout << "] " << size << " bytes: " << reinterpret_cast<const Lobbies::Packet *>(packet)->toString() << std::endl;
 	logMutex.unlock();
 #endif
-	this->_socket->send(packet, size, sent);
+	this->_socket->send(packet, size);
 }
 
 uint32_t Connection::getId() const
