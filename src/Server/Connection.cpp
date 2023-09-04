@@ -119,7 +119,7 @@ void Connection::send(const void *packet, size_t size)
 	std::cout << "] " << size << " bytes: " << reinterpret_cast<const Lobbies::Packet *>(packet)->toString() << std::endl;
 	logMutex.unlock();
 #endif
-	this->_socket->send(packet, size);
+	this->_socket->send(packet, size, sent);
 }
 
 uint32_t Connection::getId() const
