@@ -120,6 +120,13 @@ void Connection::send(const void *packet, size_t size)
 	logMutex.unlock();
 #endif
 	this->_socket->send(packet, size, sent);
+#ifndef _LOBBYNOLOG
+	if (sent != size){
+		logMutex.lock();
+		std::cout << "Warning: partial send " << sent << "/" << size << std::endl;
+		logMutex.unlock();
+	}
+#endif
 }
 
 uint32_t Connection::getId() const
