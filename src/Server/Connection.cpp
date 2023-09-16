@@ -111,21 +111,21 @@ void Connection::send(const void *packet, size_t size)
 {
 	size_t sent;
 
+	auto status = this->_socket->send(packet, size, sent);
 #ifndef _LOBBYNOLOG
 	logMutex.lock();
 	std::cout << "[>" << this->_socket->getRemoteAddress().toString() << ":" << this->_socket->getRemotePort();
 	if (this->_id)
 		std::cout << " player id " << this->_id;
 	std::cout << "] " << size << " bytes: " << reinterpret_cast<const Lobbies::Packet *>(packet)->toString() << std::endl;
-	logMutex.unlock();
-#endif
-	this->_socket->send(packet, size, sent);
-#ifndef _LOBBYNOLOG
-	if (sent != size){
-		logMutex.lock();
-		std::cout << "Warning: partial send " << sent << "/" << size << std::endl;
-		logMutex.unlock();
+	if (status == sf::Socket::Partial){
+		// This case is probably too extreme to happen. But we still log it when it does happen.
+		std::cout << "[>" << this->_socket->getRemoteAddress().toString() << ":" << this->_socket->getRemotePort();
+		if (this->_id)
+			std::cout << " player id " << this->_id;
+		std::cout << "] " << "warning: partial send, only " << sent << " bytes were sent" << std::endl;
 	}
+	logMutex.unlock();
 #endif
 }
 
