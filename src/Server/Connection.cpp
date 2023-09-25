@@ -118,12 +118,18 @@ void Connection::send(const void *packet, size_t size)
 	if (this->_id)
 		std::cout << " player id " << this->_id;
 	std::cout << "] " << size << " bytes: " << reinterpret_cast<const Lobbies::Packet *>(packet)->toString() << std::endl;
-	if (status == sf::Socket::Partial){
-		// This case is probably too extreme to happen. But we still log it when it does happen.
+	// The above cases, which require the TCP send buffer to be full, are probably hard to happen under default configuration.
+	// But we still log it when it does happen.
+	if (status == sf::Socket::Partial) {
 		std::cout << "[>" << this->_socket->getRemoteAddress().toString() << ":" << this->_socket->getRemotePort();
 		if (this->_id)
 			std::cout << " player id " << this->_id;
 		std::cout << "] " << "warning: partial send, only " << sent << " bytes were sent" << std::endl;
+	} else if (status == sf::Socket::NotReady) {
+		std::cout << "[>" << this->_socket->getRemoteAddress().toString() << ":" << this->_socket->getRemotePort();
+		if (this->_id)
+			std::cout << " player id " << this->_id;
+		std::cout << "] " << "warning: send is not ready" << std::endl;
 	}
 	logMutex.unlock();
 #endif
