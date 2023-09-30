@@ -6,6 +6,7 @@
 #define SOKULOBBIES_LOBBYMENU_HPP
 
 
+#include <atomic>
 #include <mutex>
 #include <thread>
 #include <SokuLib.hpp>
@@ -44,11 +45,12 @@ private:
 	Socket _mainServer;
 	std::vector<std::shared_ptr<Entry>> _connections;
 	unsigned char _menuState = 0;
-	volatile bool _open = true;
+	std::atomic_bool _open = true;
 	bool _active = true;
 	std::thread _netThread;
 	std::thread _connectThread;
 	std::thread _masterThread;
+	std::thread _getIpv6Thread;
 	SokuLib::DrawUtils::Sprite _ui;
 	SokuLib::DrawUtils::Sprite _title;
 	SokuLib::DrawUtils::Sprite _hidden;

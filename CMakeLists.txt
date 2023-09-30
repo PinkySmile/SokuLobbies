@@ -174,6 +174,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 		src/SokuMod/BackgroundHost.cpp
 		src/SokuMod/createUTFTexture.cpp
 		src/SokuMod/createUTFTexture.hpp
+		src/SokuMod/ipv6map.cpp
 		src/Common/encodingConverter.cpp
 		src/Common/encodingConverter.hpp
 		src/Common/shiftJISConvTable.inl

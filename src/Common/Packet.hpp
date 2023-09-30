@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <string>
 
-#define PROTOCOL_VERSION 11
+#define PROTOCOL_VERSION 12
 
 namespace Lobbies
 {
@@ -179,8 +179,10 @@ namespace Lobbies
 		bool spectator;
 		char ip[16];
 		uint16_t port;
+		char ipv6[46];
+		uint16_t port6;
 
-		PacketGameStart(const std::string &ip, uint16_t port, bool spectator);
+		PacketGameStart(const std::string &ip, uint16_t port, const std::string &ipv6, uint16_t port6, bool spectator);
 		std::string toString() const;
 	};
 

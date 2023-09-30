@@ -391,6 +391,8 @@ bool Connection::_handlePacket(const Lobbies::PacketGameStart &packet, size_t &s
 	size -= sizeof(packet);
 	this->_room.ip = std::string(packet.ip, strnlen(packet.ip, sizeof(packet.ip)));
 	this->_room.port = packet.port;
+	this->_room.ipv6 = std::string(packet.ipv6, strnlen(packet.ipv6, sizeof(packet.ipv6)));
+	this->_room.port6 = packet.port6;
 	this->onGameStart(this->_room);
 	return true;
 }

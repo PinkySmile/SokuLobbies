@@ -21,6 +21,8 @@ public:
 	struct Room {
 		std::string ip;
 		unsigned short port;
+		std::string ipv6;
+		unsigned short port6;
 	};
 
 private:

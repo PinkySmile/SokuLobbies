@@ -6,8 +6,13 @@
 #include "Exceptions.hpp"
 #include "Socket.hpp"
 #include "data.hpp"
+#include "LobbyData.hpp"
+#include <cstdio>
+#include <mutex>
 
 static char *myIp = nullptr;
+static std::mutex myIpv6Mutex;
+static std::string myIpv6("");
 static char buffer[64];
 static wchar_t buffer2[64];
 
@@ -46,4 +51,25 @@ const char *getMyIp()
 		printf("Error: %s\n", e.what());
 		throw;
 	}
+}
+
+std::string getMyIpv6()
+{
+	myIpv6Mutex.lock();
+	std::string _myIpv6 = myIpv6;
+	myIpv6Mutex.unlock();
+	return _myIpv6;
+}
+
+bool isIpv6Available() {
+	myIpv6Mutex.lock();
+	bool ret = !myIpv6.empty();
+	myIpv6Mutex.unlock();
+	return ret;
+}
+
+void setMyIpv6(std::string &ipv6) {
+	myIpv6Mutex.lock();
+	myIpv6 = ipv6;
+	myIpv6Mutex.unlock();
 }

@@ -15,6 +15,7 @@
 #include "createUTFTexture.hpp"
 #include "integration.hpp"
 #include "getPublicIp.hpp"
+#include "ipv6map_extern.hpp"
 
 #define CHAT_CHARACTER_LIMIT 512
 #define BOX_TEXTURE_SIZE {0x2000, 30}
@@ -384,6 +385,11 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 		this->_extraPlayerData[r.id].name.rect.height = size.y;
 		this->_music = "data/bgm/" + std::string(r.music, strnlen(r.music, sizeof(r.music))) + ".ogg";
 		SokuLib::playBGM(this->_music.c_str());
+		if (hasIpv6Map()) {
+			if (isIpv6Available())
+				this->_addMessageToList(0xFFFF00, 0, "Your IPv6 Address is: " + getMyIpv6());
+		} else
+			this->_addMessageToList(0xFFFF00, 0, "IPv6MapSokuMod isn't loaded, so IPv6 will not be supported.");
 	};
 	connection.onError = [this](const std::string &msg){
 		playSound(38);
@@ -407,6 +413,7 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 			this->_addMessageToList(0xFF0000, 0, "Failed to connect: Your opponent's custom IP is invalid");
 			return;
 		}
+		this->_addMessageToList(0x00FF00, 0, strncmp(ip.c_str(), "127.127.", 8) ? "Connect via IPv4" :  "Connect via IPv6");
 		this->_connection.getMe()->battleStatus = 2;
 		this->_parent->joinHost(ip.c_str(), port, spectate);
 	};
