@@ -376,9 +376,7 @@ bool Connection::_handlePacket(const Lobbies::PacketGameRequest &packet, size_t 
 	if (size < sizeof(packet))
 		return false;
 	size -= sizeof(packet);
-	this->_machineId = packet.consoleId;
-	if (this->onGameRequest())
-		this->_battleStatus = 1;
+	this->onGameRequest(packet.consoleId);
 	return true;
 }
 
@@ -440,8 +438,6 @@ bool Connection::_handlePacket(const Lobbies::PacketArcadeLeave &packet, size_t 
 		return false;
 	size -= sizeof(packet);
 	this->onArcadeLeave();
-	this->_battleStatus = 0;
-	this->_machineId = 0;
 	return true;
 }
 

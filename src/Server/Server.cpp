@@ -419,14 +419,16 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 			}
 		this->_machinesMutex.unlock();
 	};
-	connection.onGameRequest = [&connection, this](){
-		return this->_onPlayerJoinArcade(connection, connection.getActiveMachine());
+	connection.onGameRequest = [&connection, this](uint32_t aid){
+		return this->_onPlayerJoinArcade(connection, aid, true);
 	};
 	connection.onArcadeLeave = [&connection, this](){
-		if (!connection.getBattleStatus())
-			return;
 		this->_machinesMutex.lock();
-
+		if (!connection.getBattleStatus()) {
+			this->_machinesMutex.unlock();
+			return;
+		}
+		connection.setNotPlaying();
 		Lobbies::PacketMessage msgPacket{0x00FFFF, 0, "You left arcade " + std::to_string(connection.getActiveMachine()) + "."};
 		auto &machine = this->_machines[connection.getActiveMachine()];
 
@@ -609,12 +611,46 @@ void Server::close()
 	this->_opened = false;
 }
 
-bool Server::_onPlayerJoinArcade(Connection &connection, unsigned int aid)
+bool Server::_onPlayerJoinArcade(Connection &connection, unsigned int aid, bool force)
 {
-	if (connection.getBattleStatus())
-		return false;
-
 	this->_machinesMutex.lock();
+
+	if (connection.getBattleStatus()) {
+		if (!force) {
+			this->_machinesMutex.unlock();
+			return false;
+		}
+
+		auto &machine = this->_machines[connection.getActiveMachine()];
+
+		// There is no need to check if the vector is of size >= 2
+		// because there is no way that the connection is not in the list if the battle status is not 0
+		// Update: Apparently there is
+		if (
+			(!machine.empty() && machine[0] == &connection) ||
+			(machine.size() >= 2 && machine[1] == &connection)
+		) {
+			// This is one of the players, so we boot everyone out
+			for (auto &c1 : machine) {
+				Lobbies::PacketArcadeLeave packet{c1->getId()};
+
+				this->_connectionsMutex.lock();
+				for (auto &c2 : this->_connections)
+					if (c2->getId() != connection.getId() && c2->isInit())
+						c2->send(&packet, sizeof(packet));
+				c1->setNotPlaying();
+				this->_connectionsMutex.unlock();
+			}
+			machine.clear();
+		} else {
+			auto it = std::find(machine.begin(), machine.end(), &connection);
+
+			if (it != machine.end())
+				machine.erase(it);
+		}
+	}
+
+	connection.setNotPlaying();
 	auto &machine = this->_machines[aid];
 
 	if (!machine.empty() && memcmp(machine[0]->getVersionString(), connection.getVersionString(), 16) != 0) {
