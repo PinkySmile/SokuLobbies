@@ -72,7 +72,7 @@ public:
 	std::function<void (uint8_t channel, const std::string &msg)> onMessage;
 	std::function<void (const Lobbies::PacketSettingsUpdate &settings)> onSettingsUpdate;
 	std::function<void (const Room &port)> onGameStart;
-	std::function<bool ()> onGameRequest;
+	std::function<bool (uint32_t aid)> onGameRequest;
 	std::function<void ()> onArcadeLeave;
 
 	Connection(std::unique_ptr<sf::TcpSocket> &socket, const char *password);
