@@ -2028,7 +2028,7 @@ void InLobbyMenu::_startHosting()
 		free(dup);
 		try {
 			lobbyData->httpRequest("https://konni.delthas.fr/games", "PUT", data.dump());
-			this->_addMessageToList(0x00FF00, 0, "Broadcast to hostlist successful");
+			this->_addMessageToList(0x00FF00, 0, "Broadcast to hostlist successfully");
 		} catch (std::exception &e) {
 			this->_addMessageToList(0xFF0000, 0, "Hostlist error: " + std::string(e.what()));
 		}
