@@ -3,17 +3,19 @@
 //
 
 #include "getPublicIp.hpp"
-#include "Exceptions.hpp"
-#include "Socket.hpp"
+#include <string>
+#include <windows.h>
 #include "data.hpp"
+#include "LobbyData.hpp"
 
 static char *myIp = nullptr;
-static char buffer[64];
-static wchar_t buffer2[64];
+static wchar_t buffer2[256];
+static char buffer[sizeof(buffer2)/2];
 
 const char *getMyIp()
 {
-	GetPrivateProfileStringW(L"Lobby", L"HostIP", L"", buffer2, sizeof(buffer2) / sizeof(*buffer2), profilePath);
+	auto bufferSize = sizeof(buffer2)/sizeof(*buffer2);
+	GetPrivateProfileStringW(L"Lobby", L"HostIP", L"", buffer2, bufferSize, profilePath);
 	if (*buffer2) {
 		for (int i = 0; i < sizeof(buffer); i++)
 			buffer[i] = buffer2[i];
@@ -25,24 +27,18 @@ const char *getMyIp()
 
 	puts("Fetching public IP");
 	try {
-		Socket sock;
-		Socket::HttpRequest request{
-			/*.httpVer*/ "HTTP/1.1",
-			/*.body   */ "",
-			/*.method */ "GET",
-			/*.host   */ "www.sfml-dev.org",
-			/*.portno */ 80,
-			/*.header */ {},
-			/*.path   */ "/ip-provider.php",
-		};
-		auto response = sock.makeHttpRequest(request);
+		GetPrivateProfileStringW(L"Lobby", L"GetPublicIpServer", L"http://www.sfml-dev.org/ip-provider.php", buffer2, bufferSize, profilePath);
+		// https://curl.se/libcurl/c/CURLOPT_URL.html
+		WideCharToMultiByte(CP_ACP, 0, buffer2, -1, buffer, sizeof(buffer), NULL, NULL);
 
-		if (response.returnCode != 200)
-			throw HTTPErrorException(response);
-		myIp = strdup(response.body.c_str());
+		auto ip = lobbyData->httpRequest(buffer, "GET", "", 16000);
+
+		ip.erase(0, ip.find_first_not_of(" \n\r\t"));
+		ip.erase(ip.find_last_not_of(" \n\r\t") + 1);
+		myIp = strdup(ip.c_str());
 		printf("My ip is %s\n", myIp);
 		return myIp;
-	} catch (NetworkException &e) {
+	} catch (std::exception &e) {
 		printf("Error: %s\n", e.what());
 		throw;
 	}

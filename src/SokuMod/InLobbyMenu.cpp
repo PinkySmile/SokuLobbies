@@ -1993,7 +1993,14 @@ void InLobbyMenu::_startHosting()
 		this->_hostThread.join();
 	this->_hostThread = std::thread{[this, ranked]{
 		std::string converted;
-		auto ip = getMyIp();
+		const char * ip;
+		try {
+			ip = getMyIp();
+		} catch (std::exception &e) {
+			this->_addMessageToList(0xFF0000, 0, std::string("Get IP error: ") + e.what());
+			return;
+		}
+
 		unsigned short port = hostPort;
 		auto dup = strdup(ip);
 		char *pos = strchr(dup, ':');
