@@ -284,7 +284,7 @@ bool Connection::_handlePacket(const Lobbies::PacketGameRequest &packet, size_t 
 	try {
 		ip = getMyIp();
 	} catch (std::exception &e) {
-		this->error(std::string("Get IP error: ") + e.what());
+		this->error(std::string("Failed to get public IP: ") + e.what());
 		return false;
 	}
 	unsigned short port = this->onHostRequest();

@@ -1997,7 +1997,7 @@ void InLobbyMenu::_startHosting()
 		try {
 			ip = getMyIp();
 		} catch (std::exception &e) {
-			this->_addMessageToList(0xFF0000, 0, std::string("Get IP error: ") + e.what());
+			this->_addMessageToList(0xFF0000, 0, std::string("Failed to get public IP: ") + e.what());
 			return;
 		}
 
