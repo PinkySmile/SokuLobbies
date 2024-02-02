@@ -221,7 +221,7 @@ bool checkIp(const std::string &ip)
 	return true;
 }
 
-InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connection &connection) :
+InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, std::shared_ptr<Connection> &connection) :
 	_connection(connection),
 	_parent(parent),
 	_menu(menu)
@@ -309,18 +309,18 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 		this->_textSprite[0].rect.height
 	}.to<unsigned>());
 	this->_textSprite[0].setPosition({CURSOR_STARTX - (*(int *)0x411c64 == 1) * 2, CURSOR_STARTY});
-	this->onConnectRequest = connection.onConnectRequest;
-	this->onError = connection.onError;
-	this->onImpMsg = connection.onImpMsg;
-	this->onMsg = connection.onMsg;
-	this->onHostRequest = connection.onHostRequest;
-	this->onConnect = connection.onConnect;
+	this->onConnectRequest = _connection->onConnectRequest;
+	this->onError = _connection->onError;
+	this->onImpMsg = _connection->onImpMsg;
+	this->onMsg = _connection->onMsg;
+	this->onHostRequest = _connection->onHostRequest;
+	this->onConnect = _connection->onConnect;
 	for (int i = ' '; i < 0x100; i++)
 		this->_getTextSize(i);
-	connection.onDisconnect = [this]{
+	_connection->onDisconnect = [this]{
 		this->_disconnected = true;
 	};
-	connection.onPlayerJoin = [this](const Player &r){
+	_connection->onPlayerJoin = [this](const Player &r){
 		SokuLib::Vector2i size;
 		int texId = 0;
 
@@ -331,7 +331,7 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 		this->_extraPlayerData[r.id].name.rect.width = size.x;
 		this->_extraPlayerData[r.id].name.rect.height = size.y;
 	};
-	connection.onConnect = [this, &connection](const Lobbies::PacketOlleh &r){
+	_connection->onConnect = [this](const Lobbies::PacketOlleh &r){
 		auto &bg = lobbyData->backgrounds[r.bg];
 		int id = 0;
 
@@ -363,8 +363,8 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 				lobbyData->elevators[0]
 			);
 		this->_background = r.bg;
-		connection.getMe()->pos.x = bg.startX;
-		connection.getMe()->pos.y = bg.platforms[bg.startPlatform].pos.y;
+		this->_connection->getMe()->pos.x = bg.startX;
+		this->_connection->getMe()->pos.y = bg.platforms[bg.startPlatform].pos.y;
 
 		SokuLib::Vector2i size;
 		int texId = 0;
@@ -385,39 +385,39 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 		this->_music = "data/bgm/" + std::string(r.music, strnlen(r.music, sizeof(r.music))) + ".ogg";
 		SokuLib::playBGM(this->_music.c_str());
 	};
-	connection.onError = [this](const std::string &msg){
+	_connection->onError = [this](const std::string &msg){
 		playSound(38);
 		this->_wasConnected = true;
 		MessageBox(SokuLib::window, msg.c_str(), "Internal Error", MB_ICONERROR);
 	};
-	connection.onImpMsg = [this](const std::string &msg){
+	_connection->onImpMsg = [this](const std::string &msg){
 		playSound(23);
 		MessageBox(SokuLib::window, msg.c_str(), "Notification from server", MB_ICONINFORMATION);
 	};
-	connection.onMsg = [this](int32_t channel, int32_t player, const std::string &msg){
+	_connection->onMsg = [this](int32_t channel, int32_t player, const std::string &msg){
 		playSound(49);
 		this->_addMessageToList(channel, player, msg);
 	};
-	connection.onConnectRequest = [this](const std::string &ip, unsigned short port, bool spectate){
+	_connection->onConnectRequest = [this](const std::string &ip, unsigned short port, bool spectate){
 		playSound(57);
 		if (!checkIp(ip)) {
 			Lobbies::PacketArcadeLeave leave{0};
 
-			this->_connection.send(&leave, sizeof(leave));
+			this->_connection->send(&leave, sizeof(leave));
 			this->_addMessageToList(0xFF0000, 0, "Failed to connect: Your opponent's custom IP is invalid");
 			return;
 		}
-		this->_connection.getMe()->battleStatus = 2;
+		this->_connection->getMe()->battleStatus = 2;
 		this->_parent->joinHost(ip.c_str(), port, spectate);
 	};
-	connection.onHostRequest = [this]{
+	_connection->onHostRequest = [this]{
 		playSound(57);
-		this->_connection.getMe()->battleStatus = 2;
+		this->_connection->getMe()->battleStatus = 2;
 		if (this->_parent->choice == 0)
 			this->_startHosting();
 		return hostPort;
 	};
-	connection.onArcadeEngage = [this, &connection](const Player &p, uint32_t id){
+	_connection->onArcadeEngage = [this](const Player &p, uint32_t id){
 		if (id >= this->_machines.size() - 1)
 			return;
 
@@ -430,7 +430,7 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 			machine.animationCtr = 0;
 			machine.animIdle = false;
 			machine.currentAnim = &lobbyData->arcades.select;
-			if (&p == connection.getMe()) {
+			if (&p == this->_connection->getMe()) {
 				printf("Host pref %x\n", p.settings.hostPref);
 				if (p.settings.hostPref & Lobbies::HOSTPREF_ACCEPT_HOSTLIST)
 					this->_startHosting();
@@ -443,10 +443,10 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 		}
 		machine.mutex.unlock();
 	};
-	connection.onArcadeLeave = [this](const Player &p, uint32_t id){
-		if (p.id == this->_connection.getMe()->id) {
+	_connection->onArcadeLeave = [this](const Player &p, uint32_t id){
+		if (p.id == this->_connection->getMe()->id) {
 			this->_currentMachine = nullptr;
-			this->_connection.getMe()->battleStatus = 0;
+			this->_connection->getMe()->battleStatus = 0;
 		}
 		if (id >= this->_machines.size() - 1)
 			return;
@@ -468,15 +468,15 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connecti
 		}
 		machine.mutex.unlock();
 	};
-	this->_connectThread = std::thread{[this, &connection](){
+	this->_connectThread = std::thread{[this](){
 		for (int i = 0; i < lobbyJoinTries; i++) {
 			if (this->_disconnected)
 				return;
-			if (!this->_connection.isConnected())
+			if (!this->_connection->isConnected())
 				return;
-			if (this->_connection.isInit())
+			if (this->_connection->isInit())
 				return;
-			this->_connection.connect();
+			this->_connection->connect();
 			std::this_thread::sleep_for(std::chrono::seconds(lobbyJoinInterval));
 		}
 		playSound(38);
@@ -499,8 +499,8 @@ InLobbyMenu::~InLobbyMenu()
 		ImmReleaseContext(SokuLib::window, this->immCtx);
 	this->_unhook();
 	if (!this->_disconnected) {
-		this->_connection.onDisconnect = nullptr;
-		this->_connection.disconnect();
+		this->_connection->onDisconnect = nullptr;
+		this->_connection->disconnect();
 	}
 	this->_menu->setActive();
 	if (!this->_music.empty())
@@ -514,12 +514,12 @@ InLobbyMenu::~InLobbyMenu()
 void InLobbyMenu::_()
 {
 	*(int *)0x882a94 = 0x16;
-	if (this->_disconnected || !this->_connection.isInit() || !this->_connection.isConnected())
+	if (this->_disconnected || !this->_connection->isInit() || !this->_connection->isConnected())
 		return;
 
 	Lobbies::PacketArcadeLeave leave{0};
 
-	this->_connection.send(&leave, sizeof(leave));
+	this->_connection->send(&leave, sizeof(leave));
 	if (!this->_hostlist) {
 		this->_currentMachine = nullptr;
 		SokuLib::playBGM(this->_music.c_str());
@@ -528,7 +528,7 @@ void InLobbyMenu::_()
 	*(*(char **)0x89a390 + 20) = false;
 	this->_parent->choice = 0;
 	this->_parent->subchoice = 0;
-	this->_connection.getMe()->battleStatus = 0;
+	this->_connection->getMe()->battleStatus = 0;
 	messageBox->active = false;
 }
 
@@ -538,16 +538,16 @@ int InLobbyMenu::onProcess()
 		return false;
 	try {
 		this->_menu->execUiCallbacks();
-		if (!this->_connection.isInit() && !this->_wasConnected) {
+		if (!this->_connection->isInit() && !this->_wasConnected) {
 			this->_loadingGear.setRotation(this->_loadingGear.getRotation() + 0.1);
-			return this->_connection.isConnected();
+			return this->_connection->isConnected();
 		}
-		if (!this->_connection.isInit())
+		if (!this->_connection->isInit())
 			return false;
 
-		this->_connection.meMutex.lock();
+		this->_connection->meMutex.lock();
 		auto inputs = SokuLib::inputMgrs.input;
-		auto me = this->_connection.getMe();
+		auto me = this->_connection->getMe();
 
 		if (this->_translateAnimation) {
 			if (this->_translateAnimation)
@@ -564,7 +564,7 @@ int InLobbyMenu::onProcess()
 			this->_hostlist.reset();
 			this->_currentMachine = nullptr;
 			playSound(0x29);
-			this->_connection.meMutex.unlock();
+			this->_connection->meMutex.unlock();
 			return true;
 		}
 		this->updateChat(false);
@@ -575,7 +575,7 @@ int InLobbyMenu::onProcess()
 			} else if (this->_parent->subchoice == 10) { //Connect Failed
 				Lobbies::PacketArcadeLeave leave{0};
 
-				this->_connection.send(&leave, sizeof(leave));
+				this->_connection->send(&leave, sizeof(leave));
 				if (!this->_hostlist)
 					this->_currentMachine = nullptr;
 				me->battleStatus = 0;
@@ -589,9 +589,10 @@ int InLobbyMenu::onProcess()
 		if (SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
 			playSound(0x29);
 			if (!this->_editingText) {
-				this->_connection.meMutex.unlock();
+
+				this->_connection->meMutex.unlock();
 				this->_unhook();
-				this->_connection.disconnect();
+				this->_connection->disconnect();
 				if (this->_parent->choice == SokuLib::MenuConnect::CHOICE_HOST) {
 					memset(&SokuLib::inputMgrs.input, 0, sizeof(SokuLib::inputMgrs.input));
 					SokuLib::inputMgrs.input.b = 1;
@@ -626,7 +627,7 @@ int InLobbyMenu::onProcess()
 
 					Lobbies::PacketMove m{0, me->dir};
 
-					this->_connection.send(&m, sizeof(m));
+					this->_connection->send(&m, sizeof(m));
 				}
 				if (diff == 0);
 				else if (diff < 0)
@@ -638,7 +639,7 @@ int InLobbyMenu::onProcess()
 
 				Lobbies::PacketMove m{0, me->dir};
 
-				this->_connection.send(&m, sizeof(m));
+				this->_connection->send(&m, sizeof(m));
 			}
 			switch (this->_currentElevator->state) {
 			case 0:
@@ -746,7 +747,7 @@ int InLobbyMenu::onProcess()
 					Lobbies::PacketGameRequest packet{machine.id};
 
 					me->battleStatus = 1;
-					this->_connection.send(&packet, sizeof(packet));
+					this->_connection->send(&packet, sizeof(packet));
 					goto touched;
 				}
 			touched:
@@ -773,8 +774,8 @@ int InLobbyMenu::onProcess()
 
 				if (SokuLib::inputMgrs.input.horizontalAxis < 0 && me->pos.x < PLAYER_H_SPEED) {
 					playSound(0x29);
-					this->_connection.meMutex.unlock();
-					this->_connection.disconnect();
+					this->_connection->meMutex.unlock();
+					this->_connection->disconnect();
 					return false;
 				}
 				newDir &= 0b01100;
@@ -809,7 +810,7 @@ int InLobbyMenu::onProcess()
 			if (dirChanged) {
 				Lobbies::PacketMove l{0, me->dir};
 
-				this->_connection.send(&l, sizeof(l));
+				this->_connection->send(&l, sizeof(l));
 			}
 		} else {
 			if (me->dir & 0b1111) {
@@ -817,12 +818,12 @@ int InLobbyMenu::onProcess()
 
 				Lobbies::PacketMove m{0, me->dir};
 
-				this->_connection.send(&m, sizeof(m));
+				this->_connection->send(&m, sizeof(m));
 			}
 			if (SokuLib::inputMgrs.input.b == 1 && !this->_editingText && !this->_hostlist) {
 				Lobbies::PacketArcadeLeave l{0};
 
-				this->_connection.send(&l, sizeof(l));
+				this->_connection->send(&l, sizeof(l));
 				me->battleStatus = 0;
 				this->_currentMachine = nullptr;
 				if (this->_parent->choice == SokuLib::MenuConnect::CHOICE_HOST) {
@@ -894,7 +895,7 @@ int InLobbyMenu::onProcess()
 			}
 		}
 
-		this->_connection.updatePlayers(lobbyData->avatars);
+		this->_connection->updatePlayers(lobbyData->avatars);
 		if (!this->_translateAnimation) {
 			if (me->pos.x < 320)
 				this->_translate.x = 0;
@@ -904,7 +905,7 @@ int InLobbyMenu::onProcess()
 				this->_translate.x = 320 - me->pos.x;
 			this->_translate.y = 340 - me->pos.y;
 		}
-		this->_connection.meMutex.unlock();
+		this->_connection->meMutex.unlock();
 		return true;
 	} catch (std::exception &e) {
 		MessageBoxA(
@@ -928,7 +929,7 @@ int InLobbyMenu::onRender()
 	if (this->_disconnected)
 		return 0;
 	try {
-		if (!this->_connection.isInit() && !this->_wasConnected) {
+		if (!this->_connection->isInit() && !this->_wasConnected) {
 			this->_messageBox.draw();
 			this->_loadingText.draw();
 			this->_loadingGear.setRotation(-this->_loadingGear.getRotation());
@@ -941,7 +942,7 @@ int InLobbyMenu::onRender()
 		}
 
 		auto &bg = lobbyData->backgrounds[this->_background];
-		auto players = this->_connection.getPlayers();
+		auto players = this->_connection->getPlayers();
 		SokuLib::DrawUtils::RectangleShape rect2;
 #ifdef _DEBUG
 		SokuLib::DrawUtils::RectangleShape rect;
@@ -1301,15 +1302,15 @@ int InLobbyMenu::onRender()
 
 void InLobbyMenu::_unhook()
 {
-	this->_connection.onConnectRequest = this->onConnectRequest;
-	this->_connection.onError = this->onError;
-	this->_connection.onImpMsg = this->onImpMsg;
-	this->_connection.onMsg = this->onMsg;
-	this->_connection.onHostRequest = this->onHostRequest;
-	this->_connection.onConnect = this->onConnect;
-	this->_connection.onPlayerJoin = this->onPlayerJoin;
-	this->_connection.onArcadeEngage = this->onArcadeEngage;
-	this->_connection.onArcadeLeave = this->onArcadeLeave;
+	this->_connection->onConnectRequest = this->onConnectRequest;
+	this->_connection->onError = this->onError;
+	this->_connection->onImpMsg = this->onImpMsg;
+	this->_connection->onMsg = this->onMsg;
+	this->_connection->onHostRequest = this->onHostRequest;
+	this->_connection->onConnect = this->onConnect;
+	this->_connection->onPlayerJoin = this->onPlayerJoin;
+	this->_connection->onArcadeEngage = this->onArcadeEngage;
+	this->_connection->onArcadeLeave = this->onArcadeLeave;
 }
 
 void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const std::string &msg)
@@ -1754,7 +1755,7 @@ void InLobbyMenu::_sendMessage(const std::wstring &msg)
 
 	Lobbies::PacketMessage msgPacket{0, 0, encoded};
 
-	this->_connection.send(&msgPacket, sizeof(msgPacket));
+	this->_connection->send(&msgPacket, sizeof(msgPacket));
 }
 
 void InLobbyMenu::updateChat(bool inGame)
@@ -1986,7 +1987,7 @@ const char * const versionNames[] = { "-SWR", "+SR", "Vanilla", "+GR", "+GR-62FP
 
 void InLobbyMenu::_startHosting()
 {
-	auto ranked = this->_connection.getMe()->settings.hostPref & Lobbies::HOSTPREF_PREFER_RANKED;
+	auto ranked = this->_connection->getMe()->settings.hostPref & Lobbies::HOSTPREF_PREFER_RANKED;
 
 	this->_parent->setupHost(hostPort, true);
 	if (this->_hostThread.joinable())
