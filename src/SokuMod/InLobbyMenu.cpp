@@ -309,18 +309,18 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, std::sha
 		this->_textSprite[0].rect.height
 	}.to<unsigned>());
 	this->_textSprite[0].setPosition({CURSOR_STARTX - (*(int *)0x411c64 == 1) * 2, CURSOR_STARTY});
-	this->onConnectRequest = _connection->onConnectRequest;
-	this->onError = _connection->onError;
-	this->onImpMsg = _connection->onImpMsg;
-	this->onMsg = _connection->onMsg;
-	this->onHostRequest = _connection->onHostRequest;
-	this->onConnect = _connection->onConnect;
+	this->onConnectRequest = this->_connection->onConnectRequest;
+	this->onError = this->_connection->onError;
+	this->onImpMsg = this->_connection->onImpMsg;
+	this->onMsg = this->_connection->onMsg;
+	this->onHostRequest = this->_connection->onHostRequest;
+	this->onConnect = this->_connection->onConnect;
 	for (int i = ' '; i < 0x100; i++)
 		this->_getTextSize(i);
-	_connection->onDisconnect = [this]{
+	this->_connection->onDisconnect = [this]{
 		this->_disconnected = true;
 	};
-	_connection->onPlayerJoin = [this](const Player &r){
+	this->_connection->onPlayerJoin = [this](const Player &r){
 		SokuLib::Vector2i size;
 		int texId = 0;
 
@@ -331,7 +331,7 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, std::sha
 		this->_extraPlayerData[r.id].name.rect.width = size.x;
 		this->_extraPlayerData[r.id].name.rect.height = size.y;
 	};
-	_connection->onConnect = [this](const Lobbies::PacketOlleh &r){
+	this->_connection->onConnect = [this](const Lobbies::PacketOlleh &r){
 		auto &bg = lobbyData->backgrounds[r.bg];
 		int id = 0;
 
@@ -385,20 +385,20 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, std::sha
 		this->_music = "data/bgm/" + std::string(r.music, strnlen(r.music, sizeof(r.music))) + ".ogg";
 		SokuLib::playBGM(this->_music.c_str());
 	};
-	_connection->onError = [this](const std::string &msg){
+	this->_connection->onError = [this](const std::string &msg){
 		playSound(38);
 		this->_wasConnected = true;
 		MessageBox(SokuLib::window, msg.c_str(), "Internal Error", MB_ICONERROR);
 	};
-	_connection->onImpMsg = [this](const std::string &msg){
+	this->_connection->onImpMsg = [this](const std::string &msg){
 		playSound(23);
 		MessageBox(SokuLib::window, msg.c_str(), "Notification from server", MB_ICONINFORMATION);
 	};
-	_connection->onMsg = [this](int32_t channel, int32_t player, const std::string &msg){
+	this->_connection->onMsg = [this](int32_t channel, int32_t player, const std::string &msg){
 		playSound(49);
 		this->_addMessageToList(channel, player, msg);
 	};
-	_connection->onConnectRequest = [this](const std::string &ip, unsigned short port, bool spectate){
+	this->_connection->onConnectRequest = [this](const std::string &ip, unsigned short port, bool spectate){
 		playSound(57);
 		if (!checkIp(ip)) {
 			Lobbies::PacketArcadeLeave leave{0};
@@ -410,14 +410,14 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, std::sha
 		this->_connection->getMe()->battleStatus = 2;
 		this->_parent->joinHost(ip.c_str(), port, spectate);
 	};
-	_connection->onHostRequest = [this]{
+	this->_connection->onHostRequest = [this]{
 		playSound(57);
 		this->_connection->getMe()->battleStatus = 2;
 		if (this->_parent->choice == 0)
 			this->_startHosting();
 		return hostPort;
 	};
-	_connection->onArcadeEngage = [this](const Player &p, uint32_t id){
+	this->_connection->onArcadeEngage = [this](const Player &p, uint32_t id){
 		if (id >= this->_machines.size() - 1)
 			return;
 
@@ -443,7 +443,7 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, std::sha
 		}
 		machine.mutex.unlock();
 	};
-	_connection->onArcadeLeave = [this](const Player &p, uint32_t id){
+	this->_connection->onArcadeLeave = [this](const Player &p, uint32_t id){
 		if (p.id == this->_connection->getMe()->id) {
 			this->_currentMachine = nullptr;
 			this->_connection->getMe()->battleStatus = 0;
