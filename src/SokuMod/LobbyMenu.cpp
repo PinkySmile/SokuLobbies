@@ -397,7 +397,7 @@ bool LobbyMenu::_joinLobbyUpdate()
 				setInputBoxCallbacks([this, c](const std::string &value){
 					if (c->c && c->c->isConnected()) {
 						c->c->setPassword(value);
-						SokuLib::activateMenu(new InLobbyMenu(this, this->_parent, *c->c));
+						SokuLib::activateMenu(new InLobbyMenu(this, this->_parent, c->c));
 						this->_active = false;
 						playSound(0x28);
 					} else
@@ -405,7 +405,7 @@ bool LobbyMenu::_joinLobbyUpdate()
 				});
 				openInputDialog("Enter password", "", '*');
 			} else {
-				SokuLib::activateMenu(new InLobbyMenu(this, this->_parent, *this->_connections[this->_lobbyCtr]->c));
+				SokuLib::activateMenu(new InLobbyMenu(this, this->_parent, this->_connections[this->_lobbyCtr]->c));
 				this->_active = false;
 				playSound(0x28);
 			}

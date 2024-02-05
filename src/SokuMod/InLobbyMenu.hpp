@@ -84,7 +84,7 @@ private:
 	LobbyMenu *_menu;
 	ArcadeMachine *_currentMachine = nullptr;
 	ElevatorMachine *_currentElevator = nullptr;
-	Connection &_connection;
+	std::shared_ptr<Connection> _connection;
 	SokuLib::MenuConnect *_parent;
 	bool _wasConnected = false;
 	bool _disconnected = false;
@@ -146,7 +146,7 @@ public:
 	wchar_t keyBuffer[2] = {0, 0};
 	bool wineWorkaroundNeeded = false;
 
-	InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, Connection &connection);
+	InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, std::shared_ptr<Connection> &connection);
 	~InLobbyMenu();
 	void _() override;
 	int onProcess() override;
