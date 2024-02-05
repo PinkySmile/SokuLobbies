@@ -280,7 +280,13 @@ bool Connection::_handlePacket(const Lobbies::PacketGameRequest &packet, size_t 
 		return false;
 	size -= sizeof(packet);
 
-	auto ip = getMyIp();
+	const char* ip;
+	try {
+		ip = getMyIp();
+	} catch (std::exception &e) {
+		this->error(std::string("Failed to get public IP: ") + e.what());
+		return false;
+	}
 	unsigned short port = this->onHostRequest();
 	auto dup = strdup(ip);
 	char *pos = strchr(dup, ':');

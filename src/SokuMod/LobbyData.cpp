@@ -1316,7 +1316,7 @@ void LobbyData::_grantDebugAchievements()
 		}
 }
 
-std::string LobbyData::httpRequest(const std::string &url, const std::string &method, const std::string &data)
+std::string LobbyData::httpRequest(const std::string &url, const std::string &method, const std::string &data, long timeoutMs)
 {
 	std::string response;
 	int response_code;
@@ -1336,6 +1336,7 @@ std::string LobbyData::httpRequest(const std::string &url, const std::string &me
 	curl_easy_setopt(request_handle, CURLOPT_SSL_VERIFYPEER, false);
 	curl_easy_setopt(request_handle, CURLOPT_AUTOREFERER, 1L);
 	curl_easy_setopt(request_handle, CURLOPT_FOLLOWLOCATION, 1L);
+	curl_easy_setopt(request_handle, CURLOPT_TIMEOUT_MS, timeoutMs);
 
 	request_chunk.memory = (char *)calloc(1, sizeof(char));
 	request_chunk.size = 0;
