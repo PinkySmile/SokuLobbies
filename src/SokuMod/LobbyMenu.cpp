@@ -206,6 +206,8 @@ LobbyMenu::~LobbyMenu()
 		this->_masterThread.join();
 	if (this->_connectThread.joinable())
 		this->_connectThread.join();
+	std::lock_guard<std::mutex> connectionsMutexGuard(this->_connectionsMutex);
+	this->_connections.clear();
 }
 
 void LobbyMenu::_netLoop()
