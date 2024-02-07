@@ -221,6 +221,18 @@ bool checkIp(const std::string &ip)
 	return true;
 }
 
+void InLobbyMenu::_openMessageBox(int sound, const std::string &text, const std::string &title, UINT type)
+{
+	if (SokuLib::sceneId == SokuLib::SCENE_BATTLECL || SokuLib::sceneId == SokuLib::SCENE_BATTLESV) {
+		std::lock_guard<std::mutex> messageBoxMutexGuard(this->_messageBoxQueueMutex);
+		this->_messageBoxQueue.push(MessageBoxArgs{sound, text, title, type});
+	}
+	else {
+		playSound(sound);
+		MessageBox(SokuLib::window, text.c_str(), title.c_str(), type);
+	}
+}
+
 InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, std::shared_ptr<Connection> &connection) :
 	_connection(connection),
 	_parent(parent),
@@ -386,13 +398,11 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, std::sha
 		SokuLib::playBGM(this->_music.c_str());
 	};
 	this->_connection->onError = [this](const std::string &msg){
-		playSound(38);
 		this->_wasConnected = true;
-		MessageBox(SokuLib::window, msg.c_str(), "Internal Error", MB_ICONERROR);
+		this->_openMessageBox(38, msg, std::string("Internal Error"), MB_ICONERROR);
 	};
 	this->_connection->onImpMsg = [this](const std::string &msg){
-		playSound(23);
-		MessageBox(SokuLib::window, msg.c_str(), "Notification from server", MB_ICONINFORMATION);
+		this->_openMessageBox(23, msg, std::string("Notification from server"), MB_ICONINFORMATION);
 	};
 	this->_connection->onMsg = [this](int32_t channel, int32_t player, const std::string &msg){
 		playSound(49);
@@ -486,6 +496,24 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, std::sha
 	ptrMutex.lock();
 	activeMenu = this;
 	ptrMutex.unlock();
+	this->_messageBoxThread = std::thread{[this](){
+		while (std::this_thread::sleep_for(std::chrono::milliseconds(100)), true) {
+			// * (char *) 0x0089ffdc: is soku still running
+			if (*(char *) 0x0089ffdc && (SokuLib::sceneId == SokuLib::SCENE_BATTLECL || SokuLib::sceneId == SokuLib::SCENE_BATTLESV))
+				continue;
+			std::lock_guard<std::mutex> messageBoxMutexGuard(this->_messageBoxQueueMutex);
+			if (this->_messageBoxQueue.empty()) {
+				if (activeMenu)
+					continue;
+				else
+					break;
+			}
+			const MessageBoxArgs &args = this->_messageBoxQueue.front();
+			playSound(args.sound);
+			MessageBox(NULL, args.text.c_str(), args.title.c_str(), args.type);
+			this->_messageBoxQueue.pop();
+		}
+	}};
 	if (!Original_WndProc)
 		Original_WndProc = (WNDPROC) SetWindowLongPtr(SokuLib::window, GWL_WNDPROC, (LONG_PTR) Hooked_WndProc);
 }
@@ -509,6 +537,8 @@ InLobbyMenu::~InLobbyMenu()
 		this->_hostThread.join();
 	if (this->_connectThread.joinable())
 		this->_connectThread.join();
+	if (this->_messageBoxThread.joinable())
+		this->_messageBoxThread.join();
 }
 
 void InLobbyMenu::_()
