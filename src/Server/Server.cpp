@@ -247,7 +247,10 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 				c->send(&move, sizeof(move));
 		this->_connectionsMutex.unlock();
 	};
-	connection.onPosition = [this, id](uint32_t x, uint32_t y){
+	connection.onPosition = [this, id](uint32_t x, uint32_t y, bool changed){
+		if (!changed)
+			return;
+
 		Lobbies::PacketPosition pos{id, x, y};
 
 		this->_connectionsMutex.lock();

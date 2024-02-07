@@ -352,6 +352,7 @@ bool Connection::_handlePacket(const Lobbies::PacketMove &packet, size_t &size)
 		return false;
 	size -= sizeof(packet);
 	this->_dir = packet.dir;
+	this->_posChanged = true;
 	this->onMove(packet.dir);
 	return true;
 }
@@ -363,8 +364,9 @@ bool Connection::_handlePacket(const Lobbies::PacketPosition &packet, size_t &si
 	if (size < sizeof(packet))
 		return false;
 	size -= sizeof(packet);
+	this->onPosition(packet.x, packet.y, this->_posChanged || this->_pos.x != packet.x || this->_pos.y != packet.y);
 	this->_pos = {packet.x, packet.y};
-	this->onPosition(packet.x, packet.y);
+	this->_posChanged = false;
 	this->_timeoutClock.restart();
 	return true;
 }
