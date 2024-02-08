@@ -238,7 +238,10 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 	connection.onPing = [this](){
 		return this->_infos;
 	};
-	connection.onMove = [this, id](uint8_t dir){
+	connection.onMove = [this, id](uint8_t dir, bool changed){
+		if (!changed)
+			return;
+
 		Lobbies::PacketMove move{id, dir};
 
 		this->_connectionsMutex.lock();

@@ -351,9 +351,9 @@ bool Connection::_handlePacket(const Lobbies::PacketMove &packet, size_t &size)
 	if (size < sizeof(packet))
 		return false;
 	size -= sizeof(packet);
+	this->onMove(packet.dir, packet.dir != this->_dir);
 	this->_dir = packet.dir;
 	this->_posChanged = true;
-	this->onMove(packet.dir);
 	return true;
 }
 

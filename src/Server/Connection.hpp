@@ -66,7 +66,7 @@ private:
 
 public:
 	std::function<LobbyInfo ()> onPing;
-	std::function<void (uint8_t dir)> onMove;
+	std::function<void (uint8_t dir, bool changed)> onMove;
 	std::function<void (uint32_t x, uint32_t y, bool)> onPosition;
 	std::function<void (const std::string &reason)> onDisconnect;
 	std::function<bool (const Lobbies::PacketHello &hello, std::string ip, std::string &name)> onJoin;
