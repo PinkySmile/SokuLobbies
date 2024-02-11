@@ -767,11 +767,9 @@ int InLobbyMenu::onProcess()
 				}
 			}
 
-			bool dirChanged;
+			auto newDir = me->dir;
 
 			if (SokuLib::inputMgrs.input.horizontalAxis) {
-				auto newDir = me->dir;
-
 				if (SokuLib::inputMgrs.input.horizontalAxis < 0 && me->pos.x < PLAYER_H_SPEED) {
 					playSound(0x29);
 					this->_connection->meMutex.unlock();
@@ -793,23 +791,16 @@ int InLobbyMenu::onProcess()
 					newDir &= 0b11110;
 					me->pos.x = platform.pos.x + platform.width;
 				}
-				dirChanged = newDir != me->dir;
-				me->dir = newDir;
-			} else {
-				dirChanged = (me->dir & 0b00011) != 0;
-				me->dir &= 0b11100;
-			}
-			if (SokuLib::inputMgrs.input.d == 0) {
-				dirChanged |= (me->dir & 0b100000) != 0;
-				me->dir &= ~0b100000;
-			} else {
-				dirChanged |= (me->dir & 0b100000) == 0;
-				me->dir |= 0b100000;
-			}
+			} else
+				newDir &= 0b11100;
+			if (SokuLib::inputMgrs.input.d == 0)
+				newDir &= ~0b100000;
+			else
+				newDir |= 0b100000;
 			me->pos.y = bg.platforms[this->_currentPlatform].pos.y;
-			if (dirChanged) {
+			if (newDir != me->dir) {
+				me->dir = newDir;
 				Lobbies::PacketMove l{0, me->dir};
-
 				this->_connection->send(&l, sizeof(l));
 			}
 		} else {
