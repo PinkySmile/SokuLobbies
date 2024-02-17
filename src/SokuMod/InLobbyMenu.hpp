@@ -8,6 +8,7 @@
 
 #include <mutex>
 #include <thread>
+#include <queue>
 #include <Socket.hpp>
 #include <SokuLib.hpp>
 #include "Connection.hpp"
@@ -66,6 +67,12 @@ private:
 		ElevatorMachine(unsigned id, SokuLib::Vector2i pos, LobbyData::ElevatorPlacement &links, LobbyData::ElevatorSkin &skin);
 		ElevatorMachine(const ElevatorMachine &);
 	};
+	struct MessageBoxArgs {
+		int sound;
+		std::string text;
+		std::string title;
+		UINT type;
+	};
 
 	std::function<void (const std::string &ip, unsigned short port, bool spectate)> onConnectRequest;
 	std::function<void (const std::string &msg)> onError;
@@ -107,6 +114,9 @@ private:
 	std::thread _connectThread;
 	unsigned char _elevatorCtr = 0;
 	bool _elevatorOut = false;
+	std::queue<MessageBoxArgs> _messageBoxQueue;
+	std::mutex _messageBoxQueueMutex;
+	std::thread _messageBoxThread;
 
 	// Chat input box
 	SokuLib::SWRFont _chatFont;
@@ -134,6 +144,7 @@ private:
 	void _renderMachineOverlay();
 	void _startHosting();
 	void _updateCompositionSprite();
+	void _openMessageBox(int sound, const std::string &text, const std::string &title, UINT type);
 	int _getTextSize(unsigned i);
 
 public:
