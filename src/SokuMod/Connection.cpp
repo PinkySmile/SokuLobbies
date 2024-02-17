@@ -27,6 +27,14 @@ void Connection::_netLoop()
 	size_t recvSize = 0;
 
 	while (true) {
+		if (!this->_connected)
+			return;
+
+		if (!this->_hasConnected) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			continue;
+		}
+
 		try {
 			recvSize += (recvSizeAdded = this->_socket.read(buffer + recvSize, sizeof(buffer) - recvSize));
 		} catch (std::exception &e) {
@@ -45,8 +53,6 @@ void Connection::_netLoop()
 			return;
 		}
 
-		if (!this->_connected)
-			return;
 		if (recvSizeAdded == 0) {
 			this->_init = false;
 			this->_connected = false;
@@ -64,9 +70,10 @@ void Connection::_netLoop()
 }
 
 Connection::Connection(const std::string &host, unsigned short port, const Player &initParams) :
+	_host(host),
+	_port(port),
 	_initParams(initParams)
 {
-	this->_socket.connect(host, port);
 }
 
 Connection::~Connection()
@@ -74,7 +81,10 @@ Connection::~Connection()
 	this->_init = false;
 	if (this->onDisconnect)
 		this->onDisconnect();
-	this->_socket.disconnect();
+	if (this->_connectThread.joinable())
+		this->_connectThread.join();
+	if (this->_hasConnected)
+		this->_socket.disconnect();
 	if (this->_netThread.joinable())
 		this->_netThread.join();
 	if (this->_posThread.joinable())
@@ -91,6 +101,16 @@ void Connection::error(const std::string &msg)
 
 void Connection::startThread()
 {
+	this->_connectThread = std::thread([this](){
+		try {
+			this->_socket.connect(this->_host, this->_port);
+			this->_hasConnected = true;
+		} catch (std::exception &e) {
+			std::lock_guard<std::mutex> playerMutexGuard(this->_playerMutex);
+			std::lock_guard<std::mutex> meMutexGuard(this->meMutex);
+			this->error(e.what());
+		}
+	});
 	this->_netThread = std::thread{&Connection::_netLoop, this};
 }
 
@@ -116,6 +136,11 @@ void Connection::send(const void *packet, size_t size)
 bool Connection::isInit() const
 {
 	return this->_init;
+}
+
+bool Connection::hasConnected() const
+{
+	return this->_hasConnected;
 }
 
 bool Connection::isConnected() const

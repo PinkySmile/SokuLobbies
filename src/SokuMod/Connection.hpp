@@ -33,6 +33,10 @@ private:
 	mutable std::mutex _playerMutex;
 	std::thread _netThread;
 	std::thread _posThread;
+	std::thread _connectThread;
+	std::string _host;
+	unsigned short _port;
+	bool _hasConnected = false;
 	bool _connected = true;
 	bool _init = false;
 	char _uniqueId[16];
@@ -91,6 +95,7 @@ public:
 	void send(const void *packet, size_t size);
 	bool isInit() const;
 	bool isConnected() const;
+	bool hasConnected() const;
 	const LobbyInfo &getLobbyInfo() const;
 	Player *getMe();
 	const Player *getMe() const;

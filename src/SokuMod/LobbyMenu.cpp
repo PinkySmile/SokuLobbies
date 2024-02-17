@@ -215,7 +215,7 @@ void LobbyMenu::_netLoop()
 
 		this->_connectionsMutex.lock();
 		for (auto &c : this->_connections)
-			if (c->c && !c->c->isInit() && c->c->isConnected())
+			if (c->c && c->c->hasConnected() && !c->c->isInit() && c->c->isConnected())
 				c->c->send(&ping, sizeof(ping));
 		this->_connectionsMutex.unlock();
 		for (int i = 0; i < 20 && this->_open; i++)
