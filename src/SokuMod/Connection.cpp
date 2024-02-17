@@ -39,9 +39,14 @@ void Connection::_netLoop()
 		#endif
 			this->_init = false;
 			this->_connected = false;
-			this->onError(e.what());
-			if (this->onDisconnect)
-				this->onDisconnect();
+			{
+				std::lock_guard<std::mutex> meMutexGuard(this->meMutex);
+				std::lock_guard<std::mutex> playerMutexGuard(this->_playerMutex);
+				std::lock_guard<std::mutex> functionMutexGuard(this->functionMutex);
+				this->onError(e.what());
+				if (this->onDisconnect)
+					this->onDisconnect();
+			}
 			return;
 		}
 
@@ -50,9 +55,14 @@ void Connection::_netLoop()
 		if (recvSizeAdded == 0) {
 			this->_init = false;
 			this->_connected = false;
-			this->onError("Connection closed");
-			if (this->onDisconnect)
-				this->onDisconnect();
+			{
+				std::lock_guard<std::mutex> meMutexGuard(this->meMutex);
+				std::lock_guard<std::mutex> playerMutexGuard(this->_playerMutex);
+				std::lock_guard<std::mutex> functionMutexGuard(this->functionMutex);
+				this->onError("Connection closed");
+				if (this->onDisconnect)
+					this->onDisconnect();
+			}
 			return;
 		}
 
@@ -72,8 +82,13 @@ Connection::Connection(const std::string &host, unsigned short port, const Playe
 Connection::~Connection()
 {
 	this->_init = false;
-	if (this->onDisconnect)
-		this->onDisconnect();
+	{
+		std::lock_guard<std::mutex> meMutexGuard(this->meMutex);
+		std::lock_guard<std::mutex> playerMutexGuard(this->_playerMutex);
+		std::lock_guard<std::mutex> functionMutexGuard(this->functionMutex);
+		if (this->onDisconnect)
+			this->onDisconnect();
+	}
 	this->_socket.disconnect();
 	if (this->_netThread.joinable())
 		this->_netThread.join();
@@ -131,6 +146,9 @@ bool Connection::_handlePacket(const Lobbies::Packet &packet, size_t &size)
 	std::cout << "] " << size << " bytes: " << packet.toString() << std::endl;
 	logMutex.unlock();
 #endif
+	std::lock_guard<std::mutex> meMutexGuard(this->meMutex);
+	std::lock_guard<std::mutex> playerMutexGuard(this->_playerMutex);
+	std::lock_guard<std::mutex> functionMutexGuard(this->functionMutex);
 	switch (packet.opcode) {
 	case Lobbies::OPCODE_HELLO:
 		return this->_handlePacket(packet.hello, size);
@@ -184,12 +202,8 @@ bool Connection::_handlePacket(const Lobbies::PacketOlleh &packet, size_t &size)
 
 	player.id = packet.id;
 	player.name = std::string(packet.realName, strnlen(packet.realName, sizeof(packet.realName)));
-	this->_playerMutex.lock();
 	this->_players[packet.id] = player;
-	this->meMutex.lock();
 	this->_me = &this->_players[packet.id];
-	this->meMutex.unlock();
-	this->_playerMutex.unlock();
 	this->_init = true;
 	this->_posThread = std::thread(&Connection::_posLoop, this);
 	if (this->onConnect)
@@ -210,9 +224,7 @@ bool Connection::_handlePacket(const Lobbies::PacketPlayerJoin &packet, size_t &
 	player.id = packet.id;
 	player.name = std::string(packet.name, strnlen(packet.name, sizeof(packet.name)));
 	player.player = packet.custom;
-	this->_playerMutex.lock();
 	this->_players[packet.id] = player;
-	this->_playerMutex.unlock();
 	if (this->onPlayerJoin)
 		this->onPlayerJoin(player);
 	return true;
@@ -227,9 +239,7 @@ bool Connection::_handlePacket(const Lobbies::PacketPlayerLeave &packet, size_t 
 	size -= sizeof(packet);
 	if (packet.id == this->_me->id)
 		return this->error("Protocol error: Server sent OPCODE_PLAYER_LEAVE with self id"), false;
-	this->_playerMutex.lock();
 	this->_players.erase(this->_players.find(packet.id));
-	this->_playerMutex.unlock();
 	return true;
 }
 
@@ -253,9 +263,7 @@ bool Connection::_handlePacket(const Lobbies::PacketMove &packet, size_t &size)
 	if (size < sizeof(packet))
 		return false;
 	size -= sizeof(packet);
-	this->_playerMutex.lock();
 	this->_players[packet.id].dir = packet.dir;
-	this->_playerMutex.unlock();
 	return true;
 }
 
@@ -266,9 +274,7 @@ bool Connection::_handlePacket(const Lobbies::PacketPosition &packet, size_t &si
 	if (size < sizeof(packet))
 		return false;
 	size -= sizeof(packet);
-	this->_playerMutex.lock();
 	this->_players[packet.id].pos = {packet.x, packet.y};
-	this->_playerMutex.unlock();
 	return true;
 }
 
@@ -332,6 +338,7 @@ bool Connection::_handlePacket(const Lobbies::PacketPong &packet, size_t &size)
 		return false;
 	size -= sizeof(packet);
 
+	std::lock_guard<std::mutex> infoMutexLock(this->_infoMutex);
 	this->_info.name = std::string(packet.name, strnlen(packet.name, sizeof(packet.name)));
 	this->_info.maxPlayers = packet.maxPlayers;
 	this->_info.currentPlayers = packet.currentPlayers;
@@ -346,9 +353,7 @@ bool Connection::_handlePacket(const Lobbies::PacketSettingsUpdate &packet, size
 	if (size < sizeof(packet))
 		return false;
 	size -= sizeof(packet);
-	this->_playerMutex.lock();
 	this->_players[packet.id].player = packet.custom;
-	this->_playerMutex.unlock();
 	return true;
 }
 
@@ -359,12 +364,10 @@ bool Connection::_handlePacket(const Lobbies::PacketArcadeEngage &packet, size_t
 	if (size < sizeof(packet))
 		return false;
 	size -= sizeof(packet);
-	this->_playerMutex.lock();
 	this->_players[packet.id].battleStatus = 1;
 	this->_players[packet.id].machineId = packet.machineId;
 	if (this->onArcadeEngage)
 		this->onArcadeEngage(this->_players[packet.id], packet.machineId);
-	this->_playerMutex.unlock();
 	return true;
 }
 
@@ -375,11 +378,9 @@ bool Connection::_handlePacket(const Lobbies::PacketArcadeLeave &packet, size_t 
 	if (size < sizeof(packet))
 		return false;
 	size -= sizeof(packet);
-	this->_playerMutex.lock();
 	this->_players[packet.id].battleStatus = 0;
 	if (this->onArcadeLeave)
 		this->onArcadeLeave(this->_players[packet.id], this->_players[packet.id].machineId);
-	this->_playerMutex.unlock();
 	return true;
 }
 
@@ -452,18 +453,21 @@ void Connection::disconnect()
 	Lobbies::PacketPlayerLeave leave{0};
 
 	this->send(&leave, sizeof(leave));
-	this->meMutex.lock();
-	this->_init = false;
-	this->_me = nullptr;
-	this->_players.clear();
-	this->meMutex.unlock();
-	if (this->onDisconnect)
-		this->onDisconnect();
+	{
+		std::lock_guard<std::mutex> meMutexGuard(this->meMutex);
+		std::lock_guard<std::mutex> playerMutexGuard(this->_playerMutex);
+		std::lock_guard<std::mutex> functionMutexGuard(this->functionMutex);
+		this->_init = false;
+		this->_me = nullptr;
+		this->_players.clear();
+		if (this->onDisconnect)
+			this->onDisconnect();
+	}
 	if (this->_posThread.joinable())
 		this->_posThread.join();
 }
 
-const Connection::LobbyInfo &Connection::getLobbyInfo() const
+const Connection::LobbyInfo Connection::getLobbyInfo() const
 {
 	return this->_info;
 }
@@ -482,10 +486,9 @@ std::vector<Player> Connection::getPlayers() const
 {
 	std::vector<Player> players;
 
-	this->_playerMutex.lock();
+	std::lock_guard<std::mutex> playerMutexGuard(this->_playerMutex);
 	for (auto &p : this->_players)
 		players.push_back(p.second);
-	this->_playerMutex.unlock();
 	return players;
 }
 
@@ -564,10 +567,10 @@ void Connection::_posLoop()
 {
 	while (this->_init) {
 		this->meMutex.lock();
-
-		Lobbies::PacketPosition position{0, this->_me->pos.x, this->_me->pos.y};
-
-		this->send(&position, sizeof(position));
+		if (this->_init) {
+			Lobbies::PacketPosition position{0, this->_me->pos.x, this->_me->pos.y};
+			this->send(&position, sizeof(position));
+		}
 		this->meMutex.unlock();
 		for (int i = 0; i < 10 && this->_init; i++)
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));

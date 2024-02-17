@@ -88,6 +88,7 @@ private:
 	SokuLib::MenuConnect *_parent;
 	bool _wasConnected = false;
 	bool _disconnected = false;
+	std::vector<Player> _playersCopy;
 	unsigned _chatTimer = 0;
 	unsigned _chatOffset = 0;
 	uint8_t _background = 0;

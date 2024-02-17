@@ -863,6 +863,8 @@ void LobbyMenu::_connectLoop()
 					runOnUI(fct);
 
 					connection->c = std::make_shared<Connection>(connection->ip, connection->port, this->_loadedSettings);
+
+					std::lock_guard<std::mutex> functionMutexGuard(connection->c->functionMutex);
 					connection->c->onError = [weak, this](const std::string &msg) {
 						auto fct = [weak, msg, this]{
 							auto c = weak.lock();
