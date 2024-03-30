@@ -321,14 +321,15 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, std::sha
 		this->_textSprite[0].rect.height
 	}.to<unsigned>());
 	this->_textSprite[0].setPosition({CURSOR_STARTX - (*(int *)0x411c64 == 1) * 2, CURSOR_STARTY});
+	for (int i = ' '; i < 0x100; i++)
+		this->_getTextSize(i);
+	std::lock_guard<std::mutex> functionMutexGuard(this->_connection->functionMutex);
 	this->onConnectRequest = this->_connection->onConnectRequest;
 	this->onError = this->_connection->onError;
 	this->onImpMsg = this->_connection->onImpMsg;
 	this->onMsg = this->_connection->onMsg;
 	this->onHostRequest = this->_connection->onHostRequest;
 	this->onConnect = this->_connection->onConnect;
-	for (int i = ' '; i < 0x100; i++)
-		this->_getTextSize(i);
 	this->_connection->onDisconnect = [this]{
 		this->_disconnected = true;
 	};
@@ -558,7 +559,9 @@ void InLobbyMenu::_()
 	*(*(char **)0x89a390 + 20) = false;
 	this->_parent->choice = 0;
 	this->_parent->subchoice = 0;
+	this->_connection->meMutex.lock();
 	this->_connection->getMe()->battleStatus = 0;
+	this->_connection->meMutex.unlock();
 	messageBox->active = false;
 }
 
@@ -568,14 +571,16 @@ int InLobbyMenu::onProcess()
 		return false;
 	try {
 		this->_menu->execUiCallbacks();
-		if (!this->_connection->isInit() && !this->_wasConnected) {
-			this->_loadingGear.setRotation(this->_loadingGear.getRotation() + 0.1);
-			return this->_connection->isConnected();
+		std::unique_lock<std::mutex> meMutexLock(this->_connection->meMutex);
+		if (!this->_connection->isInit()) {
+			if (!this->_wasConnected) {
+				this->_loadingGear.setRotation(this->_loadingGear.getRotation() + 0.1);
+				return this->_connection->isConnected();
+			}
+			else
+				return false;
 		}
-		if (!this->_connection->isInit())
-			return false;
 
-		this->_connection->meMutex.lock();
 		auto inputs = SokuLib::inputMgrs.input;
 		auto me = this->_connection->getMe();
 
@@ -594,7 +599,6 @@ int InLobbyMenu::onProcess()
 			this->_hostlist.reset();
 			this->_currentMachine = nullptr;
 			playSound(0x29);
-			this->_connection->meMutex.unlock();
 			return true;
 		}
 		this->updateChat(false);
@@ -619,8 +623,7 @@ int InLobbyMenu::onProcess()
 		if (SokuLib::checkKeyOneshot(DIK_ESCAPE, 0, 0, 0)) {
 			playSound(0x29);
 			if (!this->_editingText) {
-
-				this->_connection->meMutex.unlock();
+				meMutexLock.unlock();
 				this->_unhook();
 				this->_connection->disconnect();
 				if (this->_parent->choice == SokuLib::MenuConnect::CHOICE_HOST) {
@@ -802,7 +805,7 @@ int InLobbyMenu::onProcess()
 			if (SokuLib::inputMgrs.input.horizontalAxis) {
 				if (SokuLib::inputMgrs.input.horizontalAxis < 0 && me->pos.x < PLAYER_H_SPEED) {
 					playSound(0x29);
-					this->_connection->meMutex.unlock();
+					meMutexLock.unlock();
 					this->_connection->disconnect();
 					return false;
 				}
@@ -917,7 +920,7 @@ int InLobbyMenu::onProcess()
 		}
 
 		this->_connection->updatePlayers(lobbyData->avatars);
-		if (!this->_translateAnimation) {
+		if (this->_connection->isInit() && !this->_translateAnimation) {
 			if (me->pos.x < 320)
 				this->_translate.x = 0;
 			else if (me->pos.x > bg.size.x - 320)
@@ -926,7 +929,7 @@ int InLobbyMenu::onProcess()
 				this->_translate.x = 320 - me->pos.x;
 			this->_translate.y = 340 - me->pos.y;
 		}
-		this->_connection->meMutex.unlock();
+		this->_playersCopy = this->_connection->getPlayers();
 		return true;
 	} catch (std::exception &e) {
 		MessageBoxA(
@@ -963,7 +966,7 @@ int InLobbyMenu::onRender()
 		}
 
 		auto &bg = lobbyData->backgrounds[this->_background];
-		auto players = this->_connection->getPlayers();
+
 		SokuLib::DrawUtils::RectangleShape rect2;
 #ifdef _DEBUG
 		SokuLib::DrawUtils::RectangleShape rect;
@@ -973,7 +976,6 @@ int InLobbyMenu::onRender()
 #endif
 		rect2.setBorderColor(SokuLib::Color::Black);
 		rect2.setFillColor(SokuLib::Color{0x00, 0x00, 0x00, 0xA0});
-
 		for (auto &layer : bg.layers) {
 			if (layer.type == LobbyData::LAYERTYPE_IMAGE) {
 				SokuLib::Vector2i tsize = {
@@ -1105,7 +1107,7 @@ int InLobbyMenu::onRender()
 					elevator.skin.sprite.draw();
 				}
 			}
-			for (auto &player : players) {
+			for (auto &player : this->_playersCopy) {
 				if (std::find(this->_insideElevator.begin(), this->_insideElevator.end(), player.id) == this->_insideElevator.end())
 					continue;
 				if (player.player.avatar < lobbyData->avatars.size()) {
@@ -1230,7 +1232,7 @@ int InLobbyMenu::onRender()
 				elevator.skin.sprite.draw();
 			}
 
-			for (auto &player : players) {
+			for (auto &player : this->_playersCopy) {
 				if (std::find(this->_insideElevator.begin(), this->_insideElevator.end(), player.id) != this->_insideElevator.end())
 					continue;
 				if (player.player.avatar < lobbyData->avatars.size()) {
@@ -1279,8 +1281,8 @@ int InLobbyMenu::onRender()
 
 		std::vector<std::tuple<float, float, unsigned>> lastTexts;
 
-		lastTexts.reserve(players.size());
-		for (auto &player : players) {
+		lastTexts.reserve(this->_playersCopy.size());
+		for (auto &player : this->_playersCopy) {
 			unsigned nb = 0;
 			auto &name = this->_extraPlayerData[player.id].name;
 			auto minPos = this->_translate.x + player.pos.x - name.getSize().x / 2.f;
@@ -1323,6 +1325,7 @@ int InLobbyMenu::onRender()
 
 void InLobbyMenu::_unhook()
 {
+	std::lock_guard<std::mutex> functionMutexGuard(this->_connection->functionMutex);
 	this->_connection->onConnectRequest = this->onConnectRequest;
 	this->_connection->onError = this->onError;
 	this->_connection->onImpMsg = this->onImpMsg;

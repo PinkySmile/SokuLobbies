@@ -206,6 +206,8 @@ LobbyMenu::~LobbyMenu()
 		this->_masterThread.join();
 	if (this->_connectThread.joinable())
 		this->_connectThread.join();
+	std::lock_guard<std::mutex> connectionsMutexGuard(this->_connectionsMutex);
+	this->_connections.clear();
 }
 
 void LobbyMenu::_netLoop()
@@ -863,6 +865,8 @@ void LobbyMenu::_connectLoop()
 					runOnUI(fct);
 
 					connection->c = std::make_shared<Connection>(connection->ip, connection->port, this->_loadedSettings);
+
+					std::lock_guard<std::mutex> functionMutexGuard(connection->c->functionMutex);
 					connection->c->onError = [weak, this](const std::string &msg) {
 						auto fct = [weak, msg, this]{
 							auto c = weak.lock();

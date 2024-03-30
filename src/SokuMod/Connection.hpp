@@ -31,6 +31,7 @@ public:
 private:
 	mutable std::mutex _messagesMutex;
 	mutable std::mutex _playerMutex;
+	std::mutex _infoMutex;
 	std::thread _netThread;
 	std::thread _posThread;
 	bool _connected = true;
@@ -80,6 +81,7 @@ public:
 	std::function<unsigned short ()> onHostRequest;
 	std::function<void ()> onDisconnect;
 	std::mutex meMutex;
+	std::mutex functionMutex;
 
 	Connection(const std::string &host, unsigned short port, const Player &initParams);
 	~Connection();
@@ -91,7 +93,7 @@ public:
 	void send(const void *packet, size_t size);
 	bool isInit() const;
 	bool isConnected() const;
-	const LobbyInfo &getLobbyInfo() const;
+	const LobbyInfo getLobbyInfo() const;
 	Player *getMe();
 	const Player *getMe() const;
 	std::vector<Player> getPlayers() const;
