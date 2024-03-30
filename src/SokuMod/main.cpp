@@ -335,13 +335,13 @@ void countGame()
 			if (achievement->requirement["action"] != chr.objectBase.action)
 				return false;
 			if (achievement->requirement.contains("block_blacklist")) {
-				auto &list = achievement->requirement["block_blacklist"].get<std::vector<int>>();
+				auto list = achievement->requirement["block_blacklist"].get<std::vector<int>>();
 
 				if (std::find(list.begin(), list.end(), chr.objectBase.actionBlockId) != list.end())
 					return false;
 			}
 			if (achievement->requirement.contains("block_whitelist")) {
-				auto &list = achievement->requirement["block_whitelist"].get<std::vector<int>>();
+				auto list = achievement->requirement["block_whitelist"].get<std::vector<int>>();
 
 				if (std::find(list.begin(), list.end(), chr.objectBase.actionBlockId) == list.end())
 					return false;
@@ -357,7 +357,7 @@ void countGame()
 	// All cards achievements
 	auto textures = lobbyData->cardsTextures.find(mid);
 	bool allCards = true;
-	for (auto &elem : textures->second) {
+	for (const auto &elem : textures->second) {
 		auto cardIt = cardsIt->second.cards.find(elem.first);
 
 		if (cardIt == cardsIt->second.cards.end() || cardIt->second.used == 0) {
