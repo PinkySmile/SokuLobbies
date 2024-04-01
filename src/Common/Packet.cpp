@@ -2,6 +2,7 @@
 // Created by PinkySmile on 01/10/2022.
 //
 
+#include <cstdint>
 #include <cstring>
 #include "Packet.hpp"
 
@@ -150,18 +151,22 @@ namespace Lobbies
 		return "Packet GAME_REQUEST: Console id " + std::to_string(this->consoleId);
 	}
 
-	PacketGameStart::PacketGameStart(const std::string &ip, uint16_t port, bool spectator) :
+	PacketGameStart::PacketGameStart(const std::string &ip, uint16_t port, const std::string &ipv6, uint16_t port6, bool spectator) :
 		opcode(OPCODE_GAME_START),
 		spectator(spectator),
-		port(port)
+		port(port),
+		port6(port6)
 	{
 		strncpy(this->ip, ip.c_str(), sizeof(this->ip));
+		strncpy(this->ipv6, ipv6.c_str(), sizeof(this->ipv6));
 	}
 
 	std::string PacketGameStart::toString() const
 	{
-		return "Packet GAME_START: Connect address " + std::string(this->ip, strnlen(this->ip, sizeof(this->ip))) + ":" + std::to_string(this->port) +
-		       (this->spectator ? " as spectator" : " as player");
+		return "Packet GAME_START:"
+		       "Connect address v4: " + std::string(this->ip, strnlen(this->ip, sizeof(this->ip))) + ":" + std::to_string(this->port) +
+		       (this->port6 ? "Connect address v6: " + std::string(this->ipv6, strnlen(this->ipv6, sizeof(this->ipv6)))  + " on port " + std::to_string(this->port6) : "") +
+		       "Spectator: " + (this->spectator ? " true" : " false");
 	}
 
 	PacketPing::PacketPing() :

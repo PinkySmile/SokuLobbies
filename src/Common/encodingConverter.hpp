@@ -7,6 +7,7 @@
 
 
 #include <string>
+#include <cstdint>
 
 template<typename T1, typename T2, std::basic_string<unsigned> decoder(const std::basic_string<T1> &), std::basic_string<T2> encoder(const std::basic_string<unsigned> &)>
 std::basic_string<T2> convertEncoding(const std::basic_string<T1> &str)

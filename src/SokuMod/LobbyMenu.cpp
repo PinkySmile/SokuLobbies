@@ -19,6 +19,7 @@
 #include "AchievementsMenu.hpp"
 #include "integration.hpp"
 #include "createUTFTexture.hpp"
+#include "ipv6map_extern.hpp"
 
 #define CRenderer_Unknown1 ((void (__thiscall *)(int, int))0x404AF0)
 #define runOnUI(fct) do {                     \
@@ -64,6 +65,9 @@ void displaySokuCursor(SokuLib::Vector2i pos, SokuLib::Vector2u size)
 LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
 	_parent(parent)
 {
+	if (hasIpv6Map())
+		this->_getIpv6Thread = std::thread(getIpv6Loop, std::ref(this->_open));
+
 	if (!lobbyData)
 		lobbyData = std::make_unique<LobbyData>();
 
@@ -206,6 +210,8 @@ LobbyMenu::~LobbyMenu()
 		this->_masterThread.join();
 	if (this->_connectThread.joinable())
 		this->_connectThread.join();
+	if (this->_getIpv6Thread.joinable())
+		this->_getIpv6Thread.join();
 	std::lock_guard<std::mutex> connectionsMutexGuard(this->_connectionsMutex);
 	this->_connections.clear();
 }
