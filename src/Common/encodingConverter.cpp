@@ -2,6 +2,7 @@
 // Created by PinkySmile on 29/01/2023.
 //
 
+#include <cstdint>
 #include "encodingConverter.hpp"
 #include "shiftJISConvTable.inl"
 #include "shiftJISReverseConvTable.inl"
