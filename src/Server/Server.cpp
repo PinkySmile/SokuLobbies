@@ -385,7 +385,7 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 		this->_connectionsMutex.unlock();
 	};
 	connection.onGameStart = [&connection, this](const Connection::Room &room){
-		Lobbies::PacketGameStart packet{room.ip, room.port, false};
+		Lobbies::PacketGameStart packet{room.ip, room.port, room.ipv6, room.port6, false};
 
 		this->_machinesMutex.lock();
 		auto &machine = this->_machines[connection.getActiveMachine()];
@@ -667,11 +667,11 @@ bool Server::_onPlayerJoinArcade(Connection &connection, unsigned int aid, bool 
 	connection.send(&msgPacket, sizeof(msgPacket));
 	if (machine.size() >= 2) {
 		if (machine[0]->getBattleStatus() == 2) {
-			Lobbies::PacketGameStart packet{machine[0]->getRoomInfo().ip, machine[0]->getRoomInfo().port, true};
+			Lobbies::PacketGameStart packet{machine[0]->getRoomInfo().ip, machine[0]->getRoomInfo().port, machine[0]->getRoomInfo().ipv6, machine[0]->getRoomInfo().port6, true};
 
 			connection.send(&packet, sizeof(packet));
 		} else if (machine[1]->getBattleStatus() == 2) {
-			Lobbies::PacketGameStart packet{machine[1]->getRoomInfo().ip, machine[1]->getRoomInfo().port, true};
+			Lobbies::PacketGameStart packet{machine[1]->getRoomInfo().ip, machine[1]->getRoomInfo().port, machine[1]->getRoomInfo().ipv6, machine[1]->getRoomInfo().port6, true};
 
 			connection.send(&packet, sizeof(packet));
 		}
