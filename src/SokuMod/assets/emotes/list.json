@@ -341,5 +341,7 @@
     {"path": "assets/emotes/normal/youmu.png",                    "alias": ["youmu"]},
     {"path": "assets/emotes/normal/yukari.png",                   "alias": ["yukari"]},
     {"path": "assets/emotes/normal/yuuka.png",                    "alias": ["yuuka"]},
-    {"path": "assets/emotes/normal/yuyuko.png",                   "alias": ["yuyuko"]}
+    {"path": "assets/emotes/normal/yuyuko.png",                   "alias": ["yuyuko"]},
+
+    {"path": "assets/emotes/extra/bocchi.png",                    "alias": ["bocchi", "shadow"]}
 ]

@@ -4513,12 +4513,12 @@
             "type": "win_move",
             "chr": 14,
             "action": 605,
-	    "stage": 5
+            "stage": 5
         },
         "rewards": [
             {
                 "type": "emote",
-		"name": "keystone"
+                "name": "keystone"
             }
         ],
         "name": "The Weight Of Heaven",
@@ -4536,7 +4536,7 @@
         "rewards": [
             {
                 "type": "emote",
-		"name": "gungnir"
+                "name": "gungnir"
             }
         ],
         "name": "Heart Piercing Spear",
@@ -4545,6 +4545,8 @@
         "id": "remilia_spear",
         "category": "remilia"
     },
+
+
     "Meta",
     {
         "requirement": {
@@ -4995,6 +4997,23 @@
         "id": "debug",
         "category": "meta"
     },
+    {
+        "requirement": {
+            "type": "title_straight",
+            "time": 15
+        },
+        "rewards": [
+            {
+                "type": "emote",
+                "name": "bocchi"
+            }
+        ],
+        "name": "Did you see that shadow!?",
+        "description": "Observe the shadow on the title screen<br>for 15 minutes straight.",
+        "hidden": true,
+        "id": "title_watch",
+        "category": "meta"
+    },
 
     "System",
     {
@@ -5037,7 +5056,7 @@
         "requirement": {
             "type": "use_card",
             "id": 0,
-	    "count": 10
+            "count": 10
         },
         "rewards": [
             {
@@ -5055,7 +5074,7 @@
         "requirement": {
             "type": "use_card",
             "id": 1,
-	    "count": 10
+            "count": 10
         },
         "rewards": [
             {
@@ -5073,7 +5092,7 @@
         "requirement": {
             "type": "use_card",
             "id": 2,
-	    "count": 10
+            "count": 10
         },
         "rewards": [
             {
@@ -5091,7 +5110,7 @@
         "requirement": {
             "type": "use_card",
             "id": 3,
-	    "count": 10
+            "count": 10
         },
         "rewards": [
             {
@@ -5109,7 +5128,7 @@
         "requirement": {
             "type": "use_card",
             "id": 4,
-	    "count": 10
+            "count": 10
         },
         "rewards": [
             {
@@ -5127,7 +5146,7 @@
         "requirement": {
             "type": "use_card",
             "id": 5,
-	    "count": 10
+            "count": 10
         },
         "rewards": [
             {
@@ -5145,7 +5164,7 @@
         "requirement": {
             "type": "use_card",
             "id": 6,
-	    "count": 10
+            "count": 10
         },
         "rewards": [
             {
@@ -5163,7 +5182,7 @@
         "requirement": {
             "type": "use_card",
             "id": 7,
-	    "count": 10
+            "count": 10
         },
         "rewards": [
             {
@@ -5181,7 +5200,7 @@
         "requirement": {
             "type": "use_card",
             "id": 8,
-	    "count": 10
+            "count": 10
         },
         "rewards": [
             {
@@ -5199,7 +5218,7 @@
         "requirement": {
             "type": "use_card",
             "id": 9,
-	    "count": 10
+            "count": 10
         },
         "rewards": [
             {
@@ -5217,7 +5236,7 @@
         "requirement": {
             "type": "use_card",
             "id": 10,
-	    "count": 10
+            "count": 10
         },
         "rewards": [
             {
@@ -5235,7 +5254,7 @@
         "requirement": {
             "type": "use_card",
             "id": 11,
-	    "count": 10
+            "count": 10
         },
         "rewards": [
             {
@@ -5253,7 +5272,7 @@
         "requirement": {
             "type": "use_card",
             "id": 12,
-	    "count": 10
+            "count": 10
         },
         "rewards": [
             {
@@ -5271,7 +5290,7 @@
         "requirement": {
             "type": "use_card",
             "id": 13,
-	    "count": 10
+            "count": 10
         },
         "rewards": [
             {
@@ -5289,7 +5308,7 @@
         "requirement": {
             "type": "use_card",
             "id": 14,
-	    "count": 10
+            "count": 10
         },
         "rewards": [
             {
@@ -5307,7 +5326,7 @@
         "requirement": {
             "type": "use_card",
             "id": 15,
-	    "count": 10
+            "count": 10
         },
         "rewards": [
             {
@@ -5325,7 +5344,7 @@
         "requirement": {
             "type": "use_card",
             "id": 16,
-	    "count": 10
+            "count": 10
         },
         "rewards": [
             {
@@ -5343,7 +5362,7 @@
         "requirement": {
             "type": "use_card",
             "id": 17,
-	    "count": 10
+            "count": 10
         },
         "rewards": [
             {
@@ -5361,7 +5380,7 @@
         "requirement": {
             "type": "use_card",
             "id": 18,
-	    "count": 10
+            "count": 10
         },
         "rewards": [
             {
@@ -5379,7 +5398,7 @@
         "requirement": {
             "type": "use_card",
             "id": 19,
-	    "count": 10
+            "count": 10
         },
         "rewards": [
             {
@@ -5397,7 +5416,7 @@
         "requirement": {
             "type": "use_card",
             "id": 20,
-	    "count": 10
+            "count": 10
         },
         "rewards": [
             {

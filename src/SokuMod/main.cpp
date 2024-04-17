@@ -44,6 +44,7 @@ static int (SokuLib::LoadingServer::*og_LoadingServerOnRender)();
 static int (SokuLib::BattleManager::*og_BattleMgrOnProcess)();
 static void (SokuLib::KeymapManager::*s_origKeymapManager_SetInputs)();
 
+LARGE_INTEGER timer_frequency;
 unsigned &currentFrame = *(unsigned *)0x8985D8;
 unsigned char soku2Major = 0;
 unsigned char soku2Minor = 0;
@@ -518,13 +519,40 @@ int __fastcall LogoOnProcess(SokuLib::Logo *This)
 
 int __fastcall TitleOnProcess(SokuLib::Title *This)
 {
+	static LARGE_INTEGER startCtr;
 	static bool placed = false;
+	static bool needReset = true;
 	auto ret = (This->*og_TitleOnProcess)();
 
 	if (!placed) {
+		QueryPerformanceFrequency(&timer_frequency);
+		QueryPerformanceCounter(&startCtr);
 		placed = true;
 		puts("Placed handler");
 		oldFilter = SetUnhandledExceptionFilter(UnhandledExFilter);
+	}
+
+	if (ret != SokuLib::SCENE_TITLE || !lobbyData) {
+		needReset = true;
+	} else if (!needReset && SokuLib::menuManager.empty()) {
+		static LARGE_INTEGER counter;
+
+		QueryPerformanceCounter(&counter);
+
+		unsigned long long time = (counter.QuadPart - startCtr.QuadPart) / timer_frequency.QuadPart;
+		bool needSave = false;
+
+		for (auto &ach : lobbyData->achievementByRequ["title_straight"])
+			if (!ach->awarded && time / 60 >= ach->requirement["time"]) {
+				ach->awarded = true;
+				lobbyData->achievementAwardQueue.push_back(ach);
+				needSave = true;
+			}
+		if (needSave)
+			lobbyData->saveAchievements();
+	} else {
+		needReset = false;
+		QueryPerformanceCounter(&startCtr);
 	}
 	return ret;
 }
@@ -1086,7 +1114,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	og_LoadingServerOnRender = SokuLib::TamperDword(&SokuLib::VTable_LoadingServer.onRender, LoadingServerOnRender);
 	og_SelectServerOnProcess = SokuLib::TamperDword(&SokuLib::VTable_SelectServer.onProcess, SelectServerOnProcess);
 	og_SelectServerOnRender  = SokuLib::TamperDword(&SokuLib::VTable_SelectServer.onRender,  SelectServerOnRender);
-	og_BattleMgrOnProcess = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onProcess, CBattleManager_OnProcess);
+	og_BattleMgrOnProcess    = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onProcess,CBattleManager_OnProcess);
 	//og_BattleMgrOnRender  = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onRender,  CBattleManager_OnRender);
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 
