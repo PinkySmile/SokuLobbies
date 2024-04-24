@@ -265,14 +265,22 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, std::sha
 	this->_chatFont.create();
 	this->_chatFont.setIndirect(desc);
 
-	this->_inBattle.texture.loadFromFile((std::filesystem::path(profileFolderPath) / "assets/lobby/inarcade.png").string().c_str());
-	this->_inBattle.setSize({
-		this->_inBattle.texture.getSize().x,
-		this->_inBattle.texture.getSize().y
-	});
-	this->_inBattle.rect.width = this->_inBattle.texture.getSize().x;
-	this->_inBattle.rect.height = this->_inBattle.texture.getSize().y;
-	this->_inBattle.setPosition({174, 218});
+	for (int i = 0; i < 3; i++) {
+		const char *paths[3] = {
+			"assets/lobby/waiting.png",
+			"assets/lobby/fighting.png",
+			"assets/lobby/watching.png",
+		};
+
+		this->_battleStatus[i].texture.loadFromFile((std::filesystem::path(profileFolderPath) / paths[i]).string().c_str());
+		this->_battleStatus[i].setSize({
+			this->_battleStatus[i].texture.getSize().x,
+			this->_battleStatus[i].texture.getSize().y
+		});
+		this->_battleStatus[i].rect.width = this->_battleStatus[i].texture.getSize().x;
+		this->_battleStatus[i].rect.height = this->_battleStatus[i].texture.getSize().y;
+		this->_battleStatus[i].setPosition({174, 218});
+	}
 
 	this->_chatSeat.texture.loadFromFile((std::filesystem::path(profileFolderPath) / "assets/lobby/chat_seat.png").string().c_str());
 	this->_chatSeat.setSize({
@@ -421,16 +429,29 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, std::sha
 			Lobbies::PacketArcadeLeave leave{0};
 
 			this->_connection->send(&leave, sizeof(leave));
-			this->_addMessageToList(0xFF0000, 0, "Failed to connect: Your opponent's custom IP is invalid");
+			this->_addMessageToList(0xFF0000, 0, "Failed to connect: Your opponent's custom IP is invalid (" + ip + ")");
 			return;
 		}
 		this->_addMessageToList(0x00FF00, 0, strncmp(ip.c_str(), "127.127.", 8) ? "Connect via IPv4" :  "Connect via IPv6");
-		this->_connection->getMe()->battleStatus = 2;
+		if (spectate)
+			this->_connection->getMe()->battleStatus = Lobbies::BATTLE_STATUS_SPECTATING;
+		else
+			this->_connection->getMe()->battleStatus = Lobbies::BATTLE_STATUS_PLAYING;
+
+		Lobbies::PacketBattleStatusUpdate packet{0, this->_connection->getMe()->battleStatus};
+
+		this->_connection->send(&packet, sizeof(packet));
 		this->_parent->joinHost(ip.c_str(), port, spectate);
 	};
 	this->_connection->onHostRequest = [this]{
+		if (SokuLib::sceneId != SokuLib::SCENE_TITLE)
+			return hostPort;
+
+		Lobbies::PacketBattleStatusUpdate packet{0, Lobbies::BATTLE_STATUS_PLAYING};
+
+		this->_connection->send(&packet, sizeof(packet));
 		playSound(57);
-		this->_connection->getMe()->battleStatus = 2;
+		this->_connection->getMe()->battleStatus = Lobbies::BATTLE_STATUS_PLAYING;
 		if (this->_parent->choice == 0)
 			this->_startHosting();
 		return hostPort;
@@ -463,8 +484,11 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, std::sha
 	};
 	this->_connection->onArcadeLeave = [this](const Player &p, uint32_t id){
 		if (p.id == this->_connection->getMe()->id) {
+			Lobbies::PacketBattleStatusUpdate packet{0, Lobbies::BATTLE_STATUS_IDLE};
+
 			this->_currentMachine = nullptr;
-			this->_connection->getMe()->battleStatus = 0;
+			this->_connection->getMe()->battleStatus = Lobbies::BATTLE_STATUS_IDLE;
+			this->_connection->send(&packet, sizeof(packet));
 		}
 		if (id >= this->_machines.size() - 1)
 			return;
@@ -505,11 +529,24 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, std::sha
 	activeMenu = this;
 	ptrMutex.unlock();
 	this->_messageBoxThread = std::thread{[this](){
-		while (std::this_thread::sleep_for(std::chrono::milliseconds(100)), true) {
-			// * (char *) 0x0089ffdc: is soku still running
-			if (*(char *) 0x0089ffdc && (SokuLib::sceneId == SokuLib::SCENE_BATTLECL || SokuLib::sceneId == SokuLib::SCENE_BATTLESV))
+		for (;; std::this_thread::sleep_for(std::chrono::milliseconds(100))) {
+			// * (char *)0x0089FFDC: is Soku still running
+			if (!*(char *)0x0089FFDC)
+				return;
+			this->_connection->meMutex.lock();
+			if (SokuLib::sceneId != SokuLib::SCENE_TITLE && this->_connection->getMe()->battleStatus == Lobbies::BATTLE_STATUS_WAITING) {
+				Lobbies::PacketBattleStatusUpdate packet{0, Lobbies::BATTLE_STATUS_PLAYING};
+
+				this->_connection->send(&packet, sizeof(packet));
+				this->_connection->getMe()->battleStatus = Lobbies::BATTLE_STATUS_PLAYING;
+				this->_connection->sendGameInfo();
+			}
+			this->_connection->meMutex.unlock();
+			if (SokuLib::sceneId == SokuLib::SCENE_BATTLECL || SokuLib::sceneId == SokuLib::SCENE_BATTLESV)
 				continue;
+
 			std::lock_guard<std::mutex> messageBoxMutexGuard(this->_messageBoxQueueMutex);
+
 			if (this->_messageBoxQueue.empty()) {
 				if (activeMenu)
 					continue;
@@ -518,7 +555,7 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, std::sha
 			}
 			const MessageBoxArgs &args = this->_messageBoxQueue.front();
 			playSound(args.sound);
-			MessageBox(NULL, args.text.c_str(), args.title.c_str(), args.type);
+			MessageBox(SokuLib::window, args.text.c_str(), args.title.c_str(), args.type);
 			this->_messageBoxQueue.pop();
 		}
 	}};
@@ -556,7 +593,9 @@ void InLobbyMenu::_()
 		return;
 
 	Lobbies::PacketArcadeLeave leave{0};
+	Lobbies::PacketBattleStatusUpdate packet{0, Lobbies::BATTLE_STATUS_IDLE};
 
+	this->_connection->send(&packet, sizeof(packet));
 	this->_connection->send(&leave, sizeof(leave));
 	if (!this->_hostlist) {
 		this->_currentMachine = nullptr;
@@ -567,7 +606,7 @@ void InLobbyMenu::_()
 	this->_parent->choice = 0;
 	this->_parent->subchoice = 0;
 	this->_connection->meMutex.lock();
-	this->_connection->getMe()->battleStatus = 0;
+	this->_connection->getMe()->battleStatus = Lobbies::BATTLE_STATUS_IDLE;
 	this->_connection->meMutex.unlock();
 	messageBox->active = false;
 }
@@ -619,7 +658,11 @@ int InLobbyMenu::onProcess()
 				this->_connection->send(&leave, sizeof(leave));
 				if (!this->_hostlist)
 					this->_currentMachine = nullptr;
-				me->battleStatus = 0;
+
+				Lobbies::PacketBattleStatusUpdate packet{0, Lobbies::BATTLE_STATUS_IDLE};
+
+				this->_connection->send(&packet, sizeof(packet));
+				me->battleStatus = Lobbies::BATTLE_STATUS_IDLE;
 				*(*(char **)0x89a390 + 20) = false;
 				this->_addMessageToList(0xFF0000, 0, "Failed connecting to opponent: " + std::string(this->_parent->subchoice == 5 ? "They are already playing" : "Connection failed"));
 				this->_parent->choice = 0;
@@ -785,9 +828,11 @@ int InLobbyMenu::onProcess()
 					}
 
 					Lobbies::PacketGameRequest packet{machine.id};
+					Lobbies::PacketBattleStatusUpdate p{0, Lobbies::BATTLE_STATUS_WAITING};
 
-					me->battleStatus = 1;
+					me->battleStatus = Lobbies::BATTLE_STATUS_WAITING;
 					this->_connection->send(&packet, sizeof(packet));
+					this->_connection->send(&p, sizeof(p));
 					goto touched;
 				}
 			touched:
@@ -853,9 +898,11 @@ int InLobbyMenu::onProcess()
 			}
 			if (SokuLib::inputMgrs.input.b == 1 && !this->_editingText && !this->_hostlist) {
 				Lobbies::PacketArcadeLeave l{0};
+				Lobbies::PacketBattleStatusUpdate p{0, Lobbies::BATTLE_STATUS_IDLE};
 
+				this->_connection->send(&p, sizeof(p));
 				this->_connection->send(&l, sizeof(l));
-				me->battleStatus = 0;
+				me->battleStatus = Lobbies::BATTLE_STATUS_IDLE;
 				this->_currentMachine = nullptr;
 				if (this->_parent->choice == SokuLib::MenuConnect::CHOICE_HOST) {
 					memset(&SokuLib::inputMgrs.input, 0, sizeof(SokuLib::inputMgrs.input));
@@ -1269,11 +1316,11 @@ int InLobbyMenu::onRender()
 				#endif
 					avatar.sprite.draw();
 					if (player.battleStatus) {
-						this->_inBattle.setPosition({
-							static_cast<int>(this->_translate.x + player.pos.x - this->_inBattle.getSize().x / 2),
-							static_cast<int>(this->_translate.y + player.pos.y - avatar.sprite.getSize().y - this->_inBattle.getSize().y)
+						this->_battleStatus[player.battleStatus - 1].setPosition({
+							static_cast<int>(this->_translate.x + player.pos.x - this->_battleStatus[player.battleStatus - 1].getSize().x / 2),
+							static_cast<int>(this->_translate.y + player.pos.y - avatar.sprite.getSize().y - this->_battleStatus[player.battleStatus - 1].getSize().y)
 						});
-						this->_inBattle.draw();
+						this->_battleStatus[player.battleStatus - 1].draw();
 					}
 				} else {
 					rect2.setSize({64, 64});

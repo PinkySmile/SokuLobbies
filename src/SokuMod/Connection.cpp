@@ -183,6 +183,8 @@ bool Connection::_handlePacket(const Lobbies::Packet &packet, size_t &size)
 		return this->_handlePacket(packet.message, size);
 	case Lobbies::OPCODE_IMPORTANT_MESSAGE:
 		return this->_handlePacket(packet.importantMsg, size);
+	case Lobbies::OPCODE_BATTLE_STATUS_UPDATE:
+		return this->_handlePacket(packet.battleStatusUpdate, size);
 	default:
 		return this->error("Protocol error: Invalid opcode " + std::to_string(packet.opcode)), false;
 	}
@@ -276,6 +278,8 @@ bool Connection::_handlePacket(const Lobbies::PacketPosition &packet, size_t &si
 		return false;
 	size -= sizeof(packet);
 	this->_players[packet.id].pos = {packet.x, packet.y};
+	this->_players[packet.id].battleStatus = packet.status;
+	this->_players[packet.id].dir = packet.dir;
 	return true;
 }
 
@@ -286,39 +290,7 @@ bool Connection::_handlePacket(const Lobbies::PacketGameRequest &packet, size_t 
 	if (size < sizeof(packet))
 		return false;
 	size -= sizeof(packet);
-
-	const char *ip;
-	std::string ipv6;
-	try {
-		ip = getMyIp();
-		if (isIpv6Available())
-			ipv6 = getMyIpv6();
-	} catch (std::exception &e) {
-		this->error(std::string("Failed to get public IP: ") + e.what());
-		return false;
-	}
-	unsigned short port = this->onHostRequest();
-	unsigned short port6 = ipv6.empty() ? 0 : port;
-	// if (ipv6)
-	// 	printf("My ipv6: %s\n", ipv6);
-	auto dup = strdup(ip);
-	char *pos = strchr(dup, ':');
-
-	if (pos) {
-		try {
-			port = std::stoul(pos + 1);
-		} catch (std::exception &e) {
-			puts(e.what());
-		}
-		*pos = 0;
-	}
-
-	Lobbies::PacketGameStart game{dup, port, port6 ? ipv6 : "", port6, false};
-
-	free(dup);
-	this->send(&game, sizeof(game));
-	this->_me->battleStatus = 2;
-	return true;
+	return this->sendGameInfo();
 }
 
 bool Connection::_handlePacket(const Lobbies::PacketGameStart &packet, size_t &size)
@@ -345,7 +317,6 @@ bool Connection::_handlePacket(const Lobbies::PacketGameStart &packet, size_t &s
 		printf("p1: %s:%u\n", ip, port);
 		this->onConnectRequest(ip, port, packet.spectator);
 	}
-	this->_me->battleStatus = 2;
 	return true;
 }
 
@@ -386,7 +357,6 @@ bool Connection::_handlePacket(const Lobbies::PacketArcadeEngage &packet, size_t
 	if (size < sizeof(packet))
 		return false;
 	size -= sizeof(packet);
-	this->_players[packet.id].battleStatus = 1;
 	this->_players[packet.id].machineId = packet.machineId;
 	if (this->onArcadeEngage)
 		this->onArcadeEngage(this->_players[packet.id], packet.machineId);
@@ -400,7 +370,6 @@ bool Connection::_handlePacket(const Lobbies::PacketArcadeLeave &packet, size_t 
 	if (size < sizeof(packet))
 		return false;
 	size -= sizeof(packet);
-	this->_players[packet.id].battleStatus = 0;
 	if (this->onArcadeLeave)
 		this->onArcadeLeave(this->_players[packet.id], this->_players[packet.id].machineId);
 	return true;
@@ -426,6 +395,17 @@ bool Connection::_handlePacket(const Lobbies::PacketImportantMessage &packet, si
 	if (this->onImpMsg)
 		this->onImpMsg(std::string(packet.message, strnlen(packet.message, sizeof(packet.message))));
 	return true;
+}
+
+bool Connection::_handlePacket(const Lobbies::PacketBattleStatusUpdate &packet, size_t &size)
+{
+	if (!this->_init)
+		return this->error("Protocol error: Invalid handshake"), false;
+	if (size < sizeof(packet))
+		return false;
+	size -= sizeof(packet);
+	this->_players[packet.playerId].battleStatus = packet.newStatus;
+	return false;
 }
 
 void Connection::connect()
@@ -588,12 +568,13 @@ void Connection::updatePlayers(const std::vector<LobbyData::Avatar> &avatars)
 void Connection::_posLoop()
 {
 	while (this->_init) {
-		this->meMutex.lock();
 		if (this->_init) {
-			Lobbies::PacketPosition position{0, this->_me->pos.x, this->_me->pos.y};
+			this->meMutex.lock();
+			Lobbies::PacketPosition position{0, this->_me->pos.x, this->_me->pos.y, this->_me->dir, this->_me->battleStatus};
+			this->meMutex.unlock();
+
 			this->send(&position, sizeof(position));
 		}
-		this->meMutex.unlock();
 		for (int i = 0; i < 10 && this->_init; i++)
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
@@ -602,4 +583,39 @@ void Connection::_posLoop()
 void Connection::setPassword(const std::string &pwd)
 {
 	this->_pwd = pwd;
+}
+
+bool Connection::sendGameInfo()
+{
+	const char *ip;
+	std::string ipv6;
+	try {
+		ip = getMyIp();
+		if (isIpv6Available())
+			ipv6 = getMyIpv6();
+	} catch (std::exception &e) {
+		this->error(std::string("Failed to get public IP: ") + e.what());
+		return false;
+	}
+	unsigned short port = this->onHostRequest();
+	unsigned short port6 = ipv6.empty() ? 0 : port;
+	// if (ipv6)
+	// 	printf("My ipv6: %s\n", ipv6);
+	auto dup = strdup(ip);
+	char *pos = strchr(dup, ':');
+
+	if (pos) {
+		try {
+			port = std::stoul(pos + 1);
+		} catch (std::exception &e) {
+			puts(e.what());
+		}
+		*pos = 0;
+	}
+
+	Lobbies::PacketGameStart game{dup, port, port6 ? ipv6 : "", port6, false};
+
+	free(dup);
+	this->send(&game, sizeof(game));
+	return true;
 }

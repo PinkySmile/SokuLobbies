@@ -127,17 +127,24 @@ namespace Lobbies
 		return "Packet MOVE: Player id " + std::to_string(this->id) + " dir: " + std::to_string(this->dir);
 	}
 
-	PacketPosition::PacketPosition(uint32_t id, uint32_t x, uint32_t y) :
+	PacketPosition::PacketPosition(uint32_t id, uint32_t x, uint32_t y, uint8_t dir, BattleStatus status) :
 		opcode(OPCODE_POSITION),
 		id(id),
 		x(x),
-		y(y)
+		y(y),
+		dir(dir),
+		status(status)
 	{
 	}
 
 	std::string PacketPosition::toString() const
 	{
-		return "Packet POSITION: Player id " + std::to_string(this->id) + " x: " + std::to_string(this->x)+ " y: " + std::to_string(this->y);
+		return "Packet POSITION: "
+		       "Player id " + std::to_string(this->id) + " "
+		       "x: " + std::to_string(this->x) + " "
+		       "y: " + std::to_string(this->y) + " "
+		       "dir: " + std::to_string(this->dir) + " "
+		       "status: " + std::to_string(this->status);
 	}
 
 	PacketGameRequest::PacketGameRequest(uint32_t consoleId) :
@@ -163,10 +170,10 @@ namespace Lobbies
 
 	std::string PacketGameStart::toString() const
 	{
-		return "Packet GAME_START:"
+		return "Packet GAME_START: "
 		       "Connect address v4: " + std::string(this->ip, strnlen(this->ip, sizeof(this->ip))) + ":" + std::to_string(this->port) +
-		       (this->port6 ? "Connect address v6: " + std::string(this->ipv6, strnlen(this->ipv6, sizeof(this->ipv6)))  + " on port " + std::to_string(this->port6) : "") +
-		       "Spectator: " + (this->spectator ? " true" : " false");
+		       (this->port6 ? " Connect address v6: " + std::string(this->ipv6, strnlen(this->ipv6, sizeof(this->ipv6)))  + " on port " + std::to_string(this->port6) : "") +
+		       " Spectator: " + (this->spectator ? "true" : "false");
 	}
 
 	PacketPing::PacketPing() :
@@ -237,7 +244,7 @@ namespace Lobbies
 
 	std::string PacketArcadeEngage::toString() const
 	{
-		return "Packet ARCADE_ENGAGE: id" + std::to_string(this->id);
+		return "Packet ARCADE_ENGAGE: id " + std::to_string(this->id);
 	}
 
 	PacketArcadeLeave::PacketArcadeLeave(uint32_t id) :
@@ -248,7 +255,7 @@ namespace Lobbies
 
 	std::string PacketArcadeLeave::toString() const
 	{
-		return "Packet ARCADE_LEAVE: id" + std::to_string(this->id);
+		return "Packet ARCADE_LEAVE: id " + std::to_string(this->id);
 	}
 
 	PacketImportantMessage::PacketImportantMessage(const std::string &msg) :
@@ -260,6 +267,18 @@ namespace Lobbies
 	std::string PacketImportantMessage::toString() const
 	{
 		return "Packet IMPORTANT_MESSAGE: " + std::string(this->message, strnlen(this->message, sizeof(this->message)));
+	}
+
+	PacketBattleStatusUpdate::PacketBattleStatusUpdate(uint32_t playerId, BattleStatus newStatus) :
+		opcode(OPCODE_BATTLE_STATUS_UPDATE),
+		playerId(playerId),
+		newStatus(newStatus)
+	{
+	}
+
+	std::string PacketBattleStatusUpdate::toString() const
+	{
+		return "Packet BATTLE_STATUS_UPDATE: playerId " + std::to_string(this->playerId) + " newStatus " + std::to_string(this->newStatus);
 	}
 
 	std::string Packet::toString() const
@@ -297,6 +316,8 @@ namespace Lobbies
 			return this->arcadeLeave.toString();
 		case OPCODE_IMPORTANT_MESSAGE:
 			return this->importantMsg.toString();
+		case OPCODE_BATTLE_STATUS_UPDATE:
+			return this->battleStatusUpdate.toString();
 		default:
 			return "Packet INVALID_OPCODE " + std::to_string(this->opcode);
 		}

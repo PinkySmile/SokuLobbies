@@ -42,7 +42,7 @@ private:
 	uint8_t _dir = 0;
 	sf::Vector2<uint32_t> _pos = {0, 0};
 	bool _posChanged = true;
-	uint8_t _battleStatus = 0;
+	Lobbies::BattleStatus _battleStatus = Lobbies::BATTLE_STATUS_IDLE;
 	uint8_t _machineId = 0;
 	sf::Clock _timeoutClock;
 	Room _room;
@@ -65,14 +65,16 @@ private:
 	bool _handlePacket(const Lobbies::PacketArcadeLeave &packet, size_t &size);
 	bool _handlePacket(const Lobbies::PacketMessage &packet, size_t &size);
 	bool _handlePacket(const Lobbies::PacketImportantMessage &packet, size_t &size);
+	bool _handlePacket(const Lobbies::PacketBattleStatusUpdate &packet, size_t &size);
 
 public:
 	std::function<LobbyInfo ()> onPing;
 	std::function<void (uint8_t dir, bool changed)> onMove;
-	std::function<void (uint32_t x, uint32_t y, bool)> onPosition;
+	std::function<void (uint32_t x, uint32_t y, uint8_t dir, Lobbies::BattleStatus status, bool)> onPosition;
 	std::function<void (const std::string &reason)> onDisconnect;
 	std::function<bool (const Lobbies::PacketHello &hello, std::string ip, std::string &name)> onJoin;
 	std::function<void (uint8_t channel, const std::string &msg)> onMessage;
+	std::function<void (Lobbies::BattleStatus status)> onBattleStatus;
 	std::function<void (const Lobbies::PacketSettingsUpdate &settings)> onSettingsUpdate;
 	std::function<void (const Room &port)> onGameStart;
 	std::function<bool (uint32_t aid)> onGameRequest;
@@ -93,8 +95,8 @@ public:
 	std::string getRealName() const;
 	sf::Vector2<uint32_t> getPos() const;
 	uint8_t getDir() const;
-	uint8_t getBattleStatus() const;
-	void setPlaying();
+	Lobbies::BattleStatus getBattleStatus() const;
+	void setPlaying(bool spec);
 	void setNotPlaying();
 	void setActiveMachine(uint8_t id);
 	uint8_t getActiveMachine() const;

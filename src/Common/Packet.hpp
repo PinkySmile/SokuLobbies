@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <string>
 
-#define PROTOCOL_VERSION 12
+#define PROTOCOL_VERSION 13
 
 namespace Lobbies
 {
@@ -31,17 +31,25 @@ namespace Lobbies
 		OPCODE_ARCADE_ENGAGE,
 		OPCODE_ARCADE_LEAVE,
 		OPCODE_IMPORTANT_MESSAGE,
+		OPCODE_BATTLE_STATUS_UPDATE,
 		OPCODE_INVALID
 	};
 
+	enum BattleStatus : uint8_t {
+		BATTLE_STATUS_IDLE,
+		BATTLE_STATUS_WAITING,
+		BATTLE_STATUS_PLAYING,
+		BATTLE_STATUS_SPECTATING
+	};
+
 	enum HostPreference : uint8_t {
-		/*  0 */ HOSTPREF_CLIENT_ONLY,
-		/*  1 */ HOSTPREF_HOST_ONLY,
-		/*  2 */ HOSTPREF_NO_PREF,
-		/*  3 */ HOSTPREF_HOST_PREF_MASK,
-		/*  4 */ HOSTPREF_ACCEPT_RELAY,
-		/*  8 */ HOSTPREF_ACCEPT_HOSTLIST = 8,
-		/* 10 */ HOSTPREF_PREFER_RANKED = 0x10,
+		/*  0h */ HOSTPREF_CLIENT_ONLY,
+		/*  1h */ HOSTPREF_HOST_ONLY,
+		/*  2h */ HOSTPREF_NO_PREF,
+		/*  3h */ HOSTPREF_HOST_PREF_MASK,
+		/*  4h */ HOSTPREF_ACCEPT_RELAY,
+		/*  8h */ HOSTPREF_ACCEPT_HOSTLIST = 8,
+		/* 10h */ HOSTPREF_PREFER_RANKED = 0x10,
 	};
 
 	struct PlayerCustomization {
@@ -155,8 +163,10 @@ namespace Lobbies
 		uint32_t id;
 		uint32_t x;
 		uint32_t y;
+		uint8_t dir;
+		BattleStatus status;
 
-		PacketPosition(uint32_t id, uint32_t x, uint32_t y);
+		PacketPosition(uint32_t id, uint32_t x, uint32_t y, uint8_t dir, BattleStatus status);
 		std::string toString() const;
 	};
 
@@ -269,6 +279,18 @@ namespace Lobbies
 		std::string toString() const;
 	};
 
+	struct PacketBattleStatusUpdate {
+	private:
+		Opcode opcode;
+
+	public:
+		uint32_t playerId;
+		BattleStatus newStatus;
+
+		PacketBattleStatusUpdate(uint32_t playerId, BattleStatus newStatus);
+		std::string toString() const;
+	};
+
 	union Packet {
 		Opcode opcode;
 		PacketHello hello;
@@ -287,6 +309,7 @@ namespace Lobbies
 		PacketArcadeEngage arcadeEngage;
 		PacketArcadeLeave arcadeLeave;
 		PacketImportantMessage importantMsg;
+		PacketBattleStatusUpdate battleStatusUpdate;
 
 		Packet();
 		std::string toString() const;

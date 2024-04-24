@@ -104,7 +104,7 @@ private:
 	SokuLib::DrawUtils::Sprite _loadingText;
 	SokuLib::DrawUtils::Sprite _messageBox;
 	SokuLib::DrawUtils::Sprite _loadingGear;
-	SokuLib::DrawUtils::Sprite _inBattle;
+	SokuLib::DrawUtils::Sprite _battleStatus[3];
 	std::list<Message> _chatMessages;
 	std::map<uint32_t, PlayerData> _extraPlayerData;
 	std::wstring _buffer;

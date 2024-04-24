@@ -68,6 +68,7 @@ private:
 	bool _handlePacket(const Lobbies::PacketArcadeLeave &packet, size_t &size);
 	bool _handlePacket(const Lobbies::PacketMessage &packet, size_t &size);
 	bool _handlePacket(const Lobbies::PacketImportantMessage &packet, size_t &size);
+	bool _handlePacket(const Lobbies::PacketBattleStatusUpdate &packet, size_t &size);
 
 public:
 	std::function<void (const std::string &ip, unsigned short port, bool spectate)> onConnectRequest;
@@ -94,6 +95,7 @@ public:
 	bool isInit() const;
 	bool isConnected() const;
 	const LobbyInfo getLobbyInfo() const;
+	bool sendGameInfo();
 	Player *getMe();
 	const Player *getMe() const;
 	std::vector<Player> getPlayers() const;

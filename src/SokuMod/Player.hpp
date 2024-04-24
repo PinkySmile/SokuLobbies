@@ -22,7 +22,7 @@ struct Player {
 	uint8_t dir = 0;
 	uint8_t animation = 0;
 	SokuLib::Vector2<uint32_t> pos = {0, 0};
-	uint8_t battleStatus = 0;
+	Lobbies::BattleStatus battleStatus = Lobbies::BATTLE_STATUS_IDLE;
 	uint8_t machineId = 0;
 	uint8_t currentAnimation = 0;
 	uint8_t animationCtr = 0;

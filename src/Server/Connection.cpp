@@ -175,14 +175,14 @@ uint8_t Connection::getDir() const
 	return this->_dir;
 }
 
-uint8_t Connection::getBattleStatus() const
+Lobbies::BattleStatus Connection::getBattleStatus() const
 {
 	return this->_battleStatus;
 }
 
-void Connection::setPlaying()
+void Connection::setPlaying(bool spec)
 {
-	this->_battleStatus = 2;
+	this->_battleStatus = spec ? Lobbies::BATTLE_STATUS_SPECTATING : Lobbies::BATTLE_STATUS_PLAYING;
 }
 
 uint8_t Connection::getActiveMachine() const
@@ -193,7 +193,7 @@ uint8_t Connection::getActiveMachine() const
 void Connection::setActiveMachine(uint8_t id)
 {
 	this->_machineId = id;
-	this->_battleStatus = 1;
+	this->_battleStatus = Lobbies::BATTLE_STATUS_WAITING;
 }
 
 const Connection::Room &Connection::getRoomInfo() const
@@ -203,7 +203,7 @@ const Connection::Room &Connection::getRoomInfo() const
 
 void Connection::setNotPlaying()
 {
-	this->_battleStatus = 0;
+	this->_battleStatus = Lobbies::BATTLE_STATUS_IDLE;
 }
 
 Lobbies::LobbySettings Connection::getSettings() const
@@ -264,6 +264,8 @@ bool Connection::_handlePacket(const Lobbies::Packet &packet, size_t &size)
 		return this->_handlePacket(packet.message, size);
 	case Lobbies::OPCODE_IMPORTANT_MESSAGE:
 		return this->_handlePacket(packet.importantMsg, size);
+	case Lobbies::OPCODE_BATTLE_STATUS_UPDATE:
+		return this->_handlePacket(packet.battleStatusUpdate, size);
 	default:
 		return this->kick("Protocol error: Invalid opcode " + std::to_string(packet.opcode)), false;
 	}
@@ -364,7 +366,19 @@ bool Connection::_handlePacket(const Lobbies::PacketPosition &packet, size_t &si
 	if (size < sizeof(packet))
 		return false;
 	size -= sizeof(packet);
-	this->onPosition(packet.x, packet.y, this->_posChanged || this->_pos.x != packet.x || this->_pos.y != packet.y);
+	this->onPosition(
+		packet.x,
+		packet.y,
+		packet.dir,
+		packet.status,
+		this->_posChanged ||
+			this->_pos.x != packet.x ||
+			this->_pos.y != packet.y ||
+			this->_battleStatus != packet.status ||
+			this->_dir != packet.dir
+	);
+	this->_battleStatus = packet.status;
+	this->_dir = packet.dir;
 	this->_pos = {packet.x, packet.y};
 	this->_posChanged = false;
 	this->_timeoutClock.restart();
@@ -460,6 +474,20 @@ bool Connection::_handlePacket(const Lobbies::PacketImportantMessage &, size_t &
 {
 	return this->kick("Protocol error: OPCODE_IMPORTANT_MESSAGE unexpected"), false;
 }
+
+bool Connection::_handlePacket(const Lobbies::PacketBattleStatusUpdate &packet, size_t &size)
+{
+	if (!this->_init)
+		return this->kick("Protocol error: Invalid handshake"), false;
+	if (size < sizeof(packet))
+		return false;
+	size -= sizeof(packet);
+	this->onBattleStatus(packet.newStatus);
+	this->_battleStatus = packet.newStatus;
+	return true;
+}
+
+
 
 sf::IpAddress Connection::getIp() const
 {

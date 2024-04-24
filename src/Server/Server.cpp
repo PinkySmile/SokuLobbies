@@ -250,16 +250,25 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 				c->send(&move, sizeof(move));
 		this->_connectionsMutex.unlock();
 	};
-	connection.onPosition = [this, id](uint32_t x, uint32_t y, bool changed){
+	connection.onPosition = [this, id](uint32_t x, uint32_t y, uint8_t dir, Lobbies::BattleStatus status, bool changed){
 		if (!changed)
 			return;
 
-		Lobbies::PacketPosition pos{id, x, y};
+		Lobbies::PacketPosition pos{id, x, y, dir, status};
 
 		this->_connectionsMutex.lock();
 		for (auto &c : this->_connections)
 			if (c->getId() != id && c->isInit())
 				c->send(&pos, sizeof(pos));
+		this->_connectionsMutex.unlock();
+	};
+	connection.onBattleStatus = [this, id](Lobbies::BattleStatus status){
+		Lobbies::PacketBattleStatusUpdate btlStatus{id, status};
+
+		this->_connectionsMutex.lock();
+		for (auto &c : this->_connections)
+			if (c->getId() != id && c->isInit())
+				c->send(&btlStatus, sizeof(btlStatus));
 		this->_connectionsMutex.unlock();
 	};
 	connection.onDisconnect = [this, &connection](const std::string &reason){
@@ -329,14 +338,12 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 		for (auto &c : this->_connections)
 			if (c->isInit()) {
 				Lobbies::PacketPlayerJoin join2{c->getId(), c->getName(), c->getPlayer()};
-				Lobbies::PacketPosition pos{c->getId(), c->getPos().x, c->getPos().y};
-				Lobbies::PacketMove move{c->getId(), c->getDir()};
+				Lobbies::PacketPosition pos{c->getId(), c->getPos().x, c->getPos().y, c->getDir(), c->getBattleStatus()};
 
 				c->send(&join, sizeof(join));
 				c->send(&msgPacket, sizeof(msgPacket));
 				connection.send(&join2, sizeof(join2));
 				connection.send(&pos, sizeof(pos));
-				connection.send(&move, sizeof(move));
 				if (c->getBattleStatus()) {
 					Lobbies::PacketArcadeEngage engage{c->getId(), c->getActiveMachine()};
 
@@ -390,12 +397,12 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 		this->_machinesMutex.lock();
 		auto &machine = this->_machines[connection.getActiveMachine()];
 
-		connection.setPlaying();
 		for (size_t i = 0; i < machine.size(); i++)
 			if (machine[i] != &connection) {
 				packet.spectator = i >= 2;
 				machine[i]->send(&packet, sizeof(packet));
-			}
+			} else
+				connection.setPlaying(i >= 2);
 		this->_machinesMutex.unlock();
 	};
 	connection.onGameRequest = [&connection, this](uint32_t aid){
@@ -665,22 +672,19 @@ bool Server::_onPlayerJoinArcade(Connection &connection, unsigned int aid, bool 
 
 	connection.setActiveMachine(aid);
 	connection.send(&msgPacket, sizeof(msgPacket));
-	if (machine.size() >= 2) {
-		if (machine[0]->getBattleStatus() == 2) {
-			Lobbies::PacketGameStart packet{machine[0]->getRoomInfo().ip, machine[0]->getRoomInfo().port, machine[0]->getRoomInfo().ipv6, machine[0]->getRoomInfo().port6, true};
+	if (!machine.empty() && machine[0]->getBattleStatus() == Lobbies::BATTLE_STATUS_PLAYING) {
+		Lobbies::PacketGameStart packet{machine[0]->getRoomInfo().ip, machine[0]->getRoomInfo().port, machine[0]->getRoomInfo().ipv6, machine[0]->getRoomInfo().port6, true};
 
-			connection.send(&packet, sizeof(packet));
-		} else if (machine[1]->getBattleStatus() == 2) {
-			Lobbies::PacketGameStart packet{machine[1]->getRoomInfo().ip, machine[1]->getRoomInfo().port, machine[1]->getRoomInfo().ipv6, machine[1]->getRoomInfo().port6, true};
+		connection.send(&packet, sizeof(packet));
+	} else if (machine.size() >= 2 && machine[1]->getBattleStatus() == Lobbies::BATTLE_STATUS_PLAYING) {
+		Lobbies::PacketGameStart packet{machine[1]->getRoomInfo().ip, machine[1]->getRoomInfo().port, machine[1]->getRoomInfo().ipv6, machine[1]->getRoomInfo().port6, true};
 
-			connection.send(&packet, sizeof(packet));
-		}
-	}
-	machine.push_back(&connection);
-	if (machine.size() == 2 && !this->_startRoom(machine)) {
+		connection.send(&packet, sizeof(packet));
+	} else if (machine.size() == 2 && !this->_startRoom(machine)) {
 		this->_machinesMutex.unlock();
 		return true;
 	}
+	machine.push_back(&connection);
 	this->_machinesMutex.unlock();
 
 	this->_connectionsMutex.lock();
@@ -695,13 +699,10 @@ void Server::_leaveArcade(Connection &connection)
 {
 	auto &machine = this->_machines[connection.getActiveMachine()];
 
-	// There is no need to check if the vector is of size >= 2
-	// because there is no way that the connection is not in the list if the battle status is not 0
-	// Update: Apparently there is
-	if (
+	if (connection.getBattleStatus() == Lobbies::BATTLE_STATUS_PLAYING && (
 		(!machine.empty() && machine[0] == &connection) ||
 		(machine.size() >= 2 && machine[1] == &connection)
-	) {
+	)) {
 		// This is one of the players, so we boot everyone out
 		for (auto &c1 : machine) {
 			Lobbies::PacketArcadeLeave packet{c1->getId()};
@@ -938,7 +939,7 @@ void Server::_teleportCmd(Connection *author, const std::vector<std::string> &ar
 	if (!player)
 		return sendSystemMessageTo(author, "Cannot find " + name + ".", 0xFF0000);
 
-	Lobbies::PacketPosition pos{author->getId(), player->getPos().x, player->getPos().y};
+	Lobbies::PacketPosition pos{author->getId(), player->getPos().x, player->getPos().y, player->getDir(), player->getBattleStatus()};
 
 	sendSystemMessageTo(author, "Teleporting to " + player->getName() + " at x:" + std::to_string(player->getPos().x) + " y:" + std::to_string(player->getPos().y) + ".", 0xFFFF00);
 	author->send(&pos, sizeof(pos));
