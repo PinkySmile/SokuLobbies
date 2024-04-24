@@ -15,6 +15,7 @@
 
 typedef HRESULT(__stdcall* EndSceneFn)(IDirect3DDevice9*);
 
+static void (__fastcall *og_call48AD33)(SokuLib::CharacterManager *);
 static EndSceneFn Original_EndScene;
 static bool wasBlocking = false;
 static void (*og_onUpdate)();
@@ -137,6 +138,29 @@ LONG WINAPI UnhandledExFilter(PEXCEPTION_POINTERS ExPtr)
 	else if ((attr & FILE_ATTRIBUTE_HIDDEN) == 0)
 		SetFileAttributesW(name, attr | FILE_ATTRIBUTE_HIDDEN);
 	return oldFilter ? oldFilter(ExPtr) : 0;
+}
+
+static void __fastcall coinUsed(SokuLib::CharacterManager *This)
+{
+	auto &battlemgr = SokuLib::getBattleMgr();
+
+	if (!lobbyData)
+		return;
+	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER && This == &battlemgr.rightCharacterManager)
+		goto ok;
+	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT && This == &battlemgr.leftCharacterManager)
+		goto ok;
+#ifdef _DEBUG
+	if (This == &battlemgr.leftCharacterManager)
+		goto ok;
+#endif
+	return;
+
+ok:
+	puts("Coin used");
+	cardsUsed.emplace_back(currentFrame, 12);
+	printf("Card %i used on frame %i\n", 12, currentFrame);
+	og_call48AD33(This);
 }
 
 static void __fastcall onCardUsed(SokuLib::CharacterManager *This)
@@ -1146,6 +1170,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 		// And we replace the footer so that it calls our function instead of jumping back
 		SokuLib::TamperNearJmp(hookAddr + 0x1A, rollbackChecker);
 	}
+	og_call48AD33 = SokuLib::TamperNearJmpOpr(0x48AD33, coinUsed);
 	VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
 
 	FlushInstructionCache(GetCurrentProcess(), nullptr, 0);
