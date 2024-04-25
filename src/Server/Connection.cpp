@@ -185,7 +185,7 @@ void Connection::setPlaying(bool spec)
 	this->_battleStatus = spec ? Lobbies::BATTLE_STATUS_SPECTATING : Lobbies::BATTLE_STATUS_PLAYING;
 }
 
-uint8_t Connection::getActiveMachine() const
+std::optional<uint8_t> Connection::getActiveMachine() const
 {
 	return this->_machineId;
 }
@@ -204,6 +204,7 @@ const Connection::Room &Connection::getRoomInfo() const
 void Connection::setNotPlaying()
 {
 	this->_battleStatus = Lobbies::BATTLE_STATUS_IDLE;
+	this->_machineId.reset();
 }
 
 Lobbies::LobbySettings Connection::getSettings() const

@@ -28,6 +28,8 @@
 #define CHAT_FONT_HEIGHT 14
 #define ELEVEATOR_CTR_DIVIDER 90.f
 
+#define DEBUG_COLOR 0x404040
+
 struct CDesignSprite {
 	void *vftable; // =008576ac
 	float UNKNOWN_1[2];
@@ -406,11 +408,15 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, std::sha
 		this->_extraPlayerData[r.id].name.rect.height = size.y;
 		this->_music = "data/bgm/" + std::string(r.music, strnlen(r.music, sizeof(r.music))) + ".ogg";
 		SokuLib::playBGM(this->_music.c_str());
-		if (hasIpv6Map()) {
-			if (isIpv6Available())
-				this->_addMessageToList(0xFFFF00, 0, "Your IPv6 Address is: " + getMyIpv6());
-		} else
+		if (!hasIpv6Map())
 			this->_addMessageToList(0xFFFF00, 0, "IPv6MapSokuMod isn't loaded, so IPv6 will not be supported.");
+		else if (isIpv6Available()) {
+			this->_addMessageToList(0xFFFF00, 0, "IPv6 connectivity is supported");
+#ifdef _DEBUG
+			this->_addMessageToList(DEBUG_COLOR, 0, "Your IPv6 Address is: " + getMyIpv6());
+#endif
+		} else
+			this->_addMessageToList(0xFFFF00, 0, "IPv6 not supported");
 	};
 	this->_connection->onError = [this](const std::string &msg){
 		this->_wasConnected = true;
@@ -424,6 +430,7 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, std::sha
 		this->_addMessageToList(channel, player, msg);
 	};
 	this->_connection->onConnectRequest = [this](const std::string &ip, unsigned short port, bool spectate){
+		printf("onConnectRequest %s %u %s\n", ip.c_str(), port, spectate ? "true" : "false");
 		playSound(57);
 		if (!checkIp(ip)) {
 			Lobbies::PacketArcadeLeave leave{0};
@@ -433,6 +440,9 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, std::sha
 			return;
 		}
 		this->_addMessageToList(0x00FF00, 0, strncmp(ip.c_str(), "127.127.", 8) ? "Connect via IPv4" :  "Connect via IPv6");
+#ifdef _DEBUG
+		this->_addMessageToList(DEBUG_COLOR, 0, "Connecting to " + ip + ":" + std::to_string(port) + (spectate ? " as spectator" : " as a player"));
+#endif
 		if (spectate)
 			this->_connection->getMe()->battleStatus = Lobbies::BATTLE_STATUS_SPECTATING;
 		else

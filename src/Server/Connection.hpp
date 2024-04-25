@@ -6,6 +6,7 @@
 #define SOKULOBBIES_CONNECTION_HPP
 
 
+#include <optional>
 #include <Packet.hpp>
 #include <SFML/Network.hpp>
 #include <thread>
@@ -43,7 +44,7 @@ private:
 	sf::Vector2<uint32_t> _pos = {0, 0};
 	bool _posChanged = true;
 	Lobbies::BattleStatus _battleStatus = Lobbies::BATTLE_STATUS_IDLE;
-	uint8_t _machineId = 0;
+	std::optional<uint8_t> _machineId;
 	sf::Clock _timeoutClock;
 	Room _room;
 
@@ -99,7 +100,7 @@ public:
 	void setPlaying(bool spec);
 	void setNotPlaying();
 	void setActiveMachine(uint8_t id);
-	uint8_t getActiveMachine() const;
+	std::optional<uint8_t> getActiveMachine() const;
 	const Room &getRoomInfo() const;
 	Lobbies::Soku2VersionInfo getSoku2Version() const;
 	Lobbies::LobbySettings getSettings() const;

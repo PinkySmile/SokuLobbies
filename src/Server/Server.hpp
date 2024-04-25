@@ -36,7 +36,7 @@ private:
 	void _processCommands(Connection *author, const std::string &msg);
 	std::string _sanitizeName(const std::string &name, const Connection *con);
 	void _prepareConnectionHandlers(Connection &connection);
-	bool _startRoom(std::vector<Connection *> &machine);
+	bool _startRoom(std::vector<Connection *> &machine, Connection &client);
 	void _registerToMainServer();
 	std::vector<std::string> _parseCommand(const std::string &msg);
 	bool _onPlayerJoinArcade(Connection &connection, unsigned id, bool force = false);

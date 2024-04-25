@@ -18,6 +18,16 @@ extern std::mutex logMutex;
 #include "Server.hpp"
 #include "Utils.hpp"
 
+#ifdef _DEBUG
+#define DEBUG_COLOR 0x404040
+#define sendDebug(m) do { \
+Lobbies::PacketMessage msg{DEBUG_COLOR, 0, "[DEBUG] " + std::string(m)}; \
+connection.send(&msg, sizeof(msg));\
+} while (0)
+#else
+#define sendDebug(_)
+#endif
+
 constexpr uint8_t SR_SWR[16] = {
 	0x64, 0x73, 0x65, 0xD9,
 	0xFF, 0xC4, 0x6E, 0x48,
@@ -184,10 +194,10 @@ void Server::run(unsigned short port, unsigned maxPlayers, const std::string &na
 
 			this->_connectionsMutex.lock();
 			for (auto &c : this->_connections) {
-				if (!c->isConnected()) {
+				if (!c->isConnected() && c->getActiveMachine()) {
 					this->_machinesMutex.lock();
 
-					auto &m = this->_machines[c->getActiveMachine()];
+					auto &m = this->_machines[*c->getActiveMachine()];
 
 					m.erase(std::find(m.begin(), m.end(), &*c));
 					this->_machinesMutex.unlock();
@@ -313,7 +323,7 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 		auto it = std::find_if(this->_banList.begin(), this->_banList.end(), [&connection, &ip](BanEntry entry){
 			return entry.ip == connection.getIp().toString();
 		});
-		bool foundVersion = false;
+		//bool foundVersion = false;
 
 		if (it != this->_banList.end()) {
 			std::cout << connection.getName() << " (" << connection.getIp() << ") tried to join but is banned (" << it->profileName << " " << it->ip << " " << it->reason << ")." << std::endl;
@@ -354,8 +364,8 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 				c->send(&msgPacket, sizeof(msgPacket));
 				connection.send(&join2, sizeof(join2));
 				connection.send(&pos, sizeof(pos));
-				if (c->getBattleStatus()) {
-					Lobbies::PacketArcadeEngage engage{c->getId(), c->getActiveMachine()};
+				if (c->getActiveMachine()) {
+					Lobbies::PacketArcadeEngage engage{c->getId(), *c->getActiveMachine()};
 
 					connection.send(&engage, sizeof(engage));
 				}
@@ -402,10 +412,13 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 		this->_connectionsMutex.unlock();
 	};
 	connection.onGameStart = [&connection, this](const Connection::Room &room){
+		if (!connection.getActiveMachine())
+			return;
+
 		Lobbies::PacketGameStart packet{room.ip, room.port, room.ipv6, room.port6, false};
 
 		this->_machinesMutex.lock();
-		auto &machine = this->_machines[connection.getActiveMachine()];
+		auto &machine = this->_machines[*connection.getActiveMachine()];
 
 		for (size_t i = 0; i < machine.size(); i++)
 			if (machine[i] != &connection) {
@@ -420,14 +433,17 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 	};
 	connection.onArcadeLeave = [&connection, this](){
 		this->_machinesMutex.lock();
-		if (!connection.getBattleStatus()) {
+		if (!connection.getActiveMachine()) {
 			this->_machinesMutex.unlock();
 			return;
 		}
-		connection.setNotPlaying();
-		Lobbies::PacketMessage msgPacket{0x00FFFF, 0, "You left arcade " + std::to_string(connection.getActiveMachine()) + "."};
+
+		auto machine = *connection.getActiveMachine();
+
+		Lobbies::PacketMessage msgPacket{0x00FFFF, 0, "You left arcade " + std::to_string(machine) + "."};
 		connection.send(&msgPacket, sizeof(msgPacket));
 		this->_leaveArcade(connection);
+		connection.setNotPlaying();
 		this->_machinesMutex.unlock();
 
 		Lobbies::PacketArcadeLeave leave{connection.getId()};
@@ -464,10 +480,10 @@ loop:
 	return result;
 }
 
-bool Server::_startRoom(std::vector<Connection *> &machine)
+bool Server::_startRoom(std::vector<Connection *> &machine, Connection &client)
 {
 	auto p1settings = machine[0]->getSettings().hostPref & Lobbies::HOSTPREF_HOST_PREF_MASK;
-	auto p2settings = machine[1]->getSettings().hostPref & Lobbies::HOSTPREF_HOST_PREF_MASK;
+	auto p2settings = client.getSettings().hostPref & Lobbies::HOSTPREF_HOST_PREF_MASK;
 	Lobbies::PacketGameRequest packet{0};
 
 	if (p1settings == p2settings && p1settings == Lobbies::HOSTPREF_CLIENT_ONLY) {
@@ -480,8 +496,8 @@ bool Server::_startRoom(std::vector<Connection *> &machine)
 		Lobbies::PacketArcadeLeave leave{machine[1]->getId()};
 
 		machine[0]->send(&msg, sizeof(msg));
-		machine[1]->send(&msg, sizeof(msg));
-		machine[1]->send(&leave, sizeof(leave));
+		client.send(&msg, sizeof(msg));
+		client.send(&leave, sizeof(leave));
 		machine.pop_back();
 		return false;
 	}
@@ -489,14 +505,15 @@ bool Server::_startRoom(std::vector<Connection *> &machine)
 		Lobbies::PacketImportantMessage msg{
 			"Error: Cannot start the game because both you and your opponent have their hosting preference set to 'Host only'."
 		};
-		Lobbies::PacketArcadeLeave leave{machine[1]->getId()};
+		Lobbies::PacketArcadeLeave leave{client.getId()};
 
 		machine[0]->send(&msg, sizeof(msg));
-		machine[1]->send(&msg, sizeof(msg));
-		machine[1]->send(&leave, sizeof(leave));
+		client.send(&msg, sizeof(msg));
+		client.send(&leave, sizeof(leave));
 		machine.pop_back();
 		return false;
 	}
+	machine.push_back(&client);
 	if (p1settings >= Lobbies::HOSTPREF_NO_PREF) {
 		machine[p2settings == Lobbies::HOSTPREF_HOST_ONLY]->send(&packet, sizeof(packet));
 		return true;
@@ -583,14 +600,13 @@ void Server::close()
 
 bool Server::_onPlayerJoinArcade(Connection &connection, unsigned int aid, bool force)
 {
+	sendDebug("Server::_onPlayerJoinArcade()");
 	this->_machinesMutex.lock();
-
 	if (connection.getBattleStatus()) {
 		if (!force) {
 			this->_machinesMutex.unlock();
 			return false;
 		}
-
 		this->_leaveArcade(connection);
 	}
 
@@ -601,7 +617,7 @@ bool Server::_onPlayerJoinArcade(Connection &connection, unsigned int aid, bool 
 		bool foundVersion = false;
 		std::string message = "Cannot join arcade " + std::to_string(aid) + " because the players here are using a different netplay version than you.\nYour version: ";
 
-		for (int i = 0; i < sizeof(versionNamesFull) / sizeof(*versionNamesFull); i++) {
+		for (unsigned i = 0; i < sizeof(versionNamesFull) / sizeof(*versionNamesFull); i++) {
 			if (memcmp(versions[i * 2], connection.getVersionString(), 16) == 0) {
 				message += std::string(versionNamesFull[i]) + " with SWR.";
 				foundVersion = true;
@@ -617,7 +633,7 @@ bool Server::_onPlayerJoinArcade(Connection &connection, unsigned int aid, bool 
 			message += "Unknown version string.";
 		foundVersion = false;
 		message += "\nTheir version: ";
-		for (int i = 0; i < sizeof(versionNamesFull) / sizeof(*versionNamesFull); i++) {
+		for (unsigned i = 0; i < sizeof(versionNamesFull) / sizeof(*versionNamesFull); i++) {
 			if (memcmp(versions[i * 2], machine[0]->getVersionString(), 16) == 0) {
 				message += std::string(versionNamesFull[i]) + " with SWR.";
 				foundVersion = true;
@@ -682,6 +698,8 @@ bool Server::_onPlayerJoinArcade(Connection &connection, unsigned int aid, bool 
 
 	connection.setActiveMachine(aid);
 	connection.send(&msgPacket, sizeof(msgPacket));
+
+	sendDebug("Machine size " + std::to_string(machine.size()) + ".");
 	if (!machine.empty() && machine[0]->getBattleStatus() == Lobbies::BATTLE_STATUS_PLAYING) {
 		Lobbies::PacketGameStart packet{machine[0]->getRoomInfo().ip, machine[0]->getRoomInfo().port, machine[0]->getRoomInfo().ipv6, machine[0]->getRoomInfo().port6, true};
 
@@ -690,11 +708,14 @@ bool Server::_onPlayerJoinArcade(Connection &connection, unsigned int aid, bool 
 		Lobbies::PacketGameStart packet{machine[1]->getRoomInfo().ip, machine[1]->getRoomInfo().port, machine[1]->getRoomInfo().ipv6, machine[1]->getRoomInfo().port6, true};
 
 		connection.send(&packet, sizeof(packet));
-	} else if (machine.size() == 2 && !this->_startRoom(machine)) {
-		this->_machinesMutex.unlock();
-		return true;
-	}
-	machine.push_back(&connection);
+	} else if (machine.size() == 1) {
+		if (!this->_startRoom(machine, connection)) {
+			sendDebug("this->_startRoom(machine) failed.");
+			this->_machinesMutex.unlock();
+			return true;
+		}
+	} else
+		machine.push_back(&connection);
 	this->_machinesMutex.unlock();
 
 	this->_connectionsMutex.lock();
@@ -707,7 +728,9 @@ bool Server::_onPlayerJoinArcade(Connection &connection, unsigned int aid, bool 
 
 void Server::_leaveArcade(Connection &connection)
 {
-	auto &machine = this->_machines[connection.getActiveMachine()];
+	sendDebug("Server::_leaveArcade()");
+
+	auto &machine = this->_machines[*connection.getActiveMachine()];
 
 	if (connection.getBattleStatus() == Lobbies::BATTLE_STATUS_PLAYING && (
 		(!machine.empty() && machine[0] == &connection) ||
@@ -870,7 +893,7 @@ void Server::_joinCmd(Connection *author, const std::vector<std::string> &args)
 	if (!author)
 		return sendSystemMessageTo(author, "Can only be used in a lobby", 0xFF0000);
 
-	auto name = args.front();
+	const auto &name = args.front();
 	Connection *player;
 
 	try {
@@ -882,10 +905,10 @@ void Server::_joinCmd(Connection *author, const std::vector<std::string> &args)
 
 	if (!player)
 		sendSystemMessageTo(author, "Cannot find " + name + ".", 0xFF0000);
-	else if (!player->getBattleStatus())
+	else if (!player->getActiveMachine())
 		sendSystemMessageTo(author, name + " is not at an arcade machine.", 0xFF0000);
 	else
-		this->_onPlayerJoinArcade(*author, player->getActiveMachine());
+		this->_onPlayerJoinArcade(*author, *player->getActiveMachine());
 }
 
 void Server::_listCmd(Connection *author, const std::vector<std::string> &)
@@ -1052,7 +1075,6 @@ void Server::_banipCmd(Connection *author, const std::vector<std::string> &args)
 
 	auto ip = sf::IpAddress(args.front());
 	auto reason = args.size() == 1 ? "Banned by an operator" : join(args.begin() + 1, args.end(), ' ');
-	Connection *player = nullptr;
 	std::string name;
 
 	if (ip == sf::IpAddress::None)
