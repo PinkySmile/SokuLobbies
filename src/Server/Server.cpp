@@ -189,7 +189,7 @@ void Server::run(unsigned short port, unsigned maxPlayers, const std::string &na
 
 					auto &m = this->_machines[c->getActiveMachine()];
 
-					m.erase(std::find(m.begin(), m.end(), &*c);
+					m.erase(std::find(m.begin(), m.end(), &*c));
 					this->_machinesMutex.unlock();
 				}
 			}
