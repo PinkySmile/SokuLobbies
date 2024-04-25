@@ -183,6 +183,16 @@ void Server::run(unsigned short port, unsigned maxPlayers, const std::string &na
 				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 			this->_connectionsMutex.lock();
+			for (auto &c : this->_connections) {
+				if (!c->isConnected()) {
+					this->_machinesMutex.lock();
+
+					auto &m = this->_machines[c->getActiveMachine()];
+
+					m.erase(std::find(m.begin(), m.end(), &*c);
+					this->_machinesMutex.unlock();
+				}
+			}
 			this->_connections.erase(std::remove_if(this->_connections.begin(), this->_connections.end(), [](std::shared_ptr<Connection> c) {
 				return !c->isConnected();
 			}), this->_connections.end());
