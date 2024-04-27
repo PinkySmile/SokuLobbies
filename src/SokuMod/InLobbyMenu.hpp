@@ -91,6 +91,7 @@ private:
 	LobbyMenu *_menu;
 	ArcadeMachine *_currentMachine = nullptr;
 	ElevatorMachine *_currentElevator = nullptr;
+	SokuLib::Vector2u _camera;
 	std::shared_ptr<Connection> _connection;
 	SokuLib::MenuConnect *_parent;
 	bool _wasConnected = false;

@@ -701,7 +701,36 @@ int InLobbyMenu::onProcess()
 
 		auto &bg = lobbyData->backgrounds[this->_background];
 
-		if (this->_currentElevator) {
+		if (SokuLib::inputMgrs.input.changeCard) {
+			int amount = 16;
+
+			if (me->dir & 0b1111) {
+				me->dir &= 0b10000;
+
+				Lobbies::PacketMove m{0, me->dir};
+
+				this->_connection->send(&m, sizeof(m));
+			}
+			if (SokuLib::inputMgrs.input.d)
+				amount = 32;
+			if (SokuLib::inputMgrs.input.horizontalAxis < 0)
+				this->_camera.x -= amount;
+			else if (SokuLib::inputMgrs.input.horizontalAxis > 0)
+				this->_camera.x += amount;
+			if (SokuLib::inputMgrs.input.verticalAxis < 0)
+				this->_camera.y -= amount;
+			else if (SokuLib::inputMgrs.input.verticalAxis > 0)
+				this->_camera.y += amount;
+
+			if (this->_camera.x < 320)
+				this->_camera.x = 320;
+			else if (this->_camera.x > bg.size.x - 320)
+				this->_camera.x = bg.size.x - 320;
+			if (this->_camera.y < 340)
+				this->_camera.y = 340;
+			else if (this->_camera.y > bg.size.y - 140)
+				this->_camera.y = bg.size.y - 140;
+		} else if (this->_currentElevator) {
 			bool elevatorChanged = false;
 
 			if (
@@ -772,7 +801,7 @@ int InLobbyMenu::onProcess()
 				}
 				if (elevatorChanged) {
 					SokuLib::Vector2i afterTranslate;
-	
+
 					if (this->_currentElevator->pos.x < 320)
 						afterTranslate.x = 0;
 					else if (this->_currentElevator->pos.x > bg.size.x - 320)
@@ -984,14 +1013,16 @@ int InLobbyMenu::onProcess()
 		}
 
 		this->_connection->updatePlayers(lobbyData->avatars);
+		if (SokuLib::inputMgrs.input.changeCard == 0)
+			this->_camera = me->pos;
 		if (this->_connection->isInit() && !this->_translateAnimation) {
-			if (me->pos.x < 320)
+			if (this->_camera.x < 320)
 				this->_translate.x = 0;
-			else if (me->pos.x > bg.size.x - 320)
+			else if (this->_camera.x > bg.size.x - 320)
 				this->_translate.x = 640 - bg.size.x;
 			else
-				this->_translate.x = 320 - me->pos.x;
-			this->_translate.y = 340 - me->pos.y;
+				this->_translate.x = 320 - this->_camera.x;
+			this->_translate.y = 340 - this->_camera.y;
 		}
 		this->_playersCopy = this->_connection->getPlayers();
 		return true;
