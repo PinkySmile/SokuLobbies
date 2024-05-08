@@ -526,6 +526,7 @@ void LobbyData::_loadBackgrounds()
 			elevator.pos.x = elevator_j["x"];
 			elevator.pos.y = elevator_j["y"];
 			elevator.noIndicator = elevator_j.contains("no_indicator") && elevator_j["no_indicator"];
+			elevator.skin = elevator_j["skin"];
 			elevator.hidden = elevator_j.contains("hidden") && elevator_j["hidden"];
 			if (!elevator_j["left_link"].is_null())
 				elevator.leftLink = {elevator_j["left_link"], 0};
@@ -639,6 +640,15 @@ SokuLib::DrawUtils::TextureRect parseTextureRect(nlohmann::json &val)
 	return rect;
 }
 
+LobbyData::DoorOpenAnimation parseDoorAnim(const std::string &anim)
+{
+	if (anim == "slide")
+		return LobbyData::DOOR_OPEN_SLIDE;
+	if (anim == "rotate")
+		return LobbyData::DOOR_OPEN_ROTATE;
+	throw std::invalid_argument("Invalid door open animation provided: " + anim);
+}
+
 void LobbyData::_loadElevators()
 {
 	std::filesystem::path folder = profileFolderPath;
@@ -668,6 +678,7 @@ void LobbyData::_loadElevators()
 		skin.arrow = parseTextureRect(val["arrow"]);
 		skin.doorLeft = parseTextureRect(val["doors"][0]);
 		skin.doorRight = parseTextureRect(val["doors"][1]);
+		skin.anim = parseDoorAnim(val["open_anim"]);
 
 		skin.sprite.texture.loadFromFile(file.string().c_str());
 	}

@@ -1,6 +1,7 @@
 [
 	{
 		"sprite": "assets/elevators/elevator.png",
+		"open_anim":"slide",
 		"door_offset": {
 			"x": 6,
 			"y": 6
@@ -35,6 +36,48 @@
 				"top": 38,
 				"width": 31,
 				"height": 106
+			}
+		],
+		"frameRate": 0,
+		"frames": 1
+	},
+	{
+		"sprite": "assets/elevators/big_door.png",
+		"open_anim":"rotate",
+		"door_offset": {
+			"x": 10,
+			"y": 92
+		},
+		"cage": {
+			"left": 190,
+			"top": 0,
+			"width": 210,
+			"height": 270
+		},
+		"indicator": {
+			"left": 0,
+			"top": 0,
+			"width": 0,
+			"height": 0
+		},
+		"arrow": {
+			"left": 0,
+			"top": 0,
+			"width": 0,
+			"height": 0
+		},
+		"doors": [
+			{
+				"left": 0,
+				"top": 92,
+				"width": 96,
+				"height": 178
+			},
+			{
+				"left": 96,
+				"top": 92,
+				"width": 94,
+				"height": 178
 			}
 		],
 		"frameRate": 0,

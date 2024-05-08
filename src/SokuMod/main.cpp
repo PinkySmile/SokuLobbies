@@ -144,8 +144,10 @@ static void __fastcall coinUsed(SokuLib::CharacterManager *This)
 {
 	auto &battlemgr = SokuLib::getBattleMgr();
 
-	if (!lobbyData)
+	if (!lobbyData) {
+		og_call48AD33(This);
 		return;
+	}
 	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSSERVER && This == &battlemgr.rightCharacterManager)
 		goto ok;
 	if (SokuLib::mainMode == SokuLib::BATTLE_MODE_VSCLIENT && This == &battlemgr.leftCharacterManager)
@@ -154,6 +156,7 @@ static void __fastcall coinUsed(SokuLib::CharacterManager *This)
 	if (This == &battlemgr.leftCharacterManager)
 		goto ok;
 #endif
+	og_call48AD33(This);
 	return;
 
 ok:

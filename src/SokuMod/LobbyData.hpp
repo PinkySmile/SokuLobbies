@@ -129,6 +129,7 @@ public:
 		std::optional<ElevatorLink> rightLink;
 		std::optional<ElevatorLink> upLink;
 		std::optional<ElevatorLink> downLink;
+		unsigned skin;
 		bool noIndicator;
 		bool hidden;
 	};
@@ -204,8 +205,13 @@ public:
 		std::vector<ArcadeAnimation> game;
 		std::vector<ArcadeSkin> skins;
 	};
+	enum DoorOpenAnimation {
+		DOOR_OPEN_SLIDE,
+		DOOR_OPEN_ROTATE
+	};
 	struct ElevatorSkin {
 		std::string file;
+		DoorOpenAnimation anim;
 		SokuLib::Vector2i doorOffset;
 		SokuLib::DrawUtils::Sprite sprite;
 		SokuLib::DrawUtils::TextureRect cage;
