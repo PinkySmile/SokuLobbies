@@ -1866,6 +1866,9 @@ void InLobbyMenu::_initInputBox()
 
 void InLobbyMenu::_updateTextCursor(int pos)
 {
+	if (pos > CHAT_CHARACTER_LIMIT)
+		pos = CHAT_CHARACTER_LIMIT;
+
 	int computedSize = getTextSize(this->_buffer.substr(0, pos).c_str(), this->_chatFont, BOX_TEXTURE_SIZE).x;
 	int newX = this->_textCursor.getPosition().x + computedSize - this->_textCursorPosSize;
 
