@@ -26,6 +26,10 @@ private:
 		SokuLib::DrawUtils::Sprite playerCount;
 		bool first = true;
 		bool passwd = false;
+		std::string redirectIpForLocalServer;
+
+	public:
+		Entry(const std::shared_ptr<Connection>& connection, const std::string& ip, unsigned short port);
 	};
 	struct AvatarShowcase {
 		unsigned char action = 0;
