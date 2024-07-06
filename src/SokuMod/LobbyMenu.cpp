@@ -20,6 +20,7 @@
 #include "integration.hpp"
 #include "createUTFTexture.hpp"
 #include "ipv6map_extern.hpp"
+#include "getPublicIp.hpp"
 
 #define CRenderer_Unknown1 ((void (__thiscall *)(int, int))0x404AF0)
 #define runOnUI(fct) do {                     \
@@ -60,6 +61,14 @@ void displaySokuCursor(SokuLib::Vector2i pos, SokuLib::Vector2u size)
 	CursorSprites[2].rotation = -*(float *)0x89A450 * 4.00000000f;
 	CursorSprites[2].render(pos.x - 14.00000000f, pos.y - 1.00000000f);
 	CRenderer_Unknown1(0x896B4C, 1);
+}
+
+LobbyMenu::Entry::Entry(const std::shared_ptr<Connection>& connection, const std::string& _ip, unsigned short _port)
+	: c(connection)
+	, ip(_ip)
+	, port(_port)
+{
+	redirectIpForLocalServer = redirectIp;
 }
 
 LobbyMenu::LobbyMenu(SokuLib::MenuConnect *parent) :
@@ -870,7 +879,9 @@ void LobbyMenu::_connectLoop()
 					};
 					runOnUI(fct);
 
-					connection->c = std::make_shared<Connection>(connection->ip, connection->port, this->_loadedSettings);
+					// for local lobby server
+					const auto& ip = connection->ip != getMyIp() ? connection->ip : connection->redirectIpForLocalServer;
+					connection->c = std::make_shared<Connection>(ip, connection->port, this->_loadedSettings);
 
 					std::lock_guard<std::mutex> functionMutexGuard(connection->c->functionMutex);
 					connection->c->onError = [weak, this](const std::string &msg) {
