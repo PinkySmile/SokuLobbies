@@ -108,6 +108,7 @@ private:
 	SokuLib::DrawUtils::Sprite _loadingGear;
 	SokuLib::DrawUtils::Sprite _battleStatus[3];
 	std::list<Message> _chatMessages;
+	std::mutex _chatMessagesMutex;
 	std::map<uint32_t, PlayerData> _extraPlayerData;
 	std::wstring _buffer;
 	std::vector<ArcadeMachine> _machines;

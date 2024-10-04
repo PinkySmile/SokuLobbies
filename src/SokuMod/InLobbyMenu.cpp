@@ -1524,9 +1524,10 @@ void InLobbyMenu::_unhook()
 void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const std::string &msg)
 {
 	this->_chatTimer = 900;
-	this->_chatMessages.emplace_front();
+	std::list<Message> tmpChatMessages;
+	tmpChatMessages.emplace_front();
 
-	auto *m = &this->_chatMessages.front();
+	auto *m = &tmpChatMessages.front();
 	std::string line;
 	std::string word;
 	std::string token;
@@ -1562,8 +1563,8 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 	};
 	auto nextLine = [&]{
 		pushText();
-		this->_chatMessages.emplace_front();
-		m = &this->_chatMessages.front();
+		tmpChatMessages.emplace_front();
+		m = &tmpChatMessages.front();
 		pos = 0;
 	};
 	size_t lastTokenSize = 0;
@@ -1655,6 +1656,18 @@ void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const
 	}
 	line += word;
 	pushText();
+	std::lock_guard<std::mutex> lock(this->_chatMessagesMutex);
+	this->_chatMessages.splice(this->_chatMessages.begin(), tmpChatMessages);
+	if (this->_chatMessages.size() > maxChatMessages) {
+		// Move those very old message into tmpChatMessages, so that they will be destructed with tmpChatMessages,
+		// after the mutex is unlocked.
+		// As a result, some D3D9 operations which might block will run outside the lock of _chatMessages.
+		auto index = this->_chatMessages.end();
+		size_t toRemoveCount = this->_chatMessages.size() - maxChatMessages;
+		for (size_t i = 0; i < toRemoveCount; i++)
+			index--;
+		tmpChatMessages.splice(tmpChatMessages.end(), this->_chatMessages, index, this->_chatMessages.end());
+	}
 }
 
 void InLobbyMenu::onKeyPressed(unsigned chr)
@@ -1988,6 +2001,7 @@ void InLobbyMenu::updateChat(bool inGame)
 		auto remaining = this->_chatOffset;
 		SokuLib::Vector2i pos{292, 180};
 
+		std::lock_guard<std::mutex> lock(this->_chatMessagesMutex);
 		for (auto &msg : this->_chatMessages) {
 			if (pos.y <= 3) {
 				msg.farUp = true;
@@ -2034,6 +2048,8 @@ void InLobbyMenu::renderChat()
 		return;
 	if (this->_chatSeat.tint.a) {
 		this->_chatSeat.draw();
+
+		std::lock_guard<std::mutex> lock(this->_chatMessagesMutex);
 		for (auto &msg: this->_chatMessages) {
 			if (msg.farUp)
 				break;
