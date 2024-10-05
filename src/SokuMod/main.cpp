@@ -61,6 +61,7 @@ unsigned hostPref;
 unsigned chatKey;
 unsigned lobbyJoinTries;
 unsigned lobbyJoinInterval;
+unsigned maxChatMessages;
 unsigned short servPort;
 unsigned short hostPort;
 bool hasSoku2 = false;
@@ -1104,6 +1105,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	chatKey = GetPrivateProfileIntW(L"Lobby", L"ChatKey", VK_RETURN, profilePath);
 	lobbyJoinTries = GetPrivateProfileIntW(L"Lobby", L"JoinTries", 15, profilePath);
 	lobbyJoinInterval = GetPrivateProfileIntW(L"Lobby", L"JoinInterval", 1, profilePath);
+	maxChatMessages = GetPrivateProfileIntW(L"Lobby", L"MaxChatMessages", 100, profilePath);
 	lobbyJoinTries += !lobbyJoinTries;
 	lobbyJoinInterval += !lobbyJoinInterval;
 
