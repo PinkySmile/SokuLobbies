@@ -787,7 +787,7 @@ void LobbyMenu::_masterServerLoop()
 				addr.S_un.S_un_b.s_b2 = packet[3];
 				addr.S_un.S_un_b.s_b3 = packet[4];
 				addr.S_un.S_un_b.s_b4 = packet[5];
-				elems.emplace_back(packet[0] | packet[1] << 8, inet_ntoa(addr));
+				elems.emplace_back((unsigned short) packet[0] | ((unsigned short) packet[1]) << 8, inet_ntoa(addr));
 				this->_mainServer.read(packet, 6);
 			}
 			_locked = true;
