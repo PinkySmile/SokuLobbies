@@ -45,13 +45,13 @@ static void __fastcall repl_alphaBlend(unsigned int color, unsigned int alpha, u
 	*out = result;
 }
 
-static void __fastcall repl_textShadow(int height, int width, int lineSize, unsigned int* input, unsigned int* output) {
+static void __fastcall repl_textShadow(int height, int width, int lineSizeInput, int lineSizeOutput, const unsigned int* input, unsigned int* output) {
 	width -= 1;
 	height -= 1;
 
 	for (int j = 1; j < height; ++j) {
 		for (int i = 1; i < width; ++i) {
-			unsigned int c0 = input[j * lineSize + i];
+			unsigned int c0 = input[j * lineSizeInput + i];
 
 			if (c0 >> 24) {
 				unsigned alpha = c0 >> 27;
@@ -60,20 +60,20 @@ static void __fastcall repl_textShadow(int height, int width, int lineSize, unsi
 				if (alpha > 16)
 					alpha = 16;
 				repl_alphaBlend(c0, alpha, &c1);
-				repl_alphaBlend(c1, 16, &output[j * lineSize + i]);
+				repl_alphaBlend(c1, 16, &output[j * lineSizeOutput + i]);
 			} else {
-				unsigned char current = input[(j - 1) * lineSize + i] >> 24;
-				unsigned char next = input[(j + 1) * lineSize + i] >> 24;
+				unsigned char current = input[(j - 1) * lineSizeInput + i] >> 24;
+				unsigned char next = input[(j + 1) * lineSizeInput + i] >> 24;
 
 				if (current < next)
 					current = next;
-				next = input[j * lineSize + (i - 1)] >> 24;
+				next = input[j * lineSizeInput + (i - 1)] >> 24;
 				if (current < next)
 					current = next;
-				next = input[j * lineSize + (i + 1)] >> 24;
+				next = input[j * lineSizeInput + (i + 1)] >> 24;
 				if (current < next)
 					current = next;
-				repl_alphaBlend(0, current >> 4, &output[j * lineSize + i]);
+				repl_alphaBlend(0, current >> 4, &output[j * lineSizeOutput + i]);
 			}
 		}
 	}
@@ -112,6 +112,16 @@ bool createTextTexture(int &retId, const wchar_t* text, SokuLib::SWRFont& font, 
 		return false;
 	}
 
+	if (D3D_OK != texPtr2->LockRect(0, &r2, nullptr, 0)) {
+		puts("Error in LockRect 2");
+		texPtr2->Release();
+		SokuLib::textureMgr.deallocate(retId);
+		return false;
+	}
+	for (int y = 0; y < texsize.y ;y++)
+		memset((char *)r2.pBits + r2.Pitch * y, 0, texsize.x * 4);
+	assert(SUCCEEDED(texPtr2->UnlockRect(0)));
+
 	if (D3D_OK != texPtr2->GetSurfaceLevel(0, &surface)) {
 		puts("Error in GetSurfaceLevel");
 		texPtr2->Release();
@@ -149,8 +159,7 @@ bool createTextTexture(int &retId, const wchar_t* text, SokuLib::SWRFont& font, 
 		size->y = actualSize.cy;
 	}
 
-	DeleteObject(font.font);
-	DeleteObject(font.gdiobj);
+	DeleteObject(SelectObject(context, font.gdiobj));
 	surface->ReleaseDC(context);
 	surface->Release();
 	font.gdiobj = nullptr;
@@ -163,6 +172,9 @@ bool createTextTexture(int &retId, const wchar_t* text, SokuLib::SWRFont& font, 
 		SokuLib::textureMgr.deallocate(retId);
 		return false;
 	}
+	for (int y = 0; y < texsize.y; y++)
+		memset((char *)r1.pBits + r1.Pitch * y, 0, texsize.x * 4);
+
 	if (D3D_OK != texPtr2->LockRect(0, &r2, nullptr, 0)) {
 		puts("Error in LockRect 2");
 		(*texPtr)->UnlockRect(0);
@@ -174,17 +186,26 @@ bool createTextTexture(int &retId, const wchar_t* text, SokuLib::SWRFont& font, 
 	auto ptr1 = reinterpret_cast<SokuLib::DrawUtils::DxSokuColor *>(r1.pBits);
 	auto ptr2 = reinterpret_cast<SokuLib::DrawUtils::DxSokuColor *>(r2.pBits);
 
-	for (int i = 0; i < texsize.x * texsize.y; i++) {
-		auto color = ptr2[i];
+	// Should we even assume it aligned to 4? Soku does assume it, but I don't found any document that confirms it.
+	assert(r1.Pitch % 4 == 0 && r2.Pitch % 4 ==0);
+	auto lineSize1 = r1.Pitch / 4;
+	auto lineSize2 = r2.Pitch / 4;
+	for (int y = 0; y < texsize.y; y++) {
+		for (int x = 0; x < texsize.x; x++) {
+			auto color = ptr2[x + y * lineSize2];
 
-		if (color) {
-			auto mean = (color.r + color.g + color.b) / 3;
-
-			(font.description.shadow ? ptr2 : ptr1)[i] = SokuLib::Color{0xFF, 0xFF, 0xFF, static_cast<unsigned char>(mean)};
+			if (color) {
+				auto mean = (color.r + color.g + color.b) / 3;
+				auto src = SokuLib::Color{0xFF, 0xFF, 0xFF, static_cast<unsigned char>(mean)};
+				if (font.description.shadow)
+					ptr2[x + y * lineSize2] = src;
+				else
+				    ptr1[x + y * lineSize1] = src;
+			}
 		}
 	}
 	if (font.description.shadow)
-		repl_textShadow(texsize.y, texsize.x, texsize.x, reinterpret_cast<unsigned *>(r2.pBits), reinterpret_cast<unsigned *>(r1.pBits));
+		repl_textShadow(texsize.y, texsize.x, lineSize2, lineSize1, reinterpret_cast<unsigned *>(r2.pBits), reinterpret_cast<unsigned *>(r1.pBits));
 	texPtr2->UnlockRect(0);
 	(*texPtr)->UnlockRect(0);
 	texPtr2->Release();
@@ -229,8 +250,7 @@ SokuLib::Vector2i getTextSize(const wchar_t *text, SokuLib::SWRFont &font, SokuL
 		return {0, 0};
 	}
 
-	DeleteObject(font.font);
-	DeleteObject(font.gdiobj);
+	DeleteObject(SelectObject(context, font.gdiobj));
 	surface->ReleaseDC(context);
 	surface->Release();
 	font.gdiobj = nullptr;
