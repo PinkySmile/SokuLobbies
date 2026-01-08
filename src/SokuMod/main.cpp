@@ -492,6 +492,8 @@ int __fastcall ConnectOnProcess(SokuLib::MenuConnect *This)
 	if (*(byte*)0x0448e4a != 0x30 && SokuLib::inputMgrs.input.changeCard == 1 && !inputBoxShown) {
 		playSound(0x28);
 		activated = !activated;
+		if (activated)
+			menu->_refreshName();
 	}
 	if (!res) {
 		activated = true;

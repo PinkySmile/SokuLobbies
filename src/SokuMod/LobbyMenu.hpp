@@ -99,6 +99,7 @@ public:
 	int onProcess() override;
 	int onRender() override;
 	void setActive();
+	void _refreshName();
 };
 
 #endif //SOKULOBBIES_LOBBYMENU_HPP
