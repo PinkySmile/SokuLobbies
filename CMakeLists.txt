@@ -28,7 +28,7 @@ if (ASAN)
 endif ()
 
 include_directories(src/Common)
-find_package(SFML)
+find_package(SFML 3)
 
 add_executable(
 	SokuLobbiesMainServer
@@ -43,6 +43,15 @@ add_executable(
 if (WIN32)
 	target_link_libraries(SokuLobbiesMainServer ws2_32)
 endif()
+
+if (SFML_FOUND)
+	find_package(SFML 3 REQUIRED)
+	add_compile_definitions(SFML3)
+else()
+	find_package(SFML 2 REQUIRED)
+	add_compile_definitions(SFML2)
+endif()
+
 
 if (SFML_FOUND)
 	add_executable(
