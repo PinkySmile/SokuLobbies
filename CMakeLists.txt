@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.15)
 project(SokuLobbies)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/pkgs)
 
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
 	if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -28,7 +27,6 @@ if (ASAN)
 endif ()
 
 include_directories(src/Common)
-find_package(SFML 3)
 
 add_executable(
 	SokuLobbiesMainServer
@@ -44,13 +42,21 @@ if (WIN32)
 	target_link_libraries(SokuLobbiesMainServer ws2_32)
 endif()
 
+find_package(SFML 3 QUIET COMPONENTS Network)
+
 if (SFML_FOUND)
-	find_package(SFML 3 REQUIRED)
-	add_compile_definitions(SFML3)
+    set(SFML_MAJOR 3)
 else()
-	find_package(SFML 2 REQUIRED)
-	add_compile_definitions(SFML2)
+    find_package(SFML 2 REQUIRED COMPONENTS network system)
+    set(SFML_MAJOR 2)
 endif()
+
+
+
+include(CMakePrintHelpers)
+
+cmake_print_variables(SFML_VERSION)
+cmake_print_variables(SFML_FOUND)
 
 
 if (SFML_FOUND)
@@ -81,8 +87,13 @@ if (SFML_FOUND)
 	if (WIN32)
 		target_link_libraries(SokuLobbiesServer ${SFML_NETWORK_LIBRARY} ${SFML_SYSTEM_LIBRARY} ws2_32)
 	else()
-		target_link_libraries(SokuLobbiesServer ${SFML_NETWORK_LIBRARY} ${SFML_SYSTEM_LIBRARY})
+		target_link_libraries(SokuLobbiesServer sfml-network sfml-system)
 	endif()
+endif()
+if (SFML_MAJOR EQUAL 3)
+    target_compile_definitions(SokuLobbiesServer PRIVATE SFML3)
+else()
+    target_compile_definitions(SokuLobbiesServer PRIVATE SFML2)
 endif()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
