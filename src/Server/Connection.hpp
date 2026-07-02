@@ -8,9 +8,12 @@
 
 #include <optional>
 #include <Packet.hpp>
-#include <SFML/Network.hpp>
 #include <thread>
 #include <functional>
+#include <Socket.hpp>
+#include <Clock.hpp>
+#include <IpAddress.hpp>
+#include <Exceptions.hpp>
 
 class Connection {
 public:
@@ -25,6 +28,11 @@ public:
 		std::string ipv6;
 		unsigned short port6;
 	};
+	template <typename T>
+	struct Vector2 {
+		T x;
+		T y;
+	};
 
 private:
 	const char *_password;
@@ -36,16 +44,16 @@ private:
 	unsigned long long _uniqueId;
 	std::string _name;
 	std::string _realName;
-	std::unique_ptr<sf::TcpSocket> _socket;
+	std::unique_ptr<Socket> _socket;
 	Lobbies::LobbySettings _settings;
 	Lobbies::PlayerCustomization _player;
 	std::thread _netThread;
 	uint8_t _dir = 0;
-	sf::Vector2<uint32_t> _pos = {0, 0};
+	Vector2<uint32_t> _pos = {0, 0};
 	bool _posChanged = true;
 	Lobbies::BattleStatus _battleStatus = Lobbies::BATTLE_STATUS_IDLE;
 	std::optional<uint8_t> _machineId;
-	sf::Clock _timeoutClock;
+	Clock _timeoutClock;
 	Room _room;
 
 	void _netLoop();
@@ -81,9 +89,9 @@ public:
 	std::function<bool (uint32_t aid)> onGameRequest;
 	std::function<void ()> onArcadeLeave;
 
-	Connection(std::unique_ptr<sf::TcpSocket> &socket, const char *password);
+	Connection(std::unique_ptr<Socket> &socket, const char *password);
 	~Connection();
-	sf::IpAddress getIp() const;
+	std::optional<IpAddress> getIp() const;
 	void kick(const std::string &msg);
 	void startThread();
 	void setId(uint32_t id);
@@ -94,7 +102,7 @@ public:
 	unsigned long long getUniqueId() const;
 	std::string getName() const;
 	std::string getRealName() const;
-	sf::Vector2<uint32_t> getPos() const;
+	Vector2<uint32_t> getPos() const;
 	uint8_t getDir() const;
 	Lobbies::BattleStatus getBattleStatus() const;
 	void setPlaying(bool spec);
@@ -106,6 +114,7 @@ public:
 	Lobbies::LobbySettings getSettings() const;
 	Lobbies::PlayerCustomization getPlayer() const;
 	bool isConnected() const;
+	bool isLocalHost() const;
 };
 
 

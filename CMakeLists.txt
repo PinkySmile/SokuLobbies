@@ -42,59 +42,35 @@ if (WIN32)
 	target_link_libraries(SokuLobbiesMainServer ws2_32)
 endif()
 
-find_package(SFML 3 QUIET COMPONENTS Network)
 
-if (SFML_FOUND)
-    set(SFML_MAJOR 3)
-else()
-    find_package(SFML 2 REQUIRED COMPONENTS network system)
-    set(SFML_MAJOR 2)
-endif()
+add_executable(
+	SokuLobbiesServer
+	src/Server/main.cpp
+	src/Common/Packet.hpp
+	src/Common/Packet.cpp
+	src/Common/Socket.hpp
+	src/Common/Socket.cpp
+	src/Server/Connection.cpp
+	src/Server/Connection.hpp
+	src/Server/Server.cpp
+	src/Server/Server.hpp
+	src/Common/GuardedMutex.cpp
+	src/Common/GuardedMutex.hpp
+	src/Common/Utils.cpp
+	src/Common/Utils.hpp
+	src/Common/IpAddress.cpp
+	src/Common/IpAddress.hpp
+	src/Common/Clock.cpp
+	src/Common/Clock.hpp
+	src/Common/encodingConverter.cpp
+	src/Common/encodingConverter.hpp
+	src/Common/shiftJISConvTable.inl
+	src/Common/shiftJISReverseConvTable.inl
+)
+if (MAIN_SERVER_HOST)
+	target_compile_definitions(SokuLobbiesServer PRIVATE MAIN_SERVER_HOST="${MAIN_SERVER_HOST}")
+endif ()
 
-
-
-include(CMakePrintHelpers)
-
-cmake_print_variables(SFML_VERSION)
-cmake_print_variables(SFML_FOUND)
-
-
-if (SFML_FOUND)
-	add_executable(
-		SokuLobbiesServer
-		src/Server/main.cpp
-		src/Common/Packet.hpp
-		src/Common/Packet.cpp
-		src/Common/Socket.hpp
-		src/Common/Socket.cpp
-		src/Server/Connection.cpp
-		src/Server/Connection.hpp
-		src/Server/Server.cpp
-		src/Server/Server.hpp
-		src/Common/GuardedMutex.cpp
-		src/Common/GuardedMutex.hpp
-		src/Common/Utils.cpp
-		src/Common/Utils.hpp
-		src/Common/encodingConverter.cpp
-		src/Common/encodingConverter.hpp
-		src/Common/shiftJISConvTable.inl
-		src/Common/shiftJISReverseConvTable.inl
-	)
-	if (MAIN_SERVER_HOST)
-		target_compile_definitions(SokuLobbiesServer PRIVATE MAIN_SERVER_HOST="${MAIN_SERVER_HOST}")
-	endif ()
-	target_include_directories(SokuLobbiesServer PRIVATE ${SFML_INCLUDE_DIRS})
-	if (WIN32)
-		target_link_libraries(SokuLobbiesServer ${SFML_NETWORK_LIBRARY} ${SFML_SYSTEM_LIBRARY} ws2_32)
-	else()
-		target_link_libraries(SokuLobbiesServer sfml-network sfml-system)
-	endif()
-endif()
-if (SFML_MAJOR EQUAL 3)
-    target_compile_definitions(SokuLobbiesServer PRIVATE SFML3)
-else()
-    target_compile_definitions(SokuLobbiesServer PRIVATE SFML2)
-endif()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 	add_definitions(-DWINVER=0x0600 -D_WIN32_WINNT=0x0600)

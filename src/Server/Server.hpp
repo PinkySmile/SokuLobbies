@@ -10,6 +10,8 @@
 #include <memory>
 #include <Packet.hpp>
 #include "Connection.hpp"
+#include <Clock.hpp>
+#include <IpAddress.hpp>
 
 struct BanEntry {
 	unsigned long long uniqueId;
@@ -24,7 +26,7 @@ private:
 	unsigned short _port;
 	const char *_password;
 	Connection::LobbyInfo _infos;
-	sf::TcpListener _listener;
+	Socket _listener;
 	std::vector<std::shared_ptr<Connection>> _connections;
 	std::mutex _connectionsMutex;
 	std::mutex _machinesMutex;

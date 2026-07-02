@@ -159,7 +159,7 @@ void Server::run(unsigned short port, unsigned maxPlayers, const std::string &na
 #ifndef _DEBUG
 	try {
 #endif
-		auto socket = std::make_unique<sf::TcpSocket>();
+		auto socket = std::make_unique<Socket>();
 		auto future = readLine();
 
 		this->_password = password;
@@ -172,39 +172,32 @@ void Server::run(unsigned short port, unsigned maxPlayers, const std::string &na
 		std::cout << "Listening on port " << port << std::endl;
 		logMutex.unlock();
 	#endif
-	#ifdef SFML2
-		if (this->_listener.listen(port) != sf::Socket::Done)
-	#else
-		if (this->_listener.listen(port) != sf::Socket::Status::Done)
-	#endif
+		if (this->_listener.slisten(port) != Done) {
+			std::cout << "listen failed" << std::endl;
 			return;
+		}
 		this->_listener.setBlocking(false);
 		this->_registerToMainServer();
 		while (this->_opened) {
-		#ifdef SFML2
-			if (sf::Socket::Done == this->_listener.accept(*socket)) {
-		#else
-			if (sf::Socket::Status::Done == this->_listener.accept(*socket)) {
-		#endif
-				auto addr = socket->getRemoteAddress();
+			std::cout << socket->getStatus() << std::endl;
+			this->_listener.accept(socket);
+			if (socket->getStatus() == Done) {
+				auto addr = socket->getRemote();
 
 				this->_connectionsMutex.lock();
 			#ifndef _LOBBYNOLOG
 				logMutex.lock();
-			#ifdef SFML2
-				std::cout << "New connection from " << addr.toString() << ":" << socket->getRemotePort() << std::endl;
-			#else
-				std::cout << "New connection from " << addr->toString() << ":" << socket->getRemotePort() << std::endl;
-			#endif
+				std::cout << "New connection from " << inet_ntoa(addr.sin_addr) << ":" << addr.sin_port << std::endl;
 				logMutex.unlock();
 			#endif
 				this->_connections.emplace_back(new Connection(socket, this->_password));
 				this->_prepareConnectionHandlers(*this->_connections.back());
 				this->_connectionsMutex.unlock();
-				socket = std::make_unique<sf::TcpSocket>();
-			} else
+				socket = std::make_unique<Socket>();
+			} else {
+				std::cout << "retrying connection" << std::endl;
 				std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
+			}
 			this->_connectionsMutex.lock();
 			for (auto &c : this->_connections) {
 				if (!c->isConnected() && c->getActiveMachine()) {
@@ -229,7 +222,8 @@ void Server::run(unsigned short port, unsigned maxPlayers, const std::string &na
 		}
 #ifndef _DEBUG
 	} catch (std::exception &e) {
-		this->_listener.close();
+		std::cerr << "Fatal error " << e.what() << std::endl;
+		this->_listener.disconnect();
 		this->_connectionsMutex.lock();
 		for (auto &c : this->_connections)
 			c->kick("Internal server error: " + std::string(e.what()));
@@ -242,7 +236,7 @@ void Server::run(unsigned short port, unsigned maxPlayers, const std::string &na
 		throw;
 	}
 #endif
-	this->_listener.close();
+	this->_listener.disconnect();
 	this->_connectionsMutex.lock();
 	for (auto &c : this->_connections) {
 		c->onDisconnect = [](const std::string &){};
@@ -336,12 +330,12 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 		}
 
 		auto it = std::find_if(this->_banList.begin(), this->_banList.end(), [&connection, &ip](BanEntry entry){
-			return entry.ip == connection.getIp().toString();
+			return entry.ip == connection.getIp()->toString();
 		});
 		//bool foundVersion = false;
 
 		if (it != this->_banList.end()) {
-			std::cout << connection.getName() << " (" << connection.getIp() << ") tried to join but is banned (" << it->profileName << " " << it->ip << " " << it->reason << ")." << std::endl;
+			std::cout << connection.getName() << " (" << connection.getIp()->toString() << ") tried to join but is banned (" << it->profileName << " " << it->ip << " " << it->reason << ")." << std::endl;
 			connection.kick("You are banned from this server: " + std::string(it->reason, strnlen(it->reason, sizeof(it->reason))));
 			return false;
 		}
@@ -554,7 +548,7 @@ void Server::_processCommands(Connection *author, const std::string &msg)
 			parsed.erase(parsed.begin());
 			return (this->*it->second.callback)(author, parsed);
 		}
-		if (!author || author->getIp() == sf::IpAddress::LocalHost) {
+		if (!author || author->isLocalHost()) {
 			auto ita = Server::_adminCommands.find(parsed.front());
 
 			if (ita != Server::_adminCommands.end()) {
@@ -579,7 +573,7 @@ void Server::_registerToMainServer()
 	logMutex.unlock();
 #endif
 	this->_mainServerThread = std::thread([this]{
-		sf::TcpSocket socket;
+		Socket socket;
 		unsigned short servPort;
 		char packet[3];
 		char buffer[64];
@@ -598,22 +592,11 @@ void Server::_registerToMainServer()
 		servPort = 5254;
 #endif
 		std::cout << "Main server is " << buffer << ":" << servPort << std::endl;
-#ifdef SFML2
 		socket.connect(buffer, servPort);
-#else
-		std::optional<sf::IpAddress> target = sf::IpAddress::resolve(buffer);
-		if (!target.has_value()) {
-			throw std::runtime_error("couldn't resolve " + std::string(buffer));
-		}
-		socket.connect(*target, servPort);
-#endif
-		while (this->_opened) {
-			if (socket.send(&packet, sizeof(packet)) == sf::Socket::Status::Disconnected)
-#ifdef SFML2
+		while (socket.isOpen()) {
+			if (socket.send(&packet, sizeof(packet)) == -1)
 				socket.connect(buffer, servPort);
-#else
-				socket.connect(*target, servPort);
-#endif
+			std::cout << "hi" << std::endl;
 			for (int i = 0; i < 100 && this->_opened; i++)
 				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		}
@@ -877,7 +860,7 @@ void Server::_helpCmd(Connection *author, const std::vector<std::string> &args)
 
 		if (it != Server::_commands.end())
 			return sendSystemMessageTo(author, "/" + it->first + " " + it->second.usage + ": " + it->second.description, 0xFFFF00);
-		if (!author || author->getIp() == sf::IpAddress::LocalHost) {
+		if (!author || author->isLocalHost()) {
 			auto ita = Server::_adminCommands.find(args[0]);
 
 			if (ita != Server::_adminCommands.end())
@@ -899,7 +882,7 @@ void Server::_helpCmd(Connection *author, const std::vector<std::string> &args)
 			msg = tmp;
 		}
 	}
-	if (!author || author->getIp() == sf::IpAddress::LocalHost)
+	if (!author || author->isLocalHost())
 		for (auto &cmd : Server::_adminCommands) {
 			auto tmp = "/" + cmd.first + " " + cmd.second.usage;
 
@@ -1089,7 +1072,7 @@ void Server::_banCmd(Connection *author, const std::vector<std::string> &args)
 
 	memset(&entry, 0, sizeof(entry));
 	sendSystemMessageTo(author, "Banned " + player->getName(), 0xFFFF00);
-	strncpy(entry.ip, player->getIp().toString().c_str(), sizeof(entry.ip));
+	strncpy(entry.ip, player->getIp()->toString().c_str(), sizeof(entry.ip));
 	strncpy(entry.profileName, player->getRealName().c_str(), sizeof(entry.profileName));
 	strncpy(entry.reason, reason.c_str(), sizeof(entry.reason));
 	player->kick(reason);
@@ -1100,42 +1083,25 @@ void Server::_banipCmd(Connection *author, const std::vector<std::string> &args)
 	if (args.empty())
 		return sendSystemMessageTo(author, "Missing argument #1 for command /banip. Use /help banip for more information", 0xFF0000);
 
-#ifdef SFML2
-	auto ip = sf::IpAddress(args.front());
-#else
-	auto ip = sf::IpAddress::fromString(args.front());
-#endif
-	auto reason = args.size() == 1 ? "Banned by an operator" : join(args.begin() + 1, args.end(), ' ');
-	std::string name;
-#ifdef SFML2
-	if (ip == sf::IpAddress::None)
-#else
-	if (!ip.has_value())
-#endif
+	if (IpAddress::validIp(args.front().c_str()))
 		return sendSystemMessageTo(author, "Invalid ip provided", 0xFF0000);
 
+	auto ip = IpAddress(args.front());
+	auto reason = args.size() == 1 ? "Banned by an operator" : join(args.begin() + 1, args.end(), ' ');
+	std::string name;
+	
 	auto it = std::find_if(this->_banList.begin(), this->_banList.end(), [ip](BanEntry &entry){
-#ifdef SFML2
+
 	return ip.toString() == entry.ip;
-#else
-	return ip->toString() == entry.ip;
-#endif
 	});
 
 	if (it == this->_banList.end()) {
 		this->_banList.emplace_back();
 		auto &entry = this->_banList.back();
-#ifdef SFML2
 		sendSystemMessageTo(author, "Banned " + ip.toString(), 0xFFFF00);
 		memset(&entry, 0, sizeof(entry));
 		strncpy(entry.ip, ip.toString().c_str(), sizeof(entry.ip));
 		strncpy(entry.profileName, ip.toString().c_str(), sizeof(entry.profileName));
-#else
-		sendSystemMessageTo(author, "Banned " + ip->toString(), 0xFFFF00);
-		memset(&entry, 0, sizeof(entry));
-		strncpy(entry.ip, ip->toString().c_str(), sizeof(entry.ip));
-		strncpy(entry.profileName, ip->toString().c_str(), sizeof(entry.profileName));
-#endif
 		strncpy(entry.reason, reason.c_str(), sizeof(entry.reason));
 	} else {
 		sendSystemMessageTo(author, "Updated entry for " + std::string(it->profileName), 0xFFFF00);
@@ -1146,7 +1112,7 @@ void Server::_banipCmd(Connection *author, const std::vector<std::string> &args)
 
 	this->_connectionsMutex.lock();
 	for (auto &c : this->_connections)
-		if (c->getIp() == ip && c->isInit())
+		if (*c->getIp() == ip && c->isInit())
 			toKick.push_back(&*c);
 	this->_connectionsMutex.unlock();
 	for (auto c : toKick)
