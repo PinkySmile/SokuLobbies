@@ -172,15 +172,14 @@ void Server::run(unsigned short port, unsigned maxPlayers, const std::string &na
 		std::cout << "Listening on port " << port << std::endl;
 		logMutex.unlock();
 	#endif
-		if (this->_listener.slisten(port) != Done) {
+		if (this->_listener.listen(port) != Done) {
 			std::cout << "listen failed" << std::endl;
 			return;
 		}
 		this->_listener.setBlocking(false);
 		this->_registerToMainServer();
 		while (this->_opened) {
-			std::cout << socket->getStatus() << std::endl;
-			this->_listener.accept(socket);
+			socket = this->_listener.accept(socket);
 			if (socket->getStatus() == Done) {
 				auto addr = socket->getRemote();
 
@@ -195,7 +194,6 @@ void Server::run(unsigned short port, unsigned maxPlayers, const std::string &na
 				this->_connectionsMutex.unlock();
 				socket = std::make_unique<Socket>();
 			} else {
-				std::cout << "retrying connection" << std::endl;
 				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			}
 			this->_connectionsMutex.lock();
@@ -596,7 +594,6 @@ void Server::_registerToMainServer()
 		while (socket.isOpen()) {
 			if (socket.send(&packet, sizeof(packet)) == -1)
 				socket.connect(buffer, servPort);
-			std::cout << "hi" << std::endl;
 			for (int i = 0; i < 100 && this->_opened; i++)
 				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		}

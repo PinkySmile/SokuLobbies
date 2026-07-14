@@ -262,12 +262,12 @@ Status Socket::bind(unsigned short port) {
 	serv_addr.sin_addr.s_addr = INADDR_ANY;
 	if (::bind(this->_sockfd, reinterpret_cast<const sockaddr *>(&serv_addr), sizeof(serv_addr)) < 0)
 		throw BindFailedException(getLastSocketError());
-	if (listen(this->_sockfd, 16) < 0)
+	if (::listen(this->_sockfd, 16) < 0)
 		throw ListenFailedException(getLastSocketError());
 	return Done;
 }
 
-Status Socket::slisten(unsigned short port) {
+Status Socket::listen(unsigned short port) {
 	return bind(port);
 }
 
@@ -290,17 +290,19 @@ Socket Socket::accept(Socket* _socket) {
 	return {fd, serv_addr};
 }
 
-Socket Socket::accept(const std::unique_ptr<Socket>& _socket) {
+std::unique_ptr<Socket> Socket::accept(const std::unique_ptr<Socket>& _socket) {
 
-	std::cout << "Done" << std::endl;
 	struct sockaddr_in serv_addr = {};
 	socklen_t size = sizeof(serv_addr);
 	SOCKET fd = ::accept(this->_sockfd, reinterpret_cast<sockaddr *>(&serv_addr), &size);
-
+	
 	if (fd == INVALID_SOCKET)
-		throw AcceptFailedException(getLastSocketError());
+	throw AcceptFailedException(getLastSocketError());
 	_status = Done;
-	return {fd, serv_addr};
+	std::cout << "Done" << std::endl;
+	auto socket = std::make_unique<Socket>(fd, serv_addr);
+	socket->_status = Done;
+	return socket;
 }
 
 std::string Socket::generateHttpResponse(const Socket::HttpResponse &res) {
@@ -380,7 +382,7 @@ Socket::Socket(const Socket &socket): _sockfd(socket.getSockFd()), _opened(socke
 	this->setNoDestroy(false);
 }
 
-Socket &Socket::operator=(const Socket &socket) {
+Socket &Socket::operator=(const Socket &socket) { 
 	if (this->isOpen() && !this->_noDestroy)
 		this->disconnect();
 	this->_opened = socket.isOpen();

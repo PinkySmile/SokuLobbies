@@ -40,15 +40,16 @@ void Connection::_netLoop()
         this->_timeoutClock.restart();
 
         buffered += readSize;
-		std::cout << buffer << std::endl;
 
         while (buffered >= sizeof(Lobbies::Packet) && this->_connected)
         {
             auto* packet = reinterpret_cast<Lobbies::Packet*>(buffer);
 			size_t packetSize = sizeof(Lobbies::Packet);
 
-            if (!this->_handlePacket(*packet, packetSize))
+            if (!this->_handlePacket(*packet, packetSize)) {
+				std::cout << "invalid packet sent" << std::endl;
                 break;
+			}
 
             buffered -= sizeof(Lobbies::Packet);
 

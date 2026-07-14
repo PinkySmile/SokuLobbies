@@ -140,10 +140,10 @@ public:
 	static HttpRequest parseHttpRequest(const std::string &requ);
 
 	Status bind(unsigned short port);
-	Status slisten(unsigned short port);
+	Status listen(unsigned short port);
 	bool hasData() const;
 	Socket accept(Socket*);
-	Socket accept(const std::unique_ptr<Socket>& _socket);
+	std::unique_ptr<Socket> accept(const std::unique_ptr<Socket>& _socket);
 
 	//! @brief Return the socket value.
 	//! @return SOCKET
