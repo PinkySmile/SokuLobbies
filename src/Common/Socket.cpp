@@ -7,6 +7,7 @@
 #include "Exceptions.hpp"
 #include <cstring>
 #include <sstream>
+#include <iostream>
 
 #ifndef _WIN32
 #include <unistd.h>
@@ -64,7 +65,7 @@ void Socket::connect(const std::string &host, unsigned short portno) {
 	struct hostent *server;
 
 	if (this->isOpen())
-		throw AlreadyOpenedException("This socket is already opened");
+		throw AlreadyOpenedException("This socket is already opened 67");
 
 	/* create the socket */
 	this->_sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -82,7 +83,7 @@ void Socket::connect(unsigned int ip, unsigned short portno) {
 	struct sockaddr_in serv_addr = {};
 
 	if (this->isOpen())
-		throw AlreadyOpenedException("This socket is already opened");
+		throw AlreadyOpenedException("This socket is already opened 85");
 
 	/* fill in the structure */
 	serv_addr.sin_family = AF_INET;
@@ -90,15 +91,19 @@ void Socket::connect(unsigned int ip, unsigned short portno) {
 	serv_addr.sin_addr.s_addr = ip;
 
 	/* connect the socket */
-	if (::connect(this->_sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+	this->_status = NotReady;
+	if (::connect(this->_sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+		this->_status = Error;
 		throw ConnectException(std::string("Cannot connect to ") + inet_ntoa(serv_addr.sin_addr) + " on port " + std::to_string(portno));
-	this->_remote = serv_addr;
+	}
+		this->_remote = serv_addr;
 	this->_opened = true;
+	this->_status = Done;
 }
 
 Socket::HttpResponse Socket::makeHttpRequest(const Socket::HttpRequest &request) {
 	if (this->isOpen())
-		throw AlreadyOpenedException("This socket is already opened");
+		throw AlreadyOpenedException("This socket is already opened 105");
 
 	std::string requestString = this->generateHttpRequest(request);
 	std::string response = this->makeRawRequest(request.host, request.portno, requestString);
@@ -117,6 +122,8 @@ void Socket::disconnect() {
 	if (!this->_noDestroy)
 		close(this->_sockfd);
 	this->_opened = false;
+	std::cout << "Scoket Disconncting" << std::endl;
+	this->_status = Disconnected;
 }
 
 std::string Socket::makeRawRequest(const std::string &host, unsigned short portno, const std::string &content) {
@@ -239,30 +246,41 @@ Socket::Socket(SOCKET sockfd, struct sockaddr_in addr): Socket() {
 	this->_remote = addr;
 }
 
-void Socket::bind(unsigned short port) {
+Status Socket::bind(unsigned short port) {
 	struct sockaddr_in serv_addr = {};
 
-	if (this->isOpen())
-		throw AlreadyOpenedException("This socket is already opened");
+	// if (this->isOpen())
+	// 	throw AlreadyOpenedException("This socket is already opened 251");
 
 	this->_sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (this->_sockfd == INVALID_SOCKET)
 		throw SocketCreationErrorException(getLastSocketError());
 	this->_opened = true;
+	this->_status = Done;
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_port = htons(port);
 	serv_addr.sin_addr.s_addr = INADDR_ANY;
 	if (::bind(this->_sockfd, reinterpret_cast<const sockaddr *>(&serv_addr), sizeof(serv_addr)) < 0)
 		throw BindFailedException(getLastSocketError());
-	if (listen(this->_sockfd, 16) < 0)
+	if (::listen(this->_sockfd, 16) < 0)
 		throw ListenFailedException(getLastSocketError());
+	return Done;
+}
+
+Status Socket::listen(unsigned short port) {
+	return bind(port);
 }
 
 const sockaddr_in &Socket::getRemote() const {
 	return this->_remote;
 }
 
-Socket Socket::accept() {
+Status Socket::getStatus() const {
+	return _status;
+}
+
+
+Socket Socket::accept(Socket* _socket) {
 	struct sockaddr_in serv_addr = {};
 	socklen_t size = sizeof(serv_addr);
 	SOCKET fd = ::accept(this->_sockfd, reinterpret_cast<sockaddr *>(&serv_addr), &size);
@@ -270,6 +288,21 @@ Socket Socket::accept() {
 	if (fd == INVALID_SOCKET)
 		throw AcceptFailedException(getLastSocketError());
 	return {fd, serv_addr};
+}
+
+std::unique_ptr<Socket> Socket::accept(const std::unique_ptr<Socket>& _socket) {
+
+	struct sockaddr_in serv_addr = {};
+	socklen_t size = sizeof(serv_addr);
+	SOCKET fd = ::accept(this->_sockfd, reinterpret_cast<sockaddr *>(&serv_addr), &size);
+	
+	if (fd == INVALID_SOCKET)
+	throw AcceptFailedException(getLastSocketError());
+	_status = Done;
+	std::cout << "Done" << std::endl;
+	auto socket = std::make_unique<Socket>(fd, serv_addr);
+	socket->_status = Done;
+	return socket;
 }
 
 std::string Socket::generateHttpResponse(const Socket::HttpResponse &res) {
@@ -336,6 +369,10 @@ void Socket::setNoDestroy(bool noDestroy) const {
 	this->_noDestroy = noDestroy;
 }
 
+void Socket::setBlocking(bool blocking) const {
+	this->_blocking = blocking;
+}
+
 bool Socket::isDisconnected() const {
 	return !this->isOpen();
 }
@@ -345,7 +382,7 @@ Socket::Socket(const Socket &socket): _sockfd(socket.getSockFd()), _opened(socke
 	this->setNoDestroy(false);
 }
 
-Socket &Socket::operator=(const Socket &socket) {
+Socket &Socket::operator=(const Socket &socket) { 
 	if (this->isOpen() && !this->_noDestroy)
 		this->disconnect();
 	this->_opened = socket.isOpen();
@@ -395,3 +432,4 @@ bool Socket::hasData() const
 		this->_opened = false;
 	return r > 0;
 }
+

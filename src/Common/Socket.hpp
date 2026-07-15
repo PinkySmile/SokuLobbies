@@ -15,12 +15,21 @@ typedef int SOCKET;
 #endif
 #include <map>
 #include <string>
+#include <memory>
 
 #ifdef _WIN32
 std::string getLastSocketError(int err = WSAGetLastError());
 #else
 std::string getLastSocketError(int err = errno);
 #endif
+
+enum Status {
+	Done,
+	NotReady,
+	Disconnected,
+	Error,
+	Partial,
+};
 
 //! @brief Define a Socket
 class Socket {
@@ -130,9 +139,11 @@ public:
 	//! @return HttpRequest
 	static HttpRequest parseHttpRequest(const std::string &requ);
 
-	void bind(unsigned short port);
+	Status bind(unsigned short port);
+	Status listen(unsigned short port);
 	bool hasData() const;
-	Socket accept();
+	Socket accept(Socket*);
+	std::unique_ptr<Socket> accept(const std::unique_ptr<Socket>& _socket);
 
 	//! @brief Return the socket value.
 	//! @return SOCKET
@@ -144,13 +155,19 @@ public:
 
 	void setNoDestroy(bool noDestroy) const;
 
+	void setBlocking(bool) const;
+
 	bool isDisconnected() const;
+
+	Status getStatus() const;
 
 protected:
 	mutable bool _noDestroy = false;
+	mutable bool _blocking = false;
 	SOCKET _sockfd = INVALID_SOCKET; //!< The socket
 	mutable bool _opened = false; //!< The status of the socket.
 	struct sockaddr_in _remote;
+	Status _status = Disconnected;
 };
 
 #endif // DISC_ORD_SOCKET_HPP

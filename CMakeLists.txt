@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.15)
 project(SokuLobbies)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/pkgs)
 
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
 	if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -28,7 +27,6 @@ if (ASAN)
 endif ()
 
 include_directories(src/Common)
-find_package(SFML)
 
 add_executable(
 	SokuLobbiesMainServer
@@ -44,37 +42,35 @@ if (WIN32)
 	target_link_libraries(SokuLobbiesMainServer ws2_32)
 endif()
 
-if (SFML_FOUND)
-	add_executable(
-		SokuLobbiesServer
-		src/Server/main.cpp
-		src/Common/Packet.hpp
-		src/Common/Packet.cpp
-		src/Common/Socket.hpp
-		src/Common/Socket.cpp
-		src/Server/Connection.cpp
-		src/Server/Connection.hpp
-		src/Server/Server.cpp
-		src/Server/Server.hpp
-		src/Common/GuardedMutex.cpp
-		src/Common/GuardedMutex.hpp
-		src/Common/Utils.cpp
-		src/Common/Utils.hpp
-		src/Common/encodingConverter.cpp
-		src/Common/encodingConverter.hpp
-		src/Common/shiftJISConvTable.inl
-		src/Common/shiftJISReverseConvTable.inl
-	)
-	if (MAIN_SERVER_HOST)
-		target_compile_definitions(SokuLobbiesServer PRIVATE MAIN_SERVER_HOST="${MAIN_SERVER_HOST}")
-	endif ()
-	target_include_directories(SokuLobbiesServer PRIVATE ${SFML_INCLUDE_DIRS})
-	if (WIN32)
-		target_link_libraries(SokuLobbiesServer ${SFML_NETWORK_LIBRARY} ${SFML_SYSTEM_LIBRARY} ws2_32)
-	else()
-		target_link_libraries(SokuLobbiesServer ${SFML_NETWORK_LIBRARY} ${SFML_SYSTEM_LIBRARY})
-	endif()
-endif()
+
+add_executable(
+	SokuLobbiesServer
+	src/Server/main.cpp
+	src/Common/Packet.hpp
+	src/Common/Packet.cpp
+	src/Common/Socket.hpp
+	src/Common/Socket.cpp
+	src/Server/Connection.cpp
+	src/Server/Connection.hpp
+	src/Server/Server.cpp
+	src/Server/Server.hpp
+	src/Common/GuardedMutex.cpp
+	src/Common/GuardedMutex.hpp
+	src/Common/Utils.cpp
+	src/Common/Utils.hpp
+	src/Common/IpAddress.cpp
+	src/Common/IpAddress.hpp
+	src/Common/Clock.cpp
+	src/Common/Clock.hpp
+	src/Common/encodingConverter.cpp
+	src/Common/encodingConverter.hpp
+	src/Common/shiftJISConvTable.inl
+	src/Common/shiftJISReverseConvTable.inl
+)
+if (MAIN_SERVER_HOST)
+	target_compile_definitions(SokuLobbiesServer PRIVATE MAIN_SERVER_HOST="${MAIN_SERVER_HOST}")
+endif ()
+
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 	add_definitions(-DWINVER=0x0600 -D_WIN32_WINNT=0x0600)
