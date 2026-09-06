@@ -4521,7 +4521,7 @@ void InLobbyMenu::_startHosting()
 			if (!chineseLanguage)
 				this->_addMessageToList(0xFF0000, 0, "Hostlist error: " + error);
 			else if (error.find("HTTP 400") != std::string::npos && error.find("couldn't connect to host") != std::string::npos)
-				this->_addMessageToList(0xFF0000, 0, "\u521B\u5EFA\u8FDE\u63A5\u5931\u8D25\uFF1A\u8BF7\u786E\u8BA4\u4F60\u5DF2\u7ECF\u4F7F\u7528 swarm \u5EFA\u7ACB\u4E3B\u673A\u6216\u4F7F\u7528 autopunch >= 0.0.4\u3002");
+				this->_addMessageToList(0xFF0000, 0, "\u521B\u5EFA\u8FDE\u63A5\u5931\u8D25\uFF1A\u8BF7\u786E\u8BA4\u4F60\u5DF2\u7ECF\u4F7F\u7528 swarm \u5EFA\u7ACB\u4E3B\u673A\uFF0C\u6709\u7591\u95EE\u53EF\u67E5\u770B wiki.514.live\u7F51\u7AD9\u8054\u673A\u6559\u7A0B\u3002");
 			else
 				this->_addMessageToList(0xFF0000, 0, "\u521B\u5EFA\u8FDE\u63A5\u5931\u8D25\uFF1A" + error);
 		}
