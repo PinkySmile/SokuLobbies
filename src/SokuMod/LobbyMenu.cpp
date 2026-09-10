@@ -936,7 +936,13 @@ void LobbyMenu::_connectLoop()
 					runOnUI(fct);
 
 					// for local lobby server
-					const auto& ip = connection->ip != getMyIp(&this->_open) ? connection->ip : connection->redirectIpForLocalServer;
+					std::string ip = connection->ip;
+					try {
+						if (connection->ip == getMyIp(&this->_open))
+							ip = connection->redirectIpForLocalServer;
+					} catch (std::exception &e) {
+						printf("Failed to get public IP, skipping local redirect: %s\n", e.what());
+					}
 					if (!this->_open)
 						break;
 					connection->c = std::make_shared<Connection>(ip, connection->port, this->_loadedSettings);
