@@ -127,6 +127,13 @@ static std::string localizeKickReason(const std::string &reason)
 
 static std::string localizeLobbyMessage(const std::string &message)
 {
+	// Older block-enabled servers use this compatibility response specifically
+	// when a player is rejected by an opponent's blacklist.
+	if (
+		message == "Unable to join this arcade machine." ||
+		message == "无法加入该对战机。\nUnable to join this arcade machine."
+	)
+		return chineseLanguage ? "你已被该玩家拉黑。" : "You have been blacklisted by this player.";
 	if (!chineseLanguage)
 		return message;
 	if (message == "Connection closed")
@@ -667,8 +674,9 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, std::sha
 	};
 	this->_connection->onMsg = [this](int32_t channel, int32_t player, const std::string &msg){
 		if (channel == Lobbies::BLOCKLIST_CONTROL_CHANNEL && msg == "BLOCKCAP1") {
+			// Synchronization is sent optimistically for compatibility with older
+			// block-enabled servers which do not return BLOCKCAP1.
 			this->_serverBlocklistSupported = true;
-			this->_syncBlocklistToServer();
 			return;
 		}
 		if (channel == Lobbies::BLOCKLIST_CONTROL_CHANNEL && msg.compare(0, 9, "BLOCKIP1\t") == 0) {
@@ -702,7 +710,7 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, std::sha
 		}
 		if (
 			player == 0 &&
-			msg.find("__blockcap") != std::string::npos &&
+			msg.find("__block") != std::string::npos &&
 			(msg.find("Unknown command") != std::string::npos || msg.find("未知指令") != std::string::npos)
 		)
 			return;
@@ -1228,6 +1236,20 @@ int InLobbyMenu::onProcess()
 						continue;
 					if (me->pos.y > machine.pos.y + machine.skin.sprite.getSize().y)
 						continue;
+					if (machine.id != UINT32_MAX) {
+						auto blockedPlayer = this->_getBlacklistedBattlePlayer(machine.id);
+
+						if (blockedPlayer) {
+							this->_addMessageToList(
+								0xFF0000,
+								0,
+								chineseLanguage
+									? "无法加入：" + *blockedPlayer + " 在你的黑名单中。"
+									: "Cannot join: " + *blockedPlayer + " is in your blacklist."
+							);
+							goto touched;
+						}
+					}
 					this->_currentMachine = &machine;
 					playSound(0x28);
 					if (machine.id == UINT32_MAX) {
@@ -1984,7 +2006,10 @@ void InLobbyMenu::_unhook()
 void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const std::string &msg, std::optional<unsigned> colorOverride, bool autoPopup)
 {
 	// Error messages must remain visible regardless of the F3 popup mode.
-	if (autoPopup || channel == 0xFF0000)
+	if (channel == 0xFF0000) {
+		this->_errorChatPopup.store(true, std::memory_order_relaxed);
+		this->_chatTimer = 900;
+	} else if (autoPopup)
 		this->_chatTimer = 900;
 	std::lock_guard<std::mutex> lock(this->_chatMessagesMutex);
 	this->_chatMessages.emplace_front();
@@ -3633,8 +3658,13 @@ void InLobbyMenu::_syncBlocklistToServer()
 
 void InLobbyMenu::_probeBlocklistServer()
 {
+	// Deployed block-enabled servers may implement synchronization and IP lookup
+	// without implementing the later capability response. Optimistically use the
+	// private commands; errors from genuinely old servers are hidden above.
+	this->_serverBlocklistSupported = true;
 	Lobbies::PacketMessage packet{0, 0, "/__blockcap"};
 	this->_connection->send(&packet, sizeof(packet));
+	this->_syncBlocklistToServer();
 }
 
 void InLobbyMenu::_requestRecentOpponentIp()
@@ -3643,6 +3673,28 @@ void InLobbyMenu::_requestRecentOpponentIp()
 		return;
 	Lobbies::PacketMessage packet{0, 0, "/__blockopponentip"};
 	this->_connection->send(&packet, sizeof(packet));
+}
+
+std::optional<std::string> InLobbyMenu::_getBlacklistedBattlePlayer(unsigned machineId) const
+{
+	unsigned battlePlayers = 0;
+	const Player *blockedPlayer = nullptr;
+	for (const auto &player : this->_playersCopy) {
+		if (
+			player.machineId != machineId ||
+			(player.battleStatus != Lobbies::BATTLE_STATUS_WAITING &&
+			 player.battleStatus != Lobbies::BATTLE_STATUS_PLAYING)
+		)
+			continue;
+		battlePlayers++;
+		if (Blocklist::contains(player.name))
+			blockedPlayer = &player;
+	}
+
+	// Two occupied battle seats mean that pressing Z is a spectate request.
+	if (battlePlayers >= 2 || !blockedPlayer)
+		return std::nullopt;
+	return blockedPlayer->name;
 }
 
 void InLobbyMenu::_sendMessage(const std::wstring &msg)
@@ -3756,7 +3808,11 @@ void InLobbyMenu::updateChat(bool inGame)
 		this->_chatPopupModeTimer--;
 	if (this->_editingText)
 		this->_chatTimer = 300;
-	else if (inGame && !this->_battleOpponentChatPopup.load(std::memory_order_relaxed))
+	else if (
+		inGame &&
+		!this->_battleOpponentChatPopup.load(std::memory_order_relaxed) &&
+		!this->_errorChatPopup.load(std::memory_order_relaxed)
+	)
 		this->_chatTimer = this->_chatSeat.tint.a != 0;
 	if (this->_chatTimer) {
 		this->_chatTimer--;
@@ -3764,8 +3820,10 @@ void InLobbyMenu::updateChat(bool inGame)
 		unsigned char alpha = this->_chatTimer > 120 ? 255 : (this->_chatTimer * 255 / 120);
 
 		this->_chatSeat.tint.a = alpha;
-	} else
+	} else {
 		this->_battleOpponentChatPopup.store(false, std::memory_order_relaxed);
+		this->_errorChatPopup.store(false, std::memory_order_relaxed);
+	}
 }
 
 void InLobbyMenu::_renderBattleChatHint()

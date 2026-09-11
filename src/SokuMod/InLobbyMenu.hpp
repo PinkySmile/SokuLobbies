@@ -128,6 +128,7 @@ private:
 	unsigned _chatOffset = 0;
 	std::atomic_bool _chatScrolledAwayFromBottom{false};
 	std::atomic_bool _battleOpponentChatPopup{false};
+	std::atomic_bool _errorChatPopup{false};
 	uint8_t _background = 0;
 	std::string _music;
 	SokuLib::DrawUtils::Sprite _chatSeat;
@@ -306,6 +307,7 @@ private:
 	void _probeBlocklistServer();
 	void _syncBlocklistToServer();
 	void _requestRecentOpponentIp();
+	std::optional<std::string> _getBlacklistedBattlePlayer(unsigned machineId) const;
 	void _unhook();
 	void _renderMachineOverlay();
 	void _startHosting();
