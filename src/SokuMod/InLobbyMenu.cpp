@@ -27,6 +27,7 @@
 #include "integration.hpp"
 #include "getPublicIp.hpp"
 #include "ipv6map_extern.hpp"
+#include "Blocklist.hpp"
 
 #define CHAT_CHARACTER_LIMIT 512
 #define BOX_TEXTURE_SIZE {0x2000, 30}
@@ -130,6 +131,10 @@ static std::string localizeLobbyMessage(const std::string &message)
 		return message;
 	if (message == "Connection closed")
 		return "与服务器的连接已关闭。";
+	if (message == "You have been blacklisted by this player.")
+		return "你已被该玩家拉黑。";
+	if (message == "This player is in your blacklist.")
+		return "该玩家已在你的黑名单中。";
 	constexpr char joinedSuffix[] = " has joined the lobby.";
 	constexpr char disconnectedSuffix[] = " has disconnected";
 	constexpr char kickedMarker[] = " has been kicked: ";
@@ -640,6 +645,7 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, std::sha
 		this->_lobbyIdentity = std::string(servHost) + ":" + std::to_string(servPort) + "/" + this->_roomName;
 		this->_restoreRecentOpponent();
 		this->_queuePlayerName(r.id, std::string(r.realName, strnlen(r.realName, sizeof(r.realName))));
+		this->_probeBlocklistServer();
 		this->_music = "data/bgm/" + std::string(r.music, strnlen(r.music, sizeof(r.music))) + ".ogg";
 		SokuLib::playBGM(this->_music.c_str());
 		if (!hasIpv6Map())
@@ -660,6 +666,46 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, std::sha
 		this->_openMessageBox(23, localizeLobbyMessage(msg), chineseLanguage ? "服务器通知" : "Notification from server", MB_ICONINFORMATION);
 	};
 	this->_connection->onMsg = [this](int32_t channel, int32_t player, const std::string &msg){
+		if (channel == Lobbies::BLOCKLIST_CONTROL_CHANNEL && msg == "BLOCKCAP1") {
+			this->_serverBlocklistSupported = true;
+			this->_syncBlocklistToServer();
+			return;
+		}
+		if (channel == Lobbies::BLOCKLIST_CONTROL_CHANNEL && msg.compare(0, 9, "BLOCKIP1\t") == 0) {
+			auto separator = msg.find('\t', 9);
+			if (separator != std::string::npos) {
+				auto encodedName = msg.substr(9, separator - 9);
+				auto ip = msg.substr(separator + 1);
+				std::string name;
+				if (encodedName.size() % 2 == 0) {
+					auto digit = [](char c) -> int {
+						if (c >= '0' && c <= '9') return c - '0';
+						if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+						if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+						return -1;
+					};
+					for (size_t i = 0; i < encodedName.size(); i += 2) {
+						auto high = digit(encodedName[i]);
+						auto low = digit(encodedName[i + 1]);
+						if (high < 0 || low < 0) {
+							name.clear();
+							break;
+						}
+						name.push_back(static_cast<char>((high << 4) | low));
+					}
+				}
+				if (!name.empty() && Blocklist::contains(name) && Blocklist::addIp(name, ip)) {
+					this->_syncBlocklistToServer();
+				}
+			}
+			return;
+		}
+		if (
+			player == 0 &&
+			msg.find("__blockcap") != std::string::npos &&
+			(msg.find("Unknown command") != std::string::npos || msg.find("未知指令") != std::string::npos)
+		)
+			return;
 		bool privateMessage = channel == -1;
 		this->_logChatToFile(player, msg);
 		this->_showEmoteBubble(player, msg);
@@ -1937,7 +1983,8 @@ void InLobbyMenu::_unhook()
 
 void InLobbyMenu::_addMessageToList(unsigned int channel, unsigned player, const std::string &msg, std::optional<unsigned> colorOverride, bool autoPopup)
 {
-	if (autoPopup)
+	// Error messages must remain visible regardless of the F3 popup mode.
+	if (autoPopup || channel == 0xFF0000)
 		this->_chatTimer = 900;
 	std::lock_guard<std::mutex> lock(this->_chatMessagesMutex);
 	this->_chatMessages.emplace_front();
@@ -3380,6 +3427,9 @@ bool InLobbyMenu::_handleLocalHelp(const std::wstring &msg)
 				L"/msg <玩家> <消息>\n"
 				L"/report [玩家] <原因>\n"
 				L"/tp <玩家>\n"
+				L"/block <玩家>\n"
+				L"/unblock <玩家名>\n"
+				L"/block list\n"
 				L"玩家联想：输入玩家后使用 Tab 或上下键选择。"
 			);
 			return true;
@@ -3416,6 +3466,10 @@ bool InLobbyMenu::_handleLocalHelp(const std::wstring &msg)
 				L"/report 被举报人已经离开大厅";
 		else if (_wcsicmp(argument.c_str(), L"tp") == 0)
 			helpText = L"/tp <玩家>：传送到指定玩家的位置。支持数字 ID 或准确的 @玩家名；冷却时间为60秒，在对战机、观战机或电梯内无法使用。\n示例：\n/tp 1\n/tp @PinkySmile";
+		else if (_wcsicmp(argument.c_str(), L"block") == 0)
+			helpText = L"/block <玩家>：阻止该玩家以对战者身份连接你。支持数字 ID 或准确的 @玩家名。\n/block list：查看名单。\n名单保存在模组目录 blocklist.json。\n示例：\n/block 1\n/block @PinkySmile";
+		else if (_wcsicmp(argument.c_str(), L"unblock") == 0)
+			helpText = L"/unblock <玩家名>：从屏蔽名单移除玩家。联想内容来自现有屏蔽名单。\n示例：\n/unblock PinkySmile";
 
 		if (helpText)
 			addChineseHelp(helpText);
@@ -3429,7 +3483,7 @@ bool InLobbyMenu::_handleLocalHelp(const std::wstring &msg)
 		this->_addMessageToList(
 			0xFFFF00,
 			0,
-			"Client command:\n/tp <player>\n/report [player] <reason>: The player is optional; omit it if they have left the lobby. Then send supporting evidence in QQ group 178884533 or privately message an administrator from the group.\nPlayer completion: use Tab or Up/Down after /msg, /report, /join, /locate, or /tp."
+			"Client commands:\n/tp <player>\n/block <player>\n/unblock <name>\n/block list\n/report [player] <reason>: The player is optional; omit it if they have left the lobby. Then send supporting evidence in QQ group 178884533 or privately message an administrator from the group.\nPlayer completion: use Tab or Up/Down after /msg, /report, /join, /locate, /tp, /block, or /unblock."
 		);
 		return false;
 	}
@@ -3443,20 +3497,159 @@ bool InLobbyMenu::_handleLocalHelp(const std::wstring &msg)
 		argument.pop_back();
 	if (!argument.empty() && argument.front() == L'/')
 		argument.erase(argument.begin());
-	if (_wcsicmp(argument.c_str(), L"tp") != 0)
+	if (_wcsicmp(argument.c_str(), L"tp") != 0 && _wcsicmp(argument.c_str(), L"block") != 0 && _wcsicmp(argument.c_str(), L"unblock") != 0)
 		return false;
 
-	this->_addMessageToList(
-		0xFFFF00,
-		0,
-		"/tp <player>: Teleport to a player by id or exact @name. Has a 60-second cooldown and cannot be used at a battle machine, spectator machine, or inside an elevator.\nExample:\n/tp 1\n/tp @PinkySmile"
+	this->_addMessageToList(0xFFFF00, 0,
+		_wcsicmp(argument.c_str(), L"tp") == 0
+		? "/tp <player>: Teleport to a player by id or exact @name. Has a 60-second cooldown and cannot be used at a battle machine, spectator machine, or inside an elevator.\nExample:\n/tp 1\n/tp @PinkySmile"
+		: _wcsicmp(argument.c_str(), L"block") == 0
+		? "/block <player>: Prevent a player from connecting to you as an opponent. Use an id or exact @name.\n/block list: Show blocked names.\nThe list is stored in blocklist.json."
+		: "/unblock <name>: Remove a player from the block list. Completions come from the current block list.\nExample:\n/unblock PinkySmile"
 	);
 	return true;
+}
+
+bool InLobbyMenu::_handleLocalBlock(const std::wstring &msg)
+{
+	bool removing = msg.size() >= 8 && _wcsnicmp(msg.c_str(), L"/unblock", 8) == 0 && (msg.size() == 8 || iswspace(msg[8]));
+	bool adding = msg.size() >= 6 && _wcsnicmp(msg.c_str(), L"/block", 6) == 0 && (msg.size() == 6 || iswspace(msg[6]));
+	if (!adding && !removing)
+		return false;
+	auto show = [this](unsigned color, const std::string &chinese, const std::string &english) {
+		this->_addMessageToList(color, 0, chineseLanguage ? chinese : english);
+	};
+	std::wstring argument = msg.substr(removing ? 8 : 6);
+	while (!argument.empty() && iswspace(argument.front()))
+		argument.erase(argument.begin());
+	while (!argument.empty() && iswspace(argument.back()))
+		argument.pop_back();
+	if (adding && _wcsicmp(argument.c_str(), L"list") == 0) {
+		auto names = Blocklist::list();
+		if (names.empty())
+			show(0xFFFF00, "屏蔽名单为空。", "The block list is empty.");
+		else {
+			std::string result = chineseLanguage ? "已屏蔽的玩家：" : "Blocked players:";
+			for (const auto &name : names)
+				result += "\n" + name;
+			this->_addMessageToList(0xFFFF00, 0, result);
+		}
+		return true;
+	}
+	if (argument.empty()) {
+		show(0xFF0000, removing ? "用法：/unblock <玩家名>" : "用法：/block <玩家> 或 /block list", removing ? "Usage: /unblock <name>" : "Usage: /block <player> or /block list");
+		return true;
+	}
+	std::string name;
+	try {
+		if (removing) {
+			std::wstring unescaped;
+			unescaped.reserve(argument.size());
+			for (size_t i = 0; i < argument.size(); i++) {
+				if (argument[i] == L'\\' && i + 1 < argument.size())
+					i++;
+				unescaped += argument[i];
+			}
+			argument = std::move(unescaped);
+		}
+		if (!removing && argument.front() != L'@') {
+			size_t parsed = 0;
+			auto id = std::stoul(argument, &parsed);
+			if (parsed != argument.size() || id > UINT32_MAX)
+				throw std::invalid_argument("invalid player id");
+			auto found = this->_playersById.find(static_cast<uint32_t>(id));
+			if (found == this->_playersById.end() || !found->second) {
+				std::lock_guard<std::mutex> lock(this->_recentOpponentMutex);
+				if (this->_recentOpponent && this->_recentOpponent->playerId == id)
+					name = this->_recentOpponent->playerName;
+				else {
+					show(0xFF0000, "找不到该玩家。", "Cannot find that player.");
+					return true;
+				}
+			} else {
+				name = found->second->name;
+			}
+		} else {
+			if (!argument.empty() && argument.front() == L'@')
+				argument.erase(argument.begin());
+			name = convertEncoding<wchar_t, char, UTF16Decode, UTF8Encode>(argument);
+		}
+	} catch (...) {
+		show(0xFF0000, "玩家必须使用数字 ID 或准确的 @名称。", "Player must be an id or an exact @name.");
+		return true;
+	}
+	if (removing) {
+		if (Blocklist::remove(name)) {
+			show(0x00FFFF, "已从屏蔽名单移除：" + name, "Removed from the block list: " + name);
+			this->_syncBlocklistToServer();
+		} else
+			show(0xFF0000, "屏蔽名单中没有：" + name, "Not found in the block list: " + name);
+	} else {
+		auto added = Blocklist::add(name);
+		this->_syncBlocklistToServer();
+		bool recentOpponent = false;
+		{
+			std::lock_guard<std::mutex> lock(this->_recentOpponentMutex);
+			recentOpponent = this->_recentOpponent && this->_recentOpponent->playerName == name;
+		}
+		if (recentOpponent)
+			this->_requestRecentOpponentIp();
+		show(
+			added ? 0x00FFFF : 0xFFFF00,
+			(added ? "已屏蔽：" : "该玩家已在屏蔽名单中：") + name,
+			(added ? "Blocked: " : "Already blocked: ") + name
+		);
+	}
+	return true;
+}
+
+void InLobbyMenu::_syncBlocklistToServer()
+{
+	if (!this->_serverBlocklistSupported)
+		return;
+	auto sendCommand = [this](const std::string &command) {
+		Lobbies::PacketMessage packet{0, 0, command};
+		this->_connection->send(&packet, sizeof(packet));
+	};
+	auto encodeHex = [](const std::string &value) {
+		static constexpr char digits[] = "0123456789abcdef";
+		std::string result;
+		result.reserve(value.size() * 2);
+		for (auto c : value) {
+			auto byte = static_cast<unsigned char>(c);
+			result.push_back(digits[byte >> 4]);
+			result.push_back(digits[byte & 0xF]);
+		}
+		return result;
+	};
+	sendCommand("/__blockreset");
+	for (const auto &entry : Blocklist::entries()) {
+		sendCommand("/__blockname " + encodeHex(entry.name));
+		for (const auto &ip : entry.ips)
+			sendCommand("/__blockipentry " + ip);
+	}
+	sendCommand("/__blockready");
+}
+
+void InLobbyMenu::_probeBlocklistServer()
+{
+	Lobbies::PacketMessage packet{0, 0, "/__blockcap"};
+	this->_connection->send(&packet, sizeof(packet));
+}
+
+void InLobbyMenu::_requestRecentOpponentIp()
+{
+	if (!this->_serverBlocklistSupported)
+		return;
+	Lobbies::PacketMessage packet{0, 0, "/__blockopponentip"};
+	this->_connection->send(&packet, sizeof(packet));
 }
 
 void InLobbyMenu::_sendMessage(const std::wstring &msg)
 {
 	if (this->_handleLocalHelp(msg))
+		return;
+	if (this->_handleLocalBlock(msg))
 		return;
 	if (this->_handleLocalTeleport(msg))
 		return;
@@ -4117,6 +4310,8 @@ bool InLobbyMenu::_getPlayerCompletionTarget(size_t &targetStart, size_t &target
 		{L"/join ", false},
 		{L"/locate ", false},
 		{L"/tp ", false},
+		{L"/block ", false},
+		{L"/unblock ", false},
 	};
 	for (const auto &prefix : prefixes) {
 		targetStart = wcslen(prefix.text);
@@ -4160,6 +4355,7 @@ void InLobbyMenu::_refreshPrivateMessageCompletions()
 		return;
 	}
 	std::wstring text(this->_buffer.begin(), this->_buffer.end() - 1);
+	const bool unblockCommand = text.compare(0, wcslen(L"/unblock "), L"/unblock ") == 0;
 	std::wstring query = text.substr(targetStart, targetEnd - targetStart);
 	if (!query.empty() && query.front() == L'@')
 		query.erase(query.begin());
@@ -4172,24 +4368,63 @@ void InLobbyMenu::_refreshPrivateMessageCompletions()
 		return next == needle.end();
 	};
 	this->_privateMessageCompletions.clear();
-	auto me = this->_connection->getMe();
-	for (const auto &[id, player] : this->_playersById) {
-		if (!player || (me && id == me->id))
-			continue;
-		std::wstring name;
-		try {
-			name = convertEncoding<char, wchar_t, UTF8Decode, UTF16Encode>(player->name);
-		} catch (...) {
-			continue;
+	if (unblockCommand) {
+		for (const auto &blockedName : Blocklist::list()) {
+			std::wstring name;
+			try {
+				name = convertEncoding<char, wchar_t, UTF8Decode, UTF16Encode>(blockedName);
+			} catch (...) {
+				continue;
+			}
+			std::wstring lowered = name;
+			std::transform(lowered.begin(), lowered.end(), lowered.begin(), towlower);
+			if (!query.empty() && !fuzzyMatch(lowered, query))
+				continue;
+			this->_privateMessageCompletions.push_back({0, std::move(name), false, {}});
 		}
-		std::wstring lowered = name;
-		std::transform(lowered.begin(), lowered.end(), lowered.begin(), towlower);
-		auto idText = std::to_wstring(id);
-		if (!query.empty() && !fuzzyMatch(lowered, query) && idText.find(query) != 0)
-			continue;
-		this->_privateMessageCompletions.push_back({id, std::move(name), {}});
+	} else {
+		auto me = this->_connection->getMe();
+		std::optional<RecentOpponent> recentOpponent;
+		{
+			std::lock_guard<std::mutex> lock(this->_recentOpponentMutex);
+			recentOpponent = this->_recentOpponent;
+		}
+		if (recentOpponent) {
+			try {
+				auto name = convertEncoding<char, wchar_t, UTF8Decode, UTF16Encode>(recentOpponent->playerName);
+				auto lowered = name;
+				std::transform(lowered.begin(), lowered.end(), lowered.begin(), towlower);
+				auto idText = std::to_wstring(recentOpponent->playerId);
+				if (query.empty() || fuzzyMatch(lowered, query) || idText.find(query) == 0)
+					this->_privateMessageCompletions.push_back({
+						recentOpponent->playerId,
+						std::move(name),
+						true,
+						{}
+					});
+			} catch (...) {
+			}
+		}
+		for (const auto &[id, player] : this->_playersById) {
+			if (!player || (me && id == me->id) || (recentOpponent && id == recentOpponent->playerId))
+				continue;
+			std::wstring name;
+			try {
+				name = convertEncoding<char, wchar_t, UTF8Decode, UTF16Encode>(player->name);
+			} catch (...) {
+				continue;
+			}
+			std::wstring lowered = name;
+			std::transform(lowered.begin(), lowered.end(), lowered.begin(), towlower);
+			auto idText = std::to_wstring(id);
+			if (!query.empty() && !fuzzyMatch(lowered, query) && idText.find(query) != 0)
+				continue;
+			this->_privateMessageCompletions.push_back({id, std::move(name), false, {}});
+		}
 	}
 	std::sort(this->_privateMessageCompletions.begin(), this->_privateMessageCompletions.end(), [&query](const auto &left, const auto &right) {
+		if (left.recentOpponent != right.recentOpponent)
+			return left.recentOpponent;
 		auto rank = [&query](const std::wstring &name) {
 			std::wstring lowered = name;
 			std::transform(lowered.begin(), lowered.end(), lowered.begin(), towlower);
@@ -4206,7 +4441,9 @@ void InLobbyMenu::_refreshPrivateMessageCompletions()
 	this->_privateMessageCompletionIndex = 0;
 	this->_privateMessageCompletionScroll = 0;
 	for (auto &entry : this->_privateMessageCompletions) {
-		auto label = entry.playerName + L"  (#" + std::to_wstring(entry.playerId) + L")";
+		auto label = unblockCommand ? entry.playerName : entry.playerName + L"  (#" + std::to_wstring(entry.playerId) + L")";
+		if (entry.recentOpponent)
+			label += chineseLanguage ? L"  [最近对手]" : L"  [Recent opponent]";
 		int textureId = 0;
 		SokuLib::Vector2i size;
 		if (createTextTexture(textureId, label.c_str(), this->_textBubbleFont, {300, 22}, &size, true)) {
@@ -4230,7 +4467,14 @@ void InLobbyMenu::_applyPrivateMessageCompletion()
 	const auto &completion = this->_privateMessageCompletions[this->_privateMessageCompletionIndex];
 	std::wstring replacement;
 	std::wstring currentText(this->_buffer.begin(), this->_buffer.end() - 1);
-	if (currentText.compare(0, wcslen(L"/report "), L"/report ") == 0) {
+	if (currentText.compare(0, wcslen(L"/unblock "), L"/unblock ") == 0) {
+		for (wchar_t chr : completion.playerName) {
+			if (chr == L'\\' || iswspace(chr))
+				replacement += L'\\';
+			replacement += chr;
+		}
+	}
+	else if (currentText.compare(0, wcslen(L"/report "), L"/report ") == 0) {
 		replacement = L"@";
 		for (wchar_t chr : completion.playerName) {
 			if (chr == L'\\' || iswspace(chr))

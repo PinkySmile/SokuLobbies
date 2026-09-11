@@ -150,6 +150,8 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 		src/SokuMod/LobbyMenu.hpp
 		src/SokuMod/Connection.cpp
 		src/SokuMod/Connection.hpp
+		src/SokuMod/Blocklist.cpp
+		src/SokuMod/Blocklist.hpp
 		src/SokuMod/InputBox.cpp
 		src/SokuMod/InputBox.cpp
 		src/SokuMod/IniConfig.cpp

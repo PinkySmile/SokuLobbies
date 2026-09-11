@@ -17,6 +17,8 @@
 #include "InLobbyMenu.hpp"
 #include "LobbyData.hpp"
 #include "InputBox.hpp"
+#include "Blocklist.hpp"
+#include "integration.hpp"
 #include "dinput.h"
 
 typedef HRESULT(__stdcall* EndSceneFn)(IDirect3DDevice9*);
@@ -50,6 +52,71 @@ static int (SokuLib::LoadingServer::*og_LoadingServerOnProcess)();
 static int (SokuLib::LoadingServer::*og_LoadingServerOnRender)();
 static int (SokuLib::BattleManager::*og_BattleMgrOnProcess)();
 static void (SokuLib::KeymapManager::*s_origKeymapManager_SetInputs)();
+static int (__stdcall *s_origRecvFrom)(SOCKET, char *, int, int, sockaddr *, int *);
+
+static int __stdcall BlocklistRecvFrom(SOCKET socket, char *buffer, int length, int flags, sockaddr *from, int *fromLength)
+{
+	while (true) {
+		auto result = s_origRecvFrom(socket, buffer, length, flags, from, fromLength);
+		if (result <= 0 || !from || !fromLength || *fromLength < sizeof(sockaddr_in) || from->sa_family != AF_INET)
+			return result;
+		auto source = reinterpret_cast<sockaddr_in *>(from);
+		auto sourceAddress = source->sin_addr.s_addr;
+		if (result < static_cast<int>(offsetof(SokuLib::PacketInitRequ, name)))
+			return result;
+		auto &request = *reinterpret_cast<SokuLib::PacketInitRequ *>(buffer);
+		if (
+			request.type != SokuLib::INIT_REQUEST ||
+			request.reqType != SokuLib::PLAY_REQU ||
+			request.nameLength > result - offsetof(SokuLib::PacketInitRequ, name)
+		)
+			return result;
+		auto address = sourceAddress;
+		auto isRelayed = (address & htonl(0xFF000000)) == htonl(0x7F000000);
+		// PLAY_REQU is sent by the joining player and received only by the
+		// host. mainMode is not reliable here because it may not switch to
+		// VSSERVER until after this handshake has completed.
+		bool blocked = !isRelayed && Blocklist::containsIp(address);
+		std::string matchedName;
+		const std::array<UINT, 5> codePages{CP_UTF8, 932U, 936U, 950U, th123intl::GetTextCodePage()};
+		for (auto codePage : codePages) {
+			std::string utf8Name;
+			try {
+				th123intl::ConvertCodePage(
+					codePage,
+					std::string_view(request.name, request.nameLength),
+					CP_UTF8,
+					utf8Name
+				);
+				if (Blocklist::contains(utf8Name)) {
+					blocked = true;
+					matchedName = std::move(utf8Name);
+				}
+			} catch (...) {
+			}
+		}
+		if (!blocked)
+			return result;
+
+		SokuLib::PacketInitError rejection{};
+		rejection.type = SokuLib::INIT_ERROR;
+		// GAME_STATE_INVALID makes the lobby client automatically retry as a
+		// spectator. Use the terminal error so a blocked play request exits
+		// the connection flow instead of entering a play/spectate retry loop.
+		rejection.reason = SokuLib::ERROR_SPECTATE_DISABLED;
+		SokuLib::DLL::ws2_32.sendto(
+			socket,
+			reinterpret_cast<char *>(&rejection),
+			sizeof(rejection),
+			0,
+			from,
+			*fromLength
+		);
+		printf("Rejected blocked opponent: %s\n", matchedName.empty() ? "<blocked IP>" : matchedName.c_str());
+		WSASetLastError(WSAEWOULDBLOCK);
+		return SOCKET_ERROR;
+	}
+}
 using CheckKeyOneshot = bool (__cdecl *)(int, int, int, int);
 static CheckKeyOneshot s_origCheckKeyOneshot = nullptr;
 static constexpr unsigned CHECK_KEY_HOOK_SIZE = 8;
@@ -1326,6 +1393,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	getModVersionStr();
 	PathRemoveFileSpecW(profilePath);
 	wcscpy(profileFolderPath, profilePath);
+	Blocklist::initialize(profileFolderPath);
 	PathAppendW(profilePath, L"SokuLobbies.ini");
 	GetPrivateProfileStringW(L"Lobby", L"Host", L"pinkysmile.fr", servHostW, sizeof(servHost) / sizeof(*servHost), profilePath);
 	GetPrivateProfileStringW(L"Lobby", L"RedirectIp", L"localhost", redirectIpW, sizeof(redirectIp) / sizeof(*redirectIp), profilePath);
@@ -1407,6 +1475,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	og_SelectServerOnProcess = SokuLib::TamperDword(&SokuLib::VTable_SelectServer.onProcess, SelectServerOnProcess);
 	og_SelectServerOnRender  = SokuLib::TamperDword(&SokuLib::VTable_SelectServer.onRender,  SelectServerOnRender);
 	og_BattleMgrOnProcess    = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onProcess,CBattleManager_OnProcess);
+	s_origRecvFrom           = SokuLib::TamperDword(&SokuLib::DLL::ws2_32.recvfrom, BlocklistRecvFrom);
 	//og_BattleMgrOnRender  = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onRender,  CBattleManager_OnRender);
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 

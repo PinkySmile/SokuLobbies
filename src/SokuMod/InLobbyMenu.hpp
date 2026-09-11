@@ -120,6 +120,7 @@ private:
 	SokuLib::MenuConnect *_parent;
 	bool _wasConnected = false;
 	bool _disconnected = false;
+	bool _serverBlocklistSupported = false;
 	std::vector<Player> _playersCopy;
 	std::unordered_map<uint32_t, const Player *> _playersById;
 	std::unordered_set<uint32_t> _playersInsideElevator;
@@ -244,6 +245,7 @@ private:
 	struct PrivateMessageCompletion {
 		uint32_t playerId;
 		std::wstring playerName;
+		bool recentOpponent = false;
 		SokuLib::DrawUtils::Sprite label;
 	};
 	std::vector<PrivateMessageCompletion> _privateMessageCompletions;
@@ -298,8 +300,12 @@ private:
 	void _renderPrivateMessageCompletions();
 	void _updateTextCursor(int pos);
 	bool _handleLocalTeleport(const std::wstring &msg);
+	bool _handleLocalBlock(const std::wstring &msg);
 	bool _handleLocalHelp(const std::wstring &msg);
 	void _sendMessage(const std::wstring &msg);
+	void _probeBlocklistServer();
+	void _syncBlocklistToServer();
+	void _requestRecentOpponentIp();
 	void _unhook();
 	void _renderMachineOverlay();
 	void _startHosting();
