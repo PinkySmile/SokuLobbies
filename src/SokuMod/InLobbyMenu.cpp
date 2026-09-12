@@ -144,6 +144,9 @@ static std::string localizeLobbyMessage(const std::string &message)
 		return chineseLanguage ? "你已被该玩家拉黑。" : "You have been blacklisted by this player.";
 	if (!chineseLanguage)
 		return message;
+	constexpr char publicIpErrorPrefix[] = "Failed to get public IP";
+	if (message.compare(0, sizeof(publicIpErrorPrefix) - 1, publicIpErrorPrefix) == 0)
+		return "无法获取IP地址，请使用swarm的IP用于大厅";
 	if (message == "Connection closed")
 		return "与服务器的连接已关闭。";
 	if (message == "You have been blacklisted by this player.")
@@ -4936,7 +4939,7 @@ void InLobbyMenu::_startHosting()
 		try {
 			ip = getMyIp();
 		} catch (std::exception &e) {
-			this->_addMessageToList(0xFF0000, 0, std::string("Failed to get public IP: ") + e.what());
+			this->_addMessageToList(0xFF0000, 0, localizeLobbyMessage(std::string("Failed to get public IP: ") + e.what()));
 			return;
 		}
 

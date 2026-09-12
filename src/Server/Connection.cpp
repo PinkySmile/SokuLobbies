@@ -10,6 +10,11 @@ extern std::mutex logMutex;
 #include <cstring>
 #include "Connection.hpp"
 
+namespace {
+	constexpr auto RECEIVE_TIMEOUT = std::chrono::seconds(120);
+	constexpr auto SEND_RETRY_TIMEOUT = std::chrono::milliseconds(250);
+}
+
 
 void Connection::_netLoop()
 {
@@ -20,11 +25,14 @@ void Connection::_netLoop()
 	this->_timeoutClock.restart();
 	this->_socket->setBlocking(false);
 	do {
+		recvSizeAdded = 0;
 		auto status = this->_socket->receive(buffer + recvSize, sizeof(buffer) - recvSize, recvSizeAdded);
 		recvSize += recvSizeAdded;
+		if (recvSizeAdded)
+			this->_timeoutClock.restart();
 
-		if (status == sf::Socket::NotReady && !recvSizeAdded) {
-			if (this->_timeoutClock.getElapsedTime().asSeconds() >= 30)
+		if (status == sf::Socket::NotReady) {
+			if (this->_timeoutClock.getElapsedTime().asMilliseconds() >= RECEIVE_TIMEOUT.count() * 1000)
 				return this->kick("Timed out");
 			std::this_thread::sleep_for(std::chrono::milliseconds(5));
 			continue;
@@ -109,9 +117,34 @@ void Connection::setId(uint32_t id)
 
 void Connection::send(const void *packet, size_t size)
 {
-	size_t sent;
+	std::lock_guard<std::mutex> sendLock(this->_sendMutex);
+	auto bytes = static_cast<const char *>(packet);
+	size_t totalSent = 0;
+	auto retryDeadline = std::chrono::steady_clock::now() + SEND_RETRY_TIMEOUT;
+	sf::Socket::Status status = sf::Socket::Done;
 
-	auto status = this->_socket->send(packet, size, sent);
+	while (totalSent < size) {
+		size_t sent = 0;
+		status = this->_socket->send(bytes + totalSent, size - totalSent, sent);
+		totalSent += sent;
+		if (totalSent == size)
+			break;
+		if (sent)
+			retryDeadline = std::chrono::steady_clock::now() + SEND_RETRY_TIMEOUT;
+		if (status == sf::Socket::Disconnected || status == sf::Socket::Error) {
+			this->_socket->disconnect();
+			break;
+		}
+		if (status != sf::Socket::Partial && status != sf::Socket::NotReady) {
+			this->_socket->disconnect();
+			break;
+		}
+		if (std::chrono::steady_clock::now() >= retryDeadline) {
+			this->_socket->disconnect();
+			break;
+		}
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	}
 #ifndef _LOBBYNOLOG
 	logMutex.lock();
 	std::cout << "[>" << this->_socket->getRemoteAddress().toString() << ":" << this->_socket->getRemotePort();
@@ -120,16 +153,11 @@ void Connection::send(const void *packet, size_t size)
 	std::cout << "] " << size << " bytes: " << reinterpret_cast<const Lobbies::Packet *>(packet)->toString() << std::endl;
 	// The above cases, which require the TCP send buffer to be full, are probably hard to happen under default configuration.
 	// But we still log it when it does happen.
-	if (status == sf::Socket::Partial) {
+	if (totalSent != size) {
 		std::cout << "[>" << this->_socket->getRemoteAddress().toString() << ":" << this->_socket->getRemotePort();
 		if (this->_id)
 			std::cout << " player id " << this->_id;
-		std::cout << "] " << "warning: partial send, only " << sent << " bytes were sent" << std::endl;
-	} else if (status == sf::Socket::NotReady) {
-		std::cout << "[>" << this->_socket->getRemoteAddress().toString() << ":" << this->_socket->getRemotePort();
-		if (this->_id)
-			std::cout << " player id " << this->_id;
-		std::cout << "] " << "warning: send is not ready" << std::endl;
+		std::cout << "] warning: send failed after " << totalSent << "/" << size << " bytes (status " << status << ")" << std::endl;
 	}
 	logMutex.unlock();
 #endif
