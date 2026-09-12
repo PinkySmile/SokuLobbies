@@ -824,7 +824,6 @@ const std::map<std::string, Server::Cmd> Server::_commands{
 	{"help",    {"[command]", "Displays all commands or detailed help for one command.\nExample:\n/help\n/help join", &Server::_helpCmd}},
 	{"join",    {"<player>", "Joins the arcade machine used by a player. Use a player id or exact @name. Updated clients support Tab and Up/Down player completion.\nExample:\n/join 1\n/join @PinkySmile", &Server::_joinCmd}},
 	{"list",    {"", "Displays the ids and names of all connected players.\nExample:\n/list", &Server::_listCmd}},
-	{"locate",  {"<player>", "Displays a player's current lobby coordinates. Use a player id or exact @name. Updated clients support Tab and Up/Down player completion.\nExample:\n/locate 1\n/locate @PinkySmile", &Server::_locateCmd}},
 	{"msg",     {"<player> <message>", "Sends a private message. Use a player id or exact @name. Updated clients support fuzzy name search with Tab and Up/Down completion.\nExample:\n/msg 1 Hello!\n/msg @PinkySmile Hello!", &Server::_msgCmd}},
 	{"report",  {"[player] <reason>", "Privately reports an incident to the server operators. If the player is online, optionally specify a player id or exact @name; otherwise enter the reason directly. Updated clients support fuzzy player completion. After reporting, send supporting evidence in QQ group 178884533 or privately message an administrator from the group.\nExample:\n/report @PinkySmile Repeated harassment\n/report The reported player has already left the lobby", &Server::_reportCmd}},
 };
@@ -934,26 +933,6 @@ void Server::_listCmd(Connection *author, const std::vector<std::string> &)
 		msg += "\n" + std::to_string(c->getId()) + ": " + c->getName();
 	this->_connectionsMutex.unlock();
 	sendSystemMessageTo(author, msg, 0xFFFF00);
-}
-
-void Server::_locateCmd(Connection *author, const std::vector<std::string> &args)
-{
-	if (args.empty())
-		return sendSystemMessageTo(author, "缺少玩家参数，请使用 /help locate 查看帮助。\nMissing player argument. Use /help locate for more information.", 0xFF0000);
-
-	auto name = args.front();
-	Connection *player;
-
-	try {
-		player = this->_findPlayer(name);
-	} catch (std::exception &e) {
-		sendSystemMessageTo(author, name + " 不是有效的玩家 ID，是否要改用 @" + name + "？\n" + name + " is not a valid player id. Did you want to use @" + name + " instead?", 0xFF0000);
-		return;
-	}
-
-	if (!player)
-		return sendSystemMessageTo(author, "找不到玩家 " + name + "。\nCannot find player " + name + ".", 0xFF0000);
-	sendSystemMessageTo(author, player->getName() + " is at x:" + std::to_string(player->getPos().x) + " y:" + std::to_string(player->getPos().y) + ".", 0xFFFF00);
 }
 
 void Server::_teleportCmd(Connection *author, const std::vector<std::string> &args)

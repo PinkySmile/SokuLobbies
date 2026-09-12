@@ -247,12 +247,20 @@ private:
 		uint32_t playerId;
 		std::wstring playerName;
 		bool recentOpponent = false;
+		bool command = false;
+		int recentSelectionRank = -1;
 		SokuLib::DrawUtils::Sprite label;
 	};
+	struct RecentPlayerSelection {
+		uint32_t playerId;
+		std::string playerName;
+	};
 	std::vector<PrivateMessageCompletion> _privateMessageCompletions;
+	std::deque<RecentPlayerSelection> _recentPlayerSelections;
 	unsigned _privateMessageCompletionIndex = 0;
 	unsigned _privateMessageCompletionScroll = 0;
 	unsigned _privateMessageCompletionTimer = 0;
+	bool _commandTabCycleArmed = false;
 	std::map<unsigned, int> _textSize;
 
 	void _updateMessageSprite(SokuLib::Vector2i pos, unsigned int remaining, SokuLib::Vector2i realSize, SokuLib::DrawUtils::Sprite &sprite, unsigned char alpha);
@@ -260,6 +268,8 @@ private:
 	void _updateRecentOpponent();
 	void _restoreRecentOpponent();
 	void _saveRecentOpponent(bool leavingLobby = false);
+	void _restoreRecentPlayerSelections();
+	void _saveRecentPlayerSelections();
 	void _showEmoteBubble(unsigned player, const std::string &msg);
 	void _renderEmoteBubbles(const std::unordered_map<uint32_t, const Player *> &playersById);
 	void _showTextBubble(unsigned player, const std::string &msg, bool privateMessage = false);
@@ -298,6 +308,7 @@ private:
 	bool _getPlayerCompletionTarget(size_t &targetStart, size_t &targetEnd, bool &appendSpace) const;
 	void _refreshPrivateMessageCompletions();
 	void _applyPrivateMessageCompletion();
+	void _rememberCurrentPlayerCompletion();
 	void _renderPrivateMessageCompletions();
 	void _updateTextCursor(int pos);
 	bool _handleLocalTeleport(const std::wstring &msg);

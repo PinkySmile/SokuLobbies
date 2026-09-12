@@ -75,6 +75,14 @@ struct RecentOpponentSession {
 static std::optional<RecentOpponentSession> recentOpponentSession;
 static std::mutex recentOpponentSessionMutex;
 
+struct RecentPlayerSelectionsSession {
+	std::deque<std::pair<uint32_t, std::string>> selections;
+	std::string lobbyIdentity;
+};
+
+static std::optional<RecentPlayerSelectionsSession> recentPlayerSelectionsSession;
+static std::mutex recentPlayerSelectionsSessionMutex;
+
 static void replaceAll(std::string &value, const std::string &from, const std::string &to)
 {
 	if (from.empty())
@@ -651,6 +659,7 @@ InLobbyMenu::InLobbyMenu(LobbyMenu *menu, SokuLib::MenuConnect *parent, std::sha
 		this->_roomName = std::string(r.name, strnlen(r.name, sizeof(r.name)));
 		this->_lobbyIdentity = std::string(servHost) + ":" + std::to_string(servPort) + "/" + this->_roomName;
 		this->_restoreRecentOpponent();
+		this->_restoreRecentPlayerSelections();
 		this->_queuePlayerName(r.id, std::string(r.realName, strnlen(r.realName, sizeof(r.realName))));
 		this->_probeBlocklistServer();
 		this->_music = "data/bgm/" + std::string(r.music, strnlen(r.music, sizeof(r.music))) + ".ogg";
@@ -936,6 +945,7 @@ InLobbyMenu::~InLobbyMenu()
 	for (auto &hostlist : this->_retiredHostlists)
 		hostlist->requestStop();
 	this->_saveRecentOpponent(true);
+	this->_saveRecentPlayerSelections();
 	ptrMutex.lock();
 	activeMenu = nullptr;
 	ptrMutex.unlock();
@@ -2446,6 +2456,38 @@ void InLobbyMenu::_saveRecentOpponent(bool leavingLobby)
 	};
 }
 
+void InLobbyMenu::_restoreRecentPlayerSelections()
+{
+	std::lock_guard<std::mutex> sessionLock(recentPlayerSelectionsSessionMutex);
+	if (!recentPlayerSelectionsSession || recentPlayerSelectionsSession->lobbyIdentity != this->_lobbyIdentity)
+		return;
+	this->_recentPlayerSelections.clear();
+	for (const auto &[playerId, playerName] : recentPlayerSelectionsSession->selections) {
+		if (playerName.empty())
+			continue;
+		this->_recentPlayerSelections.push_back({playerId, playerName});
+		if (this->_recentPlayerSelections.size() == 3)
+			break;
+	}
+}
+
+void InLobbyMenu::_saveRecentPlayerSelections()
+{
+	if (this->_lobbyIdentity.empty())
+		return;
+	RecentPlayerSelectionsSession session;
+	session.lobbyIdentity = this->_lobbyIdentity;
+	for (const auto &entry : this->_recentPlayerSelections) {
+		if (entry.playerName.empty())
+			continue;
+		session.selections.emplace_back(entry.playerId, entry.playerName);
+		if (session.selections.size() == 3)
+			break;
+	}
+	std::lock_guard<std::mutex> sessionLock(recentPlayerSelectionsSessionMutex);
+	recentPlayerSelectionsSession = std::move(session);
+}
+
 void InLobbyMenu::_updateRecentOpponent()
 {
 	auto me = this->_connection->getMe();
@@ -2698,6 +2740,7 @@ void InLobbyMenu::_inputBoxUpdate(bool blockChatInput)
 	if (!this->_privateMessageCompletions.empty() && this->_privateMessageCompletionTimer) {
 		if (this->keysPressed[VK_UP] || this->keysPressed[VK_DOWN]) {
 			std::lock_guard<std::mutex> textLock(this->_textMutex);
+			this->_commandTabCycleArmed = false;
 			if (this->keysPressed[VK_UP])
 				this->_privateMessageCompletionIndex = (this->_privateMessageCompletionIndex + this->_privateMessageCompletions.size() - 1) % this->_privateMessageCompletions.size();
 			else
@@ -2714,6 +2757,8 @@ void InLobbyMenu::_inputBoxUpdate(bool blockChatInput)
 		if (this->keysPressed[VK_RETURN]) {
 			{
 				std::lock_guard<std::mutex> textLock(this->_textMutex);
+				this->_commandTabCycleArmed = false;
+				this->_rememberCurrentPlayerCompletion();
 				this->_applyPrivateMessageCompletion();
 			}
 			this->_privateMessageCompletions.clear();
@@ -3448,13 +3493,12 @@ bool InLobbyMenu::_handleLocalHelp(const std::wstring &msg)
 				L"/help [指令]\n"
 				L"/join <玩家>\n"
 				L"/list\n"
-				L"/locate <玩家>\n"
 				L"/msg <玩家> <消息>\n"
 				L"/report [玩家] <原因>\n"
 				L"/tp <玩家>\n"
 				L"/block <玩家>\n"
 				L"/unblock <玩家名>\n"
-				L"/block list\n"
+				L"/blocklist\n"
 				L"玩家联想：输入玩家后使用 Tab 或上下键选择。"
 			);
 			return true;
@@ -3475,8 +3519,6 @@ bool InLobbyMenu::_handleLocalHelp(const std::wstring &msg)
 			helpText = L"/join <玩家>：加入该玩家所在的对战机。支持数字 ID 或准确的 @玩家名。\n示例：\n/join 1\n/join @PinkySmile";
 		else if (_wcsicmp(argument.c_str(), L"list") == 0)
 			helpText = L"/list：显示当前大厅内所有玩家的 ID 和名称。";
-		else if (_wcsicmp(argument.c_str(), L"locate") == 0)
-			helpText = L"/locate <玩家>：显示玩家当前在大厅中的坐标。支持数字 ID 或准确的 @玩家名。\n示例：\n/locate 1\n/locate @PinkySmile";
 		else if (_wcsicmp(argument.c_str(), L"msg") == 0)
 			helpText = L"/msg <玩家> <消息>：向玩家发送私聊消息。支持数字 ID 或准确的 @玩家名。\n示例：\n/msg 1 你好\n/msg @PinkySmile 你好";
 		else if (_wcsicmp(argument.c_str(), L"report") == 0)
@@ -3492,7 +3534,9 @@ bool InLobbyMenu::_handleLocalHelp(const std::wstring &msg)
 		else if (_wcsicmp(argument.c_str(), L"tp") == 0)
 			helpText = L"/tp <玩家>：传送到指定玩家的位置。支持数字 ID 或准确的 @玩家名；冷却时间为60秒，在对战机、观战机或电梯内无法使用。\n示例：\n/tp 1\n/tp @PinkySmile";
 		else if (_wcsicmp(argument.c_str(), L"block") == 0)
-			helpText = L"/block <玩家>：阻止该玩家以对战者身份连接你。支持数字 ID 或准确的 @玩家名。\n/block list：查看名单。\n名单保存在模组目录 blocklist.json。\n示例：\n/block 1\n/block @PinkySmile";
+			helpText = L"/block <玩家>：阻止该玩家以对战者身份连接你。支持数字 ID 或准确的 @玩家名。\n示例：\n/block 1\n/block @PinkySmile";
+		else if (_wcsicmp(argument.c_str(), L"blocklist") == 0)
+			helpText = L"/blocklist：查看当前黑名单。名单保存在模组目录 blocklist.dat。";
 		else if (_wcsicmp(argument.c_str(), L"unblock") == 0)
 			helpText = L"/unblock <玩家名>：从屏蔽名单移除玩家。联想内容来自现有屏蔽名单。\n示例：\n/unblock PinkySmile";
 
@@ -3508,7 +3552,7 @@ bool InLobbyMenu::_handleLocalHelp(const std::wstring &msg)
 		this->_addMessageToList(
 			0xFFFF00,
 			0,
-			"Client commands:\n/tp <player>\n/block <player>\n/unblock <name>\n/block list\n/report [player] <reason>: The player is optional; omit it if they have left the lobby. Then send supporting evidence in QQ group 178884533 or privately message an administrator from the group.\nPlayer completion: use Tab or Up/Down after /msg, /report, /join, /locate, /tp, /block, or /unblock."
+			"Client commands:\n/tp <player>\n/block <player>\n/unblock <name>\n/blocklist\n/report [player] <reason>: The player is optional; omit it if they have left the lobby. Then send supporting evidence in QQ group 178884533 or privately message an administrator from the group.\nPlayer completion: use Tab or Up/Down after /msg, /report, /join, /tp, /block, or /unblock."
 		);
 		return false;
 	}
@@ -3522,14 +3566,16 @@ bool InLobbyMenu::_handleLocalHelp(const std::wstring &msg)
 		argument.pop_back();
 	if (!argument.empty() && argument.front() == L'/')
 		argument.erase(argument.begin());
-	if (_wcsicmp(argument.c_str(), L"tp") != 0 && _wcsicmp(argument.c_str(), L"block") != 0 && _wcsicmp(argument.c_str(), L"unblock") != 0)
+	if (_wcsicmp(argument.c_str(), L"tp") != 0 && _wcsicmp(argument.c_str(), L"block") != 0 && _wcsicmp(argument.c_str(), L"blocklist") != 0 && _wcsicmp(argument.c_str(), L"unblock") != 0)
 		return false;
 
 	this->_addMessageToList(0xFFFF00, 0,
 		_wcsicmp(argument.c_str(), L"tp") == 0
 		? "/tp <player>: Teleport to a player by id or exact @name. Has a 60-second cooldown and cannot be used at a battle machine, spectator machine, or inside an elevator.\nExample:\n/tp 1\n/tp @PinkySmile"
 		: _wcsicmp(argument.c_str(), L"block") == 0
-		? "/block <player>: Prevent a player from connecting to you as an opponent. Use an id or exact @name.\n/block list: Show blocked names.\nThe list is stored in blocklist.json."
+		? "/block <player>: Prevent a player from connecting to you as an opponent. Use an id or exact @name."
+		: _wcsicmp(argument.c_str(), L"blocklist") == 0
+		? "/blocklist: Show the current blacklist. The list is stored in blocklist.dat."
 		: "/unblock <name>: Remove a player from the block list. Completions come from the current block list.\nExample:\n/unblock PinkySmile"
 	);
 	return true;
@@ -3539,17 +3585,22 @@ bool InLobbyMenu::_handleLocalBlock(const std::wstring &msg)
 {
 	bool removing = msg.size() >= 8 && _wcsnicmp(msg.c_str(), L"/unblock", 8) == 0 && (msg.size() == 8 || iswspace(msg[8]));
 	bool adding = msg.size() >= 6 && _wcsnicmp(msg.c_str(), L"/block", 6) == 0 && (msg.size() == 6 || iswspace(msg[6]));
-	if (!adding && !removing)
+	bool listing = msg.size() >= 10 && _wcsnicmp(msg.c_str(), L"/blocklist", 10) == 0 && (msg.size() == 10 || iswspace(msg[10]));
+	if (!adding && !removing && !listing)
 		return false;
 	auto show = [this](unsigned color, const std::string &chinese, const std::string &english) {
 		this->_addMessageToList(color, 0, chineseLanguage ? chinese : english);
 	};
-	std::wstring argument = msg.substr(removing ? 8 : 6);
+	std::wstring argument = msg.substr(listing ? 10 : removing ? 8 : 6);
 	while (!argument.empty() && iswspace(argument.front()))
 		argument.erase(argument.begin());
 	while (!argument.empty() && iswspace(argument.back()))
 		argument.pop_back();
-	if (adding && _wcsicmp(argument.c_str(), L"list") == 0) {
+	if (listing) {
+		if (!argument.empty()) {
+			show(0xFF0000, "用法：/blocklist", "Usage: /blocklist");
+			return true;
+		}
 		auto names = Blocklist::list();
 		if (names.empty())
 			show(0xFFFF00, "屏蔽名单为空。", "The block list is empty.");
@@ -3562,7 +3613,7 @@ bool InLobbyMenu::_handleLocalBlock(const std::wstring &msg)
 		return true;
 	}
 	if (argument.empty()) {
-		show(0xFF0000, removing ? "用法：/unblock <玩家名>" : "用法：/block <玩家> 或 /block list", removing ? "Usage: /unblock <name>" : "Usage: /block <player> or /block list");
+		show(0xFF0000, removing ? "用法：/unblock <玩家名>" : "用法：/block <玩家>", removing ? "Usage: /unblock <name>" : "Usage: /block <player>");
 		return true;
 	}
 	std::string name;
@@ -3789,8 +3840,10 @@ void InLobbyMenu::updateChat(bool inGame)
 		SokuLib::newSceneId == SokuLib::SCENE_LOADINGWATCH ||
 		SokuLib::newSceneId == SokuLib::SCENE_BATTLEWATCH
 	);
-	if (this->_privateMessageCompletionTimer)
-		this->_privateMessageCompletionTimer--;
+	if (this->_privateMessageCompletionTimer && !--this->_privateMessageCompletionTimer) {
+		this->_privateMessageCompletions.clear();
+		this->_commandTabCycleArmed = false;
+	}
 	if (this->_disconnected)
 		return;
 	const bool outsideLobby = SokuLib::sceneId != SokuLib::SCENE_TITLE;
@@ -4328,28 +4381,36 @@ void InLobbyMenu::_completePrivateMessageRecipient()
 	size_t targetEnd;
 	bool appendSpace;
 	if (!this->_getPlayerCompletionTarget(targetStart, targetEnd, appendSpace)) {
+		this->_commandTabCycleArmed = false;
 		this->_privateMessageCompletions.clear();
 		this->_privateMessageCompletionTimer = 0;
 		playSound(0x29);
 		return;
 	}
-	bool cycleExisting = !this->_privateMessageCompletions.empty() &&
-		this->_textCursorPosIndex <= static_cast<int>(targetEnd + (appendSpace && targetEnd < this->_buffer.size() - 1));
-	if (!cycleExisting)
+	if (this->_privateMessageCompletions.empty())
 		this->_refreshPrivateMessageCompletions();
-	else
-		this->_privateMessageCompletionIndex = (this->_privateMessageCompletionIndex + 1) % this->_privateMessageCompletions.size();
-	constexpr unsigned visibleCompletions = 10;
-	if (this->_privateMessageCompletionIndex < this->_privateMessageCompletionScroll)
-		this->_privateMessageCompletionScroll = this->_privateMessageCompletionIndex;
-	else if (this->_privateMessageCompletionIndex >= this->_privateMessageCompletionScroll + visibleCompletions)
-		this->_privateMessageCompletionScroll = this->_privateMessageCompletionIndex - visibleCompletions + 1;
 	if (this->_privateMessageCompletions.empty()) {
+		this->_commandTabCycleArmed = false;
 		this->_privateMessageCompletionTimer = 0;
 		playSound(0x29);
 		return;
 	}
+	const bool commandCompletion = this->_privateMessageCompletions[this->_privateMessageCompletionIndex].command;
+	if (commandCompletion && this->_commandTabCycleArmed) {
+		this->_privateMessageCompletionIndex = (this->_privateMessageCompletionIndex + 1) % this->_privateMessageCompletions.size();
+		constexpr unsigned visibleCompletions = 10;
+		if (this->_privateMessageCompletionIndex < this->_privateMessageCompletionScroll)
+			this->_privateMessageCompletionScroll = this->_privateMessageCompletionIndex;
+		else if (this->_privateMessageCompletionIndex >= this->_privateMessageCompletionScroll + visibleCompletions)
+			this->_privateMessageCompletionScroll = this->_privateMessageCompletionIndex - visibleCompletions + 1;
+	}
+	this->_rememberCurrentPlayerCompletion();
 	this->_applyPrivateMessageCompletion();
+	this->_commandTabCycleArmed = commandCompletion;
+	if (!commandCompletion) {
+		this->_privateMessageCompletions.clear();
+		this->_privateMessageCompletionTimer = 0;
+	}
 	playSound(0x27);
 }
 
@@ -4366,7 +4427,6 @@ bool InLobbyMenu::_getPlayerCompletionTarget(size_t &targetStart, size_t &target
 		{L"/msg ", true},
 		{L"/report ", true},
 		{L"/join ", false},
-		{L"/locate ", false},
 		{L"/tp ", false},
 		{L"/block ", false},
 		{L"/unblock ", false},
@@ -4399,11 +4459,18 @@ bool InLobbyMenu::_getPlayerCompletionTarget(size_t &targetStart, size_t &target
 		appendSpace = prefix.appendSpace;
 		return this->_textCursorPosIndex >= static_cast<int>(targetStart);
 	}
+	if (!text.empty() && text.front() == L'/' && text.find_first_of(L" \t\r\n", 1) == std::wstring::npos) {
+		targetStart = 1;
+		targetEnd = text.size();
+		appendSpace = false;
+		return this->_textCursorPosIndex >= 1 && this->_textCursorPosIndex <= static_cast<int>(targetEnd);
+	}
 	return false;
 }
 
 void InLobbyMenu::_refreshPrivateMessageCompletions()
 {
+	this->_commandTabCycleArmed = false;
 	size_t targetStart;
 	size_t targetEnd;
 	bool appendSpace;
@@ -4413,7 +4480,14 @@ void InLobbyMenu::_refreshPrivateMessageCompletions()
 		return;
 	}
 	std::wstring text(this->_buffer.begin(), this->_buffer.end() - 1);
+	const bool commandCompletion = targetStart == 1 && !text.empty() && text.front() == L'/';
 	const bool unblockCommand = text.compare(0, wcslen(L"/unblock "), L"/unblock ") == 0;
+	std::optional<RecentOpponent> recentOpponent;
+	{
+		std::lock_guard<std::mutex> lock(this->_recentOpponentMutex);
+		recentOpponent = this->_recentOpponent;
+	}
+	const size_t recentSelectionLimit = recentOpponent ? 2 : 3;
 	std::wstring query = text.substr(targetStart, targetEnd - targetStart);
 	if (!query.empty() && query.front() == L'@')
 		query.erase(query.begin());
@@ -4426,7 +4500,19 @@ void InLobbyMenu::_refreshPrivateMessageCompletions()
 		return next == needle.end();
 	};
 	this->_privateMessageCompletions.clear();
-	if (unblockCommand) {
+	if (commandCompletion) {
+		static constexpr const wchar_t *commands[]{
+			L"help", L"join", L"list", L"msg", L"report", L"tp", L"block", L"blocklist", L"unblock"
+		};
+		for (const auto *command : commands) {
+			std::wstring name = command;
+			auto lowered = name;
+			std::transform(lowered.begin(), lowered.end(), lowered.begin(), towlower);
+			if (!query.empty() && lowered.compare(0, query.size(), query) != 0)
+				continue;
+			this->_privateMessageCompletions.push_back({0, std::move(name), false, true, -1, {}});
+		}
+	} else if (unblockCommand) {
 		for (const auto &blockedName : Blocklist::list()) {
 			std::wstring name;
 			try {
@@ -4438,33 +4524,46 @@ void InLobbyMenu::_refreshPrivateMessageCompletions()
 			std::transform(lowered.begin(), lowered.end(), lowered.begin(), towlower);
 			if (!query.empty() && !fuzzyMatch(lowered, query))
 				continue;
-			this->_privateMessageCompletions.push_back({0, std::move(name), false, {}});
+			int recentSelectionRank = -1;
+			for (size_t i = 0; i < this->_recentPlayerSelections.size() && i < recentSelectionLimit; i++)
+				if (this->_recentPlayerSelections[i].playerName == blockedName) {
+					recentSelectionRank = static_cast<int>(i);
+					break;
+				}
+			this->_privateMessageCompletions.push_back({0, std::move(name), false, false, recentSelectionRank, {}});
 		}
 	} else {
 		auto me = this->_connection->getMe();
-		std::optional<RecentOpponent> recentOpponent;
-		{
-			std::lock_guard<std::mutex> lock(this->_recentOpponentMutex);
-			recentOpponent = this->_recentOpponent;
-		}
-		if (recentOpponent) {
+		if (recentOpponent && recentOpponent->playerId && !recentOpponent->playerName.empty()) {
 			try {
 				auto name = convertEncoding<char, wchar_t, UTF8Decode, UTF16Encode>(recentOpponent->playerName);
 				auto lowered = name;
 				std::transform(lowered.begin(), lowered.end(), lowered.begin(), towlower);
 				auto idText = std::to_wstring(recentOpponent->playerId);
-				if (query.empty() || fuzzyMatch(lowered, query) || idText.find(query) == 0)
+				if (query.empty() || fuzzyMatch(lowered, query) || idText.find(query) == 0) {
+					int recentSelectionRank = -1;
+					for (size_t i = 0; i < this->_recentPlayerSelections.size() && i < recentSelectionLimit; i++)
+						if (
+							this->_recentPlayerSelections[i].playerId == recentOpponent->playerId ||
+							this->_recentPlayerSelections[i].playerName == recentOpponent->playerName
+						) {
+							recentSelectionRank = static_cast<int>(i);
+							break;
+						}
 					this->_privateMessageCompletions.push_back({
 						recentOpponent->playerId,
 						std::move(name),
 						true,
+						false,
+						recentSelectionRank,
 						{}
 					});
+				}
 			} catch (...) {
 			}
 		}
 		for (const auto &[id, player] : this->_playersById) {
-			if (!player || (me && id == me->id) || (recentOpponent && id == recentOpponent->playerId))
+			if (!id || !player || player->name.empty() || (me && id == me->id) || (recentOpponent && id == recentOpponent->playerId))
 				continue;
 			std::wstring name;
 			try {
@@ -4477,10 +4576,26 @@ void InLobbyMenu::_refreshPrivateMessageCompletions()
 			auto idText = std::to_wstring(id);
 			if (!query.empty() && !fuzzyMatch(lowered, query) && idText.find(query) != 0)
 				continue;
-			this->_privateMessageCompletions.push_back({id, std::move(name), false, {}});
+			int recentSelectionRank = -1;
+			for (size_t i = 0; i < this->_recentPlayerSelections.size() && i < recentSelectionLimit; i++)
+				if (
+					this->_recentPlayerSelections[i].playerId == id ||
+					this->_recentPlayerSelections[i].playerName == player->name
+				) {
+					recentSelectionRank = static_cast<int>(i);
+					break;
+				}
+			this->_privateMessageCompletions.push_back({id, std::move(name), false, false, recentSelectionRank, {}});
 		}
 	}
 	std::sort(this->_privateMessageCompletions.begin(), this->_privateMessageCompletions.end(), [&query](const auto &left, const auto &right) {
+		if (left.recentSelectionRank != right.recentSelectionRank) {
+			if (left.recentSelectionRank < 0)
+				return false;
+			if (right.recentSelectionRank < 0)
+				return true;
+			return left.recentSelectionRank < right.recentSelectionRank;
+		}
 		if (left.recentOpponent != right.recentOpponent)
 			return left.recentOpponent;
 		auto rank = [&query](const std::wstring &name) {
@@ -4499,8 +4614,12 @@ void InLobbyMenu::_refreshPrivateMessageCompletions()
 	this->_privateMessageCompletionIndex = 0;
 	this->_privateMessageCompletionScroll = 0;
 	for (auto &entry : this->_privateMessageCompletions) {
-		auto label = unblockCommand ? entry.playerName : entry.playerName + L"  (#" + std::to_wstring(entry.playerId) + L")";
-		if (entry.recentOpponent)
+		auto label = commandCompletion
+			? L"/" + entry.playerName
+			: unblockCommand ? entry.playerName : entry.playerName + L"  (#" + std::to_wstring(entry.playerId) + L")";
+		if (entry.recentSelectionRank >= 0)
+			label += chineseLanguage ? L"  [最近选择]" : L"  [Recent]";
+		else if (entry.recentOpponent)
 			label += chineseLanguage ? L"  [最近对手]" : L"  [Recent opponent]";
 		int textureId = 0;
 		SokuLib::Vector2i size;
@@ -4511,6 +4630,41 @@ void InLobbyMenu::_refreshPrivateMessageCompletions()
 		}
 	}
 	this->_privateMessageCompletionTimer = this->_privateMessageCompletions.empty() ? 0 : 240;
+}
+
+void InLobbyMenu::_rememberCurrentPlayerCompletion()
+{
+	if (this->_privateMessageCompletions.empty())
+		return;
+	const auto &completion = this->_privateMessageCompletions[this->_privateMessageCompletionIndex];
+	if (completion.command)
+		return;
+	std::string name;
+	try {
+		name = convertEncoding<wchar_t, char, UTF16Decode, UTF8Encode>(completion.playerName);
+	} catch (...) {
+		return;
+	}
+	this->_recentPlayerSelections.erase(
+		std::remove_if(
+			this->_recentPlayerSelections.begin(),
+			this->_recentPlayerSelections.end(),
+			[&](const RecentPlayerSelection &entry) {
+				return entry.playerName == name || (completion.playerId && entry.playerId == completion.playerId);
+			}
+		),
+		this->_recentPlayerSelections.end()
+	);
+	this->_recentPlayerSelections.push_front({completion.playerId, std::move(name)});
+	bool hasRecentOpponent = false;
+	{
+		std::lock_guard<std::mutex> lock(this->_recentOpponentMutex);
+		hasRecentOpponent = this->_recentOpponent.has_value();
+	}
+	const size_t limit = hasRecentOpponent ? 2 : 3;
+	while (this->_recentPlayerSelections.size() > limit)
+		this->_recentPlayerSelections.pop_back();
+	this->_saveRecentPlayerSelections();
 }
 
 void InLobbyMenu::_applyPrivateMessageCompletion()
@@ -4525,7 +4679,10 @@ void InLobbyMenu::_applyPrivateMessageCompletion()
 	const auto &completion = this->_privateMessageCompletions[this->_privateMessageCompletionIndex];
 	std::wstring replacement;
 	std::wstring currentText(this->_buffer.begin(), this->_buffer.end() - 1);
-	if (currentText.compare(0, wcslen(L"/unblock "), L"/unblock ") == 0) {
+	if (completion.command) {
+		replacement = completion.playerName;
+	}
+	else if (currentText.compare(0, wcslen(L"/unblock "), L"/unblock ") == 0) {
 		for (wchar_t chr : completion.playerName) {
 			if (chr == L'\\' || iswspace(chr))
 				replacement += L'\\';

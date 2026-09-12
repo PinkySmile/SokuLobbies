@@ -348,7 +348,9 @@ bool Connection::_handlePacket(const Lobbies::PacketMove &packet, size_t &size)
 		return false;
 	}
 	size -= sizeof(packet);
-	this->_players[packet.id].dir = packet.dir;
+	auto player = this->_players.find(packet.id);
+	if (player != this->_players.end())
+		player->second.dir = packet.dir;
 	return true;
 }
 
@@ -361,9 +363,12 @@ bool Connection::_handlePacket(const Lobbies::PacketPosition &packet, size_t &si
 		return false;
 	}
 	size -= sizeof(packet);
-	this->_players[packet.id].pos = {packet.x, packet.y};
-	this->_players[packet.id].battleStatus = packet.status;
-	this->_players[packet.id].dir = packet.dir;
+	auto player = this->_players.find(packet.id);
+	if (player != this->_players.end()) {
+		player->second.pos = {packet.x, packet.y};
+		player->second.battleStatus = packet.status;
+		player->second.dir = packet.dir;
+	}
 	return true;
 }
 
@@ -441,7 +446,9 @@ bool Connection::_handlePacket(const Lobbies::PacketSettingsUpdate &packet, size
 		return false;
 	}
 	size -= sizeof(packet);
-	this->_players[packet.id].player = packet.custom;
+	auto player = this->_players.find(packet.id);
+	if (player != this->_players.end())
+		player->second.player = packet.custom;
 	return true;
 }
 
@@ -454,9 +461,12 @@ bool Connection::_handlePacket(const Lobbies::PacketArcadeEngage &packet, size_t
 		return false;
 	}
 	size -= sizeof(packet);
-	this->_players[packet.id].machineId = packet.machineId;
+	auto player = this->_players.find(packet.id);
+	if (player == this->_players.end())
+		return true;
+	player->second.machineId = packet.machineId;
 	if (this->onArcadeEngage)
-		this->onArcadeEngage(this->_players[packet.id], packet.machineId);
+		this->onArcadeEngage(player->second, packet.machineId);
 	return true;
 }
 
@@ -471,8 +481,12 @@ bool Connection::_handlePacket(const Lobbies::PacketArcadeLeave &packet, size_t 
 	size -= sizeof(packet);
 	if (this->_me && packet.id == this->_me->id)
 		this->_spectatingArcade = false;
+	auto player = this->_players.find(packet.id);
+	if (player == this->_players.end())
+		return true;
 	if (this->onArcadeLeave)
-		this->onArcadeLeave(this->_players[packet.id], this->_players[packet.id].machineId);
+		this->onArcadeLeave(player->second, player->second.machineId);
+	player->second.machineId = 0;
 	return true;
 }
 
@@ -518,7 +532,9 @@ bool Connection::_handlePacket(const Lobbies::PacketBattleStatusUpdate &packet, 
 		return false;
 	}
 	size -= sizeof(packet);
-	this->_players[packet.playerId].battleStatus = packet.newStatus;
+	auto player = this->_players.find(packet.playerId);
+	if (player != this->_players.end())
+		player->second.battleStatus = packet.newStatus;
 	return true;
 }
 
@@ -604,7 +620,8 @@ std::vector<Player> Connection::getPlayers() const
 
 	std::lock_guard<std::mutex> playerMutexGuard(this->_playerMutex);
 	for (auto &p : this->_players)
-		players.push_back(p.second);
+		if (p.first && !p.second.name.empty())
+			players.push_back(p.second);
 	return players;
 }
 
