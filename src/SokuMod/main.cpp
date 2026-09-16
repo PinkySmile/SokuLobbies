@@ -1402,7 +1402,7 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	chatKey = GetPrivateProfileIntW(L"Lobby", L"ChatKey", VK_RETURN, profilePath);
 	{
 		wchar_t language[16];
-		GetPrivateProfileStringW(L"Lobby", L"Language", L"Chinese", language, sizeof(language) / sizeof(*language), profilePath);
+		GetPrivateProfileStringW(L"Lobby", L"Language", L"English", language, sizeof(language) / sizeof(*language), profilePath);
 		chineseLanguage = _wcsicmp(language, L"Chinese") == 0 || _wcsicmp(language, L"\u4E2D\u6587") == 0;
 	}
 	loadQuickMessages();
