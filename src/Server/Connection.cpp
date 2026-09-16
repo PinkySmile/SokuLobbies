@@ -10,6 +10,21 @@ extern std::mutex logMutex;
 #include <cstring>
 #include "Connection.hpp"
 
+
+#ifdef SFML2
+constexpr const sf::Socket::Status Done = sf::Socket::Done;
+constexpr const sf::Socket::Status Partial = sf::Socket::Partial;
+constexpr const sf::Socket::Status Disconnected = sf::Socket::Disconnected;
+constexpr const sf::Socket::Status NotReady = sf::Socket::NotReady;
+constexpr const sf::Socket::Status Error = sf::Socket::Error;
+#else
+constexpr const sf::Socket::Status Done = sf::Socket::Status::Done;
+constexpr const sf::Socket::Status Partial = sf::Socket::Status::Partial;
+constexpr const sf::Socket::Status Disconnected = sf::Socket::Status::Disconnected;
+constexpr const sf::Socket::Status NotReady = sf::Socket::Status::NotReady;
+constexpr const sf::Socket::Status Error = sf::Socket::Status::Error;
+#endif
+
 namespace {
 	constexpr auto RECEIVE_TIMEOUT = std::chrono::seconds(120);
 	constexpr auto SEND_RETRY_TIMEOUT = std::chrono::milliseconds(250);
@@ -31,68 +46,47 @@ void Connection::_netLoop()
 		if (recvSizeAdded)
 			this->_timeoutClock.restart();
 
-#ifdef SFML2
-		if (status == sf::Socket::NotReady && !recvSizeAdded) {
-#else
-		if (status == sf::Socket::Status::NotReady && !recvSizeAdded) {
-#endif
+		std::optional<sf::IpAddress> ip = this->_socket->getRemoteAddress();
+
+		if (status == NotReady && !recvSizeAdded) {
 			if (this->_timeoutClock.getElapsedTime().asMilliseconds() >= RECEIVE_TIMEOUT.count() * 1000)
 				return this->kick("Timed out");
 			std::this_thread::sleep_for(std::chrono::milliseconds(5));
 			continue;
 		}
 		if (!this->_connected) {
-#ifndef _LOBBYNOLOG
+		#ifndef _LOBBYNOLOG
 			logMutex.lock();
-	#ifdef SFML2
-			std::cout << this->_socket->getRemoteAddress().toString() << ":" << this->_socket->getRemotePort();
-	#else
-			std::cout << this->_socket->getRemoteAddress()->toString() << ":" << this->_socket->getRemotePort();
-	#endif
+			if (ip)
+				std::cout << ip->toString() << ":" << this->_socket->getRemotePort();
 			if (this->_id)
 				std::cout << " player id " << this->_id;
 			std::cout << " disconnected" << std::endl;
 			logMutex.unlock();
-#endif
+		#endif
 			return;
 		}
-#ifdef SFML2
-		if (status == sf::Socket::Disconnected) {
-#else
-		if (status == sf::Socket::Status::Disconnected) {
-#endif
+		if (status == Disconnected) {
 			this->onDisconnect(" has disconnected");
 			this->_init = false;
 			this->_connected = false;
-#ifndef _LOBBYNOLOG
+		#ifndef _LOBBYNOLOG
 			logMutex.lock();
-	#ifdef SFML2
-			std::cout << this->_socket->getRemoteAddress().toString() << ":" << this->_socket->getRemotePort();
-
-	#else
-			std::cout << this->_socket->getRemoteAddress()->toString() << ":" << this->_socket->getRemotePort();
-	#endif
+			if (ip)
+				std::cout << ip->toString() << ":" << this->_socket->getRemotePort();
 			if (this->_id)
 				std::cout << " player id " << this->_id;
 			std::cout << " disconnected" << std::endl;
 			logMutex.unlock();
-#endif
+		#endif
 			return;
 		}
-#ifdef SFML2
-		if (status == sf::Socket::Error) {
-#else
-		if (status == sf::Socket::Status::Error) {
-#endif
+		if (status == Error) {
 			this->kick("Socket error");
 		#ifndef _LOBBYNOLOG
 			logMutex.lock();
-#ifdef SFML2
-			std::cout << this->_socket->getRemoteAddress().toString() << ":" << this->_socket->getRemotePort();
-#else
-			// should probably do null checks before calling dereferencing optional but I'm just trying to get this to work
-			std::cout << this->_socket->getRemoteAddress()->toString() << ":" << this->_socket->getRemotePort();
-#endif
+			if (ip)
+				std::cout << ip->toString() << ":" << this->_socket->getRemotePort();
 			if (this->_id)
 				std::cout << " player id " << this->_id;
 			std::cout << " disconnected" << std::endl;
@@ -147,7 +141,8 @@ void Connection::send(const void *packet, size_t size)
 	auto bytes = static_cast<const char *>(packet);
 	size_t totalSent = 0;
 	auto retryDeadline = std::chrono::steady_clock::now() + SEND_RETRY_TIMEOUT;
-	sf::Socket::Status status = sf::Socket::Done;
+	sf::Socket::Status status = Done;
+	std::optional<sf::IpAddress> ip = this->_socket->getRemoteAddress();
 
 	while (totalSent < size) {
 		size_t sent = 0;
@@ -157,11 +152,11 @@ void Connection::send(const void *packet, size_t size)
 			break;
 		if (sent)
 			retryDeadline = std::chrono::steady_clock::now() + SEND_RETRY_TIMEOUT;
-		if (status == sf::Socket::Disconnected || status == sf::Socket::Error) {
+		if (status == Disconnected || status == Error) {
 			this->_socket->disconnect();
 			break;
 		}
-		if (status != sf::Socket::Partial && status != sf::Socket::NotReady) {
+		if (status != Partial && status != NotReady) {
 			this->_socket->disconnect();
 			break;
 		}
@@ -173,35 +168,24 @@ void Connection::send(const void *packet, size_t size)
 	}
 #ifndef _LOBBYNOLOG
 	logMutex.lock();
-#ifdef SFML2
-	std::cout << "[>" << this->_socket->getRemoteAddress().toString() << ":" << this->_socket->getRemotePort();
-#else
-	std::cout << "[>" << this->_socket->getRemoteAddress()->toString() << ":" << this->_socket->getRemotePort();
-#endif
+	std::cout << "[>" << ip->toString() << ":" << this->_socket->getRemotePort();
 	if (this->_id)
 		std::cout << " player id " << this->_id;
 	std::cout << "] " << size << " bytes: " << reinterpret_cast<const Lobbies::Packet *>(packet)->toString() << std::endl;
 	// The above cases, which require the TCP send buffer to be full, are probably hard to happen under default configuration.
 	// But we still log it when it does happen.
 	if (totalSent != size) {
-#ifdef SFML2
-		std::cout << "[>" << this->_socket->getRemoteAddress().toString() << ":" << this->_socket->getRemotePort();
-#else
-		std::cout << "[>" << this->_socket->getRemoteAddress()->toString() << ":" << this->_socket->getRemotePort();
-#endif
+		if (ip)
+			std::cout << "[>" << ip->toString() << ":" << this->_socket->getRemotePort();
 		if (this->_id)
 			std::cout << " player id " << this->_id;
-		std::cout << "] " << "warning: partial send, only " << sent << " bytes were sent" << std::endl;
-#ifdef SFML2
-	} else if (status == sf::Socket::NotReady) {
-		std::cout << "[>" << this->_socket->getRemoteAddress().toString() << ":" << this->_socket->getRemotePort();
-#else
-	} else if (status == sf::Socket::Status::NotReady) {
-		std::cout << "[>" << this->_socket->getRemoteAddress()->toString() << ":" << this->_socket->getRemotePort();
-#endif
+		std::cout << "] " << "warning: partial send, only " << totalSent << " bytes were sent" << std::endl;
+	} else if (status == NotReady) {
+		if (ip)
+			std::cout << "[>" << ip->toString() << ":" << this->_socket->getRemotePort();
 		if (this->_id)
 			std::cout << " player id " << this->_id;
-		std::cout << "] warning: send failed after " << totalSent << "/" << size << " bytes (status " << status << ")" << std::endl;
+		std::cout << "] warning: send failed after " << totalSent << "/" << size << " bytes (status " << static_cast<int>(status) << ")" << std::endl;
 	}
 	logMutex.unlock();
 #endif
@@ -297,12 +281,10 @@ bool Connection::isConnected() const
 bool Connection::_handlePacket(const Lobbies::Packet &packet, size_t &size)
 {
 #ifndef _LOBBYNOLOG
+	std::optional<sf::IpAddress> ip = this->_socket->getRemoteAddress();
+
 	logMutex.lock();
-	#ifdef SFML2
-	std::cout << "[<" << this->_socket->getRemoteAddress().toString() << ":" << this->_socket->getRemotePort();
-	#else
-	std::cout << "[<" << this->_socket->getRemoteAddress()->toString() << ":" << this->_socket->getRemotePort();
-	#endif
+	std::cout << "[<" << ip->toString() << ":" << this->_socket->getRemotePort();
 	if (this->_id)
 		std::cout << " player id " << this->_id;
 	std::cout << "] " << size << " bytes: " << packet.toString() << std::endl;
@@ -373,6 +355,7 @@ bool Connection::_handlePacket(const Lobbies::PacketHello &packet, size_t &size)
 
 	char buffer[sizeof(packet.name) + 1];
 	char invalidChars[] = {'\\', '/', ':', '*', '?', '\"', '<', '>', '|'};
+	std::optional<sf::IpAddress> ip = this->_socket->getRemoteAddress();
 
 	memset(buffer, 0, sizeof(buffer));
 	strncpy(buffer, packet.name, sizeof(packet.name));
@@ -381,11 +364,7 @@ bool Connection::_handlePacket(const Lobbies::PacketHello &packet, size_t &size)
 			return this->kick("Invalid name (contains " + std::string(&c, 1) + ")"), false;
 	if (!this->onJoin(
 		packet,
-#ifdef SFML2
-		this->_socket->getRemoteAddress().toString() + ":" + std::to_string(this->_socket->getRemotePort()),
-#else
-		this->_socket->getRemoteAddress()->toString() + ":" + std::to_string(this->_socket->getRemotePort()),
-#endif
+		ip->toString() + ":" + std::to_string(this->_socket->getRemotePort()),
 		this->_name
 	)) {
 		this->_socket->disconnect();
@@ -568,16 +547,14 @@ bool Connection::_handlePacket(const Lobbies::PacketBattleStatusUpdate &packet, 
 	return true;
 }
 
-
-
 sf::IpAddress Connection::getIp() const
 {
 	if (this->_socket)
-#ifdef SFML2
+	#ifdef SFML2
 		return this->_socket->getRemoteAddress();
-#else
+	#else
 		return *this->_socket->getRemoteAddress();
-#endif
+	#endif
 	return sf::IpAddress::Any;
 }
 

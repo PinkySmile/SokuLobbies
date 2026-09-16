@@ -7,10 +7,11 @@
 
 
 #include <optional>
-#include <Packet.hpp>
-#include <SFML/Network.hpp>
+#include <mutex>
 #include <thread>
 #include <functional>
+#include <SFML/Network.hpp>
+#include <Packet.hpp>
 
 class Connection {
 public:
