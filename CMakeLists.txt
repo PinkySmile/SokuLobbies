@@ -170,8 +170,12 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 		src/SokuMod/LobbyMenu.hpp
 		src/SokuMod/Connection.cpp
 		src/SokuMod/Connection.hpp
+		src/SokuMod/Blocklist.cpp
+		src/SokuMod/Blocklist.hpp
 		src/SokuMod/InputBox.cpp
 		src/SokuMod/InputBox.cpp
+		src/SokuMod/IniConfig.cpp
+		src/SokuMod/IniConfig.hpp
 		src/SokuMod/InLobbyMenu.cpp
 		src/SokuMod/InLobbyMenu.cpp
 		src/SokuMod/getPublicIp.hpp
@@ -187,6 +191,8 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 		src/SokuMod/AchievementsMenu.hpp
 		src/SokuMod/StatsMenu.cpp
 		src/SokuMod/StatsMenu.hpp
+		src/SokuMod/OptionsMenu.cpp
+		src/SokuMod/OptionsMenu.hpp
 		src/SokuMod/LobbyData.cpp
 		src/SokuMod/LobbyData.hpp
 		src/SokuMod/SmallHostlist.cpp
@@ -200,15 +206,17 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 		src/Common/shiftJISConvTable.inl
 		src/Common/shiftJISReverseConvTable.inl
 	)
-	target_compile_options(SokuLobbiesMod PRIVATE /Zi)
+	target_compile_options(SokuLobbiesMod PRIVATE /Zi /utf-8)
 	target_compile_definitions("SokuLobbiesMod" PRIVATE DIRECTINPUT_VERSION=0x0800 _CRT_SECURE_NO_WARNINGS)
 	target_link_libraries(
 		SokuLobbiesMod
 		SokuLib
 		shlwapi
+		shell32
 		ws2_32
 		d3dx9
 		imm32
+		ole32
 		version
 		CURL::libcurl
 		mbedtls_shim
@@ -216,4 +224,20 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 	target_link_directories(SokuLobbiesMod PRIVATE lib)
 	target_include_directories(SokuLobbiesMod PRIVATE lib/include)
 	target_compile_definitions(SokuLobbiesMod PRIVATE _LOBBYNOLOG=1)
+
+	option(SOKULOBBIES_BUILD_TESTS "Build SokuLobbies unit tests" OFF)
+	if (SOKULOBBIES_BUILD_TESTS)
+		enable_testing()
+		add_executable(SokuLobbiesIniConfigTests
+			tests/IniConfigTests.cpp
+			src/SokuMod/IniConfig.cpp
+			src/SokuMod/IniConfig.hpp
+		)
+		add_test(NAME SokuLobbiesIniConfigTests COMMAND SokuLobbiesIniConfigTests)
+	endif()
 endif()
+
+
+SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
+SET(CMAKE_MODULE_LINKER_FLAGS_RELEASE "${CMAKE_MODULE_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
+SET(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")

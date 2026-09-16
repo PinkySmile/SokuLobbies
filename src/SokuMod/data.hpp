@@ -8,6 +8,7 @@
 
 #include <windows.h>
 #include <map>
+#include <string>
 #include <functional>
 
 struct Character {
@@ -15,6 +16,12 @@ struct Character {
 	std::string fullName;
 	std::string codeName;
 	unsigned nbSkills;
+};
+
+enum ChatPopupMode {
+	CHAT_POPUP_ALL,
+	CHAT_POPUP_OPPONENTS,
+	CHAT_POPUP_NEVER
 };
 
 extern wchar_t profilePath[MAX_PATH];
@@ -26,8 +33,13 @@ extern char *wineVersion;
 extern unsigned lobbyJoinTries;
 extern unsigned lobbyJoinInterval;
 extern unsigned maxChatMessages;
+extern unsigned opponentChatColor;
+extern bool showTextBubbles;
+extern ChatPopupMode chatPopupMode;
 extern unsigned hostPref;
 extern unsigned chatKey;
+extern bool chineseLanguage;
+extern std::wstring quickMessages[9];
 extern unsigned short servPort;
 extern unsigned short hostPort;
 extern bool hasSoku2;

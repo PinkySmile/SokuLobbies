@@ -112,11 +112,20 @@ Socket::HttpResponse Socket::makeHttpRequest(const Socket::HttpRequest &request)
 }
 
 void Socket::disconnect() {
-	if (!this->isOpen())
+	if (this->_sockfd == INVALID_SOCKET)
 		return;
-	if (!this->_noDestroy)
-		close(this->_sockfd);
+	auto sockfd = this->_sockfd;
+
+	this->_sockfd = INVALID_SOCKET;
 	this->_opened = false;
+	if (this->_noDestroy)
+		return;
+#ifdef _WIN32
+	shutdown(sockfd, 2);
+#else
+	shutdown(sockfd, SHUT_RDWR);
+#endif
+	close(sockfd);
 }
 
 std::string Socket::makeRawRequest(const std::string &host, unsigned short portno, const std::string &content) {

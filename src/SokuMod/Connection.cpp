@@ -8,6 +8,8 @@
 std::mutex logMutex;
 #endif
 #include <cstring>
+#include <algorithm>
+#include <chrono>
 #include <vector>
 #include <functional>
 #include <Exceptions.hpp>
@@ -22,6 +24,13 @@ extern unsigned char soku2Minor;
 extern char soku2Letter;
 extern bool soku2Force;
 
+static long long steadyClockMilliseconds()
+{
+	return std::chrono::duration_cast<std::chrono::milliseconds>(
+		std::chrono::steady_clock::now().time_since_epoch()
+	).count();
+}
+
 void Connection::_netLoop()
 {
 	char buffer[sizeof(Lobbies::Packet) * 6];
@@ -29,6 +38,14 @@ void Connection::_netLoop()
 	size_t recvSize = 0;
 
 	while (true) {
+		if (!this->_connected)
+			return;
+
+		if (!this->_hasConnected) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			continue;
+		}
+
 		try {
 			recvSize += (recvSizeAdded = this->_socket.read(buffer + recvSize, sizeof(buffer) - recvSize));
 		} catch (std::exception &e) {
@@ -52,8 +69,6 @@ void Connection::_netLoop()
 			return;
 		}
 
-		if (!this->_connected)
-			return;
 		if (recvSizeAdded == 0) {
 			this->_init = false;
 			this->_connected = false;
@@ -79,14 +94,16 @@ void Connection::_netLoop()
 }
 
 Connection::Connection(const std::string &host, unsigned short port, const Player &initParams) :
+	_host(host),
+	_port(port),
 	_initParams(initParams)
 {
-	this->_socket.connect(host, port);
 }
 
 Connection::~Connection()
 {
 	this->_init = false;
+	this->_connected = false;
 	{
 		std::lock_guard<std::mutex> meMutexGuard(this->meMutex);
 		std::lock_guard<std::mutex> playerMutexGuard(this->_playerMutex);
@@ -94,7 +111,11 @@ Connection::~Connection()
 		if (this->onDisconnect)
 			this->onDisconnect();
 	}
+	// Closing the socket first interrupts a pending connect/recv so joining cannot
+	// block the game thread until the operating system network timeout expires.
 	this->_socket.disconnect();
+	if (this->_connectThread.joinable())
+		this->_connectThread.join();
 	if (this->_netThread.joinable())
 		this->_netThread.join();
 	if (this->_posThread.joinable())
@@ -111,6 +132,16 @@ void Connection::error(const std::string &msg)
 
 void Connection::startThread()
 {
+	this->_connectThread = std::thread([this](){
+		try {
+			this->_socket.connect(this->_host, this->_port);
+			this->_hasConnected = true;
+		} catch (std::exception &e) {
+			std::lock_guard<std::mutex> meMutexGuard(this->meMutex);
+			std::lock_guard<std::mutex> playerMutexGuard(this->_playerMutex);
+			this->error(e.what());
+		}
+	});
 	this->_netThread = std::thread{&Connection::_netLoop, this};
 }
 
@@ -136,6 +167,11 @@ void Connection::send(const void *packet, size_t size)
 bool Connection::isInit() const
 {
 	return this->_init;
+}
+
+bool Connection::hasConnected() const
+{
+	return this->_hasConnected;
 }
 
 bool Connection::isConnected() const
@@ -252,7 +288,12 @@ bool Connection::_handlePacket(const Lobbies::PacketPlayerLeave &packet, size_t 
 	size -= sizeof(packet);
 	if (packet.id == this->_me->id)
 		return this->error("Protocol error: Server sent OPCODE_PLAYER_LEAVE with self id"), false;
-	this->_players.erase(this->_players.find(packet.id));
+	auto it = this->_players.find(packet.id);
+	if (it == this->_players.end())
+		return true;
+	if (this->onPlayerLeave)
+		this->onPlayerLeave(it->second);
+	this->_players.erase(it);
 	return true;
 }
 
@@ -263,8 +304,35 @@ bool Connection::_handlePacket(const Lobbies::PacketKicked &packet, size_t &size
 		return false;
 	}
 	size -= sizeof(packet);
-	if (this->onImpMsg)
-		this->onImpMsg("Kicked: " + std::string(packet.message, strnlen(packet.message, sizeof(packet.message))));
+
+	std::string reason(packet.message, strnlen(packet.message, sizeof(packet.message)));
+	constexpr char inactivePrefix[] = "Kicked for being inactive for ";
+	constexpr char inactiveSuffix[] = " minutes.";
+	bool inactiveAutoKick = false;
+
+	if (
+		reason.size() > sizeof(inactivePrefix) - 1 + sizeof(inactiveSuffix) - 1 &&
+		reason.compare(0, sizeof(inactivePrefix) - 1, inactivePrefix) == 0 &&
+		reason.compare(reason.size() - (sizeof(inactiveSuffix) - 1), sizeof(inactiveSuffix) - 1, inactiveSuffix) == 0
+	) {
+		auto minutesBegin = reason.begin() + sizeof(inactivePrefix) - 1;
+		auto minutesEnd = reason.end() - (sizeof(inactiveSuffix) - 1);
+
+		inactiveAutoKick = std::all_of(minutesBegin, minutesEnd, [](unsigned char c) {
+			return c >= '0' && c <= '9';
+		});
+	}
+	auto nowMs = steadyClockMilliseconds();
+	auto lastSpectatingAtMs = this->_lastSpectatingAtMs.load();
+	bool recentlySpectating = lastSpectatingAtMs > 0 && nowMs - lastSpectatingAtMs <= 10000;
+	bool inSpectatingScene =
+		SokuLib::sceneId == SokuLib::SCENE_LOADINGWATCH ||
+		SokuLib::sceneId == SokuLib::SCENE_BATTLEWATCH ||
+		SokuLib::newSceneId == SokuLib::SCENE_LOADINGWATCH ||
+		SokuLib::newSceneId == SokuLib::SCENE_BATTLEWATCH;
+	bool spectatorContext = this->_spectatingArcade.load() || this->_spectatingScene.load() || inSpectatingScene || recentlySpectating;
+	if (!(spectatorContext && inactiveAutoKick) && this->onImpMsg)
+		this->onImpMsg("Kicked: " + reason);
 	this->_init = false;
 	this->_connected = false;
 	this->_socket.disconnect();
@@ -280,7 +348,9 @@ bool Connection::_handlePacket(const Lobbies::PacketMove &packet, size_t &size)
 		return false;
 	}
 	size -= sizeof(packet);
-	this->_players[packet.id].dir = packet.dir;
+	auto player = this->_players.find(packet.id);
+	if (player != this->_players.end())
+		player->second.dir = packet.dir;
 	return true;
 }
 
@@ -293,9 +363,12 @@ bool Connection::_handlePacket(const Lobbies::PacketPosition &packet, size_t &si
 		return false;
 	}
 	size -= sizeof(packet);
-	this->_players[packet.id].pos = {packet.x, packet.y};
-	this->_players[packet.id].battleStatus = packet.status;
-	this->_players[packet.id].dir = packet.dir;
+	auto player = this->_players.find(packet.id);
+	if (player != this->_players.end()) {
+		player->second.pos = {packet.x, packet.y};
+		player->second.battleStatus = packet.status;
+		player->second.dir = packet.dir;
+	}
 	return true;
 }
 
@@ -320,6 +393,9 @@ bool Connection::_handlePacket(const Lobbies::PacketGameStart &packet, size_t &s
 		return false;
 	}
 	size -= sizeof(packet);
+	this->_spectatingArcade = packet.spectator;
+	if (packet.spectator)
+		this->_lastSpectatingAtMs = steadyClockMilliseconds();
 	if (this->onConnectRequest){
 		const char * ip = packet.ip;
 		unsigned short port = packet.port;
@@ -370,7 +446,9 @@ bool Connection::_handlePacket(const Lobbies::PacketSettingsUpdate &packet, size
 		return false;
 	}
 	size -= sizeof(packet);
-	this->_players[packet.id].player = packet.custom;
+	auto player = this->_players.find(packet.id);
+	if (player != this->_players.end())
+		player->second.player = packet.custom;
 	return true;
 }
 
@@ -383,9 +461,12 @@ bool Connection::_handlePacket(const Lobbies::PacketArcadeEngage &packet, size_t
 		return false;
 	}
 	size -= sizeof(packet);
-	this->_players[packet.id].machineId = packet.machineId;
+	auto player = this->_players.find(packet.id);
+	if (player == this->_players.end())
+		return true;
+	player->second.machineId = packet.machineId;
 	if (this->onArcadeEngage)
-		this->onArcadeEngage(this->_players[packet.id], packet.machineId);
+		this->onArcadeEngage(player->second, packet.machineId);
 	return true;
 }
 
@@ -398,9 +479,22 @@ bool Connection::_handlePacket(const Lobbies::PacketArcadeLeave &packet, size_t 
 		return false;
 	}
 	size -= sizeof(packet);
+	if (this->_me && packet.id == this->_me->id)
+		this->_spectatingArcade = false;
+	auto player = this->_players.find(packet.id);
+	if (player == this->_players.end())
+		return true;
 	if (this->onArcadeLeave)
-		this->onArcadeLeave(this->_players[packet.id], this->_players[packet.id].machineId);
+		this->onArcadeLeave(player->second, player->second.machineId);
+	player->second.machineId = 0;
 	return true;
+}
+
+void Connection::setSpectatingScene(bool spectating)
+{
+	this->_spectatingScene = spectating;
+	if (spectating)
+		this->_lastSpectatingAtMs = steadyClockMilliseconds();
 }
 
 bool Connection::_handlePacket(const Lobbies::PacketMessage &packet, size_t &size)
@@ -438,7 +532,9 @@ bool Connection::_handlePacket(const Lobbies::PacketBattleStatusUpdate &packet, 
 		return false;
 	}
 	size -= sizeof(packet);
-	this->_players[packet.playerId].battleStatus = packet.newStatus;
+	auto player = this->_players.find(packet.playerId);
+	if (player != this->_players.end())
+		player->second.battleStatus = packet.newStatus;
 	return true;
 }
 
@@ -524,7 +620,8 @@ std::vector<Player> Connection::getPlayers() const
 
 	std::lock_guard<std::mutex> playerMutexGuard(this->_playerMutex);
 	for (auto &p : this->_players)
-		players.push_back(p.second);
+		if (p.first && !p.second.name.empty())
+			players.push_back(p.second);
 	return players;
 }
 

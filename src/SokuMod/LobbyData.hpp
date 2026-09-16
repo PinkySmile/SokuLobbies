@@ -7,10 +7,12 @@
 
 
 #include <map>
+#include <atomic>
 #include <mutex>
 #include <vector>
 #include <string>
 #include <optional>
+#include <filesystem>
 #include <SokuLib.hpp>
 #include <curl/curl.h>
 #include "nlohmann/json.hpp"
@@ -26,6 +28,8 @@ private:
 	};
 
 	void _loadStats();
+	void _loadStatsFile(const std::filesystem::path &path);
+	void _clearStats();
 	void _loadAvatars();
 	void _loadBackgrounds();
 	void _loadEmotes();
@@ -255,7 +259,7 @@ public:
 
 	LobbyData();
 	~LobbyData();
-	std::string httpRequest(const std::string &url, const std::string &method = "GET", const std::string &data = "", long timeoutMs = 20000L);
+	std::string httpRequest(const std::string &url, const std::string &method = "GET", const std::string &data = "", long timeoutMs = 20000L, const std::atomic_bool *cancel = nullptr);
 	bool isLocked(const Emote &emote);
 	bool isLocked(const Avatar &avatar);
 	bool isLocked(const Background &background);
