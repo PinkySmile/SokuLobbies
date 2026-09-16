@@ -21,14 +21,12 @@ extern std::map<unsigned int, Character> characters;
 void LobbyData::saveStats()
 {
 	auto path = std::filesystem::path(profileFolderPath) / "stats.dat";
-
-	unlink((path.string() + ".backup").c_str());
-	_wrename(path.wstring().c_str(), (path.wstring() + L".backup").c_str());
-
-	std::ofstream stream{path, std::fstream::binary};
+	auto backup = std::filesystem::path(path.wstring() + L".backup");
+	auto temporary = std::filesystem::path(path.wstring() + L".tmp");
+	std::ofstream stream{temporary, std::fstream::binary | std::fstream::trunc};
 
 	if (stream.fail()) {
-		MessageBoxA(SokuLib::window, ("Cannot open " + path.string() + ": " + strerror(errno)).c_str(), "Stat saving error", MB_ICONERROR);
+		fprintf(stderr, "Cannot open temporary stats file %s: %s\n", temporary.string().c_str(), strerror(errno));
 		return;
 	}
 
@@ -38,35 +36,106 @@ void LobbyData::saveStats()
 	this->_saveCharacterStats(stream);
 	this->_saveCharacterCardUsage(stream);
 	this->_saveMatchupStats(stream);
-	if (stream.fail()) {
-		MessageBoxA(SokuLib::window, ("Error when saving stats to file: " + std::string(errno ? strerror(errno) : "Unknown error")).c_str(), "Save error", MB_ICONERROR);
-		unlink(path.string().c_str());
-		_wrename((path.wstring() + L".backup").c_str(), path.wstring().c_str());
+	stream.flush();
+	bool failed = stream.fail();
+	stream.close();
+	if (failed) {
+		fprintf(stderr, "Error writing temporary stats file: %s\n", errno ? strerror(errno) : "Unknown error");
+		std::error_code ec;
+		std::filesystem::remove(temporary, ec);
+		return;
+	}
+	std::error_code existsError;
+	bool primaryExists = std::filesystem::exists(path, existsError);
+	if (existsError)
+		fprintf(stderr, "Cannot inspect stats file before backup: %s\n", existsError.message().c_str());
+	else if (primaryExists && !CopyFileW(path.wstring().c_str(), backup.wstring().c_str(), FALSE))
+		fprintf(stderr, "Cannot update stats backup: Windows error %lu\n", GetLastError());
+	if (!MoveFileExW(temporary.wstring().c_str(), path.wstring().c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH)) {
+		fprintf(stderr, "Cannot replace stats file: Windows error %lu\n", GetLastError());
+		std::error_code ec;
+		std::filesystem::remove(temporary, ec);
 	}
 }
 
 void LobbyData::_loadStats()
 {
-	std::ifstream stream{std::filesystem::path(profileFolderPath) / "stats.dat", std::fstream::binary};
-	unsigned magic;
+	auto path = std::filesystem::path(profileFolderPath) / "stats.dat";
+	auto backup = std::filesystem::path(path.wstring() + L".backup");
+	std::string primaryError;
+	std::string backupError;
+	auto tryLoad = [this](const std::filesystem::path &candidate, std::string &error) {
+		try {
+			std::error_code ec;
+			bool exists = std::filesystem::exists(candidate, ec);
+			if (ec)
+				throw std::runtime_error("Cannot inspect file: " + ec.message());
+			if (!exists) {
+				error = "file does not exist";
+				return false;
+			}
+			this->_loadStatsFile(candidate);
+			return true;
+		} catch (const std::exception &e) {
+			error = e.what();
+			this->_clearStats();
+			return false;
+		}
+	};
 
+	if (tryLoad(path, primaryError))
+		return;
+	fprintf(stderr, "Failed to load %s: %s\n", path.string().c_str(), primaryError.c_str());
+	if (tryLoad(backup, backupError)) {
+		fprintf(stderr, "Recovered statistics from %s\n", backup.string().c_str());
+		auto temporary = std::filesystem::path(path.wstring() + L".recovering");
+		if (
+			CopyFileW(backup.wstring().c_str(), temporary.wstring().c_str(), FALSE) &&
+			MoveFileExW(temporary.wstring().c_str(), path.wstring().c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH)
+		)
+			return;
+		fprintf(stderr, "Loaded stats backup but could not restore primary file: Windows error %lu\n", GetLastError());
+		std::error_code ec;
+		std::filesystem::remove(temporary, ec);
+		return;
+	}
+	fprintf(stderr, "Failed to load %s: %s. Starting with empty statistics.\n", backup.string().c_str(), backupError.c_str());
+	this->_clearStats();
+	auto quarantine = [](const std::filesystem::path &source, const std::filesystem::path &target) {
+		std::error_code ec;
+		bool exists = std::filesystem::exists(source, ec);
+		if (ec)
+			fprintf(stderr, "Cannot inspect %s for quarantine: %s\n", source.string().c_str(), ec.message().c_str());
+		else if (exists && !MoveFileExW(source.wstring().c_str(), target.wstring().c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH))
+			fprintf(stderr, "Cannot quarantine %s: Windows error %lu\n", source.string().c_str(), GetLastError());
+	};
+	quarantine(path, std::filesystem::path(path.wstring() + L".corrupt"));
+	quarantine(backup, std::filesystem::path(backup.wstring() + L".corrupt"));
+}
+
+void LobbyData::_clearStats()
+{
 	this->loadedMatchupStats.clear();
 	this->loadedCharacterCardUsage.clear();
 	this->loadedCharacterStats.clear();
+}
+
+void LobbyData::_loadStatsFile(const std::filesystem::path &path)
+{
+	std::ifstream stream{path, std::fstream::binary};
+	unsigned magic;
+
+	this->_clearStats();
 	if (stream.fail())
-		return;
+		throw std::invalid_argument("Cannot open stats file");
 	stream.read((char *)&magic, sizeof(magic));
 	if (stream.fail())
-		throw std::invalid_argument("Cannot load stats.dat: Unexpected end of file in header");
+		throw std::invalid_argument("Unexpected end of file in header");
 	this->_loadCharacterStats(stream);
 	this->_loadCharacterCardUsage(stream);
 	this->_loadMatchupStats(stream);
 	if (magic != this->_getExpectedMagic())
-#ifndef _DEBUG
-		throw std::invalid_argument("Cannot load stats.dat: Invalid magic");
-#else
-		MessageBox(SokuLib::window, "Warning: Invalid magic", "Warning", MB_ICONWARNING);
-#endif
+		throw std::invalid_argument("Invalid magic");
 
 	std::vector<std::map<unsigned char, CardChrStatEntry>::iterator> its;
 	auto it = this->loadedCharacterCardUsage.begin();
@@ -870,9 +939,11 @@ unsigned LobbyData::_getExpectedMagic()
 
 void LobbyData::_loadCharacterStats(std::istream &stream)
 {
-	unsigned len;
+	unsigned len = 0;
 
 	stream.read((char *)&len, sizeof(len));
+	if (stream.fail() || len > 256)
+		throw std::invalid_argument("Cannot load stats.dat: Invalid character stats entry count");
 	while (len--) {
 		CharacterStatEntry entry;
 		unsigned char id;
@@ -892,9 +963,11 @@ void LobbyData::_loadCharacterStats(std::istream &stream)
 
 void LobbyData::_loadCharacterCardUsage(std::istream &stream)
 {
-	unsigned len;
+	unsigned len = 0;
 
 	stream.read((char *)&len, sizeof(len));
+	if (stream.fail() || len > 256)
+		throw std::invalid_argument("Cannot load stats.dat: Invalid character card stats entry count");
 	printf("Loading %u entrie(s)\n", len);
 	while (len--) {
 		CardChrStatEntry entry;
@@ -904,6 +977,8 @@ void LobbyData::_loadCharacterCardUsage(std::istream &stream)
 		stream.read((char *)&id, sizeof(id));
 		stream.read((char *)&nb, sizeof(nb));
 		stream.read((char *)&entry.nbGames, sizeof(entry.nbGames));
+		if (stream.fail() || nb > 4096)
+			throw std::invalid_argument("Cannot load stats.dat: Invalid card stats entry count");
 		printf("%u: %u games for %u cards\n", id, entry.nbGames, nb);
 		for (unsigned i = 0; i < nb; i++) {
 			unsigned cardId;
@@ -928,9 +1003,11 @@ void LobbyData::_loadCharacterCardUsage(std::istream &stream)
 
 void LobbyData::_loadMatchupStats(std::istream &stream)
 {
-	unsigned len;
+	unsigned len = 0;
 
 	stream.read((char *)&len, sizeof(len));
+	if (stream.fail() || len > 65536)
+		throw std::invalid_argument("Cannot load stats.dat: Invalid matchup stats entry count");
 	while (len--) {
 		MatchupStatEntry entry;
 		std::pair<unsigned char, unsigned char> id;
@@ -1327,7 +1404,7 @@ void LobbyData::_grantDebugAchievements()
 		}
 }
 
-std::string LobbyData::httpRequest(const std::string &url, const std::string &method, const std::string &data, long timeoutMs)
+std::string LobbyData::httpRequest(const std::string &url, const std::string &method, const std::string &data, long timeoutMs, const std::atomic_bool *cancel)
 {
 	std::string response;
 	int response_code;
@@ -1348,6 +1425,13 @@ std::string LobbyData::httpRequest(const std::string &url, const std::string &me
 	curl_easy_setopt(request_handle, CURLOPT_AUTOREFERER, 1L);
 	curl_easy_setopt(request_handle, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(request_handle, CURLOPT_TIMEOUT_MS, timeoutMs);
+	if (cancel) {
+		curl_easy_setopt(request_handle, CURLOPT_NOPROGRESS, 0L);
+		curl_easy_setopt(request_handle, CURLOPT_XFERINFOFUNCTION, +[](void *data, curl_off_t, curl_off_t, curl_off_t, curl_off_t) -> int {
+			return !*static_cast<const std::atomic_bool *>(data);
+		});
+		curl_easy_setopt(request_handle, CURLOPT_XFERINFODATA, cancel);
+	}
 
 	request_chunk.memory = (char *)calloc(1, sizeof(char));
 	request_chunk.size = 0;

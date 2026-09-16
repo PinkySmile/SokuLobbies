@@ -16,7 +16,7 @@ static char *myIp = nullptr;
 static wchar_t buffer2[256];
 static char buffer[sizeof(buffer2) / sizeof(*buffer2)];
 
-const char *getMyIp()
+const char *getMyIp(const std::atomic_bool *cancel)
 {
 	auto bufferSize = sizeof(buffer2)/sizeof(*buffer2);
 	GetPrivateProfileStringW(L"Lobby", L"HostIP", L"", buffer2, bufferSize, profilePath);
@@ -35,7 +35,7 @@ const char *getMyIp()
 		// https://curl.se/libcurl/c/CURLOPT_URL.html
 		WideCharToMultiByte(CP_ACP, 0, buffer2, -1, buffer, sizeof(buffer), NULL, NULL);
 
-		auto ip = lobbyData->httpRequest(buffer, "GET", "", 16000);
+		auto ip = lobbyData->httpRequest(buffer, "GET", "", 16000, cancel);
 
 		ip.erase(0, ip.find_first_not_of(" \n\r\t"));
 		ip.erase(ip.find_last_not_of(" \n\r\t") + 1);

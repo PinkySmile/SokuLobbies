@@ -37,6 +37,7 @@ private:
 	std::string _name;
 	std::string _realName;
 	std::unique_ptr<sf::TcpSocket> _socket;
+	std::mutex _sendMutex;
 	Lobbies::LobbySettings _settings;
 	Lobbies::PlayerCustomization _player;
 	std::thread _netThread;

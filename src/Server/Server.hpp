@@ -60,9 +60,9 @@ private:
 	void _helpCmd(Connection *author, const std::vector<std::string> &args);
 	void _joinCmd(Connection *author, const std::vector<std::string> &args);
 	void _listCmd(Connection *author, const std::vector<std::string> &args);
-	void _locateCmd(Connection *author, const std::vector<std::string> &args);
 	void _teleportCmd(Connection *author, const std::vector<std::string> &args);
 	void _msgCmd(Connection *author, const std::vector<std::string> &args);
+	void _reportCmd(Connection *author, const std::vector<std::string> &args);
 
 	//Admin cmd
 	void _banCmd(Connection *author, const std::vector<std::string> &args);

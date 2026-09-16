@@ -65,6 +65,7 @@ private:
 	SokuLib::DrawUtils::Sprite _customAvatarName;
 	SokuLib::DrawUtils::Sprite _customAvatarRequ;
 	SokuLib::DrawUtils::Sprite _loadingText;
+	SokuLib::DrawUtils::Sprite _loadingHint;
 	SokuLib::DrawUtils::Sprite _messageBox;
 	SokuLib::DrawUtils::Sprite _loadingGear;
 	SokuLib::DrawUtils::Sprite _unlock;
@@ -99,6 +100,9 @@ public:
 	int onProcess() override;
 	int onRender() override;
 	void setActive();
+	void _refreshName();
+	void onHostPrefChanged();
+	void onLanguageChanged();
 };
 
 #endif //SOKULOBBIES_LOBBYMENU_HPP

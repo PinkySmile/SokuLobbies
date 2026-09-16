@@ -13,6 +13,7 @@
 
 namespace Lobbies
 {
+	constexpr int32_t BLOCKLIST_CONTROL_CHANNEL = INT32_MIN + 731;
 #pragma pack(push, 1)
 	enum Opcode : uint8_t {
 		OPCODE_HELLO,

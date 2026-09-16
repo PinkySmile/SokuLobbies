@@ -4,6 +4,12 @@
 
 #include <sstream>
 #include <fstream>
+#include <memory>
+#include <vector>
+#include <algorithm>
+#include <cstdlib>
+#include <cwctype>
+#include <filesystem>
 #include <SokuLib.hpp>
 #include <shlwapi.h>
 #include "data.hpp"
@@ -11,6 +17,8 @@
 #include "InLobbyMenu.hpp"
 #include "LobbyData.hpp"
 #include "InputBox.hpp"
+#include "Blocklist.hpp"
+#include "integration.hpp"
 #include "dinput.h"
 
 typedef HRESULT(__stdcall* EndSceneFn)(IDirect3DDevice9*);
@@ -44,6 +52,256 @@ static int (SokuLib::LoadingServer::*og_LoadingServerOnProcess)();
 static int (SokuLib::LoadingServer::*og_LoadingServerOnRender)();
 static int (SokuLib::BattleManager::*og_BattleMgrOnProcess)();
 static void (SokuLib::KeymapManager::*s_origKeymapManager_SetInputs)();
+static int (__stdcall *s_origRecvFrom)(SOCKET, char *, int, int, sockaddr *, int *);
+
+static int __stdcall BlocklistRecvFrom(SOCKET socket, char *buffer, int length, int flags, sockaddr *from, int *fromLength)
+{
+	while (true) {
+		auto result = s_origRecvFrom(socket, buffer, length, flags, from, fromLength);
+		if (result <= 0 || !from || !fromLength || *fromLength < sizeof(sockaddr_in) || from->sa_family != AF_INET)
+			return result;
+		auto source = reinterpret_cast<sockaddr_in *>(from);
+		auto sourceAddress = source->sin_addr.s_addr;
+		if (result < static_cast<int>(offsetof(SokuLib::PacketInitRequ, name)))
+			return result;
+		auto &request = *reinterpret_cast<SokuLib::PacketInitRequ *>(buffer);
+		if (
+			request.type != SokuLib::INIT_REQUEST ||
+			request.reqType != SokuLib::PLAY_REQU ||
+			request.nameLength > result - offsetof(SokuLib::PacketInitRequ, name)
+		)
+			return result;
+		auto address = sourceAddress;
+		auto isRelayed = (address & htonl(0xFF000000)) == htonl(0x7F000000);
+		// PLAY_REQU is sent by the joining player and received only by the
+		// host. mainMode is not reliable here because it may not switch to
+		// VSSERVER until after this handshake has completed.
+		bool blocked = !isRelayed && Blocklist::containsIp(address);
+		std::string matchedName;
+		const std::array<UINT, 5> codePages{CP_UTF8, 932U, 936U, 950U, th123intl::GetTextCodePage()};
+		for (auto codePage : codePages) {
+			std::string utf8Name;
+			try {
+				th123intl::ConvertCodePage(
+					codePage,
+					std::string_view(request.name, request.nameLength),
+					CP_UTF8,
+					utf8Name
+				);
+				if (Blocklist::contains(utf8Name)) {
+					blocked = true;
+					matchedName = std::move(utf8Name);
+				}
+			} catch (...) {
+			}
+		}
+		if (!blocked)
+			return result;
+
+		SokuLib::PacketInitError rejection{};
+		rejection.type = SokuLib::INIT_ERROR;
+		// GAME_STATE_INVALID makes the lobby client automatically retry as a
+		// spectator. Use the terminal error so a blocked play request exits
+		// the connection flow instead of entering a play/spectate retry loop.
+		rejection.reason = SokuLib::ERROR_SPECTATE_DISABLED;
+		SokuLib::DLL::ws2_32.sendto(
+			socket,
+			reinterpret_cast<char *>(&rejection),
+			sizeof(rejection),
+			0,
+			from,
+			*fromLength
+		);
+		printf("Rejected blocked opponent: %s\n", matchedName.empty() ? "<blocked IP>" : matchedName.c_str());
+		WSASetLastError(WSAEWOULDBLOCK);
+		return SOCKET_ERROR;
+	}
+}
+using CheckKeyOneshot = bool (__cdecl *)(int, int, int, int);
+static CheckKeyOneshot s_origCheckKeyOneshot = nullptr;
+static constexpr unsigned CHECK_KEY_HOOK_SIZE = 8;
+static constexpr unsigned char CHECK_KEY_PROLOGUE[CHECK_KEY_HOOK_SIZE] = {
+	0x8B, 0x44, 0x24, 0x10,
+	0x8B, 0x4C, 0x24, 0x0C
+};
+
+static bool __cdecl CheckKeyOneshotHook(int key, int arg2, int arg3, int arg4)
+{
+	auto pressed = s_origCheckKeyOneshot(key, arg2, arg3, arg4);
+
+	if (key != DIK_ESCAPE || !activeMenu)
+		return pressed;
+	return activeMenu->filterNativeEscape(pressed);
+}
+
+static bool canInstallCheckKeyOneshotHook()
+{
+	return memcmp(
+		reinterpret_cast<const void *>(SokuLib::ADDR_CHECK_KEY_ONESHOT),
+		CHECK_KEY_PROLOGUE,
+		CHECK_KEY_HOOK_SIZE
+	) == 0;
+}
+
+static bool installCheckKeyOneshotHook()
+{
+	auto target = reinterpret_cast<unsigned char *>(SokuLib::ADDR_CHECK_KEY_ONESHOT);
+	auto gateway = static_cast<unsigned char *>(VirtualAlloc(
+		nullptr,
+		CHECK_KEY_HOOK_SIZE + 5,
+		MEM_COMMIT | MEM_RESERVE,
+		PAGE_EXECUTE_READWRITE
+	));
+
+	if (!gateway)
+		return false;
+	memcpy(gateway, target, CHECK_KEY_HOOK_SIZE);
+	gateway[CHECK_KEY_HOOK_SIZE] = 0xE9;
+	*reinterpret_cast<int *>(gateway + CHECK_KEY_HOOK_SIZE + 1) =
+		reinterpret_cast<int>(target + CHECK_KEY_HOOK_SIZE) -
+		reinterpret_cast<int>(gateway + CHECK_KEY_HOOK_SIZE + 5);
+	s_origCheckKeyOneshot = reinterpret_cast<CheckKeyOneshot>(gateway);
+
+	target[0] = 0xE9;
+	*reinterpret_cast<int *>(target + 1) =
+		reinterpret_cast<int>(CheckKeyOneshotHook) - reinterpret_cast<int>(target + 5);
+	memset(target + 5, 0x90, CHECK_KEY_HOOK_SIZE - 5);
+	return true;
+}
+
+static std::wstring decodeIniBytes(const char *bytes, size_t size, unsigned codePage, DWORD flags = 0)
+{
+	std::wstring result;
+	if (!size)
+		return result;
+	auto resultSize = MultiByteToWideChar(codePage, flags, bytes, static_cast<int>(size), nullptr, 0);
+	if (!resultSize)
+		return result;
+	result.resize(resultSize);
+	if (!MultiByteToWideChar(codePage, flags, bytes, static_cast<int>(size), result.data(), resultSize))
+		result.clear();
+	return result;
+}
+
+static void loadQuickMessages()
+{
+	const wchar_t *defaults[9] = {
+		L"Good game!", L"Thanks for playing!", L"Please wait a moment.", L"Let's play again!",
+		L"", L"", L"", L"", L""
+	};
+	for (unsigned i = 0; i < 9; i++)
+		quickMessages[i] = defaults[i];
+
+	std::ifstream file(std::filesystem::path(profilePath), std::ios::binary);
+	if (!file)
+		return;
+	std::string bytes{std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
+	auto trim = [](std::wstring &value) {
+		value.erase(value.begin(), std::find_if(value.begin(), value.end(), [](wchar_t c) { return !std::iswspace(c); }));
+		value.erase(std::find_if(value.rbegin(), value.rend(), [](wchar_t c) { return !std::iswspace(c); }).base(), value.end());
+	};
+	auto parseWideText = [&](const std::wstring &text) {
+		std::wistringstream stream(text);
+		std::wstring line;
+		bool inLobbySection = false;
+
+		while (std::getline(stream, line)) {
+			if (!line.empty() && line.back() == L'\r')
+				line.pop_back();
+			trim(line);
+			if (line.empty() || line[0] == L';' || line[0] == L'#')
+				continue;
+			if (line.front() == L'[' && line.back() == L']') {
+				auto section = line.substr(1, line.size() - 2);
+				trim(section);
+				inLobbySection = _wcsicmp(section.c_str(), L"Lobby") == 0;
+				continue;
+			}
+			if (!inLobbySection)
+				continue;
+			auto separator = line.find(L'=');
+			if (separator == std::wstring::npos)
+				continue;
+			auto key = line.substr(0, separator);
+			auto value = line.substr(separator + 1);
+			trim(key);
+			trim(value);
+			for (unsigned i = 0; i < 9; i++) {
+				auto expected = L"QuickMessage" + std::to_wstring(i + 1);
+				if (_wcsicmp(key.c_str(), expected.c_str()) == 0) {
+					quickMessages[i] = value.substr(0, 512);
+					break;
+				}
+			}
+		}
+	};
+
+	if (bytes.size() >= 2 && static_cast<unsigned char>(bytes[0]) == 0xFF && static_cast<unsigned char>(bytes[1]) == 0xFE) {
+		std::wstring text;
+		text.reserve((bytes.size() - 2) / 2);
+		for (size_t i = 2; i + 1 < bytes.size(); i += 2)
+			text += static_cast<wchar_t>(static_cast<unsigned char>(bytes[i]) | (static_cast<unsigned char>(bytes[i + 1]) << 8));
+		parseWideText(text);
+		return;
+	}
+	if (bytes.size() >= 2 && static_cast<unsigned char>(bytes[0]) == 0xFE && static_cast<unsigned char>(bytes[1]) == 0xFF) {
+		std::wstring text;
+		text.reserve((bytes.size() - 2) / 2);
+		for (size_t i = 2; i + 1 < bytes.size(); i += 2)
+			text += static_cast<wchar_t>((static_cast<unsigned char>(bytes[i]) << 8) | static_cast<unsigned char>(bytes[i + 1]));
+		parseWideText(text);
+		return;
+	}
+	if (bytes.size() >= 3 && static_cast<unsigned char>(bytes[0]) == 0xEF && static_cast<unsigned char>(bytes[1]) == 0xBB && static_cast<unsigned char>(bytes[2]) == 0xBF) {
+		parseWideText(decodeIniBytes(bytes.data() + 3, bytes.size() - 3, CP_UTF8, MB_ERR_INVALID_CHARS));
+		return;
+	}
+
+	auto trimBytes = [](std::string &value) {
+		auto whitespace = [](unsigned char c) { return c == ' ' || c == '\t' || c == '\r'; };
+		value.erase(value.begin(), std::find_if(value.begin(), value.end(), [&](unsigned char c) { return !whitespace(c); }));
+		value.erase(std::find_if(value.rbegin(), value.rend(), [&](unsigned char c) { return !whitespace(c); }).base(), value.end());
+	};
+	auto decodeValue = [&](const std::string &value) {
+		auto result = decodeIniBytes(value.data(), value.size(), CP_UTF8, MB_ERR_INVALID_CHARS);
+		if (!result.empty() || value.empty())
+			return result;
+		result = decodeIniBytes(value.data(), value.size(), 936);
+		if (!result.empty())
+			return result;
+		return decodeIniBytes(value.data(), value.size(), CP_ACP);
+	};
+	std::istringstream stream(bytes);
+	std::string line;
+	bool inLobbySection = false;
+	while (std::getline(stream, line)) {
+		trimBytes(line);
+		if (line.empty() || line[0] == ';' || line[0] == '#')
+			continue;
+		if (line.front() == '[' && line.back() == ']') {
+			auto section = line.substr(1, line.size() - 2);
+			trimBytes(section);
+			inLobbySection = _stricmp(section.c_str(), "Lobby") == 0;
+			continue;
+		}
+		if (!inLobbySection)
+			continue;
+		auto separator = line.find('=');
+		if (separator == std::string::npos)
+			continue;
+		auto key = line.substr(0, separator);
+		auto value = line.substr(separator + 1);
+		trimBytes(key);
+		trimBytes(value);
+		for (unsigned i = 0; i < 9; i++) {
+			auto expected = "QuickMessage" + std::to_string(i + 1);
+			if (_stricmp(key.c_str(), expected.c_str()) == 0) {
+				quickMessages[i] = decodeValue(value).substr(0, 512);
+				break;
+			}
+		}
+	}
+}
 
 LARGE_INTEGER timer_frequency;
 unsigned &currentFrame = *(unsigned *)0x8985D8;
@@ -59,9 +317,14 @@ char redirectIp[64];
 char *wineVersion = nullptr;
 unsigned hostPref;
 unsigned chatKey;
+bool chineseLanguage = false;
+std::wstring quickMessages[9];
 unsigned lobbyJoinTries;
 unsigned lobbyJoinInterval;
 unsigned maxChatMessages;
+unsigned opponentChatColor = 0x7FA6D9;
+bool showTextBubbles = true;
+ChatPopupMode chatPopupMode = CHAT_POPUP_ALL;
 unsigned short servPort;
 unsigned short hostPort;
 bool hasSoku2 = false;
@@ -492,6 +755,8 @@ int __fastcall ConnectOnProcess(SokuLib::MenuConnect *This)
 	if (*(byte*)0x0448e4a != 0x30 && SokuLib::inputMgrs.input.changeCard == 1 && !inputBoxShown) {
 		playSound(0x28);
 		activated = !activated;
+		if (activated)
+			menu->_refreshName();
 	}
 	if (!res) {
 		activated = true;
@@ -700,17 +965,23 @@ int __fastcall BattleOnProcess(SokuLib::Battle *This)
 }
 int __fastcall BattleWatchOnProcess(SokuLib::BattleWatch *This)
 {
+	if (activeMenu)
+		activeMenu->routePendingHotkeys();
 	processCommon(false);
 	return (This->*og_BattleWatchOnProcess)();
 }
 int __fastcall LoadingWatchOnProcess(SokuLib::LoadingWatch *This)
 {
+	if (activeMenu)
+		activeMenu->routePendingHotkeys();
 	processCommon(true);
 	return (This->*og_LoadingWatchOnProcess)();
 }
 int __fastcall BattleClientOnProcess(SokuLib::BattleClient *This)
 {
 	auto &mgr = SokuLib::getBattleMgr();
+	if (activeMenu)
+		activeMenu->routePendingHotkeys();
 	auto ret = (This->*og_BattleClientOnProcess)();
 
 	processCommon(false);
@@ -722,18 +993,24 @@ int __fastcall BattleClientOnProcess(SokuLib::BattleClient *This)
 }
 int __fastcall SelectClientOnProcess(SokuLib::SelectClient *This)
 {
+	if (activeMenu)
+		activeMenu->routePendingHotkeys();
 	processCommon(true);
 	selectCommon();
 	return (This->*og_SelectClientOnProcess)();
 }
 int __fastcall LoadingClientOnProcess(SokuLib::LoadingClient *This)
 {
+	if (activeMenu)
+		activeMenu->routePendingHotkeys();
 	processCommon(true);
 	return (This->*og_LoadingClientOnProcess)();
 }
 int __fastcall BattleServerOnProcess(SokuLib::BattleServer *This)
 {
 	auto &mgr = SokuLib::getBattleMgr();
+	if (activeMenu)
+		activeMenu->routePendingHotkeys();
 	auto ret = (This->*og_BattleServerOnProcess)();
 
 	processCommon(false);
@@ -745,12 +1022,16 @@ int __fastcall BattleServerOnProcess(SokuLib::BattleServer *This)
 }
 int __fastcall SelectServerOnProcess(SokuLib::SelectServer *This)
 {
+	if (activeMenu)
+		activeMenu->routePendingHotkeys();
 	processCommon(true);
 	selectCommon();
 	return (This->*og_SelectServerOnProcess)();
 }
 int __fastcall LoadingServerOnProcess(SokuLib::LoadingServer *This)
 {
+	if (activeMenu)
+		activeMenu->routePendingHotkeys();
 	processCommon(true);
 	return (This->*og_LoadingServerOnProcess)();
 }
@@ -928,20 +1209,19 @@ void loadSoku2Config()
 	int argc;
 	wchar_t app_path[MAX_PATH];
 	wchar_t setting_path[MAX_PATH];
-	wchar_t **arg_list = CommandLineToArgvW(GetCommandLineW(), &argc);
+	auto arg_list = std::unique_ptr<wchar_t *, decltype(&LocalFree)>(CommandLineToArgvW(GetCommandLineW(), &argc), LocalFree);
 
-	wcsncpy(app_path, arg_list[0], MAX_PATH);
+	if (!arg_list)
+		return;
+
+	wcsncpy(app_path, arg_list.get()[0], MAX_PATH);
 	PathRemoveFileSpecW(app_path);
 	if (GetEnvironmentVariableW(L"SWRSTOYS", setting_path, sizeof(setting_path)) <= 0) {
-		if (arg_list && argc > 1 && StrStrIW(arg_list[1], L"ini")) {
-			wcscpy(setting_path, arg_list[1]);
-			LocalFree(arg_list);
+		if (arg_list && argc > 1 && StrStrIW(arg_list.get()[1], L"ini")) {
+			wcscpy(setting_path, arg_list.get()[1]);
 		} else {
 			wcscpy(setting_path, app_path);
 			PathAppendW(setting_path, L"\\SWRSToys.ini");
-		}
-		if (arg_list) {
-			LocalFree(arg_list);
 		}
 	}
 	printf("Config file is %S\n", setting_path);
@@ -985,6 +1265,28 @@ void loadSoku2Config()
 static void __fastcall KeymapManagerSetInputs(SokuLib::KeymapManager *This)
 {
 	(This->*s_origKeymapManager_SetInputs)();
+	if (activeMenu)
+		activeMenu->setMappedEscapeDown(This->input.b != 0);
+	if (activeMenu && activeMenu->isInputing()) {
+		std::lock_guard<std::mutex> lock(activeMenu->keyTimersMutex);
+
+		if (activeMenu->isEmotePickerOpen()) {
+			if (This->input.horizontalAxis == -1)
+				activeMenu->keysPressed[VK_LEFT] = true;
+			else if (This->input.horizontalAxis == 1)
+				activeMenu->keysPressed[VK_RIGHT] = true;
+			if (This->input.verticalAxis == -1)
+				activeMenu->keysPressed[VK_UP] = true;
+			else if (This->input.verticalAxis == 1)
+				activeMenu->keysPressed[VK_DOWN] = true;
+			if (This->input.a == 1)
+				activeMenu->keysPressed[VK_RETURN] = true;
+			if (This->input.changeCard == 1)
+				activeMenu->keysPressed[VK_PRIOR] = true;
+			if (This->input.spellcard == 1)
+				activeMenu->keysPressed[VK_NEXT] = true;
+		}
+	}
 	if (
 		(activeMenu && activeMenu->isInputing()) ||
 		(wasBlocking && (
@@ -1028,28 +1330,20 @@ void getModVersionStr()
 	if (verSize == 0)
 		return;
 
-	auto verData = new char[verSize];
+	std::vector<char> verData(verSize);
 
-	if (!GetFileVersionInfoW(profilePath, verHandle, verSize, verData)) {
-		delete[] verData;
+	if (!GetFileVersionInfoW(profilePath, verHandle, verSize, verData.data()))
 		return;
-	}
 
-	if (!VerQueryValueA(verData, "\\", (void **)&lpBuffer, &size)) {
-		delete[] verData;
+	if (!VerQueryValueA(verData.data(), "\\", (void **)&lpBuffer, &size))
 		return;
-	}
-	if (!size) {
-		delete[] verData;
+	if (!size)
 		return;
-	}
 
 	auto verInfo = (VS_FIXEDFILEINFO *)lpBuffer;
 
-	if (verInfo->dwSignature != 0xFEEF04BD) {
-		delete[] verData;
+	if (verInfo->dwSignature != 0xFEEF04BD)
 		return;
-	}
 	sprintf_s(
 		modVersion,
 		"%d.%d.%d.%d",
@@ -1081,6 +1375,8 @@ extern "C" __declspec(dllexport) bool CheckVersion(const BYTE hash[16]) {
 
 extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hParentModule) {
 	DWORD old;
+	if (!canInstallCheckKeyOneshotHook())
+		return false;
 
 #ifdef _DEBUG
 	FILE *_;
@@ -1097,15 +1393,46 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	getModVersionStr();
 	PathRemoveFileSpecW(profilePath);
 	wcscpy(profileFolderPath, profilePath);
+	Blocklist::initialize(profileFolderPath);
 	PathAppendW(profilePath, L"SokuLobbies.ini");
 	GetPrivateProfileStringW(L"Lobby", L"Host", L"pinkysmile.fr", servHostW, sizeof(servHost) / sizeof(*servHost), profilePath);
 	GetPrivateProfileStringW(L"Lobby", L"RedirectIp", L"localhost", redirectIpW, sizeof(redirectIp) / sizeof(*redirectIp), profilePath);
 	servPort = GetPrivateProfileIntW(L"Lobby", L"Port", 5254, profilePath);
 	hostPort = GetPrivateProfileIntW(L"Lobby", L"HostPort", 10800, profilePath);
 	chatKey = GetPrivateProfileIntW(L"Lobby", L"ChatKey", VK_RETURN, profilePath);
+	{
+		wchar_t language[16];
+		GetPrivateProfileStringW(L"Lobby", L"Language", L"Chinese", language, sizeof(language) / sizeof(*language), profilePath);
+		chineseLanguage = _wcsicmp(language, L"Chinese") == 0 || _wcsicmp(language, L"\u4E2D\u6587") == 0;
+	}
+	loadQuickMessages();
 	lobbyJoinTries = GetPrivateProfileIntW(L"Lobby", L"JoinTries", 15, profilePath);
 	lobbyJoinInterval = GetPrivateProfileIntW(L"Lobby", L"JoinInterval", 1, profilePath);
 	maxChatMessages = GetPrivateProfileIntW(L"Lobby", L"MaxChatMessages", 100, profilePath);
+	showTextBubbles = GetPrivateProfileIntW(L"Lobby", L"ShowTextBubbles", 1, profilePath) != 0;
+	{
+		wchar_t popupMode[32];
+		GetPrivateProfileStringW(L"Lobby", L"ChatPopupMode", L"All", popupMode, sizeof(popupMode) / sizeof(*popupMode), profilePath);
+		if (_wcsicmp(popupMode, L"Battle") == 0 || _wcsicmp(popupMode, L"Opponents") == 0 || wcscmp(popupMode, L"1") == 0)
+			chatPopupMode = CHAT_POPUP_OPPONENTS;
+		else if (_wcsicmp(popupMode, L"Never") == 0 || wcscmp(popupMode, L"2") == 0)
+			chatPopupMode = CHAT_POPUP_NEVER;
+		else
+			chatPopupMode = CHAT_POPUP_ALL;
+	}
+	{
+		wchar_t colorBuffer[32];
+		GetPrivateProfileStringW(L"Lobby", L"OpponentChatColor", L"7FA6D9", colorBuffer, sizeof(colorBuffer) / sizeof(*colorBuffer), profilePath);
+		std::wstring color{colorBuffer};
+		color.erase(color.begin(), std::find_if(color.begin(), color.end(), [](wchar_t c){ return !std::iswspace(c); }));
+		color.erase(std::find_if(color.rbegin(), color.rend(), [](wchar_t c){ return !std::iswspace(c); }).base(), color.end());
+		if (!color.empty() && color.front() == L'#')
+			color.erase(color.begin());
+		else if (color.size() >= 2 && color[0] == L'0' && (color[1] == L'x' || color[1] == L'X'))
+			color.erase(0, 2);
+		if (color.size() == 6 && std::all_of(color.begin(), color.end(), [](wchar_t c){ return std::iswxdigit(c) != 0; }))
+			opponentChatColor = std::wcstoul(color.c_str(), nullptr, 16);
+	}
 	lobbyJoinTries += !lobbyJoinTries;
 	lobbyJoinInterval += !lobbyJoinInterval;
 
@@ -1148,10 +1475,15 @@ extern "C" __declspec(dllexport) bool Initialize(HMODULE hMyModule, HMODULE hPar
 	og_SelectServerOnProcess = SokuLib::TamperDword(&SokuLib::VTable_SelectServer.onProcess, SelectServerOnProcess);
 	og_SelectServerOnRender  = SokuLib::TamperDword(&SokuLib::VTable_SelectServer.onRender,  SelectServerOnRender);
 	og_BattleMgrOnProcess    = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onProcess,CBattleManager_OnProcess);
+	s_origRecvFrom           = SokuLib::TamperDword(&SokuLib::DLL::ws2_32.recvfrom, BlocklistRecvFrom);
 	//og_BattleMgrOnRender  = SokuLib::TamperDword(&SokuLib::VTable_BattleManager.onRender,  CBattleManager_OnRender);
 	VirtualProtect((PVOID)RDATA_SECTION_OFFSET, RDATA_SECTION_SIZE, old, &old);
 
 	VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, PAGE_EXECUTE_WRITECOPY, &old);
+	if (!installCheckKeyOneshotHook()) {
+		VirtualProtect((PVOID)TEXT_SECTION_OFFSET, TEXT_SECTION_SIZE, old, &old);
+		return false;
+	}
 	s_origKeymapManager_SetInputs = SokuLib::union_cast<void (SokuLib::KeymapManager::*)()>(SokuLib::TamperNearJmpOpr(0x40A45D, KeymapManagerSetInputs));
 
 	if (*((uint8_t*)0x40104c) != 0xe8) {

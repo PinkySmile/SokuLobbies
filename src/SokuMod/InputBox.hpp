@@ -11,8 +11,11 @@ void inputBoxRender();
 void inputBoxUpdate();
 void inputBoxLoadAssets();
 void inputBoxUnloadAssets();
+void closeInputDialog();
 void openInputDialog(const char *title, const char *defaultValue, char shownChar = 0);
 void setInputBoxCallbacks(const std::function<void (const std::string &value)> &onAccept);
+void openWideInputDialog(const wchar_t *title, const std::wstring &defaultValue, size_t maxLength, wchar_t shownChar = 0);
+void setWideInputBoxCallbacks(const std::function<void (const std::wstring &value)> &onAccept);
 
 extern bool inputBoxShown;
 

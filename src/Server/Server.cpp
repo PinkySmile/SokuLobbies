@@ -4,10 +4,8 @@
 
 #include <iostream>
 #include <future>
-#ifndef _LOBBYNOLOG
 #include <mutex>
 extern std::mutex logMutex;
-#endif
 #include <memory>
 #include <cstring>
 #include <fstream>
@@ -377,9 +375,12 @@ void Server::_prepareConnectionHandlers(Connection &connection)
 		return true;
 	};
 	connection.onMessage = [this, &connection, id](uint8_t channel, const std::string &msg){
-		std::cout << "<" << connection.getName() << ">: " << msg << std::endl;
-		if (!msg.empty() && msg.front() == '/')
+		if (!msg.empty() && msg.front() == '/') {
+			if (msg != "/report" && msg.compare(0, strlen("/report "), "/report ") != 0)
+				std::cout << "<" << connection.getName() << ">: " << msg << std::endl;
 			return this->_processCommands(&connection, msg);
+		}
+		std::cout << "<" << connection.getName() << ">: " << msg << std::endl;
 
 		auto realMessage = "[" + connection.getName() + "]: " + msg;
 		Lobbies::PacketMessage msgPacket{channel, id, realMessage};
@@ -549,9 +550,9 @@ void Server::_processCommands(Connection *author, const std::string &msg)
 				return (this->*ita->second.callback)(author, parsed);
 			}
 		}
-		sendSystemMessageTo(author, "Unknown command \"" + parsed[0]+ "\"\nUse /help for a list of command", 0xFF0000);
+		sendSystemMessageTo(author, "未知指令：" + parsed[0] + "。请使用 /help 查看可用指令。\nUnknown command \"" + parsed[0] + "\". Use /help for a list of commands.", 0xFF0000);
 	} catch (std::exception &e) {
-		return sendSystemMessageTo(author, "Fatal error when executing command. Please report this error: " + std::string(e.what()), 0xFF0000);
+		return sendSystemMessageTo(author, "执行指令时发生严重错误，请报告此错误：" + std::string(e.what()) + "\nFatal error when executing command. Please report this error: " + e.what(), 0xFF0000);
 	}
 }
 
@@ -820,17 +821,17 @@ Connection *Server::_findPlayer(const std::string &name)
 }
 
 const std::map<std::string, Server::Cmd> Server::_commands{
-	{"help",    {"[command]", "Displays list of commands.\nExample:\n/help\n/help help", &Server::_helpCmd}},
-	{"join",    {"<player_name>", "Join an arcade machine. The id must be in the range 0 to 4294967295\nExample:\n/join 1\n/join @PinkySmile", &Server::_joinCmd}},
-	{"list",    {"", "Displays the list of connected players.", &Server::_listCmd}},
-	{"locate",  {"<player_name>", "Locate a player in the field.\nExample:\n/locate 1\n/locate @PinkySmile", &Server::_locateCmd}},
-	{"msg",     {"<player_name> <message>", "Sends a message privately\nExample:\n/msg @PinkySmile Hello!", &Server::_msgCmd}},
+	{"help",    {"[command]", "Displays all commands or detailed help for one command.\nExample:\n/help\n/help join", &Server::_helpCmd}},
+	{"join",    {"<player>", "Joins the arcade machine used by a player. Use a player id or exact @name. Updated clients support Tab and Up/Down player completion.\nExample:\n/join 1\n/join @PinkySmile", &Server::_joinCmd}},
+	{"list",    {"", "Displays the ids and names of all connected players.\nExample:\n/list", &Server::_listCmd}},
+	{"msg",     {"<player> <message>", "Sends a private message. Use a player id or exact @name. Updated clients support fuzzy name search with Tab and Up/Down completion.\nExample:\n/msg 1 Hello!\n/msg @PinkySmile Hello!", &Server::_msgCmd}},
+	{"report",  {"[player] <reason>", "Privately reports an incident to the server operators. If the player is online, optionally specify a player id or exact @name; otherwise enter the reason directly. Updated clients support fuzzy player completion. After reporting, send supporting evidence in QQ group 178884533 or privately message an administrator from the group.\nExample:\n/report @PinkySmile Repeated harassment\n/report The reported player has already left the lobby", &Server::_reportCmd}},
 };
 
 const std::map<std::string, Server::Cmd> Server::_adminCommands{
-	{"ban",    {"<player_name> <reason>", "Bans a player.\nExample:\n/ban @PinkySmile\n/ban 1", &Server::_banCmd}},
-	{"banip",  {"<ip> <reason>", "Bans a player.\nExample:\n/ban @PinkySmile\n/ban 1", &Server::_banipCmd}},
-	{"kick",   {"<player_name> <reason>", "Kicks a player.\nExample:\n/ban @PinkySmile\n/ban 1", &Server::_kickCmd}},
+	{"ban",    {"<player> <reason>", "Bans a player by id or exact @name.\nExample:\n/ban @PinkySmile Repeated abuse\n/ban 1 Repeated abuse", &Server::_banCmd}},
+	{"banip",  {"<ip> <reason>", "Bans an IP address.\nExample:\n/banip 192.0.2.1 Repeated abuse", &Server::_banipCmd}},
+	{"kick",   {"<player> <reason>", "Kicks a player by id or exact @name.\nExample:\n/kick @PinkySmile Please reconnect\n/kick 1 Please reconnect", &Server::_kickCmd}},
 	{"say",    {"<message>", "Sends a message as the server.\nExample:\n/say Hello!", &Server::_sayCmd}},
 	{"warn",   {"<message>", "Sends an important message to everyone.\nExample:\n/warn The server will close in 5 minutes.", &Server::_warnCmd}},
 };
@@ -858,7 +859,7 @@ void Server::_helpCmd(Connection *author, const std::vector<std::string> &args)
 			if (ita != Server::_adminCommands.end())
 				return sendSystemMessageTo(author, "/" + ita->first + " " + ita->second.usage + ": " + ita->second.description, 0xFFFF00);
 		}
-		return sendSystemMessageTo(author, "Unknown command \"" + args[0] + "\"", 0xFF0000);
+		return sendSystemMessageTo(author, "未知指令：" + args[0] + "。\nUnknown command \"" + args[0] + "\".", 0xFF0000);
 	}
 
 	std::string msg;
@@ -891,9 +892,9 @@ void Server::_helpCmd(Connection *author, const std::vector<std::string> &args)
 void Server::_joinCmd(Connection *author, const std::vector<std::string> &args)
 {
 	if (args.empty())
-		return sendSystemMessageTo(author, "Missing argument #1 for command /join. Use /help join for more information", 0xFF0000);
+		return sendSystemMessageTo(author, "缺少玩家参数，请使用 /help join 查看帮助。\nMissing player argument. Use /help join for more information.", 0xFF0000);
 	if (!author)
-		return sendSystemMessageTo(author, "Can only be used in a lobby", 0xFF0000);
+		return sendSystemMessageTo(author, "只能在大厅内使用。\nCan only be used in a lobby.", 0xFF0000);
 
 	const auto &name = args.front();
 	Connection *player;
@@ -901,14 +902,14 @@ void Server::_joinCmd(Connection *author, const std::vector<std::string> &args)
 	try {
 		player = this->_findPlayer(name);
 	} catch (std::exception &e) {
-		sendSystemMessageTo(author, name + " is not a valid player id. Did you want to use @" + name + " instead?", 0xFF0000);
+		sendSystemMessageTo(author, name + " 不是有效的玩家 ID，是否要改用 @" + name + "？\n" + name + " is not a valid player id. Did you want to use @" + name + " instead?", 0xFF0000);
 		return;
 	}
 
 	if (!player)
-		sendSystemMessageTo(author, "Cannot find " + name + ".", 0xFF0000);
+		sendSystemMessageTo(author, "找不到玩家 " + name + "。\nCannot find player " + name + ".", 0xFF0000);
 	else if (!player->getActiveMachine())
-		sendSystemMessageTo(author, name + " is not at an arcade machine.", 0xFF0000);
+		sendSystemMessageTo(author, name + " 当前不在对战机或观战机。\n" + name + " is not at an arcade machine.", 0xFF0000);
 	else
 		this->_onPlayerJoinArcade(*author, *player->getActiveMachine());
 }
@@ -934,32 +935,12 @@ void Server::_listCmd(Connection *author, const std::vector<std::string> &)
 	sendSystemMessageTo(author, msg, 0xFFFF00);
 }
 
-void Server::_locateCmd(Connection *author, const std::vector<std::string> &args)
-{
-	if (args.empty())
-		return sendSystemMessageTo(author, "Missing argument #1 for command /locate. Use /help locate for more information", 0xFF0000);
-
-	auto name = args.front();
-	Connection *player;
-
-	try {
-		player = this->_findPlayer(name);
-	} catch (std::exception &e) {
-		sendSystemMessageTo(author, name + " is not a valid player id. Did you want to use @" + name + " instead?", 0xFF0000);
-		return;
-	}
-
-	if (!player)
-		return sendSystemMessageTo(author, "Cannot find " + name + ".", 0xFF0000);
-	sendSystemMessageTo(author, player->getName() + " is at x:" + std::to_string(player->getPos().x) + " y:" + std::to_string(player->getPos().y) + ".", 0xFFFF00);
-}
-
 void Server::_teleportCmd(Connection *author, const std::vector<std::string> &args)
 {
 	if (!author)
-		return sendSystemMessageTo(author, "Can only be used in a lobby", 0xFF0000);
+		return sendSystemMessageTo(author, "只能在大厅内使用。\nCan only be used in a lobby.", 0xFF0000);
 	if (args.empty())
-		return sendSystemMessageTo(author, "Missing argument #1 for command /teleport. Use /help teleport for more information", 0xFF0000);
+		return sendSystemMessageTo(author, "缺少玩家参数，请使用 /help teleport 查看帮助。\nMissing player argument. Use /help teleport for more information.", 0xFF0000);
 
 	auto name = args.front();
 	Connection *player;
@@ -967,12 +948,12 @@ void Server::_teleportCmd(Connection *author, const std::vector<std::string> &ar
 	try {
 		player = this->_findPlayer(name);
 	} catch (std::exception &e) {
-		sendSystemMessageTo(author, name + " is not a valid player id. Did you want to use @" + name + " instead?", 0xFF0000);
+		sendSystemMessageTo(author, name + " 不是有效的玩家 ID，是否要改用 @" + name + "？\n" + name + " is not a valid player id. Did you want to use @" + name + " instead?", 0xFF0000);
 		return;
 	}
 
 	if (!player)
-		return sendSystemMessageTo(author, "Cannot find " + name + ".", 0xFF0000);
+		return sendSystemMessageTo(author, "找不到玩家 " + name + "。\nCannot find player " + name + ".", 0xFF0000);
 
 	Lobbies::PacketPosition pos{author->getId(), player->getPos().x, player->getPos().y, player->getDir(), player->getBattleStatus()};
 
@@ -986,9 +967,9 @@ void Server::_teleportCmd(Connection *author, const std::vector<std::string> &ar
 void Server::_msgCmd(Connection *author, const std::vector<std::string> &args)
 {
 	if (!author)
-		return sendSystemMessageTo(author, "Can only be used in a lobby", 0xFF0000);
+		return sendSystemMessageTo(author, "只能在大厅内使用。\nCan only be used in a lobby.", 0xFF0000);
 	if (args.empty())
-		return sendSystemMessageTo(author, "Missing argument #1 for command /teleport. Use /help teleport for more information", 0xFF0000);
+		return sendSystemMessageTo(author, "缺少玩家参数，请使用 /help msg 查看帮助。\nMissing player argument. Use /help msg for more information.", 0xFF0000);
 
 	auto name = args.front();
 	auto msg = join(args.begin() + 1, args.end(), ' ');
@@ -997,12 +978,12 @@ void Server::_msgCmd(Connection *author, const std::vector<std::string> &args)
 	try {
 		player = this->_findPlayer(name);
 	} catch (std::exception &e) {
-		sendSystemMessageTo(author, name + " is not a valid player id. Did you want to use @" + name + " instead?", 0xFF0000);
+		sendSystemMessageTo(author, name + " 不是有效的玩家 ID，是否要改用 @" + name + "？\n" + name + " is not a valid player id. Did you want to use @" + name + " instead?", 0xFF0000);
 		return;
 	}
 
 	if (!player)
-		return sendSystemMessageTo(author, "Cannot find " + name + ".", 0xFF0000);
+		return sendSystemMessageTo(author, "找不到玩家 " + name + "。\nCannot find player " + name + ".", 0xFF0000);
 
 	auto realMessage1 = "[from " + (author ? author->getName() : std::string("*CONSOLE*")) + "]: " + msg;
 	auto realMessage2 = "[to " + player->getName() + "]: " + msg;
@@ -1041,10 +1022,57 @@ void Server::_msgCmd(Connection *author, const std::vector<std::string> &args)
 	player->send(&msgPacket1, sizeof(msgPacket1));
 }
 
+void Server::_reportCmd(Connection *author, const std::vector<std::string> &args)
+{
+	if (!author)
+		return sendSystemMessageTo(author, "只能在大厅内使用。\nCan only be used in a lobby.", 0xFF0000);
+	if (args.empty())
+		return sendSystemMessageTo(author, "缺少举报原因，请使用 /help report 查看帮助。\nMissing report reason. Use /help report for more information.", 0xFF0000);
+
+	auto hasExplicitPlayer = args[0].front() == '@' || std::all_of(args[0].begin(), args[0].end(), [](unsigned char chr) {
+		return std::isdigit(chr);
+	});
+	Connection *player = nullptr;
+	std::string reason;
+	if (hasExplicitPlayer) {
+		if (args.size() < 2)
+			return sendSystemMessageTo(author, "缺少举报原因，请使用 /help report 查看帮助。\nMissing report reason. Use /help report for more information.", 0xFF0000);
+		try {
+			player = this->_findPlayer(args[0]);
+		} catch (std::exception &) {
+			return sendSystemMessageTo(author, args[0] + " 不是有效的玩家 ID。\n" + args[0] + " is not a valid player id.", 0xFF0000);
+		}
+		if (!player)
+			return sendSystemMessageTo(
+				author,
+				"找不到 " + args[0] + "。如举报已离开大厅的玩家，请省略玩家并直接输入原因。\nCannot find " + args[0] + ". To report a player who has left, omit the player and enter the reason directly.",
+				0xFF0000
+			);
+		if (player == author)
+			return sendSystemMessageTo(author, "不能举报自己。\nYou cannot report yourself.", 0xFF0000);
+		reason = join(args.begin() + 1, args.end(), ' ');
+	} else
+		reason = join(args.begin(), args.end(), ' ');
+	if (reason.find_first_not_of(" \t\r\n") == std::string::npos)
+		return sendSystemMessageTo(author, "缺少举报原因，请使用 /help report 查看帮助。\nMissing report reason. Use /help report for more information.", 0xFF0000);
+	{
+		std::lock_guard<std::mutex> lock(logMutex);
+		std::cout << "[REPORT] " << author->getName() << " reported " << (player ? player->getName() : "<unspecified player>") << ": " << reason << std::endl;
+	}
+	sendSystemMessageTo(
+		author,
+		"举报已记录。请将证据发到群178884533，或私聊群管理员。\n"
+		"如举报在线玩家可：/report @玩家 原因\n"
+		"如举报玩家不在大厅内可：/report 原因\n"
+		"无意义举报请重新提交并在原因中说明，否则可能导致封禁。",
+		0x00FFFF
+	);
+}
+
 void Server::_banCmd(Connection *author, const std::vector<std::string> &args)
 {
 	if (args.empty())
-		return sendSystemMessageTo(author, "Missing argument #1 for command /banip. Use /help banip for more information", 0xFF0000);
+		return sendSystemMessageTo(author, "缺少玩家参数，请使用 /help ban 查看帮助。\nMissing player argument. Use /help ban for more information.", 0xFF0000);
 
 	auto reason = args.size() == 1 ? "Banned by an operator" : join(args.begin() + 1, args.end(), ' ');
 	Connection *player;
@@ -1052,12 +1080,12 @@ void Server::_banCmd(Connection *author, const std::vector<std::string> &args)
 	try {
 		player = this->_findPlayer(args[0]);
 	} catch (std::exception &e) {
-		sendSystemMessageTo(author, args[0] + " is not a valid player id. Did you want to use @" + args[0] + " instead?", 0xFF0000);
+		sendSystemMessageTo(author, args[0] + " 不是有效的玩家 ID，是否要改用 @" + args[0] + "？\n" + args[0] + " is not a valid player id. Did you want to use @" + args[0] + " instead?", 0xFF0000);
 		return;
 	}
 
 	if (!player)
-		return sendSystemMessageTo(author, "Cannot find " + args[0] + ".", 0xFF0000);
+		return sendSystemMessageTo(author, "找不到玩家 " + args[0] + "。\nCannot find player " + args[0] + ".", 0xFF0000);
 	this->_banList.emplace_back();
 
 	auto &entry = this->_banList.back();
@@ -1073,14 +1101,14 @@ void Server::_banCmd(Connection *author, const std::vector<std::string> &args)
 void Server::_banipCmd(Connection *author, const std::vector<std::string> &args)
 {
 	if (args.empty())
-		return sendSystemMessageTo(author, "Missing argument #1 for command /banip. Use /help banip for more information", 0xFF0000);
+		return sendSystemMessageTo(author, "缺少 IP 参数，请使用 /help banip 查看帮助。\nMissing IP argument. Use /help banip for more information.", 0xFF0000);
 
 	auto ip = sf::IpAddress(args.front());
 	auto reason = args.size() == 1 ? "Banned by an operator" : join(args.begin() + 1, args.end(), ' ');
 	std::string name;
 
 	if (ip == sf::IpAddress::None)
-		return sendSystemMessageTo(author, "Invalid ip provided", 0xFF0000);
+		return sendSystemMessageTo(author, "提供的 IP 地址无效。\nInvalid IP address provided.", 0xFF0000);
 
 	auto it = std::find_if(this->_banList.begin(), this->_banList.end(), [ip](BanEntry &entry){
 		return ip.toString() == entry.ip;
@@ -1113,7 +1141,7 @@ void Server::_banipCmd(Connection *author, const std::vector<std::string> &args)
 void Server::_kickCmd(Connection *author, const std::vector<std::string> &args)
 {
 	if (args.empty())
-		return sendSystemMessageTo(author, "Missing argument #1 for command /banip. Use /help banip for more information", 0xFF0000);
+		return sendSystemMessageTo(author, "缺少玩家参数，请使用 /help kick 查看帮助。\nMissing player argument. Use /help kick for more information.", 0xFF0000);
 
 	auto reason = args.size() == 1 ? "Kicked by an operator" : join(args.begin() + 1, args.end(), ' ');
 	Connection *player;
@@ -1121,12 +1149,12 @@ void Server::_kickCmd(Connection *author, const std::vector<std::string> &args)
 	try {
 		player = this->_findPlayer(args[0]);
 	} catch (std::exception &e) {
-		sendSystemMessageTo(author, args[0] + " is not a valid player id. Did you want to use @" + args[0] + " instead?", 0xFF0000);
+		sendSystemMessageTo(author, args[0] + " 不是有效的玩家 ID，是否要改用 @" + args[0] + "？\n" + args[0] + " is not a valid player id. Did you want to use @" + args[0] + " instead?", 0xFF0000);
 		return;
 	}
 
 	if (!player)
-		return sendSystemMessageTo(author, "Cannot find " + args[0] + ".", 0xFF0000);
+		return sendSystemMessageTo(author, "找不到玩家 " + args[0] + "。\nCannot find player " + args[0] + ".", 0xFF0000);
 	player->kick(reason);
 }
 
