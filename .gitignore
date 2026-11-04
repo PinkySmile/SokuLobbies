@@ -33,6 +33,7 @@
 
 # CMake build folders
 cmake-build-*
+build*
 
 # CLion config files
 .idea
